@@ -1,0 +1,16 @@
+package <- "simPopulation"
+citHeader(paste("To cite package '", package, "' in publications use:", sep=""))
+
+desc <- packageDescription(package)
+title <- paste(package, desc$Title, sep=": ")
+vers <- paste("R package version", desc$Version)
+year <- sub(".*(2[[:digit:]]{3})-.*", "\\1", desc$Date)
+author <- desc$Author
+authorList <- unlist(strsplit(author, "(, and |, | and )"))
+authorList <- do.call(personList, lapply(authorList, as.person))
+url <- paste("http://CRAN.R-project.org/package=", package, sep="")
+textVersion <- paste(author, " (", year, "). ", 
+    title, ". ", vers, ". URL ", url, ".", sep="")
+
+citEntry(entry="Manual", title = title, author = authorList, 
+    year = year, note = vers, url = url, textVersion = textVersion)

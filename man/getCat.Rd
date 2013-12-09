@@ -1,0 +1,48 @@
+\name{getCat}
+\alias{getCat}
+\title{
+  Categorize (semi-)continuous variables
+}
+\description{
+  Categorize continuous or semi-continuous variables.  This is a utility 
+  function that is useful for writing custom wrapper functions such as 
+  \code{\link{simEUSILC}}.
+}
+\usage{
+getCat(x, breaks, zeros = TRUE, right = FALSE)
+}
+\arguments{
+  \item{x}{a numeric vector to be categorized.}
+  \item{breaks}{a numeric vector of two or more break points.}
+  \item{zeros}{a logical indicating whether \code{x} is semi-continuous, i.e., 
+    contains a considerable amount of zeros.  See \dQuote{Details} on how this 
+    affects the behavior of the function.}
+  \item{right}{logical; if \code{zeros} is not \code{TRUE}, this indicates 
+    whether the intervals should be closed on the right (and open on the left) 
+    or vice versa.}
+}
+\details{
+  If \code{zeros} is \code{TRUE}, 0 is added to the break points and treated as 
+  its own factor level.  Consequently, intervals for negative values are 
+  left-closed and right-open, whereas intervals for positive values are 
+  left-open and right-closed.
+}
+\value{
+  A \code{\link{factor}} containing the categories.
+}
+\author{
+  Andreas Alfons
+}
+\seealso{
+  \code{\link{getBreaks}}, \code{\link{cut}}
+}
+\examples{
+data(eusilcS)
+
+## semi-continuous variable
+breaks <- getBreaks(eusilcS$netIncome, 
+    weights=eusilcS$rb050, equidist = FALSE)
+netIncomeCat <- getCat(eusilcS$netIncome, breaks)
+summary(netIncomeCat)
+}
+\keyword{manip}

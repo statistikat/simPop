@@ -1,0 +1,66 @@
+## imports
+importFrom(lattice, bwplot, panel.bwplot)
+importFrom(vcd, mosaic)
+
+## exports
+export(
+    contingencyWt,
+    corWt,
+    covWt,
+    getBreaks,
+    getCat,
+    meanWt,
+    quantileWt,
+    simCategorical,
+    simComponents,
+    simContinuous,
+    simEUSILC,
+    simRelation,
+    simStructure,
+    spBwplotStats,
+    spBwplot,
+    spCdf,
+    spCdfplot,
+    spMosaic,
+    spTable,
+    tableWt,
+    varWt
+)
+
+## register methods for S3 generics defined in this package
+# methods for S3 generic 'contingencyWt'
+S3method(contingencyWt, default)
+S3method(contingencyWt, matrix)
+S3method(contingencyWt, data.frame)
+# methods for S3 generic 'spBwplot'
+S3method(spBwplot, default)
+# methods for S3 generic 'spCdfplot'
+S3method(spCdfplot, default)
+# methods for S3 generic 'spMosaic'
+S3method(spMosaic, default)
+#S3method(spMosaic, formula)
+S3method(spMosaic, spTable)
+# methods for S3 generic 'spTable'
+S3method(spTable, default)
+S3method(spTable, formula)
+
+## register methods for internal S3 generics defined in this package
+# methods for S3 generic 'corWt'
+S3method(corWt, default)
+S3method(corWt, matrix)
+S3method(corWt, data.frame)
+# methods for S3 generic 'covWt'
+S3method(covWt, default)
+S3method(covWt, matrix)
+S3method(covWt, data.frame)
+# methods for S3 generic 'prepBwplotStats'
+S3method(prepBwplotStats, default)
+S3method(prepBwplotStats, data.frame)
+
+## register methods for existing S3 generics
+# as.array
+S3method(as.array, spTable)
+# as.table
+S3method(as.table, spTable)
+# print
+S3method(print, spTable)

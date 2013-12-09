@@ -1,0 +1,17 @@
+Package: simPopulation
+Type: Package
+Title: Simulation of synthetic populations for surveys based on sample
+        data
+Version: 0.4.0
+Date: 2012-02-12
+Author: Andreas Alfons and Stefan Kraft
+Maintainer: Andreas Alfons <andreas.alfons@econ.kuleuven.be>
+Depends: R(>= 2.10.0), nnet, POT, lattice, vcd
+Imports: lattice, vcd
+Description: Simulate populations for surveys based on sample data with
+        special application to EU-SILC.
+License: GPL (>= 2)
+LazyLoad: yes
+Packaged: 2012-02-12 20:56:53 UTC; andi
+Repository: CRAN
+Date/Publication: 2012-02-12 21:51:11

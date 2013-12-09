@@ -1,0 +1,83 @@
+\name{ghanaS}
+\alias{ghanaS}
+\docType{data}
+\title{
+Synthetic GLSS survey data
+}
+\description{
+This data set is synthetically generated from real GLSS (Ghana Living Standards 
+Survey) data.
+}
+\usage{data(eusilcS)}
+\format{
+  A data frame with 36970 observations on the following 14 variables.
+  \describe{
+    \item{\code{hhid}}{integer; the household ID.}
+    \item{\code{hsize}}{integer; the number of persons in the household.}
+    \item{\code{region}}{factor; the region in which the household is located 
+      (levels \code{western}, \code{central}, \code{greater accra}, 
+      \code{volta}, \code{eastern}, \code{ashanti}, \code{brong ahafo}, 
+      \code{northern}, \code{upper east} and \code{upper west}).}
+    \item{\code{clust}}{factor; the enumeration area.}
+    \item{\code{age}}{integer; the person's age.}
+    \item{\code{sex}}{factor; the person's sex (levels \code{male} and 
+      \code{female}).}
+    \item{\code{relate}}{factor; the relationship with the household head 
+      (levels \code{head}, \code{spouse}, \code{child}, \code{grandchild}, 
+      \code{parent/parentlaw}, \code{son/daughterlaw}, \code{other relative}, 
+      \code{adopted child}, \code{househelp} and \code{non_relative}).}
+    \item{\code{nation}}{factor; the person's nationality (levels 
+      \code{ghanaian birth}, \code{ghanaian naturalise}, \code{burkinabe}, 
+      \code{malian}, \code{nigerian}, \code{ivorian}, \code{togolese}, 
+      \code{liberian}, \code{other ecowas}, \code{other africa} and 
+      \code{other}).}
+    \item{\code{ethnic}}{factor; the person's ethnicity (levels \code{akan}, 
+      \code{all other tribes}, \code{ewe}, \code{ga-dangbe}, \code{grusi}, 
+      \code{guan}, \code{gurma}, \code{mande} and \code{mole-dagbani}).}
+    \item{\code{religion}}{factor; the person's religion (levels 
+      \code{catholic}, \code{anglican}, \code{presbyterian}, \code{methodist}, 
+      \code{pentecostal}, \code{spiritualist}, \code{other christian}, 
+      \code{moslem}, \code{traditional}, \code{no religion} and 
+      \code{other}).}
+    \item{\code{highest_degree}}{factor; the person's highest degree of 
+      education (levels \code{none}, \code{mlsc}, \code{bece}, \code{voc/comm}, 
+      \code{teacher trng a}, \code{teacher trng b}, \code{gce 'o' level}, 
+      \code{ssce}, \code{gce 'a' level}, \code{tech/prof cert}, 
+      \code{tech/prof dip}, \code{hnd}, \code{bachelor}, \code{masters}, 
+      \code{doctorate} and \code{other}).}
+    \item{\code{occupation}}{factor; the person's occupation (levels 
+      \code{armed forces and other security personnel}, \code{clerks}, 
+      \code{craft and related trades workers}, \code{elementary occupations}, 
+      \code{legislators, senior officials and managers}, \code{none}, 
+      \code{plant and machine operators and assemblers}, \code{professionals}, 
+      \code{service workers and shop and market sales workers}, 
+      \code{skilled agricultural and fishery workers}, and 
+      \code{technicians and associate professionals}).}
+    \item{\code{income}}{numeric; the person's annual income.}
+    \item{\code{weight}}{numeric; the sample weights.}
+  }
+}
+\details{
+The data set consists of 8700 households and is used as sample data in some of 
+the examples in package \code{simPopulation}.  Note that it is included for 
+illustrative purposes only.  The sample weights do not reflect the true 
+population sizes of Ghana and its regions.  The resulting population data is 
+about 100 times smaller than the real population size to save computation time.
+
+Only some of the variables in the original survey are included in this example 
+data set.  Furthermore, categories are aggregated for certain variables due to 
+the large number of possible outcomes in the original survey data.
+}
+\source{
+This is a synthetic data set based on GLSS data from 2006.  The 
+original sample was provided by Ghana Statistical Service.
+}
+\references{
+Ghana Statistical Service (2008) Ghana Living Standards Survey: Report of the 
+fifth round.
+}
+\examples{
+data(ghanaS)
+summary(ghanaS)
+}
+\keyword{datasets}

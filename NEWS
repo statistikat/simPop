@@ -1,0 +1,80 @@
+Changes in simPopulation version 0.4.0
+    
+    + New function 'simRelation' for simulation of categorical predictor 
+      variables with dependent relationships among household members.
+    
+    + New example data 'ghanaS' for the Ghana Living Standards Survey.
+    
+    + New demo 'ghana' for the simulation of Ghana Living Standards Survey data.
+    
+    + Added more functionality to account for structural zeros.
+    
+    + New argument 'probs' in 'getBreaks', 'simContinuous' and 'simEUSILC' 
+      giving probabilities for (positive) break points based on quantiles.
+
+
+
+Changes in simPopulation version 0.3
+    
+    + Functions 'simCategorical' and 'simContinuous' are now much more 
+      memory-efficient and faster if there is a large number of possible 
+      combinations in the categorical predictor variables.
+    
+    + Bugfix in 'simCategorical' regarding default value of basic variables.
+    
+    + Updated author affiliation.
+
+
+
+Changes in simPopulation version 0.2.1
+    
+    + Small changes in vignette.
+
+
+Changes in simPopulation version 0.2
+    
+    + New argument 'equidist' in 'getBreaks', 'simContinuous' and 'simEUSILC' 
+      indicating whether (positive) break points should be equidistant.
+    
+    + Function 'continencyWt' is now generic and has an additional 'data.frame' 
+      method for computing pairwise contingency coefficients.
+    
+    + Added package vignette 'simPopulation-eusilc'.
+    
+    + Bugfix in 'simStructure': if 'hsize' is not supplied, the resulting 
+      variable is now an integer instead of an array.
+    
+    + New methods to choose from in 'simStructure' and 'simCategorical'.
+    
+    + New argument 'useNA' in 'tableWt' indicating whether to include extra NA 
+      levels in the table.
+
+
+
+Changes in simPopulation version 0.1.4
+    
+    + 'R CMD check' no longer produces a note.
+
+
+Changes in simPopulation version 0.1.3
+    
+    + Bugfix: methods for the generic functions 'covWt' and 'corWt' are now 
+      exported.
+
+
+Changes in simPopulation version 0.1.2
+    
+    + Corrected typos in help file for 'quantileWt'.
+    
+    + Bugfix in 'simCategorical' in case of only one predictor variable.
+
+
+Changes in simPopulation version 0.1.1
+
+    + Argument 'const' added to functions 'simContinuous' and 'simEUSILC' so 
+      that constant can be added before log transformation.
+    
+    + Bugfix in 'getCat': it produced an error for semi-continuous variables 
+      when there were either no negative or no positive breakpoints.
+    
+    + Added help file for package.
