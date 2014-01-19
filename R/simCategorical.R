@@ -9,7 +9,7 @@ simCategorical <- function(dataS, dataP, w = "rb050", strata = "db040",
 		basic, additional = c("pl030", "pb220a"),
 		method = c("multinom", "distribution"), 
         limit = NULL, censor = NULL, maxit = 500, 
-        MaxNWts = 1500, eps = NULL, seed) {
+        MaxNWts = 1500, eps = NULL, seed, parallel=FALSE) {
 	
 	##### initializations
 	if(!missing(seed)) set.seed(seed)  # set seed of random number generator
@@ -84,7 +84,7 @@ simCategorical <- function(dataS, dataP, w = "rb050", strata = "db040",
 			excludeLevels <- any(hasNewLevels)
 			
 			# generate values of new variable
-			values <- lapply(levels(dataS[, strata]), 
+			values <- mclapply(levels(dataS[, strata]), 
 				function(s) {
 					# sample data
 					dataSample <- dataS[dataS[, strata] == s, , drop=FALSE]
@@ -159,7 +159,9 @@ simCategorical <- function(dataS, dataP, w = "rb050", strata = "db040",
 					sim <- unsplit(sim, dataPop, drop=TRUE)
 					# return realizations
 					levelsResponse[ind][sim]
-				})
+				}, mc.cores=detectCores(),
+					mc.preschedule = FALSE
+			)
 			values <- factor(unsplit(values, dataP[, strata, drop=FALSE]), 
 				levels=levelsResponse)
 			
@@ -198,7 +200,8 @@ simCategorical <- function(dataS, dataP, w = "rb050", strata = "db040",
 				sim <- grid[sim,]
 				rownames(sim) <- rownames(dataPop)
 				sim
-			})
+			}, mc.cores=detectCores(),
+			mc.preschedule = FALSE)
 		values <- unsplit(values, dataP[, strata, drop=FALSE])
 		
 		## add new categorical variables to data set and return
