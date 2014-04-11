@@ -11,7 +11,7 @@
 \usage{
 simCategorical(dataS, dataP, w = "rb050", strata = "db040", 
                basic, additional = c("pl030", "pb220a"), 
-               method = c("multinom", "distribution"), 
+               method = c("multinom", "distribution", "ctree", "naivebayes", "liblinear"), 
                limit = NULL, censor = NULL, maxit = 500, 
                MaxNWts = 1500, eps = NULL, seed)
 }
@@ -37,7 +37,9 @@ simCategorical(dataS, dataP, w = "rb050", strata = "db040",
     \code{"multinom"} (estimation of the conditional probabilities using 
     multinomial log-linear models and random draws from the resulting 
     distributions), or \code{"distribution"} (random draws from the observed 
-    conditional distributions of their multivariate realizations).}
+    conditional distributions of their multivariate realizations), \code{ctree} 
+    (classification trees), \code{naivebayes} (classification based on naive 
+    bayes approach) and \code{liblinear} (linear classification).}
   \item{limit}{if \code{method} is \code{"multinom"}, this can be used to 
     account for structural zeros.  If only one additional variable is 
     requested, a named list of lists should be supplied.  The names of the list 
