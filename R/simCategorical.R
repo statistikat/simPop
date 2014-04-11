@@ -128,7 +128,7 @@ simCategorical <- function(dataS, dataP, w = "rb050", strata = "db040",
   basic, additional = c("pl030", "pb220a"),
   method = c("multinom", "distribution","ctree","naivebayes","liblinear"), 
   limit = NULL, censor = NULL, maxit = 500, 
-  MaxNWts = 1500, eps = NULL, seed, parallel=FALSE) {
+  MaxNWts = 1500, eps = NULL, seed) {
   
   if ( method == "ctree" ) {
     stop("fix errow with unequal levels of factors in train and test-dataset!\n")
