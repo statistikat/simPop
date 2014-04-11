@@ -1,30 +1,35 @@
 ## imports
+import(POT)
+import(nnet)
+import(data.table)
 importFrom(lattice, bwplot, panel.bwplot)
 importFrom(vcd, mosaic)
 
 ## exports
 export(
-    contingencyWt,
-    corWt,
-    covWt,
-    getBreaks,
-    getCat,
-    meanWt,
-    quantileWt,
-    simCategorical,
-    simComponents,
-    simContinuous,
-    simEUSILC,
-    simRelation,
-    simStructure,
-    spBwplotStats,
-    spBwplot,
-    spCdf,
-    spCdfplot,
-    spMosaic,
-    spTable,
-    tableWt,
-    varWt
+  contingencyWt,
+  corWt,
+  covWt,
+  getBreaks,
+  getCat,
+  ipu,
+  meanWt,
+  quantileWt,
+  simannealing,
+  simCategorical,
+  simComponents,
+  simContinuous,
+  simEUSILC,
+  simRelation,
+  simStructure,
+  spBwplotStats,
+  spBwplot,
+  spCdf,
+  spCdfplot,
+  spMosaic,
+  spTable,
+  tableWt,
+  varWt
 )
 
 ## register methods for S3 generics defined in this package
