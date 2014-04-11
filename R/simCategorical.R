@@ -134,12 +134,14 @@ simCategorical <- function(dataS, dataP, w = "rb050", strata = "db040",
     stop("fix errow with unequal levels of factors in train and test-dataset!\n")
   }
   
-  if ( parallel ) {
+  parallel <- FALSE
+  if ( Sys.info()["sysname"] != "Windows" ) {
     nr_cores <- detectCores()
     if ( nr_cores > 2 ) {
-      nr_cores <- nr_cores-1
-    }
-  }
+      parallel <- TRUE
+      nr_cores <- nr_cores-1 # keep one core available
+    }    
+  }  
     
   ##### initializations
   if( !missing(seed) ) {
