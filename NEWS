@@ -11,4 +11,6 @@ Changes in synthPop version 0.1.0
   + remove vignette from simPopulation
 
   + update Citation
+
+  + new methods for simCategorical (naivebayes, ctree and liblinear)
     
