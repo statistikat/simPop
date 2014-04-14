@@ -2,29 +2,30 @@
 \alias{simannealing}
 \docType{data}
 \title{
-Simulated Annealing to create of synthetic micro data
+Simulated Annealing to calibrate to known marginals
 }
 \description{
-A Simulated Annealing Algorithm for the Creation of Synthetic Microdata. Aims to find, given a microdataset, a combination of different households which optimaly satisfy, in the sense of an acceptable error, a given table of specific attributes.  
+A Simulated Annealing Algorithm for calibrartion of synthetic microdata. The aims is to find, given a population, a combination of different households which optimaly satisfy, in the sense of an acceptable error, a given table of specific attributes.  
 }
 \usage{
 simannealing(data, totals, hid, parameter, split, temp = 30, eps.factor = 0.05, maxiter=200, temp.cooldown = 0.975, factor.cooldown = 0.85, min.temp = 10^-3, sample = FALSE)
 }
 \arguments{
   \item{data}{
-a data.table object containing microdata. Rows must correspond with different attributes in totals.
+a data.table object containing microdata. 
+%Rows must correspond with different attributes in totals.
 }
-  \item{totals}{
-a table object containing the target-marginals. Entries need to display whole number of individuals which need to fit different attributes (e.g. income, age, gender, ect...). Attributes can freely be chosen, but need to correspond to a collumn in data. (s.a example)
+\item{totals}{
+a table object containing the target-marginals. Entries need to display aggregated information on individuals (e.g. age, gender, household size, ect...). Attributes can freely be chosen, but need to correspond to a column in the data. 
 }
-  \item{hid}{
+\item{hid}{
 spezifying household-ID column in data
 }
-  \item{parameter}{
-character vector containg the attributes (variable names) to be optimized for.
+\item{parameter}{
+character vector containg the variable names to be optimized for.
 }
   \item{split}{
-attribute in which the problem will be split. Has to correspond to a collumn in data, which should be factor leveled for an appropiate differentiation of main problem. For example split = c("region"), problem will be split in different regions.
+given strata in which the problem will be split. Has to correspond to a column in data. For example \code{split = c("region")}, problem will be split for different regions. Parallel computing is automatically applied when working under Linux.
 }
   \item{temp}{
 starting temperatur for simulated annealing algorithm
@@ -36,27 +37,27 @@ a factor (between 0 and 1) specifying the acceptance error. For example eps.fact
 maximum iterations during a temperature step.
 }
   \item{temp.cooldown}{
-a factor (between 0 and 1) specifying the rate at which temperature will be dropped.
+a factor (between 0 and 1) specifying the rate at which temperature will be reduced in each step.
 }
   \item{factor.cooldown}{
-a factor (between 0 and 1) specifying the rate at which the number of permutations of housholds, in each iteration, will be dropped.
+a factor (between 0 and 1) specifying the rate at which the number of permutations of housholds, in each iteration, will be reduced in each step.
 }
   \item{min.temp}{
 minimal temperature at which the algorithm will stop.
 }
   \item{sample}{
-boolean variable; if TRUE specific Sample-Weights will be calculated for a more targeted household swapping.
+boolean variable; if TRUE specific weights will be calculated for a targeted household swapping.
 }
 }
 \details{
-Creates synthetic microdata using simulated annealing. Finds optimal combination of different households, by swaping housholds at random (or with sample weights with sample=TRUE) in each iteration of each temperature level.
+Calibrates microdata using simulated annealing. Finds optimal combination of different households, by swaping housholds at random (or with sample weights with sample=TRUE) in each iteration of each temperature level.
 During the algorithm as well as for the output the optimal (or so far best) combination will be indicated by a logical vector containg only 0s (not inculded) and 1s (included in optimal selection).
 Objective function for simulated annealing is defined by the sum of absolute differences between target marginals and synthetic marginals (=marginals of synthetic microdataset). 
 The sum of target marginals can at most be as large as the sum of target marginals. 
-For every factor-level in "split", data must eat least contain as many entries of this kind as target marginals.
+For every factor-level in \dQuote{split}, data must at least contain as many entries of this kind as target marginals.
 }
 \value{
-Returns a list including solution, value of objective function, temperature level, ect...
+Returns a list including the solution, value of objective function, temperature level, ect...
 }
 \examples{
 \dontrun{
@@ -69,6 +70,7 @@ data(eusilcP)
 data(eusilcS)
 
 eusilcP <- data.table(eusilcP, keep.rownames=TRUE)
+## microdata (1) and donor (0)
 weights <- c(rep(1, 30000),rep(0,nrow(eusilcP)-30000))
 eusilcP$weights <- weights
 eusilcP$new.weights <- weights
