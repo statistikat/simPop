@@ -16,6 +16,7 @@ export(
   ipu,
   meanWt,
   quantileWt,
+  sampHH,
   simannealing,
   simCategorical,
   simComponents,

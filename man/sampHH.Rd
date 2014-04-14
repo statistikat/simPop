@@ -29,7 +29,7 @@ the new households.
 the data frame of new households.
 }
 \author{
-Bernhard Meindl, Johannes Gussenbauer and Matthias Templ
+Bernhard Meindl and Matthias Templ
 }
 \note{
 TODO: ID, size

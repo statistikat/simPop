@@ -59,6 +59,9 @@ For every factor-level in \dQuote{split}, data must at least contain as many ent
 \value{
 Returns a list including the solution, value of objective function, temperature level, ect...
 }
+\author{
+Bernhard Meindl, Johannes Gussenbauer and Matthias Templ
+}
 \examples{
 \dontrun{
 library(data.table)
@@ -69,23 +72,30 @@ library(parallel)
 data(eusilcP)
 data(eusilcS)
 
-eusilcP <- data.table(eusilcP, keep.rownames=TRUE)
+## synth pop:
+pop <- eusilcP
+colnames(pop)[3] <- "hhsize"
+#eusilcP <- data.table(eusilcP, keep.rownames=TRUE)
+## donor data:
+donors <- sampHH(pop, strata="region", 
+          hsize="hhsize")
+
 ## microdata (1) and donor (0)
-weights <- c(rep(1, 30000),rep(0,nrow(eusilcP)-30000))
-eusilcP$weights <- weights
-eusilcP$new.weights <- weights
+pop <- rbind(pop, donors)
+pop$weight <- rep(c(1,0), c(nrow(eusilcP), nrow(donors)))
+pop$new.weights <- pop$weights
 
-index <- eusilcP$weights == 1
-tab <- table(eusilcP$region[index],eusilcP$gender[index], eusilcP$hsize[index])
+index <- pop$weights == 1
+tab <- table(pop$region[index],pop$gender[index], pop$hsize[index])
 
-# create target marginals
+## create target marginals
 totals <- tableWt(eusilcS[,c("db040", "rb090","hsize")], weights=eusilcS$rb050)
-totals <- nrow(eusilcP[index])/sum(totals) * totals
+totals <- nrow(pop[index])/sum(totals) * totals
 totals <- ceiling(totals)
 totals <- as.data.table(totals)
 setnames(totals, c("region","gender","hsize","N"))
 
-data <- eusilcP
+data <- data.table(pop, keep.rownames=TRUE)
 totals <- totals
 hid <- "hid"
 parameter <- c("gender","hsize")
