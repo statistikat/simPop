@@ -4,6 +4,7 @@ import(nnet)
 import(data.table)
 importFrom(lattice, bwplot, panel.bwplot)
 importFrom(vcd, mosaic)
+importFrom(laeken, calibVars, calibWeights)
 
 ## exports
 export(
