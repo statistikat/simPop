@@ -9,7 +9,8 @@ obj <- function(data,totals,weights,parameter) {
 
 ## function for sample weights
 ## use difference to marginals
-## sample weight euqals positive difference between marginals and synth-data divided by whole deviation
+## sample weight equals positive difference between marginals and 
+## synth-data divided by whole deviation
 sample.weights <- function(data,totals,weights,parameter, donor=TRUE) {  
   table.weights <- sweight.donor <- sweight.synth <- NULL
   index <- weights == 1
@@ -226,7 +227,7 @@ one_run <- function(data0, totals0, parameter, temp, eps.factor,
 ## factor.cooldown = scalar between 0 and 1; determines the cooldown step for the factor(resample.R).
 ## min.temp = minimal acceptable temperature; if temp < min.temp stop algorithm.
 ## sample = boolean variable; If TRUE sample weights will be used for resample algorithm. 
-simannealing <- function(data, totals, hid, parameter, 
+calibPop <- function(data, totals, hid, parameter, 
   split, temp = 30, eps.factor = 0.05, maxiter=200, temp.cooldown = 0.975, 
   factor.cooldown = 0.85, min.temp = 10^-3, sample = FALSE) {
   

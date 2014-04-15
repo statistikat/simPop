@@ -1,14 +1,14 @@
-\name{simannealing}
-\alias{simannealing}
+\name{calibPop}
+\alias{calibPop}
 \docType{data}
 \title{
-Simulated Annealing to calibrate to known marginals
+Calibration of 0/1 weights by Simulated Annealing 
 }
 \description{
-A Simulated Annealing Algorithm for calibrartion of synthetic microdata. The aims is to find, given a population, a combination of different households which optimaly satisfy, in the sense of an acceptable error, a given table of specific attributes.  
+A Simulated Annealing Algorithm for calibrartion of synthetic microdata. The aims is to find, given a population, a combination of different households which optimaly satisfy, in the sense of an acceptable error, a given table of specific known marginals.  
 }
 \usage{
-simannealing(data, totals, hid, parameter, split, temp = 30, eps.factor = 0.05, maxiter=200, temp.cooldown = 0.975, factor.cooldown = 0.85, min.temp = 10^-3, sample = FALSE)
+calibPop(data, totals, hid, parameter, split, temp = 30, eps.factor = 0.05, maxiter=200, temp.cooldown = 0.975, factor.cooldown = 0.85, min.temp = 10^-3, sample = FALSE)
 }
 \arguments{
   \item{data}{
@@ -55,6 +55,8 @@ During the algorithm as well as for the output the optimal (or so far best) comb
 Objective function for simulated annealing is defined by the sum of absolute differences between target marginals and synthetic marginals (=marginals of synthetic microdataset). 
 The sum of target marginals can at most be as large as the sum of target marginals. 
 For every factor-level in \dQuote{split}, data must at least contain as many entries of this kind as target marginals.
+
+Donors (marked by 0-weights) have to be included in the data. 
 }
 \value{
 Returns a list including the solution, value of objective function, temperature level, ect...
@@ -108,7 +110,7 @@ factor.cooldown <- 0.95
 min.temp <- 10^-2
 sample <- TRUE
 
-system.time(testrun <- simannealing(data, totals, hid, parameter, split, temp, eps.factor, maxiter, temp.cooldown, factor.cooldown, min.temp, sample))
+system.time(testrun <- calibPop(data, totals, hid, parameter, split, temp, eps.factor, maxiter, temp.cooldown, factor.cooldown, min.temp, sample))
 }
 }
 \keyword{datasets}

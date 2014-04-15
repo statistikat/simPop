@@ -8,6 +8,9 @@ importFrom(laeken, calibVars, calibWeights)
 
 ## exports
 export(
+  calibPop,
+  calibVars,
+  calibWeights,
   contingencyWt,
   corWt,
   covWt,
@@ -17,7 +20,6 @@ export(
   meanWt,
   quantileWt,
   sampHH,
-  simannealing,
   simCategorical,
   simComponents,
   simContinuous,
