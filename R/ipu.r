@@ -20,7 +20,7 @@ ipu <- function(inp, con, hid=NULL, eps=1e-07, verbose=FALSE) {
   
   # initialize weights
   w <- rep(1,nrow(inp))  
-  gamma.vals <- sapply(1:length(con), function(x) { (abs(sum(w*inp[,x]) - con[[x]])) / con[[x]] })
+  gamma.vals <- sapply(1:length(con), function(x) { (abs(sum(w*inp[,x,with=F]) - con[[x]])) / con[[x]] })
   gamma <- mean(gamma.vals)
   
   run_ind <- TRUE
