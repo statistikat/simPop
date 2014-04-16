@@ -2,6 +2,7 @@
 import(POT)
 import(nnet)
 import(data.table)
+import("Rcpp")
 importFrom(lattice, bwplot, panel.bwplot)
 importFrom(vcd, mosaic)
 importFrom(laeken, calibVars, calibWeights)
@@ -73,3 +74,4 @@ S3method(as.array, spTable)
 S3method(as.table, spTable)
 # print
 S3method(print, spTable)
+useDynLib(synthPop)
