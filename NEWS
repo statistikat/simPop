@@ -1,3 +1,19 @@
+Changes in synthPop version 0.1.2
+  * temporarily add explicit parallel-option to calibPop() for testing-purposes
+
+  * more efficient implementation of auxiliary-function resample() used in calibPop()
+
+  * changed default setting for auxiliary-variable 'factor' in calibPop() which now allows the algorithm to terminate in an accceptable time
+
+  * added R/zzz.R to get current package version on loading the package
+
+Changes in synthPop version 0.1.1
+  * more efficient c++ implementation of iterative proportional updating
+
+  * multiple imports from package simPopulation
+
+  * reorganizations (simAnnealing -> synthPop,...)
+
 Changes in synthPop version 0.1.0
 
   + code largely based on version 0.4.1 of simPopulation
