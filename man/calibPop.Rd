@@ -70,15 +70,13 @@ Bernhard Meindl, Johannes Gussenbauer and Matthias Templ
 \examples{
 \dontrun{
 library(simFrame)
-library(parallel)
-
 data(eusilcP)
 data(eusilcS)
 
 ## synth pop:
 pop <- eusilcP
 colnames(pop)[3] <- "hhsize"
-#eusilcP <- data.table(eusilcP, keep.rownames=TRUE)
+
 ## donor data:
 donors <- sampHH(pop, strata="region", hsize="hhsize")
 
