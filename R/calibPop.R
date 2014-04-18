@@ -102,12 +102,11 @@ one_run <- function(data0, totals0, parameter, temp, eps.factor,
   ## acceptable error
   eps <- eps.factor*sum(data0$weights)
   
-  ## initial number of swaps per resample
-  ## decreases with temperature
-  factor <- index1*(1/10)  
-  
   setkeyv(data0, parameter)
   objective <- obj(data=data0, totals=totals0, weights=data0$weights, parameter=parameter)
+  ## initial number of swaps per resample
+  ## decreases with temperature but depends on median hhsize and initial value of objective fn
+  factor <- objective/median(data0$hhsize_calculated[data0$weights==1])/10
   
   if ( sample ) {
     data0 <- sample.weights(data=data0, totals=totals0, weights=data0$weights, parameter=parameter, donor=FALSE)
