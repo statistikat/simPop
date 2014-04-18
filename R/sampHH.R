@@ -50,5 +50,6 @@ sampHH <- function(pop, sizefactor=1, hid="hid", strata="region", hsize=NULL) {
   ids$x <- 1
   ids <- ids[,list(sum(x)),by=id]
   out[,hid] <- rep(1:length(unique(ids$id)), times=ids$V1)      
+  out$hid <- out$hid + max(pop[,hid])
   invisible(out)
 }
