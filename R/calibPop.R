@@ -33,11 +33,15 @@ sample.weights <- function(data,totals,weights,parameter, donor=TRUE) {
   
   #gibt ein WARINING falls table.weights noch nicht als col definiert
   if ( donor == TRUE ) {
-    data[,sweight.donor:=NULL]
+    if ( !is.na(match("sweight.donor", colnames(data))) ) {
+      data[,sweight.donor:=NULL]  
+    }    
     data <- merge(data,dat,suffixes=c())
     setnames(data,"table.weights","sweight.donor")
   } else {
-    data[,sweight.synth:=NULL]
+    if ( !is.na(match("sweight.synth", colnames(data))) ) {
+      data[,sweight.synth:=NULL]
+    }    
     data <- merge(data,dat,suffixes=c())
     setnames(data,"table.weights","sweight.synth")
   }  
@@ -47,25 +51,22 @@ sample.weights <- function(data,totals,weights,parameter, donor=TRUE) {
 ## resample function
 ## switches a percentage of weights, given by factor, from 0 to 1
 ## switches full households always
-resample <- function(data, factor) {  
+resample <- function(data, factor) {
+  data$id <- 1:nrow(data)
   new.weights <- data$weights
   active <- new.weights == 1  
   inactive <- new.weights == 0 
   
   randomactive <- sample(data$hid[active],factor,prob=data$sweight.synth[active])
-  randomactive <- sort(unique(randomactive))
-  activeindex <- chmatch(as.character(randomactive),as.character(data$hid))
-  activehhsize <- as.numeric(data$hsize[activeindex])
-  activeindex <- unlist(sapply(c(1:length(randomactive)), function(x) c(activeindex[x]:c((activeindex+activehhsize-1))[x])))
+  a <- data.table(hid=randomactive)
+  setkeyv(a, "hid")
+  activeindex <- data[a]$id
+  new.weights[activeindex] <- 0   
   
   randominactive <- sample(data$hid[inactive],factor,prob=data$sweight.donor[inactive])  
-  randominactive <- sort(unique(randominactive)) 
-  inactiveindex <- chmatch(as.character(randominactive),as.character(data$hid)) 
-  inactivehhsize <- as.numeric(data$hsize[inactiveindex])
-  inactiveindex <- unlist(sapply(c(1:length(randominactive)), function(x) c(inactiveindex[x]:c((inactiveindex+inactivehhsize-1))[x])))
-  
-  
-  new.weights[activeindex] <- 0 
+  b <- data.table(hid=randominactive)
+  setkeyv(b, "hid")  
+  inactiveindex <- data[b]$id
   new.weights[inactiveindex] <- 1
   return(new.weights)
 }
@@ -229,16 +230,19 @@ one_run <- function(data0, totals0, parameter, temp, eps.factor,
 ## sample = boolean variable; If TRUE sample weights will be used for resample algorithm. 
 calibPop <- function(data, totals, hid, parameter, 
   split, temp = 30, eps.factor = 0.05, maxiter=200, temp.cooldown = 0.975, 
-  factor.cooldown = 0.85, min.temp = 10^-3, sample = FALSE) {
+  factor.cooldown = 0.85, min.temp = 10^-3, sample = FALSE, parallel=FALSE) {
   
   table.weights <- sweight.donor <- sweight.synth <- NULL
   
-  parallel <- FALSE
-  if ( Sys.info()["sysname"] != "Windows" ) {
-    nr_cores <- detectCores()
-    if ( nr_cores > 2 ) {
-      parallel <- TRUE
-      nr_cores <- nr_cores-1 # keep one core available
+  if ( parallel ) {
+    if ( Sys.info()["sysname"] != "Windows" ) {
+      nr_cores <- detectCores()
+      if ( nr_cores > 2 ) {
+        parallel <- TRUE
+        nr_cores <- nr_cores-1 # keep one core available
+      }    
+    } else {
+      parallel <- FALSE 
     }    
   }
   
