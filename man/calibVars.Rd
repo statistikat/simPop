@@ -19,12 +19,12 @@
   totals.
 }
 \examples{
-data(eusilc)
+data(eusilcS)
 # default method
-aux <- calibVars(eusilc$rb090)
+aux <- calibVars(eusilcS$rb090)
 head(aux)
 # data.frame method
-aux <- calibVars(eusilc[, c("db040", "rb090")])
+aux <- calibVars(eusilcS[, c("db040", "rb090")])
 head(aux)
 }
 \author{
