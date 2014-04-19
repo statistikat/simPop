@@ -8,7 +8,7 @@ Calibration of 0/1 weights by Simulated Annealing
 A Simulated Annealing Algorithm for calibrartion of synthetic microdata. The aims is to find, given a population, a combination of different households which optimaly satisfy, in the sense of an acceptable error, a given table of specific known marginals.  
 }
 \usage{
-calibPop(data, totals, hid, parameter, split, temp=30, eps.factor=0.05, maxiter=200, temp.cooldown=0.975, factor.cooldown=0.85, min.temp=10^-3, sample=FALSE, parallel=FALSE)
+calibPop(data, totals, hid, parameter, split, temp=30, eps.factor=0.05, maxiter=200, temp.cooldown=0.975, factor.cooldown=0.85, min.temp=10^-3, verbose=FALSE, parallel=FALSE)
 }
 \arguments{
   \item{data}{
@@ -45,8 +45,8 @@ a factor (between 0 and 1) specifying the rate at which the number of permutatio
   \item{min.temp}{
 minimal temperature at which the algorithm will stop.
 }
-  \item{sample}{
-boolean variable; if TRUE specific weights will be calculated for a targeted household swapping.
+  \item{verbose}{
+boolean variable; if TRUE some additional verbose output is provided.
 }
   \item{parallel}{
 boolean variable; if TRUE the procedure will use n-1 of cpu-cores available. Setting this option has only effects on non-windows platforms.
@@ -106,9 +106,9 @@ maxiter <- 250
 temp.cooldown <- 0.90
 factor.cooldown <- 0.95
 min.temp <- 10^-2
-sample <- TRUE
+verbose <- FALSE
 parallel <- FALSE
-system.time(testrun <- calibPop(data, totals, hid, parameter, split, temp, eps.factor, maxiter, temp.cooldown, factor.cooldown, min.temp, sample, parallel))
+system.time(testrun <- calibPop(data, totals, hid, parameter, split, temp, eps.factor, maxiter, temp.cooldown, factor.cooldown, min.temp, verbose, parallel))
 }
 }
 \keyword{datasets}

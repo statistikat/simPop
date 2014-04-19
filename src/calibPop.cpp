@@ -120,39 +120,39 @@ double calc_factor(double obj, IntegerVector hh_head, IntegerVector hh_size, Int
 }  
 
 // [[Rcpp::export]]
-IntegerVector calib_pop(IntegerMatrix inp, NumericVector totals, IntegerVector weights, 
-  IntegerVector hh_ids, IntegerVector hh_head, IntegerVector hh_size, IntegerVector verbose) { 
+IntegerVector calibPop_work(IntegerMatrix inp, NumericVector totals, IntegerVector weights, 
+  List hh_info, List params) {
     
   IntegerVector new_weights(weights.size());
   
   int nr_con = totals.size();  
   bool verb = false;
-  if ( verbose[0] == 1 ) {
+  if ( params["verbose"] == 1 ) {
     verb = true;
   }
 
-  Rprintf("setting constants...");
-  double temp = 10;
-  double eps_factor = 0.01;
-  double maxiter = 250;
-  double temp_cooldown = 0.90;
-  double factor_cooldown = 0.95;
-  double min_temp = 10^-2;
+  IntegerVector hh_ids = hh_info["hh_ids"];
+  IntegerVector hh_head = hh_info["hh_head"];
+  IntegerVector hh_size = hh_info["hh_size"];
+
+  double temp = params["temp"];
+  double eps_factor = params["eps_factor"];
+  double maxiter = params["maxiter"];
+  double temp_cooldown = params["temp_cooldown"];
+  double factor_cooldown = params["factor_cooldown"];
+  double min_temp = params["min_temp"];
   int cooldown = 0; 
   double obj, obj_new = 0.0;
   
   //acceptable error
   double eps = eps_factor*sum(weights);
-  Rprintf("[done]\n");
     
   // calculate objective value based on initial solution
   obj = calc_obj(inp, weights, totals);
-  Rprintf("starting with obj-value %g\n");
   
   double factor = calc_factor(obj, hh_head, hh_size, weights);
-  Rprintf("factor = %g\n", factor);
   if ( obj <= eps ) {
-    Rprintf("solution within required margins! --> we are finished!\n");
+    Rprintf("nothing to do, already finished! obj=%g | eps=%g\n", obj, eps);
     return(weights);
   }
   
@@ -161,8 +161,7 @@ IntegerVector calib_pop(IntegerMatrix inp, NumericVector totals, IntegerVector w
   double prob = 0.0;
   NumericVector samp_result(1);
   while( temp > min_temp ) {  
-    Rprintf("temp=%f | min_temp=%f\n", temp, min_temp);
-    //counter = counter + 1;
+    //Rprintf("temp=%f | min_temp=%f\n", temp, min_temp);
     counter = 1;
     while( counter < maxiter ) {
       // swap zeros to ones and ones to zeros
@@ -170,7 +169,9 @@ IntegerVector calib_pop(IntegerMatrix inp, NumericVector totals, IntegerVector w
       
       // calculate new objective value based on new solution
       obj_new = calc_obj(inp, new_weights, totals);
-      Rprintf("obj_new=%g | obj_old=%g\n", obj_new, obj);
+      if ( verb ) {
+        Rprintf("obj_new=%g | obj_old=%g\n", obj_new, obj);
+      }
       
       if ( obj_new <= eps ) {
         obj = obj_new;
@@ -178,7 +179,7 @@ IntegerVector calib_pop(IntegerMatrix inp, NumericVector totals, IntegerVector w
           weights[z] = new_weights[z];
         }
         change = change+1;
-        Rprintf("breaking!\n");
+        Rprintf("breaking: obj_new: %g | eps=%g\n", obj_new, eps);
         break;
       }      
       // if new solution is better than old one, we accept
@@ -187,7 +188,6 @@ IntegerVector calib_pop(IntegerMatrix inp, NumericVector totals, IntegerVector w
           weights[z] = new_weights[z];
         }
         obj = obj_new;
-        // updating sample weights --> required??
         change = change + 1;
       } 
       // if new solution is worse than current, we accept based on temp and value
@@ -199,7 +199,6 @@ IntegerVector calib_pop(IntegerMatrix inp, NumericVector totals, IntegerVector w
             weights[z] = new_weights[z];
           }
           obj = obj_new;
-          // updating sample weights --> required??
           change = change + 1;
         }
       }
@@ -208,14 +207,35 @@ IntegerVector calib_pop(IntegerMatrix inp, NumericVector totals, IntegerVector w
     // decrease temp and decrease factor accordingly
     // decrease temp by a const fraction (simple method used for testing only)
     temp = temp_cooldown*temp;
-    //factor = floor(factor_cooldown*factor);
-    //if ( factor == 0 ) {
-    //  factor = 1;
-    //}
+    factor = floor(factor_cooldown*factor);
+    if ( factor == 0 ) {
+      factor = 1;
+    }
     cooldown = cooldown + 1;
     if ( obj_new <= eps | cooldown == 500 ) {
+      Rprintf("breaking: obj_new: %g | eps=%g\n", obj_new, eps);
       break;
     }    
   }
   return(weights);
+}
+
+// exporting for package (compileAttributes())
+IntegerVector calibPop_work(IntegerMatrix inp, NumericVector totals, IntegerVector weights, List hh_info, List params);
+RcppExport SEXP synthPop_calibPop_work(SEXP inpSEXP, SEXP totalsSEXP, SEXP weightsSEXP, SEXP hh_infoSEXP, SEXP paramsSEXP) {
+BEGIN_RCPP
+    SEXP __sexp_result;
+    {
+        Rcpp::RNGScope __rngScope;
+        Rcpp::traits::input_parameter< IntegerMatrix >::type inp(inpSEXP );
+        Rcpp::traits::input_parameter< NumericVector >::type totals(totalsSEXP );
+        Rcpp::traits::input_parameter< IntegerVector >::type weights(weightsSEXP );
+        Rcpp::traits::input_parameter< List >::type hh_info(hh_infoSEXP );
+        Rcpp::traits::input_parameter< List >::type params(paramsSEXP );
+        IntegerVector __result = calibPop_work(inp, totals, weights, hh_info, params);
+        PROTECT(__sexp_result = Rcpp::wrap(__result));
+    }
+    UNPROTECT(1);
+    return __sexp_result;
+END_RCPP
 }
