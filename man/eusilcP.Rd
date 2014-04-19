@@ -94,8 +94,5 @@ longitudinal. \emph{EU-SILC 065/04}, Eurostat.
 \examples{
 data(eusilcP)
 summary(eusilcP)
-
-strata <- stratify(eusilcP, c("region", "gender"))
-summary(strata)
 }
 \keyword{datasets}
