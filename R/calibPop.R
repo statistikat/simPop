@@ -417,7 +417,6 @@ calibPop <- function(data, totals, hid, parameter, split, temp = 30, eps.factor 
   }
   # return dataset with new weights
   data$new.weights <- as.integer(unlist(final_weights))
-  print(identical(data$weights, unlist(final_weights)))
   data$hhsize_calculated <- NULL
   return(data)
 }
