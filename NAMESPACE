@@ -6,6 +6,7 @@ import("Rcpp")
 importFrom(lattice, bwplot, panel.bwplot)
 importFrom(vcd, mosaic)
 importFrom(laeken, calibVars, calibWeights)
+importFrom(MASS, ginv)
 
 ## exports
 export(
@@ -53,6 +54,10 @@ S3method(spMosaic, spTable)
 # methods for S3 generic 'spTable'
 S3method(spTable, default)
 S3method(spTable, formula)
+# methods for S3 generic 'calibVars'
+S3method(calibVars, default)
+S3method(calibVars, matrix)
+S3method(calibVars, data.frame)
 
 ## register methods for internal S3 generics defined in this package
 # methods for S3 generic 'corWt'
