@@ -1,4 +1,5 @@
 sampHH <- function(pop, sizefactor=1, hid="hid", strata="region", hsize=NULL) {
+  x <- nr <- id <- NULL
   pop <- as.data.table(pop)
   setkeyv(pop, hid)
   

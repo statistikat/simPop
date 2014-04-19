@@ -8,11 +8,17 @@ The function samples households from microdata containing personal and
 household information.
 }
 \usage{
-sampHH(pop, hid = "hid", strata = "region", hsize = NULL)
+sampHH(pop, sizefactor = 1, hid = "hid", strata = "region", hsize = NULL)
 }
 \arguments{
 \item{pop}{
 data frame containing households and persons
+}
+\item{sizefactor}{
+factor of how many times the initial population should be resampled
+}
+\item{hid}{
+string specifying the name of the household-id variable in the data.
 }
 \item{strata}{
 can be used to sample within strata.
