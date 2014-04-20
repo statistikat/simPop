@@ -69,7 +69,6 @@ Bernhard Meindl, Johannes Gussenbauer and Matthias Templ
 }
 \examples{
 \dontrun{
-library(simFrame)
 data(eusilcP)
 data(eusilcS)
 

@@ -152,7 +152,9 @@ IntegerVector calibPop_work(IntegerMatrix inp, NumericVector totals, IntegerVect
   
   double factor = calc_factor(obj, hh_head, hh_size, weights);
   if ( obj <= eps ) {
-    Rprintf("nothing to do, already finished! obj=%g | eps=%g\n", obj, eps);
+    if ( verb ) {
+      Rprintf("We have nothing to do and are already finished!\nValue of objective function: %g | (required precision=%g)\n", obj, eps);
+    }
     return(weights);
   }
   
@@ -160,8 +162,10 @@ IntegerVector calibPop_work(IntegerMatrix inp, NumericVector totals, IntegerVect
   int change = 0;
   double prob = 0.0;
   NumericVector samp_result(1);
-  while( temp > min_temp ) {  
-    //Rprintf("temp=%f | min_temp=%f\n", temp, min_temp);
+  while( temp > min_temp ) {
+    if ( verb ) {
+      Rprintf("current temperature: %f (minimal temp=%f)\n", temp, min_temp);
+    }
     counter = 1;
     while( counter < maxiter ) {
       // swap zeros to ones and ones to zeros
@@ -170,16 +174,17 @@ IntegerVector calibPop_work(IntegerMatrix inp, NumericVector totals, IntegerVect
       // calculate new objective value based on new solution
       obj_new = calc_obj(inp, new_weights, totals);
       if ( verb ) {
-        Rprintf("obj_new=%g | obj_old=%g\n", obj_new, obj);
+        Rprintf("current value of objective function: %g (old value: %g)\n", obj_new, obj);
       }
-      
       if ( obj_new <= eps ) {
         obj = obj_new;
         for ( int z=0; z<weights.size(); ++z ) {
           weights[z] = new_weights[z];
         }
         change = change+1;
-        Rprintf("breaking: obj_new: %g | eps=%g\n", obj_new, eps);
+        if ( verb ) {
+          Rprintf("Required precision reached!\nValue of objective function: %g (required precision=%g)\n", obj_new, eps);
+        }
         break;
       }      
       // if new solution is better than old one, we accept
@@ -213,7 +218,9 @@ IntegerVector calibPop_work(IntegerMatrix inp, NumericVector totals, IntegerVect
     }
     cooldown = cooldown + 1;
     if ( obj_new <= eps | cooldown == 500 ) {
-      Rprintf("breaking: obj_new: %g | eps=%g\n", obj_new, eps);
+      if ( verb ) {
+        Rprintf("Required precision reached!\nValue of objective function: %g (required precision=%g)\n", obj_new, eps);
+      }
       break;
     }    
   }

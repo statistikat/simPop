@@ -392,7 +392,7 @@ calibPop <- function(data, totals, hid, parameter, split, temp = 30, eps.factor 
       hh_info$hh_head[hh_info$hh_head>1] <- 0L
       hh_info$hh_size <- as.integer(data0$hhsize_calculated)
 
-      .Call("synthPop_calibPop_work", inp=inp, totals=totals, weights=weights, hh_info=hh_info, params=params, package="synthPop")
+      .Call("synthPop_calibPop_work", inp=inp, totals=current_totals, weights=weights, hh_info=hh_info, params=params, package="synthPop")
     },
     mc.cores = max(nr_cores,nrow(split.number)))
   } else {
@@ -412,7 +412,7 @@ calibPop <- function(data, totals, hid, parameter, split, temp = 30, eps.factor 
       hh_info$hh_head[hh_info$hh_head>1] <- 0L
       hh_info$hh_size <- as.integer(data0$hhsize_calculated)
 
-      final_weights[[length(final_weights)+1]] <- .Call("synthPop_calibPop_work", inp=inp, totals=totals, weights=weights, hh_info=hh_info, params=params, package="synthPop")    
+      final_weights[[length(final_weights)+1]] <- .Call("synthPop_calibPop_work", inp=inp, totals=current_totals, weights=weights, hh_info=hh_info, params=params, package="synthPop")    
     }
   }
   # return dataset with new weights
