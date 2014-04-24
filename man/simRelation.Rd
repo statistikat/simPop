@@ -1,5 +1,4 @@
 \name{simRelation}
-\Rdversion{1.1}
 \alias{simRelation}
 \title{
   Simulate categorical variables of population data
@@ -88,7 +87,7 @@ simRelation(dataS, dataP, hid = "hhid", w = "weight",
   A \code{data.frame} containing the simulated population data including the 
   categorical variables specified by \code{additional}.
 }
-\author{Andreas Alfons}
+\author{Andreas Alfons and Bernhard Meindl}
 \note{
   The basic household structure needs to be simulated beforehand with the 
   function \code{\link{simStructure}}.
@@ -99,7 +98,6 @@ simRelation(dataS, dataP, hid = "hhid", w = "weight",
 }
 \examples{
 \dontrun{
-
 ## these take some time and are not run automatically
 ## copy & paste to the R command line
 
