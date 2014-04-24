@@ -1,3 +1,10 @@
+Changes in synthPop version 0.1.3
+  * parallelize simRelevation() on non-windows platforms
+
+  * c++ algorithm for simulated annealing in calibPop()
+
+  * multiple commits to fix documentation and cran-notes/warnings when checking
+
 Changes in synthPop version 0.1.2
   * temporarily add explicit parallel-option to calibPop() for testing-purposes
 
