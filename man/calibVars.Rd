@@ -31,7 +31,7 @@ head(aux)
   Andreas Alfons
 }
 \seealso{
-  \code{\link{calibWeights}}
+  \code{\link{calibSample}}
 }
 \keyword{survey}
 

@@ -1,9 +1,9 @@
 \encoding{utf8}
-\name{calibWeights}
-\alias{calibWeights}
+\name{calibSample}
+\alias{calibSample}
 \title{Calibrate sample weights}
 \usage{
-  calibWeights(X, d, totals, q = NULL,
+  calibSample(X, d, totals, q = NULL,
     method = c("raking", "linear", "logit"),
     bounds = c(0, 10), maxit = 500, tol = 1e-06,
     eps = .Machine$double.eps)
@@ -73,7 +73,7 @@ aux <- calibVars(eusilcS$rb090)
 # population totals
 totals <- c(3990798, 4191431)
 # compute g-weights
-g <- calibWeights(aux, eusilcS$rb050, totals)
+g <- calibSample(aux, eusilcS$rb050, totals)
 # compute final weights
 weights <- g * eusilcS$rb050
 summary(weights)

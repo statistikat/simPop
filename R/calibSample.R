@@ -63,7 +63,7 @@
 #' # population totals
 #' totals <- c(3990798, 4191431)
 #' # compute g-weights
-#' g <- calibWeights(aux, eusilc$rb050, totals)
+#' g <- calibSample(aux, eusilc$rb050, totals)
 #' # compute final weights
 #' weights <- g * eusilc$rb050
 #' summary(weights)
@@ -71,7 +71,7 @@
 #' @export
 #' @import MASS
 
-calibWeights <- function(X, d, totals, q = NULL, 
+calibSample <- function(X, d, totals, q = NULL, 
         method = c("raking", "linear", "logit"), 
         bounds = c(0, 10), maxit = 500, tol = 1e-06, 
         eps = .Machine$double.eps) {

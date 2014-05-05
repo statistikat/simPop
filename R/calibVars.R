@@ -17,7 +17,7 @@
 #' 
 #' @author Andreas Alfons
 #' 
-#' @seealso \code{\link{calibWeights}}
+#' @seealso \code{\link{calibSample}}
 #' 
 #' @keywords survey
 #' 

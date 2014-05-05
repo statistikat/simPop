@@ -5,14 +5,14 @@ import(data.table)
 import("Rcpp")
 importFrom(lattice, bwplot, panel.bwplot)
 importFrom(vcd, mosaic)
-importFrom(laeken, calibVars, calibWeights)
+importFrom(laeken, calibVars)
 importFrom(MASS, ginv)
 
 ## exports
 export(
   calibPop,
   calibVars,
-  calibWeights,
+  calibSample,
   contingencyWt,
   corWt,
   covWt,
