@@ -1,4 +1,4 @@
-simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), keep=TRUE, seed=1) {
+simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), seed=1) {
   if ( !class(dataS) == "sampleObj" ) {
     stop("Error. Please provide the input sample in the required format.\n
       It must be an object of class 'sampleObj' that can be created using function specify_sample()!\n")
@@ -141,10 +141,9 @@ simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), 
     if( method == "direct" ) "strata[indices]" else "dataPH$strata[hidNew]", expr, ")", sep="")
 
   # evaluate command and return result
-  print(command)
   dataP <- eval(parse(text=command))
   setkeyv(dataP, dataS@hhid)
-  print(head(dataP))
-  out <- new("popObj", data=dataP, hhid=dataS@hhid, hhsize=dataS@hhsize, pid=dataS@pid, strata=dataS@strata, additional=dataS@additional)
+  pop <- new("popObj", data=dataP, hhid=dataS@hhid, hhsize=dataS@hhsize, pid=dataS@pid, strata=dataS@strata, additional=dataS@additional)
+  out <- new("synthPopObj", sample=dataS, table=NULL, pop=pop)
   invisible(out)   
 }
