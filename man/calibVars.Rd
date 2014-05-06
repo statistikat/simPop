@@ -28,7 +28,7 @@ aux <- calibVars(eusilcS[, c("db040", "rb090")])
 head(aux)
 }
 \author{
-  Andreas Alfons
+  Bernhard Meindl and Andreas Alfons
 }
 \seealso{
   \code{\link{calibSample}}

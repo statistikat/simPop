@@ -41,11 +41,12 @@ spMosaic(x, \dots)
   \code{\link{spTable}}, \code{\link[vcd]{cotabplot}}
 }
 \examples{
-set.seed(1234)  # for reproducibility
 data(eusilcS)   # load sample data
-eusilcP <- simStructure(eusilcS)
+samp <- specify_sample(data=eusilcS, hhid="db030", hhsize="hsize", 
+  strata="db040", weight="db090", additional=c("age","rb090"))
+eusilcP <- simStructure(data=samp, method="direct")
 abb <- c("B","LA","Vi","C","St","UA","Sa","T","Vo")
-spMosaic(c("rb090", "db040", "hsize"), "rb050", eusilcS, eusilcP, 
+spMosaic(c("rb090", "db040", "hsize"), "rb050", eusilcS, eusilcP@pop@data, 
     labeling=labeling_border(abbreviate=c(db040=TRUE)))
 }
 \keyword{hplot}

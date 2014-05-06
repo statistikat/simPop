@@ -10,30 +10,10 @@
   from survey data.
 }
 \usage{
-simStructure(dataS, hid = "db030", w = "db090", 
-             hsize = NULL, strata = "db040", pid = NULL, 
-             additional = c("age", "rb090"), 
-             method = c("direct", "multinom", "distribution"), 
-             keep = TRUE, seed)
+simStructure(dataS, method = c("direct", "multinom", "distribution"), seed)
 }
 \arguments{
   \item{dataS}{a \code{data.frame} containing household survey data.}
-  \item{hid}{a character string specifying the column of \code{dataS} that 
-    contains the household ID.}
-  \item{w}{a character string specifying the column of \code{dataS} that 
-    contains the (household) sample weights, which are used as probability 
-    weights for resampling.}
-  \item{hsize}{an optional character string specifying a column of 
-    \code{dataS} that contains the household size.  If \code{NULL}, the 
-    household sizes are computed.}
-  \item{strata}{a character string specifying the column of \code{dataS} that 
-    define strata.  Note that this is currently a required argument and only 
-    one stratification variable is supported.}
-  \item{pid}{an optional character string specifying a column of \code{dataS} 
-    that contains the personal ID.}
-  \item{additional}{a character vector specifying additional categorical 
-    variables of \code{dataS} that define the household structure, typically 
-    age and gender.}
   \item{method}{a character string specifying the method to be used for 
     simulating the household sizes.  Accepted values are \code{"direct"} 
     (estimation of the population totals for each combination of stratum and 
@@ -42,19 +22,14 @@ simStructure(dataS, hid = "db030", w = "db090",
     multinomial log-linear model and random draws from the resulting 
     distributions), or \code{"distribution"} (random draws from the observed 
     conditional distributions within the strata).}
-  \item{keep}{a logical indicating whether the original IDs of the 
-    corresponding households in the underlying sample should be stored as a 
-    variable in the resulting population data.  If \code{TRUE}, the 
-    corresponding column name is given by \code{hid} with postfix 
-    \code{"Sample"}.}
   \item{seed}{optional; an integer value to be used as the seed of the random 
     number generator, or an integer vector containing the state of the random 
     number generator to be restored.}
 }
 \value{
-  A \code{data.frame} containing the simulated population household structure.
+  An object of class \code{synthPopObj} containing the simulated population household structure as well as the underlying sample.
 }
-\author{Andreas Alfons and Stefan Kraft}
+\author{Bernhard Meindl}
 \note{
   The function \code{\link{sample}} is used, which gives results incompatible 
   with those from \R < 2.2.0 and produces a warning the first time this happens 
@@ -65,9 +40,9 @@ simStructure(dataS, hid = "db030", w = "db090",
   \code{\link{simComponents}}, \code{\link{simEUSILC}}
 }
 \examples{
-set.seed(1234)  # for reproducibility
 data(eusilcS)   # load sample data
-eusilcP <- simStructure(eusilcS)
+samp <- specify_sample(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090", additional=c("age","rb090"))
+eusilcP <- simStructure(data=samp, method="direct")
 summary(eusilcP)
 }
 \keyword{datagen}

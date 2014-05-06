@@ -1,4 +1,4 @@
-specify_pop <- function(data, hhid, hhsize=NULL, pid=NULL, strata=NULL) {
+specify_pop <- function(data, hhid, hhsize=NULL, pid=NULL, strata=NULL, additional=NULL) {
   if ( !class(hhid)=="character" | length(hhid) != 1 | is.na(match(hhid, colnames(data)))) {
     stop("hhid must be a character defining the variable holding household ids and must be of length 1!\n")
   }
@@ -31,6 +31,16 @@ specify_pop <- function(data, hhid, hhsize=NULL, pid=NULL, strata=NULL) {
     setnames(sizes, c(key(data), hhsize))
     data$pid <- paste(data[,hhid], ".",unlist(sapply(sizes$hhsize, function(x) { seq(1, x) })), sep="")
   }
-  invisible(new("popObj", data=data, hhid=hhid, hhsize=hhsize, pid=pid, strata=strata))
+
+  vars <- c(hhid, hhsize, pid, strata)
+  if ( !is.null(additional) ) {
+    if ( any(is.na(match(additional, colnames(data)))) ) {
+      stop("at least one additional variable was not found in the input data set!\n")
+    } else {
+      vars <- c(vars, additional)
+    }
+  }
+  data <- data[,vars,with=F]
+  invisible(new("popObj", data=data, hhid=hhid, hhsize=hhsize, pid=pid, strata=strata, additional=additional))
 }
 

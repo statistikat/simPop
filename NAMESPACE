@@ -28,6 +28,8 @@ export(
   simEUSILC,
   simRelation,
   simStructure,
+  specify_sample,
+  specify_pop,
   spBwplotStats,
   spBwplot,
   spCdf,

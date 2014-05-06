@@ -47,9 +47,10 @@ spTable(dataS, dataP, select = NULL, weights = NULL)
   \code{\link{spMosaic}}, \code{\link{tableWt}}
 }
 \examples{
-set.seed(1234)  # for reproducibility
-data(eusilcS)   # load sample data
-eusilcP <- simStructure(eusilcS)
-spTable(eusilcS, eusilcP, select = ~ rb090 + db040, weights = rb050)
+data(eusilcS)
+samp <- specify_sample(data=eusilcS, hhid="db030", hhsize="hsize", 
+  strata="db040", weight="db090", additional=c("age","rb090"))
+eusilcP <- simStructure(data=samp, method="direct")
+spTable(eusilcS, eusilcP@pop@data, select = ~ rb090 + db040, weights = rb050)
 }
 \keyword{dplot}

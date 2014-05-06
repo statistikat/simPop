@@ -36,8 +36,8 @@ simEUSILC <- function(dataS, hid = "db030", wh = "db090",
     
     ## simulate household structure
     structure <- c(age, gender)
-    dataP <- simStructure(dataS, hid=hid, w=wh, hsize=hsize, 
-        strata=strata, pid=pid, additional=structure, keep=keep)
+    samp <- specify_sample(data=dataS, hhid=hid, weight=wh, hhsize=hsize, strata=strata, pid=pid, additional=structure)
+    dataP <- simStructure(dataS=samp)
     
     # construct age categories (if requested)
     categorizeAge <- isTRUE(categorizeAge)

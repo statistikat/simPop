@@ -2,7 +2,7 @@
 
 # TODO: further generalization (no or more than one stratification variable)
 one_run <- function(s, dataS, dataP, params) {
-  
+  hasNewLevels <- newLevels <- NULL
   strata <- params$strata
   head <- params$head
   excludeLevels <- params$excludeLevels
