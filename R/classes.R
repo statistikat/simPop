@@ -12,14 +12,16 @@ setClass(
     hhid='characterOrNULL',
     hhsize='characterOrNULL',
     pid='characterOrNULL',
-    strata='characterOrNULL'
+    strata='characterOrNULL',
+    additional='characterOrNULL'
   ),
   prototype=prototype(
     data=NULL,
     hhid=NULL,
     hhsize=NULL,
     pid=NULL,
-    strata=NULL
+    strata=NULL,
+    additional=NULL
   ),
   validity=function(object) {
     return(TRUE)
@@ -30,13 +32,11 @@ setClass(
 setClass(
   Class='sampleObj',
   representation=representation(
-    weight='characterOrNULL',
-    additional='characterOrNULL'
+    weight='characterOrNULL'
   ),
   contains="popObj",
   prototype=prototype(
-    weight=NULL,
-    additional=NULL
+    weight=NULL
   ),
   validity=function(object) {
     return(TRUE)
