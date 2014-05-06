@@ -44,6 +44,6 @@ specify_sample <- function(data, hhid, hhsize=NULL, pid=NULL, weight, strata=NUL
     }
   }
   data <- data[,vars,with=F]
-  invisible(new("sampleObj", data=data, hhid=hhid, hhsize=hhsize, pid=pid, weight=weight, strata=strata))
+  invisible(new("sampleObj", data=data, hhid=hhid, hhsize=hhsize, pid=pid, weight=weight, strata=strata, additional=additional))
 }
 
