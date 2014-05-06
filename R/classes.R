@@ -10,11 +10,15 @@ setClass(
   representation=representation(
     data='dataframeOrNULL',
     hhid='characterOrNULL',
+    hhsize='characterOrNULL',
+    pid='characterOrNULL',
     strata='characterOrNULL'
   ),
   prototype=prototype(
     data=NULL,
     hhid=NULL,
+    hhsize=NULL,
+    pid=NULL,
     strata=NULL
   ),
   validity=function(object) {
