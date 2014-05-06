@@ -10,11 +10,11 @@
 specify_pop(data, hhid, hhsize=NULL, pid=NULL, strata=NULL)
 }
 \arguments{
-  \item{data}{a \code{data.frame} or \code{data.table} featuring sample data.}
-  \item{hhid}{character vector of length 1 specifying variable containing household ids within \code{samp}.}
-  \item{hhsize}{character vector of length 1 specifying variable containing household sizes within \code{samp}. If NULL, household sizes are automatically calculated.}
-  \item{pid}{character vector of length 1 specifying variable containing person ids within \code{samp}. If NULL, person ids are automatically calculated.}
-  \item{strata}{character vector of length 1 specifing variable name within \code{samp} of variable holding information on strata, e.g. regions or NULL if such variable does not exist.} 
+  \item{data}{a \code{data.frame} or \code{data.table} featuring population data.}
+  \item{hhid}{character vector of length 1 specifying variable containing household ids within \code{data}.}
+  \item{hhsize}{character vector of length 1 specifying variable containing household sizes within \code{data}. If NULL, household sizes are automatically calculated.}
+  \item{pid}{character vector of length 1 specifying variable containing person ids within \code{data}. If NULL, person ids are automatically calculated.}
+  \item{strata}{character vector of length 1 specifing variable name within \code{data} of variable holding information on strata, e.g. regions or NULL if such variable does not exist.} 
 }
 
 \examples{
