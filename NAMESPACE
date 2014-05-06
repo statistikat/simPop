@@ -38,6 +38,10 @@ export(
   varWt
 )
 
+exportClasses(
+  "sampleObj", "popObj", "synthPopObj"
+)
+
 ## register methods for S3 generics defined in this package
 # methods for S3 generic 'contingencyWt'
 S3method(contingencyWt, default)
