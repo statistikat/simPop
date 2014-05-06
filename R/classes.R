@@ -30,11 +30,13 @@ setClass(
 setClass(
   Class='sampleObj',
   representation=representation(
-    weight='characterOrNULL'
+    weight='characterOrNULL',
+    additional='characterOrNULL'
   ),
   contains="popObj",
   prototype=prototype(
-    weight=NULL
+    weight=NULL,
+    additional=NULL
   ),
   validity=function(object) {
     return(TRUE)
