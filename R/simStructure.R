@@ -123,7 +123,6 @@ simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), 
     })
   }
   hidNew <- unlist(hidNew)
-  print(str(hidNew))
 
   ##### return simulated population household structure
   # it is much faster to generate replications for each variable
@@ -143,6 +142,11 @@ simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), 
   # evaluate command and return result
   dataP <- eval(parse(text=command))
   setkeyv(dataP, dataS@hhid)
+  
+  sizes <- dataP[,.N, by=key(dataP)]
+  pid <- paste(dataP[[dataS@hhid]], ".",unlist(sapply(sizes[["N"]], function(x) seq(1,x))), sep="")
+  dataP[[dataS@pid]] <- pid
+  
   pop <- new("popObj", data=dataP, hhid=dataS@hhid, hhsize=dataS@hhsize, pid=dataS@pid, strata=dataS@strata, additional=dataS@additional)
   out <- new("synthPopObj", sample=dataS, table=NULL, pop=pop)
   invisible(out)   
