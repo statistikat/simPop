@@ -1,5 +1,4 @@
 \name{simCategorical}
-\Rdversion{1.1}
 \alias{simCategorical}
 \title{
   Simulate categorical variables of population data
@@ -9,22 +8,12 @@
   of the population data needs to be simulated beforehand.
 }
 \usage{
-simCategorical(dataS, dataP, w = "rb050", strata = "db040", 
-               basic, additional = c("pl030", "pb220a"), 
-               method = c("multinom", "distribution", "ctree", "naivebayes", "liblinear"), 
-               limit = NULL, censor = NULL, maxit = 500, 
-               MaxNWts = 1500, eps = NULL, seed)
+simCategorical(synthPopObj, basic, additional, 
+  method=c("multinom", "distribution", "ctree", "naivebayes"), 
+  limit=NULL, censor=NULL, maxit=500, MaxNWts=1500, eps=NULL, seed=1)
 }
 \arguments{
-  \item{dataS}{a \code{data.frame} containing household survey data.}
-  \item{dataP}{a \code{data.frame} containing the simulated population 
-    household structure.}
-  \item{w}{a character string specifying the column of \code{dataS} that 
-    contains the (personal) sample weights.}
-  \item{strata}{a character string specifying the columns of \code{dataS} and 
-    \code{dataP}, respectively, that define strata.  The values are simulated 
-    for each stratum separately.  Note that this is currently a required 
-    argument and only one stratification variable is supported.}
+  \item{synthPopObj}{a \code{synthPopObj} containing population and household survey data as well as optionally margins in standardized format.}
   \item{basic}{a character vector specifying the columns of \code{dataS} and 
     \code{dataP}, respectively, that define the household structure, typically 
     age, gender and household size.  The default value is \code{c("age", 
@@ -38,8 +27,8 @@ simCategorical(dataS, dataP, w = "rb050", strata = "db040",
     multinomial log-linear models and random draws from the resulting 
     distributions), or \code{"distribution"} (random draws from the observed 
     conditional distributions of their multivariate realizations), \code{ctree} 
-    (classification trees), \code{naivebayes} (classification based on naive 
-    bayes approach) and \code{liblinear} (linear classification).}
+    (classification trees) and \code{naivebayes} (classification based on naive 
+    bayes approach).}
   \item{limit}{if \code{method} is \code{"multinom"}, this can be used to 
     account for structural zeros.  If only one additional variable is 
     requested, a named list of lists should be supplied.  The names of the list 
@@ -77,21 +66,14 @@ simCategorical(dataS, dataP, w = "rb050", strata = "db040",
   A \code{data.frame} containing the simulated population data including the 
   categorical variables specified by \code{additional}.
 }
-\author{Andreas Alfons and Stefan Kraft}
+\author{Bernhard Meindl and Andreas Alfons and Stefan Kraft}
 \note{
   The basic household structure needs to be simulated beforehand with the 
   function \code{\link{simStructure}}.
-  
-  Parts of the function were re-implemented with package version 0.3.  For the 
-  method based on multinomial log-linear models, the function is now much more 
-  memory-efficient and faster if there is a large number of possible 
-  combinations in the categorical predictor variables.  Nevertheless, results 
-  may be different from previous versions of the package.
 }
 \seealso{
   \code{\link{simStructure}}, \code{\link{simRelation}}, 
-  \code{\link{simContinuous}}, \code{\link{simComponents}}, 
-  \code{\link{simEUSILC}}
+  \code{\link{simContinuous}}, \code{\link{simComponents}}
 }
 \examples{
 \dontrun{

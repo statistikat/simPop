@@ -14,33 +14,35 @@ generate.values <- function(dataSample, dataPop, params) {
   eps <- params$eps
   limit <- params$limit
   censor <- params$censor
-  levelsResponse <- params$levelsResponse  
+  levelsResponse <- params$levelsResponse
 
   indGrid <- split(1:nrow(dataPop), dataPop, drop=TRUE)
   grid <- dataPop[sapply(indGrid, function(i) i[1]), , drop=FALSE]
+  grid <- as.data.frame(grid)
 
-  # in sample, observations with NAs have been removed to fit the 
+  # in sample, observations with NAs have been removed to fit the
   # model, hence population can have additional levels
-  # these need to be removed since those probabilities cannot 
+  # these need to be removed since those probabilities cannot
   # be predicted from the model
   if ( excludeLevels ) {
-    exclude <- mapply(function(pop, new) pop %in% new, 
-      pop=grid[, hasNewLevels, drop=FALSE], 
+    exclude <- mapply(function(pop, new) pop %in% new,
+      pop=grid[, hasNewLevels, drop=FALSE],
       new=newLevels[hasNewLevels])
     if ( is.null(dim(exclude)) ) {
       exclude <- which(any(exclude))
-    } else exclude <- which(apply(exclude, 1, any))
+    } else {
+      exclude <- which(apply(exclude, 1, any))
+    }
   } else {
     exclude <- integer()
   }
   # fit multinomial model
   # command needs to be constructed as string
   # this is actually a pretty ugly way of fitting the model
-  #browser()
   mod <- eval(parse(text=formula.cmd))  # fitted model
 
   # predict probabilities
-  if( length(exclude) == 0 ) {
+  if ( length(exclude) == 0 ) {
     newdata <- grid
   } else {
     newdata <- grid[-exclude, , drop=FALSE]
@@ -48,31 +50,27 @@ generate.values <- function(dataSample, dataPop, params) {
   ind <- match(colnames(newdata), colnames(dataSample))
   for ( i in 1:length(ind) ) {
     if ( is.factor(newdata[,i]) ) {
-      newdata[,i] <- factor(as.character(newdata[,i]), levels(dataSample[,ind[i]]))
+      newdata[,i] <- factor(as.character(newdata[,i]), levels(dataSample[[ind[i]]]))
     }
-  }   
-  
+  }
+
   if ( meth %in% "multinom" ) {
     probs <- predict(mod, newdata=newdata, type="probs")
   }
   if ( meth %in% "naivebayes" ) {
     probs <- predict(mod, newdata=newdata, type="raw")
-  }        
+  }
   # TODO: fix error if level-sets are not equal!
   if ( meth %in% "ctree" ) {
     probs <- do.call("rbind", predict(mod, newdata=newdata, type="prob"))
   }
-  if ( meth == "liblinear" ) {
-    probs <- predict(mod, newx=newdata, proba=TRUE)
-  }
-
   # set too small probabilities to exactly 0
-  if( !is.null(eps) ) {
+  if ( !is.null(eps) ) {
     probs[probs < eps] <- 0
   }
 
   # ensure code works for missing levels of response
-  ind <- as.integer(which(table(dataSample[, cur.var]) > 0))
+  ind <- as.integer(which(table(dataSample[[cur.var]]) > 0))
   if( length(ind) > 2 && (nrow(grid)-length(exclude)) == 1 ) {
     probs <- t(probs)
   }
@@ -106,7 +104,7 @@ generate.values <- function(dataSample, dataPop, params) {
   invisible(levelsResponse[ind][sim])
 }
 
-# simulation of variables using random draws from the observed 
+# simulation of variables using random draws from the observed
 # conditional distributions of their multivariate realizations
 generate.values.distribution <- function(dataSample, dataPop, params) {
   grid <- params$grid
@@ -117,35 +115,42 @@ generate.values.distribution <- function(dataSample, dataPop, params) {
   if( !nrow(dataSample) ) {
     return(character())
   }
-  
+
   # population data
-  splitS <- split(1:nrow(dataSample), dataSample[, basic], drop=TRUE)
+  splitS <- split(1:nrow(dataSample), dataSample[, basic, with=F], drop=TRUE)
   pSplit <- lapply(splitS, function(i) {
-    tmp <- tableWt(dataSample[i, additional], dataSample[i, w])
+    tmp <- tableWt(dataSample[i, additional, with=F], dataSample[[w]][i])
     tmp <- as.data.frame(tmp)
     p <- ncol(tmp)
     tmp[, p]/sum(tmp[, p])
   })
-  splitP <- split(1:nrow(dataPop), dataPop[, basic])
+  splitP <- split(1:nrow(dataPop), dataPop[, basic, with=F])
   NSplit <- sapply(splitP, length)
-  # in sample, observations with NAs have been removed to fit the 
+  # in sample, observations with NAs have been removed to fit the
   # model, hence population can have additional levels
   whichP <- which(names(splitP) %in% names(splitS))
   # generate realizations for each combination
   sim <- as.list(rep.int(NA, length(splitP)))
   sim[whichP] <- mapply(spSample, NSplit[whichP], pSplit, SIMPLIFY=FALSE)
-  sim <- unsplit(sim, dataPop[, basic])
+  sim <- unsplit(sim, dataPop[, basic, with=F])
   sim <- grid[sim,]
   rownames(sim) <- rownames(dataPop)
   sim
 }
 
-simCategorical <- function(dataS, dataP, w = "rb050", strata = "db040",
-  basic, additional = c("pl030", "pb220a"),
-  method = c("multinom", "distribution","ctree","naivebayes","liblinear"), 
-  limit = NULL, censor = NULL, maxit = 500, 
-  MaxNWts = 1500, eps = NULL, seed) {
-  
+simCategorical <- function(synthPopObj, basic, additional,
+  method=c("multinom", "distribution","ctree","naivebayes"),
+  limit=NULL, censor=NULL, maxit=500, MaxNWts=1500, eps=NULL, seed=1) {
+
+  dataP <- synthPopObj@pop
+  dataS <- synthPopObj@sample
+  data_pop <- dataP@data
+  data_sample <- dataS@data
+
+  if ( any(additional %in% dataP@additional) ) {
+    stop("variables already exist in the population!\n")
+  }
+
   parallel <- FALSE
   if ( Sys.info()["sysname"] != "Windows" ) {
     nr_cores <- detectCores()
@@ -154,46 +159,42 @@ simCategorical <- function(dataS, dataP, w = "rb050", strata = "db040",
       nr_cores <- nr_cores-1 # keep one core available
     } else {
       parallel <- FALSE
-    }  
-  }  
+    }
+  }
   ##### initializations
   if ( !missing(seed) ) {
     set.seed(seed)  # set seed of random number generator
   }
-  if ( length(strata) != 1 ) { 
-    stop("currently 'strata' must specify exactly one column of 'data'")
-  }
-  method <- match.arg(method)  
+  method <- match.arg(method)
   if ( method == "ctree" ) {
-    stop("fix errow with unequal levels of factors in train and test-dataset!\n")
-  }  
-  
+    stop("Todo: fix errow with unequal levels of factors in train and test-dataset!\n")
+  }
+
   if ( missing(basic) ) {
-    basic <- c("age", "rb090")
+    basic <- setdiff(colnames(data_pop), c(dataP@hhid, dataP@pid, dataP@hhsize, dataP@strata))
     if ( method == "multinom" ) {
-      basic <- c(basic, "hsize")
+      basic <- c(basic, dataP@hhsize)
+    }
+  } else {
+    if ( !all(basic %in% colnames(data_pop)) ) {
+      stop("undefined variables in the population data -> check your input!\n")
     }
   }
-  varNames <- c(w=w, strata=strata, basic, additional)
 
-  # check data
-  if ( all(varNames %in% names(dataS)) ) {
-    dataS <- dataS[, varNames]
-  } else {
-    stop("undefined variables in the sample data")
-  }
-  if ( !all(c(strata, basic) %in% names(dataP)) ) {
-    stop("undefined variables in the population data")
+  # check sample data against additional parameter
+  if ( !all(additional %in% colnames(data_sample)) )  {
+    stop("undefined variables in the sample data -> check your input!\n")
   }
 
   # observations with missings are excluded from simulation
-  exclude <- getExclude(dataS)
-  if ( length(exclude) ) {
-    dataS <- dataS[-exclude,]
+  exclude <- getExclude(data_sample)
+  if ( length(exclude) > 0 ) {
+    data_sample <- data_sample[-exclude,]
   }
+
   # variables are coerced to factors
-  dataS <- checkFactor(dataS, c(strata, basic, additional))
-  dataP <- checkFactor(dataP, c(strata, basic))
+  data_sample <- checkFactor(data_sample, c(dataS@strata, basic, additional))
+  data_pop <- checkFactor(data_pop, c(dataP@strata, basic))
 
   # check arguments to account for structural zeros
   if ( length(additional) == 1 ) {
@@ -208,70 +209,70 @@ simCategorical <- function(dataS, dataP, w = "rb050", strata = "db040",
   }
 
   # list indStrata contains the indices of dataP split by strata
-  N <- nrow(dataP)
-  indStrata <- split(1:N, dataP[, strata, drop=FALSE])
+  N <- nrow(data_pop)
+  indStrata <- split(1:N, data_pop[[dataP@strata]])
 
   ##### simulation
   # predictor variables
   predNames <- basic  # names of predictor variables
-  
+
   if ( method == "distribution" ) {
     params <- list()
-    params$grid <- expand.grid(lapply(dataS[, additional], levels))
+    params$grid <- expand.grid(lapply(data_sample[,additional, with=F], levels))
     params$additional <- additional
     params$basic <- basic
-    params$w <- w
+    params$w <- dataS@weight
 
-    if ( parallel ) {      
-      values <- mclapply(levels(dataS[, strata]), function(x) { 
+    if ( parallel ) {
+      values <- mclapply(levels(data_sample[[dataS@strata]]), function(x) {
         generate.values.distribution(
-          dataSample=dataS[dataS[, strata] == x, , drop=FALSE],
-          dataPop=dataP[indStrata[[x]], , drop=FALSE], params)
+          dataSample=data_sample[data_sample[[dataS@strata]] == x,],
+          dataPop=data_pop[indStrata[[x]], predNames, with=F], params)
       })
     } else {
-      values <- lapply(levels(dataS[, strata]), function(x) { 
+      values <- lapply(levels(data_sample[[dataS@strata]]), function(x) {
         generate.values.distribution(
-          dataSample=dataS[dataS[, strata] == x, , drop=FALSE], 
-          dataPop=dataP[indStrata[[x]], , drop=FALSE], params)
+          dataSample=data_sample[data_sample[[dataS@strata]] == x,],
+          dataPop=data_pop[indStrata[[x]], predNames, with=F], params)
       })
     }
-    values <- unsplit(values, dataP[, strata, drop=FALSE])
+    values <- do.call("rbind", values)
 
     ## add new categorical variables to data set and return
-    dataP[, additional] <- values
-    return(dataP)
+    for ( i in additional ) {
+      data_pop[[i]] <- values[,i]
+    }
+    synthPopObj@pop@data <- data_pop
+    return(invisible(synthPopObj))
   }
 
   # any other method
   for ( i in additional ) {
     # components of multinomial model are specified
-    levelsResponse <- levels(dataS[, i])
+    levelsResponse <- levels(data_sample[[i]])
 
     # simulation of variables using a sequence of multinomial models
     if ( method == "multinom" ) {
       formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
-      formula.cmd <- paste("suppressWarnings(multinom(", formula.cmd, 
-        ", weights=", w, ", data=dataSample, trace=FALSE", 
+      formula.cmd <- paste("suppressWarnings(multinom(", formula.cmd,
+        ", weights=", dataS@weight, ", data=dataSample, trace=FALSE",
         ", maxit=",maxit, ", MaxNWts=", MaxNWts,"))", sep="")
     }
     # simulation via recursive partitioning and regression trees
     if ( method == "ctree" ) {
       formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
-      formula.cmd <- paste("suppressWarnings(ctree(", formula.cmd, ", weights=as.integer(dataSample$", w, "), data=dataSample))", sep="")						
+      formula.cmd <- paste("suppressWarnings(ctree(", formula.cmd, ", weights=as.integer(dataSample$", dataS@weight, "), data=dataSample))", sep="")
     }
     if ( method == "naivebayes" ) {
       formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
-      formula.cmd <- paste("naiveBayes(", formula.cmd, ", data=dataSample, usekernel=TRUE)", sep="")						
-    }
-    if ( method == "liblinear" ) {
-      formula.cmd <- paste("LiblineaR(data=as.matrix(dataSample[,c('",paste(predNames, collapse="','"),"')]), labels=dataSample[,cur.var], type=0, bias=TRUE,verbose=FALSE)", collapse="", sep="")						
+      formula.cmd <- paste("naiveBayes(", formula.cmd, ", data=dataSample, usekernel=TRUE)", sep="")
     }
 
-    # check if population data contains factor levels that do not exist 
+    # check if population data contains factor levels that do not exist
     # in the sample
     newLevels <- lapply(predNames, function(nam) {
-      levelsS <- levels(dataS[, nam])
-      levelsP <- levels(dataP[, nam])
+      levelsS <- levels(data_sample[[nam]])
+      levelsP <- levels(data_pop[[nam]])
       levelsP[!(levelsP %in% levelsS)]
     })
     hasNewLevels <- sapply(newLevels, length) > 0
@@ -284,31 +285,32 @@ simCategorical <- function(dataS, dataP, w = "rb050", strata = "db040",
     params$excludeLevels <- excludeLevels
     params$hasNewLevels <- hasNewLevels
     params$newLevels <- newLevels
-    params$w <- w
+    params$w <- dataS@weight
     params$formula.cmd <- formula.cmd
     params$eps <- eps
     params$limit <- limit
     params$censor <- censor
     params$levelsResponse <- levelsResponse
     if ( parallel ) {
-      values <- mclapply(levels(dataS[, strata]), function(x) {
+      values <- mclapply(levels(data_sample[[dataS@strata]]), function(x) {
         generate.values(
-          dataSample=dataS[dataS[, strata] == x, , drop=FALSE],
-          dataPop=dataP[indStrata[[x]], predNames, drop=FALSE], params
-        )        
+          dataSample=data_sample[data_sample[[dataS@strata]] == x,],
+          dataPop=data_pop[indStrata[[x]], predNames, with=F], params
+        )
       })
     } else {
-      values <- lapply(levels(dataS[, strata]), function(x) {
+      values <- lapply(levels(data_sample[[dataS@strata]]), function(x) {
         generate.values(
-          dataSample=dataS[dataS[, strata] == x, , drop=FALSE],
-          dataPop=dataP[indStrata[[x]], predNames, drop=FALSE], params
+          dataSample=data_sample[data_sample[[dataS@strata]] == x,],
+          dataPop=data_pop[indStrata[[x]], predNames, with=F], params
         )
       })
     }
-    values <- factor(unsplit(values, dataP[, strata, drop=FALSE]), levels=levelsResponse)
+    values <- factor(unsplit(values, data_pop[[dataP@strata]]), levels=levelsResponse)
     ## add new categorical variable to data set
-    dataP[, i] <- values
+    data_pop[[i]] <- values
     predNames <- c(predNames, i)
   }
-  invisible(dataP)
+  synthPopObj@pop@data <- data_pop
+  invisible(synthPopObj)
 }
