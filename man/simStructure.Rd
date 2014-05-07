@@ -1,5 +1,4 @@
 \name{simStructure}
-\Rdversion{1.1}
 \alias{simStructure}
 \title{
   Simulate the household structure of population data
@@ -13,7 +12,7 @@
 simStructure(dataS, method = c("direct", "multinom", "distribution"), seed)
 }
 \arguments{
-  \item{dataS}{a \code{data.frame} containing household survey data.}
+  \item{dataS}{an object of class \code{sampleObj} containing household survey data.}
   \item{method}{a character string specifying the method to be used for 
     simulating the household sizes.  Accepted values are \code{"direct"} 
     (estimation of the population totals for each combination of stratum and 
