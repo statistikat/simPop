@@ -62,8 +62,7 @@ simEUSILC <- function(dataS, hid = "db030", wh = "db090",
     
     ## simulate additional categorical variables
     basic <- c(structure, if(is.null(hsize)) "hsize" else hsize)
-    dataP <- simCategorical(dataS, dataP, w=wp, strata=strata, 
-        basic=basic, additional=categorical, maxit=maxit, MaxNWts=MaxNWts)
+    dataP <- simCategorical(dataP, basic=basic, additional=categorical, maxit=maxit, MaxNWts=MaxNWts)
     
     ## simulate income
     basic <- union(basic, categorical)
