@@ -2,9 +2,12 @@
 import(POT)
 import(nnet)
 import(data.table)
+import(e1071)
+import(parallel)
+import(vcd)
+import(methods)
 import("Rcpp")
 importFrom(lattice, bwplot, panel.bwplot)
-importFrom(vcd, mosaic)
 importFrom(laeken, calibVars)
 importFrom(MASS, ginv)
 
