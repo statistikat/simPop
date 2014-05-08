@@ -6,57 +6,45 @@ setClassUnion('matrixOrNULL', c('matrix', 'NULL'))
 setClassUnion('listOrNULL', c('list', 'NULL'))
 
 setClass(
-  Class='popObj',
+  Class='dataObj',
   representation=representation(
     data='dataframeOrNULL',
     hhid='characterOrNULL',
-    hhsize='characterOrNULL',
     pid='characterOrNULL',
+    hhsize='characterOrNULL',
+    weight='characterOrNULL',
     strata='characterOrNULL',
-    additional='characterOrNULL'
+    ispopulation='logicalOrNULL'
   ),
   prototype=prototype(
     data=NULL,
     hhid=NULL,
-    hhsize=NULL,
     pid=NULL,
+    hhsize=NULL,
+    weight=NULL,
     strata=NULL,
-    additional=NULL
+    ispopulation=NULL
   ),
   validity=function(object) {
     return(TRUE)
   }
 )
 
-# extends "popObj" by slot "weight"
-setClass(
-  Class='sampleObj',
-  representation=representation(
-    weight='characterOrNULL'
-  ),
-  contains="popObj",
-  prototype=prototype(
-    weight=NULL
-  ),
-  validity=function(object) {
-    return(TRUE)
-  }
-)
-
-setClassUnion('popObjOrNULL', c('popObj', 'NULL'))
-setClassUnion('sampleObjOrNULL', c('sampleObj', 'NULL'))
+setClassUnion('dataObjOrNULL', c('dataObj', 'NULL'))
 
 setClass(
   Class='synthPopObj',
   representation=representation(
-    sample='sampleObjOrNULL',
+    sample='dataObjOrNULL',
     table='dataframeOrNULL',
-    pop='popObjOrNULL'
+    pop='dataObjOrNULL',
+    basicHHvars='characterOrNULL'
   ),
   prototype=prototype(
     sample=NULL,
     table=NULL,
-    pop=NULL
+    pop=NULL,
+    basicHHvars=NULL
   ),
   validity=function(object) {
     return(TRUE)

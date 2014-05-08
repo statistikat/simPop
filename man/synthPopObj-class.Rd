@@ -11,9 +11,10 @@ Objects are automatically created in function \code{\link{simStructure}}.
 }
 \section{Slots}{
   \describe{
-    \item{\code{sample}:}{Object of class \code{"sampleObjOrNULL"} containing sample information }
-    \item{\code{table}:}{Object of class \code{"dataframeOrNULL"} containing population margins. }
-    \item{\code{pop}:}{Object of class \code{"popObjOrNULL"} containing a (simulated) population }
+    \item{\code{sample}:}{Object of class \code{dataObjOrNULL} containing sample information.}
+    \item{\code{table}:}{Object of class \code{dataframeOrNULL} containing population margins.}
+    \item{\code{pop}:}{Object of class \code{dataObjOrNULL} containing a (simulated) population.}
+    \item{\code{basicHHvars}:}{character vector specifying variables available in both \code{sample} and \code{population} that define the (basic) household structure.}
   }
 }
 \section{Methods}{
@@ -23,7 +24,7 @@ No methods defined with class "synthPopObj" in the signature.
   Bernhard Meindl
 }
 \seealso{
-\code{\linkS4class{sampleObj}} \code{\linkS4class{popObj}}
+\code{\linkS4class{dataObj}}
 }
 \examples{
 showClass("synthPopObj")

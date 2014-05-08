@@ -7,8 +7,8 @@
   Cross tabulations of expected and realized population sizes
 }
 \description{
-  Compute contingency tables of expected (i.e., estimated) and realized (i.e., 
-  simulated) population sizes.  The expected values are obtained with the 
+  Compute contingency tables of expected (i.e., estimated) and realized (i.e.,
+  simulated) population sizes.  The expected values are obtained with the
   Horvitz-Thompson estimator.
 }
 \usage{
@@ -19,12 +19,12 @@ spTable(dataS, dataP, select = NULL, weights = NULL)
 \arguments{
   \item{dataS}{a \code{data.frame} containing household survey data.}
   \item{dataP}{a \code{data.frame} containing simulated population data.}
-  \item{select}{for the formula method, a formula specifying the variables to 
-    be used for cross tabulation.  For the default method, an optional 
-    character vector defining the columns of \code{dataS} and \code{dataP} to 
+  \item{select}{for the formula method, a formula specifying the variables to
+    be used for cross tabulation.  For the default method, an optional
+    character vector defining the columns of \code{dataS} and \code{dataP} to
     be used.}
-  \item{weights}{either a numeric vector containing the (personal) sample 
-    weights, or the name of the corresponding column of \code{dataS} (for the 
+  \item{weights}{either a numeric vector containing the (personal) sample
+    weights, or the name of the corresponding column of \code{dataS} (for the
     default method, the name must be a character string).}
 }
 \details{
@@ -33,14 +33,14 @@ spTable(dataS, dataP, select = NULL, weights = NULL)
 \value{
   A list of class \code{"spTable"} with the following components:
   \item{expected}{the contingency table estimated from the survey data.}
-  \item{realized}{the contingency table computed from the simulated population 
+  \item{realized}{the contingency table computed from the simulated population
     data.}
 }
 \author{
   Andreas Alfons
 }
 \note{
-  The class of the argument \code{select} determines the method to be 
+  The class of the argument \code{select} determines the method to be
   dispatched, not the class of the first argument.
 }
 \seealso{
@@ -48,9 +48,9 @@ spTable(dataS, dataP, select = NULL, weights = NULL)
 }
 \examples{
 data(eusilcS)
-samp <- specify_sample(data=eusilcS, hhid="db030", hhsize="hsize", 
-  strata="db040", weight="db090", additional=c("age","rb090"))
-eusilcP <- simStructure(data=samp, method="direct")
+samp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize",
+  strata="db040", weight="db090")
+eusilcP <- simStructure(data=samp, method="direct", basicHHvars=c("age", "rb090"))
 spTable(eusilcS, eusilcP@pop@data, select = ~ rb090 + db040, weights = rb050)
 }
 \keyword{dplot}

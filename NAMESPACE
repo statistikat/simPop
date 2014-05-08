@@ -31,8 +31,7 @@ export(
   simEUSILC,
   simRelation,
   simStructure,
-  specify_sample,
-  specify_pop,
+  specifyInput,
   spBwplotStats,
   spBwplot,
   spCdf,
@@ -44,7 +43,7 @@ export(
 )
 
 exportClasses(
-  "sampleObj", "popObj", "synthPopObj"
+  "dataObj", "synthPopObj"
 )
 
 ## register methods for S3 generics defined in this package

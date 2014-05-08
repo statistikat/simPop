@@ -1,15 +1,17 @@
-simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), seed=1) {
-  if ( !class(dataS) == "sampleObj" ) {
+simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), basicHHvars=NULL, seed=1) {
+  if ( !class(dataS) == "dataObj" ) {
     stop("Error. Please provide the input sample in the required format.\n
-      It must be an object of class 'sampleObj' that can be created using function specify_sample()!\n")
+      It must be an object of class 'dataObj' that can be created using function specifyInput()!\n")
+  }
+  if ( dataS@ispopulation ) {
+    stop("dataS must contain sample information!\n")
   }
 
   ##### initializations
   if ( !missing(seed) ) {
-    set.seed(seed)  
+    set.seed(seed)
   }
- 
-  varNames <- c(hid=dataS@hhid, w=dataS@weight, hsize=dataS@hhsize, strata=dataS@strata, pid=dataS@pid, dataS@additional)
+
   method <- match.arg(method)
 
   # order sample (needed later on)
@@ -129,8 +131,11 @@ simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), 
   # individually than for the data frame as a whole
 
   # build command
-  if ( length(dataS@additional > 0 ) ) {
-    expr <- paste(dataS@additional, "=dataS@data[[\"", dataS@additional,"\"]][indices]", sep="")
+  if ( !is.null(basicHHvars) ) {
+    if ( !all(basicHHvars %in% colnames(dataS@data)) ) {
+      stop("please specify valid variable names for argument 'basicHHvars'!\n")
+    }
+    expr <- paste(basicHHvars, "=dataS@data[[\"", basicHHvars,"\"]][indices]", sep="")
     expr <- paste(",", expr, collapse="")
   } else {
     expr <- ""
@@ -142,12 +147,15 @@ simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), 
   # evaluate command and return result
   dataP <- eval(parse(text=command))
   setkeyv(dataP, dataS@hhid)
-  
+
   sizes <- dataP[,.N, by=key(dataP)]
   pid <- paste(dataP[[dataS@hhid]], ".",unlist(sapply(sizes[["N"]], function(x) seq(1,x))), sep="")
   dataP[[dataS@pid]] <- pid
-  
-  pop <- new("popObj", data=dataP, hhid=dataS@hhid, hhsize=dataS@hhsize, pid=dataS@pid, strata=dataS@strata, additional=dataS@additional)
+  dataP$weight <- 1
+
+
+  pop <- new("dataObj", data=dataP, hhid=dataS@hhid, hhsize=dataS@hhsize, pid=dataS@pid, strata=dataS@strata, weight="weight", ispopulation=TRUE)
   out <- new("synthPopObj", sample=dataS, table=NULL, pop=pop)
-  invisible(out)   
+  out@basicHHvars <- basicHHvars
+  invisible(out)
 }

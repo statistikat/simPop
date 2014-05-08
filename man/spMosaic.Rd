@@ -6,7 +6,7 @@
   Mosaic plots of expected and realized population sizes
 }
 \description{
-  Create mosaic plots of expected (i.e., estimated) and realized (i.e., 
+  Create mosaic plots of expected (i.e., estimated) and realized (i.e.,
   simulated) population sizes.
 }
 \usage{
@@ -15,20 +15,20 @@ spMosaic(x, \dots)
 \method{spMosaic}{default}(x, weights = NULL, dataS, dataP, \dots)
 }
 \arguments{
-  \item{x}{for the default method, an optional character vector specifying the 
-    columns of \code{dataS} and \code{dataP} to be cross tabulated and plotted.  
+  \item{x}{for the default method, an optional character vector specifying the
+    columns of \code{dataS} and \code{dataP} to be cross tabulated and plotted.
     Otherwise, an object of class \code{"spTable"}.}
-  \item{weights}{either a numeric vector containing the (personal) sample 
-    weights, or a character string specifying the corresponding column of 
+  \item{weights}{either a numeric vector containing the (personal) sample
+    weights, or a character string specifying the corresponding column of
     \code{dataS}.}
   \item{dataS}{a \code{data.frame} containing household survey data.}
   \item{dataP}{a \code{data.frame} containing simulated population data.}
   \item{\dots}{further arguments to be passed to \code{\link[vcd]{cotabplot}}.}
 }
 \details{
-  The two tables of expected and realized population sizes are combined into a 
-  single table, with an additional contitioning variable indicating expected 
-  and realized values.  A conditional plot of this table is then produced using 
+  The two tables of expected and realized population sizes are combined into a
+  single table, with an additional contitioning variable indicating expected
+  and realized values.  A conditional plot of this table is then produced using
   \code{\link[vcd]{cotabplot}}.
 }
 \author{
@@ -42,11 +42,11 @@ spMosaic(x, \dots)
 }
 \examples{
 data(eusilcS)   # load sample data
-samp <- specify_sample(data=eusilcS, hhid="db030", hhsize="hsize", 
-  strata="db040", weight="db090", additional=c("age","rb090"))
-eusilcP <- simStructure(data=samp, method="direct")
+samp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize",
+  strata="db040", weight="db090")
+eusilcP <- simStructure(data=samp, method="direct", basicHHvars=c("age","rb090"))
 abb <- c("B","LA","Vi","C","St","UA","Sa","T","Vo")
-spMosaic(c("rb090", "db040", "hsize"), "rb050", eusilcS, eusilcP@pop@data, 
+spMosaic(c("rb090", "db040", "hsize"), "rb050", eusilcS, eusilcP@pop@data,
     labeling=labeling_border(abbreviate=c(db040=TRUE)))
 }
 \keyword{hplot}
