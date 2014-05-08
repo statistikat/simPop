@@ -1,3 +1,15 @@
+Changes in synthPop version 0.1.5
+  * combined classes 'sampleObj' and 'popObj' into 'dataObj'
+
+  * renamed specify_sample() to specifyInput()
+
+  * adjusted NAMESPACE files, documentation and functions to reflect these changes
+
+  * Parallelization of simContinous() on non-windows platforms
+
+  * porting simContinous() to use new class 'synthPopObj' as input
+
+
 Changes in synthPop version 0.1.4
   * starting to use new classes 'sampleObj', 'popObj' and 'synthPopObj' for the entire package
 
