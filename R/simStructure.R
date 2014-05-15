@@ -1,10 +1,18 @@
-simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), basicHHvars=NULL, seed=1) {
+simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), basicHHvars, seed=1) {
   if ( !class(dataS) == "dataObj" ) {
     stop("Error. Please provide the input sample in the required format.\n
       It must be an object of class 'dataObj' that can be created using function specifyInput()!\n")
   }
   if ( dataS@ispopulation ) {
     stop("dataS must contain sample information!\n")
+  }
+
+  if ( is.null(basicHHvars) ) {
+    stop("please provide valid variables defining the household structure!\n")
+  }
+
+  if ( !all(basicHHvars %in% colnames(dataS@data)) ) {
+    stop("not all variables listed in argument 'basicHHvars' is available in the sample input data!\n")
   }
 
   ##### initializations
@@ -152,7 +160,6 @@ simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), 
   pid <- paste(dataP[[dataS@hhid]], ".",unlist(sapply(sizes[["N"]], function(x) seq(1,x))), sep="")
   dataP[[dataS@pid]] <- pid
   dataP$weight <- 1
-
 
   pop <- new("dataObj", data=dataP, hhid=dataS@hhid, hhsize=dataS@hhsize, pid=dataS@pid, strata=dataS@strata, weight="weight", ispopulation=TRUE)
   out <- new("synthPopObj", sample=dataS, table=NULL, pop=pop)
