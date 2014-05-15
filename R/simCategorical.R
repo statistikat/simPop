@@ -152,15 +152,18 @@ simCategorical <- function(synthPopObj, additional,
   }
 
   parallel <- FALSE
-  if ( Sys.info()["sysname"] != "Windows" ) {
-    nr_cores <- detectCores()
-    if ( nr_cores > 2 ) {
-      parallel <- TRUE
-      nr_cores <- nr_cores-1 # keep one core available
-    } else {
-      parallel <- FALSE
-    }
+  have_win <- Sys.info()["sysname"] == "Windows"
+  nr_cores <- detectCores()
+  if ( nr_cores > 2 ) {
+    parallel <- TRUE
+    nr_cores <- nr_cores-1 # keep one core available
+  } else {
+    parallel <- FALSE
   }
+
+  parallel <- TRUE
+  nr_cores <- 4
+
   ##### initializations
   if ( !missing(seed) ) {
     set.seed(seed)  # set seed of random number generator
@@ -284,20 +287,37 @@ simCategorical <- function(synthPopObj, additional,
     params$limit <- limit
     params$censor <- censor
     params$levelsResponse <- levelsResponse
+    
+    # windows
     if ( parallel ) {
-      values <- mclapply(levels(data_sample[[dataS@strata]]), function(x) {
-        generateValues(
-          dataSample=data_sample[data_sample[[dataS@strata]] == x,],
-          dataPop=data_pop[indStrata[[x]], predNames, with=F], params
-        )
-      })
+      if ( have_win ) {
+        cat("running with multi-cores on windows....\n")
+        makeCluster(nnodes=nc_cores)
+        registerDoParallel()
+        values <- foreach(x=levels(data_sample[[dataS@strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
+          generateValues(
+            dataSample=data_sample[data_sample[[dataS@strata]] == x,],
+            dataPop=data_pop[indStrata[[x]], predNames, with=F], params
+          )
+        }        
+        stopCluster()
+      }
+      # linux/mac
+      if ( !have_win) {
+        values <- mclapply(levels(data_sample[[dataS@strata]]), function(x) {
+          generateValues(
+            dataSample=data_sample[data_sample[[dataS@strata]] == x,],
+            dataPop=data_pop[indStrata[[x]], predNames, with=F], params
+          )
+        })        
+      }
     } else {
       values <- lapply(levels(data_sample[[dataS@strata]]), function(x) {
         generateValues(
           dataSample=data_sample[data_sample[[dataS@strata]] == x,],
           dataPop=data_pop[indStrata[[x]], predNames, with=F], params
         )
-      })
+      })      
     }
     values <- factor(unsplit(values, data_pop[[dataP@strata]]), levels=levelsResponse)
     ## add new categorical variable to data set
