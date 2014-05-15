@@ -1,31 +1,17 @@
 \name{spTable}
-\Rdversion{1.1}
 \alias{spTable}
-\alias{spTable.default}
-\alias{spTable.formula}
 \title{
-  Cross tabulations of expected and realized population sizes
+  Cross tabulations of expected and realized population sizes.
 }
 \description{
-  Compute contingency tables of expected (i.e., estimated) and realized (i.e.,
-  simulated) population sizes.  The expected values are obtained with the
-  Horvitz-Thompson estimator.
+  Compute contingency tables of expected (i.e., estimated) and realized (i.e., simulated) population sizes. The expected values are obtained with the Horvitz-Thompson estimator.
 }
 \usage{
-spTable(dataS, dataP, select = NULL, weights = NULL)
-
-\method{spTable}{formula}(dataS, dataP, select, weights = NULL)
+spTable(synthPopObj, select)
 }
 \arguments{
-  \item{dataS}{a \code{data.frame} containing household survey data.}
-  \item{dataP}{a \code{data.frame} containing simulated population data.}
-  \item{select}{for the formula method, a formula specifying the variables to
-    be used for cross tabulation.  For the default method, an optional
-    character vector defining the columns of \code{dataS} and \code{dataP} to
-    be used.}
-  \item{weights}{either a numeric vector containing the (personal) sample
-    weights, or the name of the corresponding column of \code{dataS} (for the
-    default method, the name must be a character string).}
+  \item{synthPopObj}{an object of class \code{\linkS4class{synthPopObj}} containing household survey and simulated population data.}
+  \item{select}{character; vector defining the columns in slots 'pop' and 'sample' of argument 'input' that should be used for tabulation.}
 }
 \details{
   The contingency tables are computed with \code{\link{tableWt}}.
@@ -37,11 +23,10 @@ spTable(dataS, dataP, select = NULL, weights = NULL)
     data.}
 }
 \author{
-  Andreas Alfons
+  Andreas Alfons and Bernhard Meindl
 }
 \note{
-  The class of the argument \code{select} determines the method to be
-  dispatched, not the class of the first argument.
+  Sampling weights are automatically used from the input object 'inp'!
 }
 \seealso{
   \code{\link{spMosaic}}, \code{\link{tableWt}}
@@ -51,6 +36,7 @@ data(eusilcS)
 samp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize",
   strata="db040", weight="db090")
 eusilcP <- simStructure(data=samp, method="direct", basicHHvars=c("age", "rb090"))
-spTable(eusilcS, eusilcP@pop@data, select = ~ rb090 + db040, weights = rb050)
+res <- spTable(eusilcP, select = c("age", "rb090"))
+class(res)
 }
 \keyword{dplot}
