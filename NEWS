@@ -1,3 +1,15 @@
+Changes in synthPop version 0.1.6
+  * removed method 'ctree' from simCategorical() -> perhaps add it later
+
+  * removed argument 'basic' from simCategorical(). The function now uses variables listed in slot @basicHHvars of the input object of class 'synthPopObj'.
+
+  * made check that slot basicHHvars after simStructure() contains at least one variable.
+
+  * new utility-function manageSynthPopObj() to get/set variables in objects of class 'synthPopObj'
+  * updated a lot of Rd-Files with (now) working examples
+
+  * updated simEUSILC()
+
 Changes in synthPop version 0.1.5
   * combined classes 'sampleObj' and 'popObj' into 'dataObj'
 
