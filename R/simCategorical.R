@@ -161,9 +161,6 @@ simCategorical <- function(synthPopObj, additional,
     parallel <- FALSE
   }
 
-  parallel <- TRUE
-  nr_cores <- 4
-
   ##### initializations
   if ( !missing(seed) ) {
     set.seed(seed)  # set seed of random number generator
@@ -220,11 +217,27 @@ simCategorical <- function(synthPopObj, additional,
     params$w <- dataS@weight
 
     if ( parallel ) {
-      values <- mclapply(levels(data_sample[[dataS@strata]]), function(x) {
-        generateValues_distribution(
-          dataSample=data_sample[data_sample[[dataS@strata]] == x,],
-          dataPop=data_pop[indStrata[[x]], predNames, with=F], params)
-      })
+      # windows
+      if ( have_win ) {
+        cat("running with multi-cores on windows....\n")
+        makeCluster(spec="")
+        registerDoParallel(cl, cores=nr_cores)
+        values <- foreach(x=levels(data_sample[[dataS@strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
+          generateValues_distribution(
+            dataSample=data_sample[data_sample[[dataS@strata]] == x,],
+            dataPop=data_pop[indStrata[[x]], predNames, with=F], params
+          )
+        }
+        stopCluster()
+      }
+      # linux/max
+      if ( !have_win ) {
+        values <- mclapply(levels(data_sample[[dataS@strata]]), function(x) {
+          generateValues_distribution(
+            dataSample=data_sample[data_sample[[dataS@strata]] == x,],
+            dataPop=data_pop[indStrata[[x]], predNames, with=F], params)
+        })
+      }
     } else {
       values <- lapply(levels(data_sample[[dataS@strata]]), function(x) {
         generateValues_distribution(
@@ -244,6 +257,7 @@ simCategorical <- function(synthPopObj, additional,
 
   # any other method
   for ( i in additional ) {
+    cat("dealing with level",i,"\n")
     # components of multinomial model are specified
     levelsResponse <- levels(data_sample[[i]])
 
@@ -287,19 +301,19 @@ simCategorical <- function(synthPopObj, additional,
     params$limit <- limit
     params$censor <- censor
     params$levelsResponse <- levelsResponse
-    
+
     # windows
     if ( parallel ) {
       if ( have_win ) {
         cat("running with multi-cores on windows....\n")
-        makeCluster(nnodes=nc_cores)
-        registerDoParallel()
+        makeCluster(spec="")
+        registerDoParallel(cl, cores=nr_cores)
         values <- foreach(x=levels(data_sample[[dataS@strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
           generateValues(
             dataSample=data_sample[data_sample[[dataS@strata]] == x,],
             dataPop=data_pop[indStrata[[x]], predNames, with=F], params
           )
-        }        
+        }
         stopCluster()
       }
       # linux/mac
@@ -309,7 +323,7 @@ simCategorical <- function(synthPopObj, additional,
             dataSample=data_sample[data_sample[[dataS@strata]] == x,],
             dataPop=data_pop[indStrata[[x]], predNames, with=F], params
           )
-        })        
+        })
       }
     } else {
       values <- lapply(levels(data_sample[[dataS@strata]]), function(x) {
@@ -317,7 +331,7 @@ simCategorical <- function(synthPopObj, additional,
           dataSample=data_sample[data_sample[[dataS@strata]] == x,],
           dataPop=data_pop[indStrata[[x]], predNames, with=F], params
         )
-      })      
+      })
     }
     values <- factor(unsplit(values, data_pop[[dataP@strata]]), levels=levelsResponse)
     ## add new categorical variable to data set
