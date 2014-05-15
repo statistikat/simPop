@@ -7,10 +7,10 @@
   Compute contingency tables of expected (i.e., estimated) and realized (i.e., simulated) population sizes. The expected values are obtained with the Horvitz-Thompson estimator.
 }
 \usage{
-spTable(synthPopObj, select)
+spTable(inp, select)
 }
 \arguments{
-  \item{synthPopObj}{an object of class \code{\linkS4class{synthPopObj}} containing household survey and simulated population data.}
+  \item{inp}{an object of class \code{\linkS4class{synthPopObj}} containing household survey and simulated population data.}
   \item{select}{character; vector defining the columns in slots 'pop' and 'sample' of argument 'input' that should be used for tabulation.}
 }
 \details{
