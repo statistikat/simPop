@@ -12,47 +12,27 @@
   \item{X}{a matrix of binary calibration variables (see
   \code{\link{calibVars}}).}
 
-  \item{d}{a numeric vector giving the initial sample
-  weights.}
+  \item{d}{a numeric vector giving the initial sample weights.}
 
-  \item{totals}{a numeric vector of population totals
-  corresponding to the calibration variables in \code{X}.}
+  \item{totals}{a numeric vector of population totals corresponding to the calibration variables in \code{X}.}
 
-  \item{q}{a numeric vector of positive values accounting
-  for heteroscedasticity.  Small values reduce the
-  variation of the \emph{g}-weights.}
+  \item{q}{a numeric vector of positive values accounting for heteroscedasticity.  Small values reduce the variation of the \emph{g}-weights.}
 
-  \item{method}{a character string specifying the
-  calibration method to be used.  Possible values are
-  \code{"linear"} for the linear method, \code{"raking"}
-  for the multiplicative method known as raking and
-  \code{"logit"} for the logit method.}
+  \item{method}{a character string specifying the calibration method to be used.  Possible values are \code{"linear"} for the linear method, \code{"raking"} for the multiplicative method known as raking and \code{"logit"} for the logit method.}
 
-  \item{bounds}{a numeric vector of length two giving
-  bounds for the g-weights to be used in the logit method.
-  The first value gives the lower bound (which must be
-  smaller than or equal to 1) and the second value gives
-  the upper bound (which must be larger than or equal to
-  1).}
+  \item{bounds}{a numeric vector of length two giving bounds for the g-weights to be used in the logit method. The first value gives the lower bound (which must be smaller than or equal to 1) and the second value gives the upper bound (which must be larger than or equal to 1).}
 
-  \item{maxit}{a numeric value giving the maximum number of
-  iterations.}
+  \item{maxit}{a numeric value giving the maximum number of iterations.}
 
-  \item{tol}{the desired accuracy for the iterative
-  procedure.}
+  \item{tol}{the desired accuracy for the iterative procedure.}
 
-  \item{eps}{the desired accuracy for computing the
-  Moore-Penrose generalized inverse (see
-  \code{\link[MASS]{ginv}}).}
+  \item{eps}{the desired accuracy for computing the Moore-Penrose generalized inverse (see \code{\link[MASS]{ginv}}).}
 }
 \value{
   A numeric vector containing the \emph{g}-weights.
 }
 \description{
-  Calibrate sample weights according to known marginal
-  population totals. Based on initial sample weights, the
-  so-called \emph{g}-weights are computed by generalized
-  raking procedures.
+  Calibrate sample weights according to known marginal population totals. Based on initial sample weights, the so-called \emph{g}-weights are computed by generalized raking procedures.
 }
 \details{
   The final sample weights need to be computed by
@@ -60,11 +40,7 @@
   initial sample weights.
 }
 \note{
-  This is a faster implementation of parts of
-  \code{\link[sampling]{calib}} from package
-  \code{sampling}.  Note that the default calibration
-  method is raking and that the truncated linear method is
-  not yet implemented.
+  This is a faster implementation of parts of \code{\link[sampling]{calib}} from package \code{sampling}. Note that the default calibration method is raking and that the truncated linear method is not yet implemented.
 }
 \examples{
 data(eusilcS)
