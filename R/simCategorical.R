@@ -1,5 +1,4 @@
-# cur.var: current.variable (value of 'i' from outer loop)
-generate.values <- function(dataSample, dataPop, params) {
+generateValues <- function(dataSample, dataPop, params) {
   if ( !nrow(dataSample) ) {
     return(character())
   }
@@ -106,7 +105,7 @@ generate.values <- function(dataSample, dataPop, params) {
 
 # simulation of variables using random draws from the observed
 # conditional distributions of their multivariate realizations
-generate.values.distribution <- function(dataSample, dataPop, params) {
+generateValues_distribution <- function(dataSample, dataPop, params) {
   grid <- params$grid
   additional <- params$additional
   basic <- params$basic
@@ -138,16 +137,17 @@ generate.values.distribution <- function(dataSample, dataPop, params) {
   sim
 }
 
-simCategorical <- function(synthPopObj, basic, additional,
-  method=c("multinom", "distribution","ctree","naivebayes"),
+simCategorical <- function(synthPopObj, additional,
+  method=c("multinom", "distribution", "naivebayes"),
   limit=NULL, censor=NULL, maxit=500, MaxNWts=1500, eps=NULL, seed=1) {
 
   dataP <- synthPopObj@pop
   dataS <- synthPopObj@sample
   data_pop <- dataP@data
   data_sample <- dataS@data
+  basic <- synthPopObj@basicHHvars
 
-  if ( any(additional %in% dataP@additional) ) {
+  if ( any(additional %in% colnames(data_pop)) ) {
     stop("variables already exist in the population!\n")
   }
 
@@ -166,19 +166,12 @@ simCategorical <- function(synthPopObj, basic, additional,
     set.seed(seed)  # set seed of random number generator
   }
   method <- match.arg(method)
-  if ( method == "ctree" ) {
-    stop("Todo: fix errow with unequal levels of factors in train and test-dataset!\n")
-  }
 
-  if ( missing(basic) ) {
-    basic <- setdiff(colnames(data_pop), c(dataP@hhid, dataP@pid, dataP@hhsize, dataP@strata))
-    if ( method == "multinom" ) {
-      basic <- c(basic, dataP@hhsize)
-    }
-  } else {
-    if ( !all(basic %in% colnames(data_pop)) ) {
-      stop("undefined variables in the population data -> check your input!\n")
-    }
+  if ( method == "multinom" ) {
+    basic <- c(basic, dataP@hhsize)
+  }
+  if ( !all(basic %in% colnames(data_pop)) ) {
+    stop("undefined variables in the population data -> check your input!\n")
   }
 
   # check sample data against additional parameter
@@ -225,13 +218,13 @@ simCategorical <- function(synthPopObj, basic, additional,
 
     if ( parallel ) {
       values <- mclapply(levels(data_sample[[dataS@strata]]), function(x) {
-        generate.values.distribution(
+        generateValues_distribution(
           dataSample=data_sample[data_sample[[dataS@strata]] == x,],
           dataPop=data_pop[indStrata[[x]], predNames, with=F], params)
       })
     } else {
       values <- lapply(levels(data_sample[[dataS@strata]]), function(x) {
-        generate.values.distribution(
+        generateValues_distribution(
           dataSample=data_sample[data_sample[[dataS@strata]] == x,],
           dataPop=data_pop[indStrata[[x]], predNames, with=F], params)
       })
@@ -293,14 +286,14 @@ simCategorical <- function(synthPopObj, basic, additional,
     params$levelsResponse <- levelsResponse
     if ( parallel ) {
       values <- mclapply(levels(data_sample[[dataS@strata]]), function(x) {
-        generate.values(
+        generateValues(
           dataSample=data_sample[data_sample[[dataS@strata]] == x,],
           dataPop=data_pop[indStrata[[x]], predNames, with=F], params
         )
       })
     } else {
       values <- lapply(levels(data_sample[[dataS@strata]]), function(x) {
-        generate.values(
+        generateValues(
           dataSample=data_sample[data_sample[[dataS@strata]] == x,],
           dataPop=data_pop[indStrata[[x]], predNames, with=F], params
         )
