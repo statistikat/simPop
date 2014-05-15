@@ -37,9 +37,6 @@ the data frame of new households.
 \author{
 Bernhard Meindl and Matthias Templ
 }
-\note{
-TODO: ID, size
-}
 \examples{
 data(eusilcP)
 pop <- eusilcP
