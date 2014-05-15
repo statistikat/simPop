@@ -57,13 +57,7 @@ S3method(contingencyWt, data.frame)
 S3method(spBwplot, default)
 # methods for S3 generic 'spCdfplot'
 S3method(spCdfplot, default)
-# methods for S3 generic 'spMosaic'
-S3method(spMosaic, default)
-#S3method(spMosaic, formula)
 S3method(spMosaic, spTable)
-# methods for S3 generic 'spTable'
-S3method(spTable, default)
-S3method(spTable, formula)
 # methods for S3 generic 'calibVars'
 S3method(calibVars, default)
 S3method(calibVars, matrix)
