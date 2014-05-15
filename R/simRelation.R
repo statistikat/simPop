@@ -1,8 +1,6 @@
-# Authors: Andreas Alfons und Bernhard Meindl
-
-# TODO: further generalization (no or more than one stratification variable)
-one_run <- function(s, dataS, dataP, params) {
-  hasNewLevels <- newLevels <- NULL
+simulateValues <- function(dataSample, dataPop, params) {
+  hasNewLevels <- params$hasNewLevels
+  newLevels <- params$newLevels
   strata <- params$strata
   head <- params$head
   excludeLevels <- params$excludeLevels
@@ -20,31 +18,31 @@ one_run <- function(s, dataS, dataP, params) {
   levelsResponse <- params$levelsResponse
   hid <- params$hid
   direct <- params$direct
-  
-  
-  # sample data
-  dataSample <- dataS[dataS[, strata] == s, , drop=FALSE]
+  totPop <- copy(dataPop) # copy for later use
+
+  #hhid <- dataPop[[hid]]
+  dataPop[,hid] <- NULL
   if ( !nrow(dataSample) ) {
     return(character())
   }
   # first step: simulate category of household head
   # sample data
-  indSampleHead <- which(dataSample[, relation] == head)
-  dataSampleHead <- dataSample[indSampleHead, , drop=FALSE]
-  # population data
-  dataPop <- dataP[indStrata[[s]], predNames, drop=FALSE]
+  indSampleHead <- which(dataSample[[relation]] == head)
+  dataSampleHead <- dataSample[indSampleHead, ]
+
   # limit population data to household heads
   # this is not stored in a separate data.frame to save memory
-  relPop <- dataP[indStrata[[s]], relation]
+  relPop <- dataPop[[relation]]
   indPopHead <- which(relPop == head)
-  dataPop <- dataPop[indPopHead, , drop=FALSE]
-  # unique combinations in the stratum of the population need 
+  dataPop <- dataPop[indPopHead,]
+  # unique combinations in the stratum of the population need
   # to be computed for prediction
   indGrid <- split(1:nrow(dataPop), dataPop, drop=TRUE)
   grid <- dataPop[sapply(indGrid, function(i) i[1]), , drop=FALSE]
-  # in sample, observations with NAs have been removed to fit the 
+  grid <- as.data.frame(grid)
+  # in sample, observations with NAs have been removed to fit the
   # model, hence population can have additional levels
-  # these need to be removed since those probabilities cannot 
+  # these need to be removed since those probabilities cannot
   # be predicted from the model
   if ( excludeLevels ) {
     exclude <- mapply(function(pop, new) pop %in% new, pop=grid[, hasNewLevels, drop=FALSE], new=newLevels[hasNewLevels])
@@ -59,11 +57,11 @@ one_run <- function(s, dataS, dataP, params) {
   # fit multinomial model
   # command needs to be constructed as string
   # this is actually a pretty ugly way of fitting the model
-  command <- paste("suppressWarnings(multinom(", formula, 
-    ", weights=", w, ", data=dataSampleHead, trace=FALSE", 
+  command <- paste("suppressWarnings(multinom(", formula,
+    ", weights=", w, ", data=dataSampleHead, trace=FALSE",
     ", maxit=maxit, MaxNWts=MaxNWts))", sep="")
   mod <- eval(parse(text=command))  # fitted model
-  
+
   # predict probabilities
   if ( length(exclude) == 0 ) {
     probs <- predict(mod, newdata=grid, type="probs")
@@ -75,7 +73,7 @@ one_run <- function(s, dataS, dataP, params) {
     probs[probs < eps] <- 0
   }
   # ensure code works for missing levels of response
-  ind <- as.integer(which(table(dataSampleHead[, current.strata]) > 0))
+  ind <- as.integer(which(table(dataSampleHead[[current.strata]]) > 0))
   if ( length(ind) > 2 && (nrow(grid)-length(exclude)) == 1 ) {
     probs <- t(probs)
   }
@@ -106,46 +104,48 @@ one_run <- function(s, dataS, dataP, params) {
   }
   sim <- unsplit(sim, dataPop, drop=TRUE)
   sim <- factor(levelsResponse[ind][sim], levels=levelsResponse)
-  
-  # second step: assign category of household head to 
+
+  # second step: assign category of household head to
   # directly related household members
   # we actually assign the category of the household head to
-  # all household members (because we need that variable 
-  # anyway) and replace the values of non-directly related 
+  # all household members (because we need that variable
+  # anyway) and replace the values of non-directly related
   # in the third step
-  hidPop <- dataP[indStrata[[s]], hid]
+  hidPop <- totPop[[hid]]
   names(sim) <- hidPop[indPopHead]
   sim <- sim[as.character(hidPop)]
-  
-  # third step: simulate category of non-directly related 
-  # household members using category of household head as 
+
+  # third step: simulate category of non-directly related
+  # household members using category of household head as
   # additional predictor
-  # FIXME: it might be a problem that we can have new levels 
-  #        for the household head that do not exist in the 
+  # FIXME: it might be a problem that we can have new levels
+  #        for the household head that do not exist in the
   #        sample and are hence not represented in the model
   # get indices of non-directly related household members
-  indSampleNonDirect <- which(!(dataSample[, relation] %in% c(head, direct)))
+  indSampleNonDirect <- which(!(dataSample[[relation]] %in% c(head, direct)))
   indPopNonDirect <- which(!(relPop %in% c(head, direct)))
   if ( length(indSampleNonDirect) > 0 && length(indPopNonDirect) > 0 ) {
     # create additional predictor in the sample
-    add <- dataS[indSampleHead, current.strata]	# these are still numeric for population data too
-    hidSample <- dataSample[, hid]
+    add <- dataSample[[current.strata]][indSampleHead] # these are still numeric for population data too
+    hidSample <- dataSample[[hid]]
     names(add) <- hidSample[indSampleHead]
     add <- add[as.character(hidSample)]
     iHead <- getHeadName(current.strata)
     dataSample[, iHead] <- add
     # limit sample and population data to non-directly related household members
-    dataSample <- dataSample[indSampleNonDirect, , drop=FALSE]
-    dataPop <- dataP[indStrata[[s]], predNames, drop=FALSE]
+    dataSample <- dataSample[indSampleNonDirect,]
+    dataPop <- totPop[,predNames, with=FALSE]
     dataPop[, iHead] <- sim
-    dataPop <- dataPop[indPopNonDirect, , drop=FALSE]
-    # unique combinations in the stratum of the population need 
+    dataPop <- dataPop[indPopNonDirect,]
+    dataPop[,hid] <- NULL
+    # unique combinations in the stratum of the population need
     # to be computed for prediction
     indGrid <- split(1:nrow(dataPop), dataPop, drop=TRUE)
     grid <- dataPop[sapply(indGrid, function(i) i[1]), , drop=FALSE]
-    # in sample, observations with NAs have been removed to fit the 
+    grid <- as.data.frame(grid)
+    # in sample, observations with NAs have been removed to fit the
     # model, hence population can have additional levels
-    # these need to be removed since those probabilities cannot 
+    # these need to be removed since those probabilities cannot
     # be predicted from the model
     if ( excludeLevels ) {
       exclude <- mapply(function(pop, new) pop %in% new, pop=grid[, hasNewLevels, drop=FALSE], new=newLevels[hasNewLevels])
@@ -155,7 +155,7 @@ one_run <- function(s, dataS, dataP, params) {
         exclude <- which(apply(exclude, 1, any))
       }
     } else {
-      exclude <- integer() 
+      exclude <- integer()
     }
     # fit multinomial model
     # command needs to be constructed as string
@@ -175,7 +175,7 @@ one_run <- function(s, dataS, dataP, params) {
       probs[probs < eps] <- 0
     }
     # ensure code works for missing levels of response
-    ind <- as.integer(which(table(dataSample[, current.strata]) > 0))
+    ind <- as.integer(which(table(dataSample[[current.strata]]) > 0))
     if ( length(ind) > 2 && (nrow(grid)-length(exclude)) == 1 ) {
       probs <- t(probs)
     }
@@ -212,16 +212,11 @@ one_run <- function(s, dataS, dataP, params) {
   sim
 }
 
-simRelation <- function(dataS, dataP, hid = "hhid", 
-		w = "weight", strata = "region", 
-		basic = c("age", "sex", "hsize"), 
-		relation = "relate", head = "head", 
-		direct = NULL, 
-		additional = c("nation", "ethnic", "religion"), 
-		limit = NULL, censor = NULL, maxit = 500, 
-    MaxNWts = 2000, eps = NULL, seed) {
+simRelation <- function(synthPopObj, relation = "relate", head = "head",
+  direct = NULL, additional = c("nation", "ethnic", "religion"),
+  limit = NULL, censor = NULL, maxit = 500, MaxNWts = 2000, eps = NULL, seed) {
 
-	##### initializations
+  ##### initializations
   if ( Sys.info()["sysname"] != "Windows" ) {
     nr_cores <- detectCores()
     if ( nr_cores > 2 ) {
@@ -232,36 +227,43 @@ simRelation <- function(dataS, dataP, hid = "hhid",
     }
   } else {
     parallel <- FALSE
-  }    
+  }
 
   # set seed of random number generator
-	if ( !missing(seed) ) {
-    set.seed(seed)  
-	}
-	if ( length(strata) != 1 ) { 
-		stop("currently 'strata' must specify exactly one column of 'data'\n")
-	}
-	varNames <- c(hid=hid, w=w, strata=strata, basic, relation=relation, additional)
+  if ( !missing(seed) ) {
+    set.seed(seed)
+  }
 
-	# check data
-	if ( all(varNames %in% names(dataS)) ) {
-		dataS <- dataS[, varNames]
-	} else {
+  sample <- synthPopObj@sample
+  pop <- synthPopObj@pop
+  w <- sample@weight
+  hid <- sample@hhid
+  strata <- sample@strata
+  basic <- synthPopObj@basicHHvars
+  dataS <- sample@data
+  dataP <- pop@data
+
+  varNames <- c(hid=hid, w=w, strata=strata, basic, relation=relation, additional)
+
+  # check data
+  if ( all(varNames %in% names(dataS)) ) {
+    dataS <- dataS[, varNames, with=F]
+  } else {
     stop("undefined variables in the sample data\n")
-	}
-	if ( !all(c(strata, basic, relation) %in% names(dataP)) ) {
-		stop("undefined variables in the population data\n")
-	}
+  }
+  if ( !all(c(strata, basic, relation) %in% names(dataP)) ) {
+    stop("undefined variables in the population data\n")
+  }
 
-	# observations with missings are excluded from simulation
-	exclude <- getExclude(dataS)
-	if( length(exclude) ) {
+  # observations with missings are excluded from simulation
+  exclude <- getExclude(dataS)
+  if ( length(exclude) > 0 ) {
     dataS <- dataS[-exclude,]
-	}
+  }
 
-	# variables are coerced to factors
-	dataS <- checkFactor(dataS, c(strata, basic, relation, additional))
-	dataP <- checkFactor(dataP, c(strata, basic, relation))
+  # variables are coerced to factors
+  dataS <- checkFactor(dataS, c(strata, basic, relation, additional))
+  dataP <- checkFactor(dataP, c(strata, basic, relation))
 
   # check arguments to account for structural zeros
   if ( length(additional) == 1 ) {
@@ -275,63 +277,70 @@ simRelation <- function(dataS, dataP, hid = "hhid",
     }
   }
 
-	# list indStrata contains the indices of dataP split by strata
-	N <- nrow(dataP)
-	indStrata <- split(1:N, dataP[, strata, drop=FALSE])
+  # list indStrata contains the indices of dataP split by strata
+  N <- nrow(dataP)
+  indStrata <- split(1:N, dataP[[strata]])
 
-	##### simulation of variables using a sequence of multinomial models	
-	# predictor variables	
-	predNames <- basic  # names of predictor variables
+  ##### simulation of variables using a sequence of multinomial models
+  # predictor variables
+  predNames <- c(basic)  # names of predictor variables
 
-	for ( i in additional ) {
-		# components of multinomial model are specified
-		levelsResponse <- levels(dataS[, i])
-		formula <- paste(i, "~", paste(predNames, collapse=" + "))
-		
-		# check if population data contains factor levels that do not exist in the sample
-		newLevels <- lapply(predNames, function(nam) {
-			levelsS <- levels(dataS[, nam])
-			levelsP <- levels(dataP[, nam])
-			levelsP[!(levelsP %in% levelsS)]
-		})
-		hasNewLevels <- sapply(newLevels, length) > 0
-		excludeLevels <- any(hasNewLevels)
+  for ( i in additional ) {
+    # components of multinomial model are specified
+    levelsResponse <- levels(dataS[[i]])
+    formula <- paste(i, "~", paste(predNames, collapse=" + "))
+    # check if population data contains factor levels that do not exist in the sample
+    newLevels <- lapply(predNames, function(nam) {
+      levelsS <- levels(dataS[[nam]])
+      levelsP <- levels(dataP[[nam]])
+      levelsP[!(levelsP %in% levelsS)]
+    })
+    hasNewLevels <- sapply(newLevels, length) > 0
+    excludeLevels <- any(hasNewLevels)
 
-		params <- list()
-		params$strata <- strata
-		params$head <- head
-		params$excludeLevels <- excludeLevels
-		params$w <- w
-		params$relation <- relation
-		params$predNames <- predNames
-		params$indStrata <- indStrata
-		params$formula <- formula
-		params$MaxNWts <- MaxNWts
-		params$maxit <- maxit
-		params$eps <- eps
-		params$current.strata <- i
-		params$limit <- limit
-		params$censor <- censor
-		params$levelsResponse <- levelsResponse
-		params$hid <- hid
-		params$direct <- direct      
+    params <- list()
+    params$hasNewLevels <- hasNewLevels
+    params$newLevels <- newLevels
+    params$strata <- strata
+    params$head <- head
+    params$excludeLevels <- excludeLevels
+    params$w <- w
+    params$relation <- relation
+    params$predNames <- predNames
+    params$indStrata <- indStrata
+    params$formula <- formula
+    params$MaxNWts <- MaxNWts
+    params$maxit <- maxit
+    params$eps <- eps
+    params$current.strata <- i
+    params$limit <- limit
+    params$censor <- censor
+    params$levelsResponse <- levelsResponse
+    params$hid <- hid
+    params$direct <- direct
 
-		### neu ###    
     if ( parallel ) {
-      values <- mclapply(levels(dataS[, strata]), function(s) {
-        one_run(s, dataS, dataP, params)},
-        mc.cores = max(nr_cores,length(levels(dataS[, strata]))))
+      values <- mclapply(levels(dataS[[strata]]), function(x) {
+        simulateValues(
+          dataSample=dataS[dataS[[strata]] == x,],
+          dataPop=dataP[indStrata[[x]], c(predNames, synthPopObj@pop@hhid), with=FALSE], params
+        )},
+        mc.cores = max(nr_cores,length(levels(dataS[[strata]]))))
     } else {
-      values <- lapply(levels(dataS[, strata]), function(s) {
-        one_run(s, dataS, dataP, params)
-      })     
+      values <- lapply(levels(dataS[[strata]]), function(x) {
+        simulateValues(
+          dataSample=dataS[dataS[[strata]] == x,],
+          dataPop=dataP[indStrata[[x]], c(predNames, synthPopObj@pop@hhid), with=FALSE], params
+        )
+      })
     }
-		values <- unsplit(values, dataP[, strata, drop=FALSE])
+    values <- unlist(values, dataP[[strata]])
 
-		## add new categorical variable to data set
-		dataP[, i] <- values
-		predNames <- c(predNames, i)
-	}	
-	# return simulated data
-	dataP
+    ## add new categorical variable to data set
+    dataP[[i]] <- values
+    predNames <- c(predNames, i)
+  }
+  # return simulated data
+  synthPopObj@pop@data <- dataP
+  invisible(synthPopObj)
 }
