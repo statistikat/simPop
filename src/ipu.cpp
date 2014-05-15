@@ -4,22 +4,22 @@
 using namespace Rcpp;
 
 // [[Rcpp::export]]
-NumericVector ipu_work(NumericMatrix inp, NumericVector con, NumericVector w, double eps, IntegerVector verbose) { 
-  int nr_con = con.size();  
+NumericVector ipu_work(NumericMatrix inp, NumericVector con, NumericVector w, double eps, IntegerVector verbose) {
+  int nr_con = con.size();
   int nr_rows = inp.nrow();
-  NumericVector gamma_vals(nr_con);  
+  NumericVector gamma_vals(nr_con);
   NumericVector gamma_vals_new(nr_con);
   double gamma, gamma_new, delta, v;
   bool verb = false;
   if ( verbose[0] == 1 ) {
     verb = true;
   }
-    
+
   for ( int i=0; i < nr_con; ++i ) {
     gamma_vals[i] = (fabs(sum(inp(_,i)*w)-con[i])) / con[i];
-  }  
+  }
   gamma = mean(gamma_vals);
-  
+
   bool run_ind = true;
   int counter = 0;
   while ( run_ind ) {
@@ -28,23 +28,23 @@ NumericVector ipu_work(NumericMatrix inp, NumericVector con, NumericVector w, do
       v = con[j] / sum(inp(_,j)*w);
       for ( int k=0; k<nr_rows; ++k ) {
         if ( inp(k,j) != 0 ) {
-          w[k] = v*w[k]; 
+          w[k] = v*w[k];
         }
       }
-    }    
-    
+    }
+
     // recalculate gamma_vals
     for ( int i=0; i < nr_con; ++i ) {
       gamma_vals_new[i] = (fabs(sum(inp(_,i)*w)-con[i])) / con[i];
-    }  
+    }
     gamma_new = mean(gamma_vals_new);
-        
+
     delta = fabs(gamma_new - gamma);
     if ( verb ) {
       Rprintf("improvement in run %d: %g | gamma=%g\n", counter, delta, gamma_new);
     }
-    
-    if ( gamma_new < eps | delta < eps ) {
+
+    if ( (gamma_new < eps) | (delta < eps) ) {
       run_ind = false;
     } else {
       for ( int k=0; k<nr_con; ++k ) {
@@ -55,7 +55,7 @@ NumericVector ipu_work(NumericMatrix inp, NumericVector con, NumericVector w, do
   }
   if ( verb ) {
     Rprintf("ipu finished after %d interations!\n", counter);
-  }  
+  }
   return(w);
 }
 
