@@ -468,3 +468,30 @@ crossprodWt <- function(x, weights) {
                                 sum(xi*xj*w) / (sum(w)-1)
 }))
 }
+
+manageSynthPopObj <- function(x, var, sample=FALSE, set=FALSE, values=NULL) {
+  if ( class(x) != "synthPopObj" ) {
+    stop("wrong input of argument 'x' (needs to be of class 'synthPopObj')!\n")
+  }
+  if ( length(var) != 1 ) {
+    stop("only one variable can be used at a time!\n")
+  }
+  if ( set==FALSE ) {
+    if ( sample ) {
+      return(invisible(x@sample@data[[var]]))
+    } else {
+      return(invisible(x@pop@data[[var]]))
+    }    
+  }
+  if ( set == TRUE ) {
+    if ( is.null(values) ) {
+      stop("you need to provide values!\n")
+    }
+    if ( sample ) {
+      x@sample@data[[var]] <- values
+    } else {
+      x@pop@data[[var]] <- values
+    }
+    return(invisible(x))
+  }
+}
