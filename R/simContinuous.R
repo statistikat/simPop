@@ -248,15 +248,16 @@ simContinuous <- function(synthPopObj, additional = "netIncome",
   tol = .Machine$double.eps^0.5,
   eps = NULL, seed) {
 
+  x <- NULL
+
   parallel <- FALSE
-  if ( Sys.info()["sysname"] != "Windows" ) {
-    nr_cores <- detectCores()
-    if ( nr_cores > 2 ) {
-      parallel <- TRUE
-      nr_cores <- nr_cores-1 # keep one core available
-    } else {
-      parallel <- FALSE
-    }
+  have_win <- Sys.info()["sysname"] == "Windows"
+  nr_cores <- detectCores()
+  if ( nr_cores > 2 ) {
+    parallel <- TRUE
+    nr_cores <- nr_cores-1 # keep one core available
+  } else {
+    parallel <- FALSE
   }
 
   samp <- synthPopObj@sample
@@ -422,13 +423,29 @@ simContinuous <- function(synthPopObj, additional = "netIncome",
     params$newLevels <- newLevels
     params$name <- name
     params$response <- response
+
     if ( parallel ) {
-      valuesCat <- mclapply(levels(dataS[[strata]]), function(x) {
-        generateValues_multinom(
-          dataSample=dataS[dataS[[strata]] == x,],
-          dataPop=dataP[indStrata[[x]], predNames, with=F], params
-        )
-      })
+      # windows
+      if ( have_win ) {
+        cl <- makePSOCKcluster(nr_cores)
+        registerDoParallel(cl)
+        values <- foreach(x=levels(dataS[[strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
+          generateValues_multinom(
+            dataSample=dataS[dataS[[strata]] == x,],
+            dataPop=dataP[indStrata[[x]], predNames, with=F], params
+          )
+        }
+        stopCluster(cl)
+      }
+      # linux/mac
+      if ( !have_win ) {
+        valuesCat <- mclapply(levels(dataS[[strata]]), function(x) {
+          generateValues_multinom(
+            dataSample=dataS[dataS[[strata]] == x,],
+            dataPop=dataP[indStrata[[x]], predNames, with=F], params
+          )
+        })
+      }
     } else {
       valuesCat <- lapply(levels(dataS[[strata]]), function(x) {
         generateValues_multinom(
@@ -531,13 +548,29 @@ simContinuous <- function(synthPopObj, additional = "netIncome",
     params$weight <- weight
     params$useAux <- useAux
     params$name <- name
+
     if ( parallel ) {
-      valuesCat <- mclapply(levels(dataS[[strata]]), function(x) {
-        generateValues_binary(
-          dataSample=dataS[dataS[[strata]] == x,],
-          dataPop=dataP[indStrata[[x]], predNames, with=F], params
-        )
-      })
+      # windows
+      if ( have_win ) {
+        cl <- makePSOCKcluster(nr_cores)
+        registerDoParallel(cl)
+        valuesCat <- foreach(x=levels(dataS[[strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
+          generateValues_binary(
+            dataSample=dataS[dataS[[strata]] == x,],
+            dataPop=dataP[indStrata[[x]], predNames, with=F], params
+          )
+        }
+        stopCluster(cl)
+      }
+      # linux/mac
+      if ( !have_win ) {
+        valuesCat <- mclapply(levels(dataS[[strata]]), function(x) {
+          generateValues_binary(
+            dataSample=dataS[dataS[[strata]] == x,],
+            dataPop=dataP[indStrata[[x]], predNames, with=F], params
+          )
+        })
+      }
     } else {
       valuesCat <- lapply(levels(dataS[[strata]]), function(x) {
         generateValues_binary(
@@ -618,13 +651,29 @@ simContinuous <- function(synthPopObj, additional = "netIncome",
     params$formula <- formula
     params$residuals <- residuals
     params$log <- log
+
     if ( parallel ) {
-      valuesTmp <- mclapply(levels(dataS[[strata]]), function(x) {
-        generateValues_lm(
-          dataSample=dataS[dataS[[strata]] == x,],
-          dataPop=dataP[indStrata[[x]], predNames, with=F], params
-        )
-      })
+      # windows
+      if ( have_win ) {
+        cl <- makePSOCKcluster(nr_cores)
+        registerDoParallel(cl)
+        valuesTmp <- foreach(x=levels(dataS[[strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
+          generateValues_lm(
+            dataSample=dataS[dataS[[strata]] == x,],
+            dataPop=dataP[indStrata[[x]], predNames, with=F], params
+          )
+        }
+        stopCluster(cl)
+      }
+      # linux/mac
+      if ( !have_win ) {
+        valuesTmp <- mclapply(levels(dataS[[strata]]), function(x) {
+          generateValues_lm(
+            dataSample=dataS[dataS[[strata]] == x,],
+            dataPop=dataP[indStrata[[x]], predNames, with=F], params
+          )
+        })
+      }
     } else {
       valuesTmp <- lapply(levels(dataS[[strata]]), function(x) {
         generateValues_lm(

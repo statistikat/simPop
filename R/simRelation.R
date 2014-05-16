@@ -216,15 +216,15 @@ simRelation <- function(synthPopObj, relation = "relate", head = "head",
   direct = NULL, additional = c("nation", "ethnic", "religion"),
   limit = NULL, censor = NULL, maxit = 500, MaxNWts = 2000, eps = NULL, seed) {
 
+  x <- NULL
+
   ##### initializations
-  if ( Sys.info()["sysname"] != "Windows" ) {
-    nr_cores <- detectCores()
-    if ( nr_cores > 2 ) {
-      parallel <- TRUE
-      nr_cores <- nr_cores-1 # keep one core available
-    } else {
-      parallel <- FALSE
-    }
+  parallel <- FALSE
+  have_win <- Sys.info()["sysname"] == "Windows"
+  nr_cores <- detectCores()
+  if ( nr_cores > 2 ) {
+    parallel <- TRUE
+    nr_cores <- nr_cores-1 # keep one core available
   } else {
     parallel <- FALSE
   }
@@ -320,12 +320,27 @@ simRelation <- function(synthPopObj, relation = "relate", head = "head",
     params$direct <- direct
 
     if ( parallel ) {
-      values <- mclapply(levels(dataS[[strata]]), function(x) {
-        simulateValues(
-          dataSample=dataS[dataS[[strata]] == x,],
-          dataPop=dataP[indStrata[[x]], c(predNames, synthPopObj@pop@hhid), with=FALSE], params
-        )},
-        mc.cores = max(nr_cores,length(levels(dataS[[strata]]))))
+      # windows
+      if ( have_win ) {
+        cl <- makePSOCKcluster(nr_cores)
+        registerDoParallel(cl)
+        values <- foreach(x=levels(dataS[[strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
+          simulateValues(
+            dataSample=dataS[dataS[[strata]] == x,],
+            dataPop=dataP[indStrata[[x]], c(predNames, synthPopObj@pop@hhid), with=FALSE], params
+          )
+        }
+        stopCluster(cl)
+      }
+      # linux/mac
+      if ( !have_win ) {
+        values <- mclapply(levels(dataS[[strata]]), function(x) {
+          simulateValues(
+            dataSample=dataS[dataS[[strata]] == x,],
+            dataPop=dataP[indStrata[[x]], c(predNames, synthPopObj@pop@hhid), with=FALSE], params
+          )
+        }, mc.cores = max(nr_cores,length(levels(dataS[[strata]]))))
+      }
     } else {
       values <- lapply(levels(dataS[[strata]]), function(x) {
         simulateValues(

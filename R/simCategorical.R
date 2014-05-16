@@ -141,6 +141,8 @@ simCategorical <- function(synthPopObj, additional,
   method=c("multinom", "distribution", "naivebayes"),
   limit=NULL, censor=NULL, maxit=500, MaxNWts=1500, eps=NULL, seed=1) {
 
+  x <- NULL
+
   dataP <- synthPopObj@pop
   dataS <- synthPopObj@sample
   data_pop <- dataP@data
@@ -219,16 +221,15 @@ simCategorical <- function(synthPopObj, additional,
     if ( parallel ) {
       # windows
       if ( have_win ) {
-        cat("running with multi-cores on windows....\n")
-        makeCluster(spec="")
-        registerDoParallel(cl, cores=nr_cores)
+        cl <- makePSOCKcluster(nr_cores)
+        registerDoParallel(cl)
         values <- foreach(x=levels(data_sample[[dataS@strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
           generateValues_distribution(
             dataSample=data_sample[data_sample[[dataS@strata]] == x,],
             dataPop=data_pop[indStrata[[x]], predNames, with=F], params
           )
         }
-        stopCluster()
+        stopCluster(cl)
       }
       # linux/max
       if ( !have_win ) {
@@ -305,16 +306,15 @@ simCategorical <- function(synthPopObj, additional,
     # windows
     if ( parallel ) {
       if ( have_win ) {
-        cat("running with multi-cores on windows....\n")
-        makeCluster(spec="")
-        registerDoParallel(cl, cores=nr_cores)
+        cl <- makePSOCKcluster(nr_cores)
+        registerDoParallel(cl)
         values <- foreach(x=levels(data_sample[[dataS@strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
           generateValues(
             dataSample=data_sample[data_sample[[dataS@strata]] == x,],
             dataPop=data_pop[indStrata[[x]], predNames, with=F], params
           )
         }
-        stopCluster()
+        stopCluster(cl)
       }
       # linux/mac
       if ( !have_win) {
