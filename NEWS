@@ -3,6 +3,12 @@ Changes in synthPop version 0.1.7
 
   * removed spTable.formula method (did not work correctly, anyway)
 
+  * parallel processing on windows using doParallel-package and foreach with %dopar%
+
+  * fixed a problem in calibPop.cpp where export of params-object in a list was not done correctly
+
+  * refactorization of calibPop.R to allow parallel computing
+
 Changes in synthPop version 0.1.6
   * removed method 'ctree' from simCategorical() -> perhaps add it later
 
