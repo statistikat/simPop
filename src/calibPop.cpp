@@ -134,12 +134,18 @@ IntegerVector calibPop_work(IntegerMatrix inp, NumericVector totals, IntegerVect
   IntegerVector hh_head = hh_info["hh_head"];
   IntegerVector hh_size = hh_info["hh_size"];
 
-  double temp = params["temp"];
-  double eps_factor = params["eps_factor"];
-  double maxiter = params["maxiter"];
-  double temp_cooldown = params["temp_cooldown"];
-  double factor_cooldown = params["factor_cooldown"];
-  double min_temp = params["min_temp"];
+  NumericVector temp_x = params["temp"];
+  double temp = temp_x[0];
+  NumericVector eps_factor_x = params["eps_factor"];
+  double eps_factor = eps_factor_x[0];
+  NumericVector maxiter_x = params["maxiter"];
+  double maxiter = maxiter_x[0];
+  NumericVector temp_cooldown_x = params["temp_cooldown"];
+  double temp_cooldown = temp_cooldown_x[0];
+  NumericVector factor_cooldown_x = params["factor_cooldown"];
+  double factor_cooldown = factor_cooldown_x[0];
+  NumericVector min_temp_x = params["min_temp"];
+  double min_temp = min_temp_x[0];
   int cooldown = 0;
   double obj, obj_new = 0.0;
 
