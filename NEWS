@@ -1,3 +1,8 @@
+Changes in synthPop version 0.1.8
+  * remove S3-class spBwplot() -> only default method was implemented. Removed option to supply a list of populations; rewritten to use 'synthPopObj'-objects
+
+  * fixed man files for spBwplot() and spBwplotStats()
+
 Changes in synthPop version 0.1.7
   * parallel-computing on windows-platforms using doParallel-package
 
