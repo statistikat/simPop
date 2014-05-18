@@ -1,85 +1,57 @@
-spBwplot <- function(x, ...) UseMethod("spBwplot")
-
-spBwplot.default <- function(x, weights = NULL, cond = NULL, dataS,
-  dataP = NULL, horizontal = TRUE, coef = 1.5, zeros = TRUE,
-  minRatio = NULL, do.out = FALSE, ...) {
+spBwplot <- function(inp, x, cond = NULL, horizontal = TRUE,
+  coef = 1.5, zeros = TRUE, minRatio = NULL, do.out = FALSE, ...) {
 
   ## initializations
+  if ( !class(inp) == "synthPopObj" ) {
+    stop("input argument 'inp' must be of class 'synthPopObj'!\n")
+  }
+
+  weights.pop <- inp@pop@weight
+  weights.samp <- inp@sample@weight
+  dataS <- inp@sample@data
+  dataP <- inp@pop@data
+
   if ( !is.character(x) || length(x) == 0 ) {
     stop("'x' must be a character vector of positive length!\n")
   }
-  if ( !is.null(weights) && (!is.character(weights) || length(weights) > 1) ) {
-    stop("'weights' must be a single character string or NULL!\n")
+  if ( !(all(x %in% colnames(dataP)) & (all(x %in% colnames(dataS)))) ) {
+    stop("The variable names specified in argument 'x' must be available both in the population and the sample!\n")
   }
+
   if ( !is.null(cond) && !is.character(cond) ) {
     stop("'cond' must be a character vector or NULL!\n")
-  }
-  if ( !inherits(dataS, "data.frame") ) {
-    stop("'dataS' must be a data.frame!\n")
-  }
-  # check if 'dataP' is valid
-  if ( !is.null(dataP) && !inherits(dataP, "data.frame") ) {
-    if ( ok <- inherits(dataP, "list") ) {
-      if ( length(dataP)) {
-        ok <- all(sapply(dataP, inherits, "data.frame"))
-      } else {
-        dataP <- NULL
-      }
-    }
-    if ( !ok ) {
-      stop("'data' must be a data.frame or a list of data.frames!\n")
+    if ( length(cond) != 1 ) {
+      stop("argument 'cond' must have length 1!\n")
     }
   }
+  if ( !(all(cond %in% colnames(dataP)) & (all(cond %in% colnames(dataS)))) ) {
+    stop("The variable names specified in argument 'cond' must be available both in the population and the sample!")
+  }
+
   horizontal <- isTRUE(horizontal)
   zeros <- isTRUE(zeros)
   do.out <- isTRUE(do.out)
-  nP <- if(inherits(dataP, "data.frame")) 2 else 1+length(dataP)
-  if ( is.null(dataP) ) {
-    lab <- ""
-  } else {
-    pop <- "Population"
-    if ( !inherits(dataP, "data.frame") ) {
-      nam <- names(dataP)
-      if ( is.null(nam) ) {
-        pop <- paste(pop, 1:(nP-1))
-      }
-      else {
-        replace <- which(nchar(nam) == 0)
-        nam[replace] <- paste(pop, replace)
-        pop <- nam
-      }
-    }
-    lab <- c("Sample", pop)
-  }
+  #nP <- if(inherits(dataP, "data.frame")) 2 else 1+length(dataP)
+  nP <- 2
+  pop <- "Population"
+  lab <- c("Sample", pop)
+
   ## compute statistics for boxplots and construct objects for 'bwplot'
   # from sample
-  tmp <- getBwplotStats(x, weights, cond, dataS, coef=coef, zeros=zeros, do.out=do.out, name=lab[1])
+  tmp <- getBwplotStats(x, weights.samp, cond, dataS, coef=coef, zeros=zeros, do.out=do.out, name=lab[1])
   values <- tmp$values
   n <- t(tmp$n)
   nzero <- ifelse(zeros, t(tmp$nzero), NULL)
   out <- tmp$out
   # from population(s)
-  if ( !is.null(dataP) ) {
-    if ( inherits(dataP, "data.frame") ) {
-      tmp <- getBwplotStats(x, NULL, cond, dataP, coef=coef, zeros=zeros, do.out=do.out, name=lab[2])
-      values <- rbind(values, tmp$values)
-      n <- rbind(n, tmp$n)
-      if (zeros ) {
-        nzero <- rbind(nzero, tmp$nzero)
-      }
-      out <- c(out, tmp$out)
-    } else {
-      tmp <- mapply(function(dP, l) {
-        getBwplotStats(x, NULL, cond, dP, coef=coef, zeros=zeros, do.out=do.out, name=l)
-      }, dataP, lab[-1], SIMPLIFY=FALSE, USE.NAMES=FALSE)
-      values <- rbind(values, do.call(rbind, lapply(tmp, function(x) x$values)))
-      n <- rbind(n, do.call(rbind, lapply(tmp, function(x) x$n)))
-      if ( zeros ) {
-        nzero <- rbind(nzero, do.call(rbind, lapply(tmp, function(x) x$nzero)))
-      }
-      out <- c(out, do.call(c, lapply(tmp, function(x) x$out)))
-    }
+  tmp <- getBwplotStats(x, weights.pop, cond, dataP, coef=coef, zeros=zeros, do.out=do.out, name=lab[2])
+  values <- rbind(values, tmp$values)
+  n <- rbind(n, tmp$n)
+  if ( zeros ) {
+    nzero <- rbind(nzero, tmp$nzero)
   }
+  out <- c(out, tmp$out)
+
   ## construct formula for 'bwplot'
   form <- ifelse(horizontal, ".name~.x", ".x~.name")  # basic formula
   if ( length(x) > 1 ) {
@@ -90,7 +62,7 @@ spBwplot.default <- function(x, weights = NULL, cond = NULL, dataS,
     form <- paste(form, cond, sep=" | ")  # add conditioning to formula
   }
   ## in case of semi-continuous variables define box widths
-  if( zeros ) {
+  if ( zeros ) {
     ratio <- n/(n+nzero)
     if ( !is.null(minRatio) ) {
       if ( !is.numeric(minRatio) || length(minRatio) != 1 || minRatio <= 0 || minRatio > 1 ) {
@@ -110,7 +82,6 @@ spBwplot.default <- function(x, weights = NULL, cond = NULL, dataS,
   ## call 'bwplot'
   localBwplot(as.formula(form), values, horizontal=horizontal, coef=coef, zeros=zeros, ratio=ratio, do.out=FALSE, outliers=out, ...)
 }
-
 
 ## panel function
 panelSpBwplot <- function(x, y, coef=1.5, zeros = TRUE, ratio, outliers, subscripts, ...) {
@@ -133,16 +104,26 @@ panelSpBwplot <- function(x, y, coef=1.5, zeros = TRUE, ratio, outliers, subscri
 # get data.frame and all required statistics
 getBwplotStats <- function(x, weights = NULL, cond = NULL, data, ..., name = "") {
   if ( is.null(cond) ) {
-    x <- data[, x]
-    w <- if(length(weights) == 0) NULL else data[, weights]
+    x <- data[,x,with=FALSE]
+    if ( length(weights) == 0 ) {
+      w <- NULL
+      } else {
+        w <- data[[weights]]
+    }
     prepBwplotStats(x, w, ..., name=name)
   } else {
-    tmp <- tapply(1:nrow(data), data[, cond, drop=FALSE], function(i) {
-      x <- data[i, x]
-      w <- ifelse(length(weights) == 0), NULL, data[i, weights])
-      g <- unique(data[i, cond, drop=FALSE])
+    spl <- split(data, data[[cond]])
+    tmp <- lapply(spl, function(z) {
+      data <- z
+      x <- data[,x,with=FALSE]
+      if ( length(weights) == 0 ) {
+        w <- NULL
+      } else {
+        w <- data[[weights]]
+      }
       res <- prepBwplotStats(x, w, ..., name=name)
-      res$values <- cbind(res$values, g[rep.int(1, nrow(res$values)), , drop=FALSE])
+      res$values <- cbind(res$values, rep(data[[cond]][1], nrow(res$values)))
+      colnames(res$values)[ncol(res$values)] <- cond
       res
     })
     values <- do.call(rbind, lapply(tmp, function(x) x$values))
