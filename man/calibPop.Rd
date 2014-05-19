@@ -5,27 +5,17 @@
 Calibration of 0/1 weights by Simulated Annealing
 }
 \description{
-A Simulated Annealing Algorithm for calibrartion of synthetic microdata. The aims is to find, given a population, a combination of different households which optimaly satisfy, in the sense of an acceptable error, a given table of specific known marginals.
+A Simulated Annealing Algorithm for calibration of synthetic population data available in a \code{\linkS4class{synthPopObj}-object. The aims is to find, given a population, a combination of different households which optimally satisfy, in the sense of an acceptable error, a given table of specific known marginals. The known marginals are also already available in slot 'table' of the input object 'inp'.
 }
 \usage{
-calibPop(data, totals, hid, parameter, split, temp=30, eps.factor=0.05, maxiter=200, temp.cooldown=0.975, factor.cooldown=0.85, min.temp=10^-3, verbose=FALSE)
+calibPop(inp, split, temp=30, eps.factor=0.05, maxiter=200, temp.cooldown=0.975, factor.cooldown=0.85, min.temp=10^-3, verbose=FALSE)
 }
 \arguments{
-  \item{data}{
-a data.table object containing microdata.
-%Rows must correspond with different attributes in totals.
-}
-\item{totals}{
-a table object containing the target-marginals. Entries need to display aggregated information on individuals (e.g. age, gender, household size, ect...). Attributes can freely be chosen, but need to correspond to a column in the data.
-}
-\item{hid}{
-spezifying household-ID column in data
-}
-\item{parameter}{
-character vector containg the variable names to be optimized for.
+  \item{inp}{
+an object of class \code{\linkS4class{synthPopObj}} with slot 'table' being non-null! (see \code{\link{addKnownMargins}}.
 }
   \item{split}{
-given strata in which the problem will be split. Has to correspond to a column in data. For example \code{split = c("region")}, problem will be split for different regions. Parallel computing is automatically applied when working under Linux.
+given strata in which the problem will be split. Has to correspond to a column population data (slot 'pop' of input argument 'inp') . For example \code{split = c("region")}, problem will be split for different regions. Parallel computing is performed automatically, if possible.
 }
   \item{temp}{
 starting temperatur for simulated annealing algorithm
@@ -50,60 +40,34 @@ boolean variable; if TRUE some additional verbose output is provided.
 }
 }
 \details{
-Calibrates microdata using simulated annealing. Finds optimal combination of different households, by swaping housholds at random (or with sample weights with sample=TRUE) in each iteration of each temperature level.
+Calibrates data using simulated annealing. The algorithm searches for a (near) optimal combination of different households, by swaping housholds at random in each iteration of each temperature level.
 During the algorithm as well as for the output the optimal (or so far best) combination will be indicated by a logical vector containg only 0s (not inculded) and 1s (included in optimal selection).
-Objective function for simulated annealing is defined by the sum of absolute differences between target marginals and synthetic marginals (=marginals of synthetic microdataset).
-The sum of target marginals can at most be as large as the sum of target marginals.
+The objective function for simulated annealing is defined by the sum of absolute differences between target marginals and synthetic marginals (=marginals of synthetic dataset). The sum of target marginals can at most be as large as the sum of target marginals.
 For every factor-level in \dQuote{split}, data must at least contain as many entries of this kind as target marginals.
 
-Donors (marked by 0-weights) have to be included in the data.
+Possible donors are automatically generated within the procedure.
 }
 \value{
-Returns a list including the solution, value of objective function, temperature level, ect...
+Returns an object of class \code{\linkS4class{synthPopObj}} with an updated population listed in slot 'pop'.
 }
 \author{
 Bernhard Meindl, Johannes Gussenbauer and Matthias Templ
 }
 \examples{
 \dontrun{
-data(eusilcP)
-data(eusilcS)
+data(eusilcS) # load sample data
+data(eusilcP) # population data
+inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
+synthPop <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090"))
+synthPop <- simCategorical(synthPop, additional=c("pl030", "pb220a"), method="multinom")
 
-## synth pop:
-pop <- eusilcP
-colnames(pop)[3] <- "hhsize"
+# add margins
+margins <- as.data.frame(xtabs(rep(1, nrow(eusilcP)) ~ eusilcP$region + eusilcP$gender + eusilcP$citizenship))
+colnames(margins) <- c("db040", "rb090", "pb220a", "freq")
+synthPop <- addKnownMargins(inp, margins)
 
-## donor data:
-donors <- sampHH(pop, strata="region", hsize="hhsize")
-
-## microdata (1) and donor (0)
-pop <- rbind(pop, donors)
-pop$weights <- rep(c(1,0), c(nrow(eusilcP), nrow(donors)))
-pop$new.weights <- pop$weights
-
-index <- pop$weights == 1
-tab <- table(pop$region[index],pop$gender[index], pop$hhsize[index])
-
-## create target marginals
-totals <- tableWt(eusilcS[,c("db040", "rb090","hsize")], weights=eusilcS$rb050)
-totals <- nrow(pop[index])/sum(totals) * totals
-totals <- ceiling(totals)
-totals <- as.data.table(totals)
-setnames(totals, c("region","gender","hhsize","N"))
-
-data <- data.table(pop, keep.rownames=TRUE)
-totals <- totals
-hid <- "hid"
-parameter <- c("gender","hhsize")
-split <- "region"
-temp <- 10
-eps.factor <-  0.01
-maxiter <- 250
-temp.cooldown <- 0.90
-factor.cooldown <- 0.95
-min.temp <- 10^-2
-verbose <- FALSE
-system.time(testrun <- calibPop(data, totals, hid, parameter, split, temp, eps.factor, maxiter, temp.cooldown, factor.cooldown, min.temp, verbose))
+# apply simulated annealing
+synthPop_adj <- calibPop(synthPop, split="db040", temp, eps.factor=0.1))
 }
 }
 \keyword{datasets}
