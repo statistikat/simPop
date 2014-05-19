@@ -15,6 +15,7 @@ importFrom(MASS, ginv)
 
 ## exports
 export(
+  addKnowMargins,
   calibPop,
   calibVars,
   calibSample,
