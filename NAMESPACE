@@ -17,6 +17,7 @@ importFrom(MASS, ginv)
 exportMethods("auxData")
 exportMethods("auxData<-")
 export(
+  addKnowMargins,
   calibPop,
   calibVars,
   calibSample,
