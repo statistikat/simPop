@@ -5,7 +5,7 @@
 Calibration of 0/1 weights by Simulated Annealing
 }
 \description{
-A Simulated Annealing Algorithm for calibration of synthetic population data available in a \code{\linkS4class{synthPopObj}-object. The aims is to find, given a population, a combination of different households which optimally satisfy, in the sense of an acceptable error, a given table of specific known marginals. The known marginals are also already available in slot 'table' of the input object 'inp'.
+A Simulated Annealing Algorithm for calibration of synthetic population data available in a \code{\linkS4class{synthPopObj}}-object. The aims is to find, given a population, a combination of different households which optimally satisfy, in the sense of an acceptable error, a given table of specific known marginals. The known marginals are also already available in slot 'table' of the input object 'inp'.
 }
 \usage{
 calibPop(inp, split, temp=30, eps.factor=0.05, maxiter=200, temp.cooldown=0.975, factor.cooldown=0.85, min.temp=10^-3, verbose=FALSE)
