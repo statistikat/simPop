@@ -46,7 +46,8 @@ export(
   spMosaic,
   spTable,
   tableWt,
-  varWt
+  varWt,
+  whipple
 )
 
 exportClasses(
