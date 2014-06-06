@@ -44,6 +44,7 @@ export(
   spCdf,
   spCdfplot,
   spMosaic,
+  sprague,
   spTable,
   tableWt,
   varWt,
