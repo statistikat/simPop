@@ -1,33 +1,35 @@
 \name{sprague}
 \alias{sprague}
 \title{
-Sprague multipliers
+Sprague index (multipliers)
 }
 \description{
-Sprague multipliers
+Using the Sprague multipliers, the age counts are estimated for each year having 5-years interval data as input.
 }
 \usage{
-sprague(x, table = FALSE, breaks = c(seq(0, 80, 5), 150))
+sprague(x)
 }
 \arguments{
   \item{x}{
-numeric vector of ages
-}
-  \item{table}{
-more later
-}
-  \item{breaks}{
-more later
+numeric vector of age counts in five-year intervals
 }
 }
 \details{
-comming soon
+The input is population counts of age classes 0-4,
+  5-9, 10-14, ... , 77-74, 75-79, 80+.
 }
 \value{
-coming soon
+Population counts for age 0, 1, 2, 3, 4, ..., 78, 79, 80+.
 }
 \references{
-coming soon
+G. Calot and J.-P. Sardon. 
+Methodology for the
+calculation of Eurostat's
+demographic indicators. 
+Detailed report by the European
+Demographic Observatory
+
+\url{http://www.cedefop.europa.eu/EN/Files/Methodology_for_the_calculation_of_Eurostats_demographic_indicators.pdf} 
 }
 \author{
 Matthias Templ
@@ -37,8 +39,10 @@ Matthias Templ
 }
 \examples{
 x <- sample(1:100, 5000, TRUE)
-sprague(x)
+s <- sprague(x)
+all.equal(sum(s), sum(x[,2]))
 
+## example from the world bank
 x <- data.frame(age=as.factor(c(
   "0-4",
   "5-9","10-14","15-19", "20-24",
@@ -49,11 +53,10 @@ x <- data.frame(age=as.factor(c(
         1502990, 1214170, 796934,  627551,  530305, 488014,
         364498, 259029,158047,  125941)
 )
-  
-# debugonce(sprague)
-s  <- sprague(x[,2], tabular=TRUE)
+
+s  <- sprague(x[,2])
 s
   
-identical(sum(s), sum(x[,2]))
+all.equal(sum(s), sum(x[,2]))
 }
 \keyword{ arith }

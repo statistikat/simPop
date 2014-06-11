@@ -1,18 +1,18 @@
 ## create Sprague multiplier data
 
-sprague <- function(x, 
-                    tabular=FALSE,
-                    breaks=c(seq(0,80,5),150)
-                    ){
-  if(tabular==FALSE){
-    x <- cut(x, breaks, right=FALSE)
-    Ns <- table(x)
-  } else {
+sprague <- function(x){
+  if(length(x) != 17) stop("input writen for original sprague with age groups 0-4,
+  5-9, 10-14, ... ,77-74,75-79,80+")
+  breaks=c(seq(0,80,5),150)
+#  if(tabular==FALSE){
+#    x <- cut(x, breaks, right=FALSE)
+#    Ns <- table(x)
+#  } else {
     Ns <- x
-    if( length(Ns) != 18 ) { 
-      warning("input table with five-yers age groups expected but not provided.")
-    }
-  }
+#    if( length(Ns) != 18 ) { 
+#      warning("input table with five-yers age groups expected but not provided.")
+#    }
+#  }
 
   plus80 <- Ns[length(Ns)] 
   
