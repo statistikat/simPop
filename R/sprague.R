@@ -1,19 +1,21 @@
 ## create Sprague multiplier data
 
 sprague <- function(x, 
-                    table=FALSE,
+                    tabular=FALSE,
                     breaks=c(seq(0,80,5),150)
                     ){
-  if(table==FALSE){
+  if(tabular==FALSE){
     x <- cut(x, breaks, right=FALSE)
     Ns <- table(x)
   } else {
+    Ns <- x
     if( length(Ns) != 18 ) { 
       warning("input table with five-yers age groups expected but not provided.")
     }
-    Ns <- x
   }
 
+  plus80 <- Ns[length(Ns)] 
+  
   multipliers <- data.frame(G1 = c(0.3616, 0.264, 0.184, 0.12, 0.0704, 
             0.0336, 0.008, -0.008, -0.016, -0.0176,
             -0.0128,  -0.0016, 0.0064, 0.0064, 0.0016,
@@ -47,7 +49,7 @@ sprague <- function(x,
   ## in group 25,26,27,28,29
   infoGroup <- function(n, mult=multipliers, mybreaks=breaks, popN=Ns){
     ## from a five years group, which one of the five years:
-    group <- (n+1) %% 5
+    group <- (n) %% 5
     ## extreme group or normal:
     if(n < 5){ 
       tab <- subset(mult, subset=groups=="lowest") 
@@ -82,6 +84,9 @@ sprague <- function(x,
     return(cohort)
   }
   
-   cohorts <- sapply(1:100, infoGroup)
+   cohorts <- sapply(0:79, infoGroup)
+  ## group 80+
+   cohorts <- c(cohorts, plus80)
+   names(cohorts) <- c(0:79,"80+")
    return(cohorts)
 }
