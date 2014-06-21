@@ -2,13 +2,13 @@
 
 # install_bitbucket("simPopulation2", username="bernhard_da",  auth_user="matthias-da", password="Hdjexly1")
 
-load_all("../../simpopulation2/")
-
-source('~/workspace/simpopulation2/R/sprague.R')
-x <- sample(1:100, 5000, TRUE)
-x <- table(cut(x, breaks=c(seq(0,80,5),150)))
-s <- sprague(x)
-if(!all.equal(sum(s), sum(x) ) ) stop("not identical")
+#load_all("../../simpopulation2/")
+#
+#source('~/workspace/simpopulation2/R/sprague.R')
+#x <- sample(1:100, 5000, TRUE)
+#x <- table(cut(x, breaks=c(seq(0,80,5),150)))
+#s <- sprague(x)
+#if(!all.equal(sum(s), sum(x) ) ) stop("not identical")
 
 x <- data.frame(age=as.factor(c(
   "0-4",
