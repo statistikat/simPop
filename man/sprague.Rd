@@ -38,10 +38,6 @@ Matthias Templ
 \code{\link{whipple}}
 }
 \examples{
-x <- sample(1:100, 5000, TRUE)
-s <- sprague(x)
-all.equal(sum(s), sum(x[,2]))
-
 ## example from the world bank
 x <- data.frame(age=as.factor(c(
   "0-4",
