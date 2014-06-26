@@ -41,7 +41,6 @@ export(
   spBwplot,
   spBwplotStats,
   spBwplot,
-  sprague,
   spCdf,
   spCdfplot,
   spMosaic,
