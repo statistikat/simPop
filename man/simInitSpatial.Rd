@@ -1,13 +1,15 @@
 \name{simInitSpatial}
 \alias{simInitSpatial}
-\title{Generation of smaller regions given an existing spatial variable and a table}.
+\title{
+Generation of smaller regions given an existing spatial variable and a table.
+}
 \description{
   This function allows to manipulate an object of class \code{\linkS4class{synthPopObj}} in a way that a new variable containing smaller regions within an already existing broader region is generated. The distribution of the smaller region within the broader region is respected.
 
 The distributional information must be contained in an input table that holds combinations of characteristics of the broader region and the smaller regions as well as population counts (which may be available from a census).
 }
 \usage{
-simInitSpatial(synthPopObj, additional, region, tspatial) 
+simInitSpatial(synthPopObj, additional, region, tspatial)
 }
 \arguments{
   \item{synthPopObj}{an object of class \code{\linkS4class{synthPopObj}}.}
@@ -34,11 +36,11 @@ data(eusilcP)
 simulate_districts <- function(inp) {
   hhid <- "hid"
   region <- "region"
-  
+
   a <- inp[!duplicated(inp[,hhid]),c(hhid, region)]
   spl <- split(a, a[,region])
   regions <- unique(inp[,region])
-  
+
   tmpres <- lapply(1:length(spl), function(x) {
     codes <- paste(x, 1:sample(3:9,1), sep="")
     spl[[x]]$district <- sample(codes, nrow(spl[[x]]), replace=TRUE)

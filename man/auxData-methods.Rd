@@ -2,9 +2,10 @@
 \docType{methods}
 \alias{auxData}
 \alias{auxData-methods}
+\alias{auxData<-}
 \alias{auxData<--methods}
 \alias{auxData,synthPopObj-method}
-\alias{auxData<-,synthPopObj,data.frame-method}
+\alias{auxData<-,synthPopObj,dataObj-method}
 \title{Methods for Function \code{auxData}}
 \description{
  allows to query or replace slot 'sample' of an \code{\linkS4class{synthPopObj}} with an object of class \code{\linkS4class{dataObj}}.
