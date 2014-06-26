@@ -1,15 +1,5 @@
 ## test sprague index:
-
-# install_bitbucket("simPopulation2", username="bernhard_da",  auth_user="matthias-da", password="Hdjexly1")
-
-#load_all("../../simpopulation2/")
-#
-#source('~/workspace/simpopulation2/R/sprague.R')
-#x <- sample(1:100, 5000, TRUE)
-#x <- table(cut(x, breaks=c(seq(0,80,5),150)))
-#s <- sprague(x)
-#if(!all.equal(sum(s), sum(x) ) ) stop("not identical")
-
+library(synthPop)
 x <- data.frame(age=as.factor(c(
   "0-4",
   "5-9","10-14","15-19", "20-24",
@@ -20,11 +10,11 @@ x <- data.frame(age=as.factor(c(
         1502990, 1214170, 796934,  627551,  530305, 488014,
         364498, 259029,158047,  125941)
 )
-  
+
 # debugonce(sprague)
 s  <- sprague(x[,2])
 
-  
+
 if(!all.equal(sum(s), sum(x[,2]))) stop("not identical")
 
 
