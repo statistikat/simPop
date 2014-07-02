@@ -7,7 +7,8 @@
   Produce box-and-whisker plots of continuous or semi-continuous variables, possibly broken down according to conditioning variables and taking into account sample weights.
 }
 \usage{
-spBwplot(inp, x, cond = NULL, horizontal = TRUE, coef = 1.5, zeros = TRUE, minRatio = NULL, do.out = FALSE, \dots)
+spBwplot(inp, x, cond = NULL, horizontal = TRUE, coef = 1.5, zeros = TRUE,
+  minRatio = NULL, do.out = FALSE, \dots)
 }
 \arguments{
   \item{inp}{an object of class \code{linkS4class{synthPopObj}} containing survey sample and synthetic population data.}

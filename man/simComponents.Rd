@@ -8,7 +8,8 @@
 }
 \usage{
 simComponents(synthPopObj, total="netIncome",
-  components=c("py010n", "py050n", "py090n", "py100n", "py110n","py120n", "py130n", "py140n"),
+  components=c("py010n", "py050n", "py090n", "py100n",
+    "py110n","py120n", "py130n", "py140n"),
   conditional=c(getCatName(total), "pl030"),
   replaceEmpty=c("sequential", "min"), seed)
 }
