@@ -1,7 +1,7 @@
 ## imports
 import(doParallel)
 import(foreach)
-import(POT)
+#import(POT)
 import(nnet)
 import(data.table)
 import(e1071)
