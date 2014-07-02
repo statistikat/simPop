@@ -33,7 +33,8 @@ inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", 
 inp <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090"))
 inp <- simCategorical(inp, additional=c("pl030", "pb220a"), method="multinom")
 
-margins <- as.data.frame(xtabs(rep(1, nrow(eusilcP)) ~ eusilcP$region + eusilcP$gender + eusilcP$citizenship))
+margins <- as.data.frame(
+  xtabs(rep(1, nrow(eusilcP)) ~ eusilcP$region + eusilcP$gender + eusilcP$citizenship))
 colnames(margins) <- c("db040", "rb090", "pb220a", "freq")
 inp <- addKnownMargins(inp, margins)
 str(inp)
