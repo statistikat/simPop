@@ -36,7 +36,8 @@ spBwplot(inp, x, cond = NULL, horizontal = TRUE, coef = 1.5, zeros = TRUE, minRa
 \dontrun{
 data(eusilcS)
 inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
-synthPop <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090", "hsize", "pl030", "pb220a"))
+synthPop <- simStructure(data=inp, method="direct",
+  basicHHvars=c("age", "rb090", "hsize", "pl030", "pb220a"))
 
 # multinomial model with random draws
 eusilcM <- simContinuous(synthPop, additional="netIncome", upper=200000, equidist=FALSE)
