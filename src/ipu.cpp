@@ -31,8 +31,13 @@ NumericVector ipu_work(NumericMatrix inp, NumericVector con, NumericVector w, do
           w[k] = v*w[k];
         }
       }
+      if(verb){
+    	Rprintf("fak %d: %f \n",j,v);
+      }
     }
-
+    double meanweight;
+    meanweight=mean(w);
+    Rprintf("mean weight: %g \n",meanweight);
     // recalculate gamma_vals
     for ( int i=0; i < nr_con; ++i ) {
       gamma_vals_new[i] = (fabs(sum(inp(_,i)*w)-con[i])) / con[i];
@@ -41,20 +46,25 @@ NumericVector ipu_work(NumericMatrix inp, NumericVector con, NumericVector w, do
 
     delta = fabs(gamma_new - gamma);
     if ( verb ) {
-      Rprintf("improvement in run %d: %g | gamma=%g\n", counter, delta, gamma_new);
+      Rprintf("improvement in run %d: %g | gamma_new=%g | gamma=%g \n", counter, delta, gamma_new,gamma);
     }
 
-    if ( (gamma_new < eps) | (delta < eps) ) {
+    if ( gamma_new < eps ) {
+      if ( verb ) {
+        Rprintf("ipu finished after %d interations!\n", counter);
+      }
       run_ind = false;
-    } else {
+    } else if ( delta < eps/10 ) {
+    	if ( verb ) {
+    	  Rprintf("WARNING: not converted \n");
+    	}
+        run_ind = false;
+    }else {
       for ( int k=0; k<nr_con; ++k ) {
         gamma_vals[k] = gamma_vals_new[k];
       }
       gamma = gamma_new;
     }
-  }
-  if ( verb ) {
-    Rprintf("ipu finished after %d interations!\n", counter);
   }
   return(w);
 }
