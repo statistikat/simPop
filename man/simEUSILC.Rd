@@ -16,7 +16,8 @@ simEUSILC(dataS, hid = "db030", wh = "db090", wp = "rb050",
   equidist = TRUE, probs = NULL, gpd = TRUE,
   threshold = NULL, est = "moments", const = NULL,
   alpha = 0.01, residuals = TRUE,
-  components = c("py010n", "py050n", "py090n","py100n", "py110n", "py120n", "py130n", "py140n"),
+  components = c("py010n", "py050n", "py090n","
+    py100n", "py110n", "py120n", "py130n", "py140n"),
   conditional = c(getCatName(income), "pl030"),
   keep = TRUE, maxit = 500, MaxNWts = 1500,
   tol = .Machine$double.eps^0.5, seed)
