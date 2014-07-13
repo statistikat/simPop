@@ -31,13 +31,9 @@ NumericVector ipu_work(NumericMatrix inp, NumericVector con, NumericVector w, do
           w[k] = v*w[k];
         }
       }
-      if(verb){
-    	Rprintf("fak %d: %f \n",j,v);
-      }
     }
     double meanweight;
     meanweight=mean(w);
-    Rprintf("mean weight: %g \n",meanweight);
     // recalculate gamma_vals
     for ( int i=0; i < nr_con; ++i ) {
       gamma_vals_new[i] = (fabs(sum(inp(_,i)*w)-con[i])) / con[i];
@@ -55,9 +51,9 @@ NumericVector ipu_work(NumericMatrix inp, NumericVector con, NumericVector w, do
       }
       run_ind = false;
     } else if ( delta < eps/10 ) {
-    	if ( verb ) {
-    	  Rprintf("WARNING: not converted \n");
-    	}
+      if ( verb ) {
+        Rprintf("WARNING: not converted \n");
+      }
         run_ind = false;
     }else {
       for ( int k=0; k<nr_con; ++k ) {

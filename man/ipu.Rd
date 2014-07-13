@@ -35,43 +35,52 @@ res <- ipu(inp=inp, hid="hhid", con=con, verbose=FALSE)
 data(eusilcS)
 data(eusilcP)
 
+# variable generation and preparation
+eusilcS$hsize <- factor(eusilcS$hsize)
+
 # make sure, factor levels in sample and population match
 eusilcP$region <- factor(eusilcP$region, levels = levels(eusilcS$db040))
 eusilcP$gender <- factor(eusilcP$gender, levels = levels(eusilcS$rb090))
+eusilcP$hsize  <- factor(eusilcP$hsize , levels = levels(eusilcS$hsize))
 
 # generate input matrix
 # we want to adjust to variable "db040" (region) as household variables and
 # variable "rb090" (gender) as individual information
 samp <- data.table(eusilcS)
+pop <-  data.table(eusilcP)
 setkeyv(samp, "db030")
 hh <- samp[!duplicated(samp$db030),]
+hhpop <- pop[!duplicated(pop$hid),]
 
 # reg contains for each region the number of households
 reg <- data.table(model.matrix(~db040 +0, data=hh))
+# hsize contains for each household size the number of households
+hsize <- data.table(model.matrix(~factor(hsize) +0, data=hh))
 
+# aggregate persons-level characteristics per household
 # gender contains for each household the number of males and females
 gender <- data.table(model.matrix(~db030+rb090 +0, data=samp))
 setkeyv(gender, "db030")
 gender <- gender[, lapply(.SD, sum), by = key(gender)]
 
 # bind together and use it as input
-inp <- cbind(reg, gender)
+inp <- cbind(reg, hsize, gender)
 
 # the totals we want to calibrate to
 con <- c(
-  as.list(xtabs(rep(1, nrow(eusilcP)) ~ eusilcP$region)),
+  as.list(xtabs(rep(1, nrow(hhpop)) ~ hhpop$region)),
+  as.list(xtabs(rep(1, nrow(hhpop)) ~ hhpop$hsize)),
   as.list(xtabs(rep(1, nrow(eusilcP)) ~ eusilcP$gender))
 )
 # we need to have the same names as in 'inp'
 names(con) <- setdiff(names(inp), "db030")
 
-# perform ipu
+# run ipu und check results
 res <- ipu(inp=inp, hid="db030", con=con, verbose=TRUE)
 
-# check results
-is <- sapply(2:(ncol(res)-1), function(x) {
+is <- sapply(2:(ncol(res)-1), function(x) { 
   sum(res[,x]*res$weights)
-})
+}) 
 data.frame(required=unlist(con), is=is)
 }
 \keyword{method}
