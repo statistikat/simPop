@@ -18,6 +18,27 @@
   }
 }}
 
+\details{
+  The methods return a list containing both the \emph{g}-weights as well as the final weights (initial sampling weights adjusted by the \emph{g}-weights.
+}
+\note{
+  This is a faster implementation of parts of \code{\link[sampling]{calib}} from package \code{sampling}. Note that the default calibration method is raking and that the truncated linear method is not yet implemented.
+}
+\author{
+  Andreas Alfons and Bernhard Meindl
+}
+\references{
+  Deville, J.-C. and \enc{Saerndal}{Saerndal}, C.-E. (1992)
+  Calibration estimators in survey sampling. \emph{Journal
+  of the American Statistical Association}, \bold{87}(418),
+  376--382.
+  Deville, J.-C., \enc{Saerndal}{Saerndal}, C.-E. and
+  Sautory, O. (1993) Generalized raking procedures in
+  survey sampling. \emph{Journal of the American
+  Statistical Association}, \bold{88}(423), 1013--1020.
+}
+\keyword{survey}
+
 \examples{
 data(eusilcS)
 inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
@@ -36,3 +57,4 @@ res2 <- calibSample(inp=df, totals, w="db090")
 identical(res1, res2)
 }
 \keyword{methods}
+

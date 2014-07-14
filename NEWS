@@ -1,4 +1,5 @@
 Changes in synthPop version 0.1.9
+  * calibSample() can be applied to objects of class 'synthPopObj'
   * updated example for ipu
   * whipple index (original and modified) included
   * sprague index included
