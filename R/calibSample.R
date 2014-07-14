@@ -1,4 +1,138 @@
-calibSample <- function(X, d, totals, q=NULL,
+# Todo: Methods to apply calibSample on objects of class "synthPopObj" and "dataObj"
+setGeneric("calibSample", function(inp, totals, ...) {
+  standardGeneric("calibSample")
+})
+
+setMethod("calibSample", c(inp="synthPopObj", totals="list"), function(inp, totals, ...) {
+  samp <- inp@sample@data
+  vnames <- names(totals)
+
+  #  check if vars exist
+  if ( !all(vnames %in% colnames(samp)) ) {
+    stop("not all slotnames of argument 'totals' exist in the sample slot of argument 'inp'!\n")
+  }
+
+  # check if totals match leves of vars
+  res <- sapply(1:length(totals), function(x) {
+    ii <- match(vnames[x], colnames(samp))
+    if ( !is.na(ii) ) {
+      ll <- levels(factor(samp[[ii]]))
+      res <- length(totals[[x]]) != length(ll)
+    } else {
+      res <- TRUE
+    }
+    res
+  })
+  if ( sum(res) != 0 ) {
+    stop("please specify the input. Number of totals does not match with the number of levels!\n")
+  }
+
+  # handle additional arguments
+  args <- list(...)
+  if ( is.null(args$method) ) {
+    method <- "raking"
+  }
+  if ( is.null(args$bounds) ) {
+    bounds <- c(0,10)
+  }
+  if ( is.null(args$maxit) ) {
+    maxit <- 500
+  }
+  if ( is.null(args$tol) ) {
+    tol <- 1e-06
+  }
+  if ( is.null(args$q) ) {
+    q <- NULL
+  }  
+  if ( is.null(args$eps) ) {
+     eps <- .Machine$double.eps
+  }
+
+  # everything ok so far
+  X <- calibVars(samp[,vnames,with=FALSE])
+
+  # initial sample weights
+  w <- samp[[inp@sample@weight]]
+
+  totals <- unlist(totals)
+
+  # g-weights
+  g_weights <- calibSample_work(X, d=w, totals=totals, q=q, method=method, bounds=bounds, maxit=maxit, tol=tol, eps=eps)
+  # final-weights
+  final_weights <- g_weights*w
+
+  invisible(list(g_weights=g_weights, final_weights=final_weights))
+})
+
+setMethod("calibSample", c(inp="data.frame", totals="list"), function(inp, totals, ...) {
+  samp <- inp
+  vnames <- names(totals)
+  
+  #  check if vars exist
+  if ( !all(vnames %in% colnames(samp)) ) {
+    stop("not all slotnames of argument 'totals' exist in argument 'inp'!\n")
+  }
+  
+  # check if totals match leves of vars
+  res <- sapply(1:length(totals), function(x) {
+    ii <- match(vnames[x], colnames(samp))
+    if ( !is.na(ii) ) {
+      ll <- levels(factor(samp[,ii]))
+      res <- length(totals[[x]]) != length(ll)
+    } else {
+      res <- TRUE
+    }
+    res
+  })
+  if ( sum(res) != 0 ) {
+    stop("please specify the input. Number of totals does not match with the number of levels!\n")
+  }
+  
+  # handle additional arguments
+  args <- list(...)
+  if ( is.null(args$method) ) {
+    method <- "raking"
+  }
+  if ( is.null(args$bounds) ) {
+    bounds <- c(0,10)
+  }
+  if ( is.null(args$maxit) ) {
+    maxit <- 500
+  }
+  if ( is.null(args$tol) ) {
+    tol <- 1e-06
+  }
+  if ( is.null(args$q) ) {
+    q <- NULL
+  }  
+  if ( is.null(args$eps) ) {
+    eps <- .Machine$double.eps
+  }
+  
+  # everything ok so far
+  X <- calibVars(samp[,vnames])
+  
+  # initial sample weights
+  if ( is.null(args$w) ) {
+    w <- rep(1, nrow(samp))
+  } else {
+    ii <- match(w, colnames(samp))
+    if ( is.na(ii) ) {
+      stop("specified weight-variable does not exist in argument 'inp'!\n")
+    }
+    w <- samp[,ii]
+  }
+  totals <- unlist(totals)
+  
+  # g-weights
+  g_weights <- calibSample_work(X, d=w, totals=totals, q=q, method=method, bounds=bounds, maxit=maxit, tol=tol, eps=eps)
+  # final-weights
+  final_weights <- g_weights*w
+  
+  invisible(list(g_weights=g_weights, final_weights=final_weights))
+})
+
+calibSample_work <- function(X, d, totals, q=NULL,
   method=c("raking", "linear", "logit"),
   bounds=c(0, 10), maxit=500, tol=1e-06,
   eps=.Machine$double.eps) {
