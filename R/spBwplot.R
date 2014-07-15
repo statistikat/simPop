@@ -1,23 +1,24 @@
 spBwplot <- function(inp, x, cond = NULL, horizontal = TRUE,
-  coef = 1.5, zeros = TRUE, minRatio = NULL, do.out = FALSE, ...) {
-
+                     coef = 1.5, zeros = TRUE, minRatio = NULL, 
+                     do.out = FALSE, ...) {
+  
   ## initializations
   if ( !class(inp) == "synthPopObj" ) {
     stop("input argument 'inp' must be of class 'synthPopObj'!\n")
   }
-
+  
   weights.pop <- inp@pop@weight
   weights.samp <- inp@sample@weight
   dataS <- inp@sample@data
   dataP <- inp@pop@data
-
+  
   if ( !is.character(x) || length(x) == 0 ) {
     stop("'x' must be a character vector of positive length!\n")
   }
   if ( !(all(x %in% colnames(dataP)) & (all(x %in% colnames(dataS)))) ) {
     stop("The variable names specified in argument 'x' must be available both in the population and the sample!\n")
   }
-
+  
   if ( !is.null(cond) && !is.character(cond) ) {
     stop("'cond' must be a character vector or NULL!\n")
     if ( length(cond) != 1 ) {
@@ -27,15 +28,12 @@ spBwplot <- function(inp, x, cond = NULL, horizontal = TRUE,
   if ( !(all(cond %in% colnames(dataP)) & (all(cond %in% colnames(dataS)))) ) {
     stop("The variable names specified in argument 'cond' must be available both in the population and the sample!")
   }
-
+  
   horizontal <- isTRUE(horizontal)
   zeros <- isTRUE(zeros)
   do.out <- isTRUE(do.out)
-  #nP <- if(inherits(dataP, "data.frame")) 2 else 1+length(dataP)
-  nP <- 2
-  pop <- "Population"
-  lab <- c("Sample", pop)
-
+  lab <- c("Sample", "Population")
+  
   ## compute statistics for boxplots and construct objects for 'bwplot'
   # from sample
   tmp <- getBwplotStats(x, weights.samp, cond, dataS, coef=coef, zeros=zeros, do.out=do.out, name=lab[1])
@@ -51,7 +49,7 @@ spBwplot <- function(inp, x, cond = NULL, horizontal = TRUE,
     nzero <- rbind(nzero, tmp$nzero)
   }
   out <- c(out, tmp$out)
-
+  
   ## construct formula for 'bwplot'
   form <- ifelse(horizontal, ".name~.x", ".x~.name")  # basic formula
   if ( length(x) > 1 ) {
@@ -75,8 +73,8 @@ spBwplot <- function(inp, x, cond = NULL, horizontal = TRUE,
   }
   ## define local version of 'bwplot'
   localBwplot <- function(form, values, xlab = NULL, ylab = NULL, ...,
-  # these arguments are defined so that they aren't supplied twice:
-  x, data, allow.multiple, outer, panel, groups) {
+                          # these arguments are defined so that they aren't supplied twice:
+                          x, data, allow.multiple, outer, panel, groups) {
     bwplot(form, data=values, panel=panelSpBwplot, xlab=xlab, ylab=ylab, ...)
   }
   ## call 'bwplot'
@@ -104,18 +102,18 @@ panelSpBwplot <- function(x, y, coef=1.5, zeros = TRUE, ratio, outliers, subscri
 # get data.frame and all required statistics
 getBwplotStats <- function(x, weights = NULL, cond = NULL, data, ..., name = "") {
   if ( is.null(cond) ) {
-    x <- data[,x,with=FALSE]
+    x <- data[, x, with=FALSE]
     if ( length(weights) == 0 ) {
       w <- NULL
-      } else {
-        w <- data[[weights]]
+    } else {
+      w <- data[[weights]]
     }
     prepBwplotStats(x, w, ..., name=name)
   } else {
     spl <- split(data, data[[cond]])
     tmp <- lapply(spl, function(z) {
       data <- z
-      x <- data[,x,with=FALSE]
+      x <- data[, x, with=FALSE]
       if ( length(weights) == 0 ) {
         w <- NULL
       } else {

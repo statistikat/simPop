@@ -32,7 +32,8 @@ spTable(inp, select)
   \code{\link{spMosaic}}, \code{\link{tableWt}}
 }
 \examples{
-data(eusilcS)
+set.seed(1234)  # for reproducibility
+data(eusilcS)   # load sample data
 samp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize",
   strata="db040", weight="db090")
 eusilcP <- simStructure(data=samp, method="direct", basicHHvars=c("age", "rb090"))

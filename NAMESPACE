@@ -38,7 +38,6 @@ export(
   simRelation,
   simStructure,
   specifyInput,
-  spBwplot,
   spBwplotStats,
   spBwplot,
   spCdf,
@@ -61,8 +60,6 @@ exportClasses(
 S3method(contingencyWt, default)
 S3method(contingencyWt, matrix)
 S3method(contingencyWt, data.frame)
-# methods for S3 generic 'spCdfplot'
-S3method(spCdfplot, default)
 # methods for S3 generic 'calibVars'
 S3method(calibVars, default)
 S3method(calibVars, matrix)
@@ -80,6 +77,9 @@ S3method(covWt, data.frame)
 # methods for S3 generic 'prepBwplotStats'
 S3method(prepBwplotStats, default)
 S3method(prepBwplotStats, data.frame)
+# methods for S3 generic 'prepCdf'
+S3method(prepCdf, default)
+S3method(prepCdf, data.frame)
 
 ## register methods for existing S3 generics
 # as.array

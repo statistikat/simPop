@@ -1,6 +1,6 @@
 spTable <- function(inp, select) {
   if ( class(inp) != "synthPopObj") {
-    stop("wrong input! Argument 'inp' must be of class 'synthPopobj'!\n")
+    stop("wrong input! Argument 'inp' must be of class 'synthPopObj'!\n")
   }
   dataS <- inp@sample@data
   dataP <- inp@pop@data
