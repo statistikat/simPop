@@ -111,7 +111,6 @@ double calc_factor(double obj, IntegerVector hh_head, IntegerVector hh_size, Int
   return(factor);
 }
 
-// [[Rcpp::export]]
 IntegerVector calibPop_work(IntegerMatrix inp, NumericVector totals, IntegerVector weights,
   List hh_info, List params) {
 

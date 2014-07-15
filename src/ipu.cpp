@@ -3,7 +3,6 @@
 #include <Rcpp.h>
 using namespace Rcpp;
 
-// [[Rcpp::export]]
 NumericVector ipu_work(NumericMatrix inp, NumericVector con, NumericVector w, double eps, IntegerVector verbose) {
   int nr_con = con.size();
   int nr_rows = inp.nrow();
