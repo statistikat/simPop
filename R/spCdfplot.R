@@ -1,6 +1,5 @@
-spCdfplot <- function(inp, x, weights = NULL, cond = NULL, 
-                      approx = c(FALSE, TRUE), n = 10000, 
-                      bounds = TRUE, ...) {
+spCdfplot <- function(inp, x, cond = NULL, approx = c(FALSE, TRUE), 
+                      n = 10000, bounds = TRUE, ...) {
   ## initializations
   if ( !class(inp) == "synthPopObj" ) {
     stop("input argument 'inp' must be of class 'synthPopObj'!\n")
