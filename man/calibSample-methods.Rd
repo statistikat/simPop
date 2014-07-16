@@ -2,19 +2,19 @@
 \docType{methods}
 \alias{calibSample}
 \alias{calibSample-methods}
-\alias{calibSample,synthPopObj,list-method}
+\alias{calibSample,dataObj_or_synthPopObj,list-method}
 \alias{calibSample,data.frame,list-method}
 \title{Calibrate sample weights}
 \description{
   Calibrate sample weights according to known marginal population totals. Based on initial sample weights, the so-called \emph{g}-weights are computed by generalized raking procedures.
 }
 \section{Methods}{
-\describe{blabla
-  \item{\code{signature(inp="synthPopObj", totals="list",...)}}{
-  bla1
+\describe{The function provides methods with the following signatures.
+  \item{\code{signature(inp="dataObj_or_synthPopObj", totals="list",...)}}{
+  Argument 'inp' must be an object of class \code{\linkS4class{dataObj}} or \code{\linkS4class{synthPopObj}}.
   }
   \item{\code{signature(inp="data.frame", totals="list",...)}}{
-  bla2
+  Argument 'inp' must be an object of class 'data.frame'.
   }
 }}
 

@@ -1,10 +1,16 @@
-# Todo: Methods to apply calibSample on objects of class "synthPopObj" and "dataObj"
+setClassUnion('dataObj_or_synthPopObj', c('dataObj', 'synthPopObj'))
 setGeneric("calibSample", function(inp, totals, ...) {
   standardGeneric("calibSample")
 })
 
-setMethod("calibSample", c(inp="synthPopObj", totals="list"), function(inp, totals, ...) {
-  samp <- inp@sample@data
+setMethod("calibSample", c(inp="dataObj_or_synthPopObj", totals="list"), function(inp, totals, ...) {
+  if ( class(inp) == "dataObj" ) {
+    samp <- inp@data
+  }
+  if ( class(inp) == "synthPopObj" ) {
+    samp <- inp@sample@data
+  }
+  
   vnames <- names(totals)
 
   #  check if vars exist
@@ -52,7 +58,12 @@ setMethod("calibSample", c(inp="synthPopObj", totals="list"), function(inp, tota
   X <- calibVars(samp[,vnames,with=FALSE])
 
   # initial sample weights
-  w <- samp[[inp@sample@weight]]
+  if ( class(inp) == "dataObj" ) {
+    w <- samp[[inp@weight]]
+  }
+  if ( class(inp) == "synthPopObj" ) {
+    w <- samp[[inp@sample@weight]]
+  }  
 
   totals <- unlist(totals)
 
