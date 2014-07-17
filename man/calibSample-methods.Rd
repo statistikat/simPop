@@ -2,24 +2,21 @@
 \docType{methods}
 \alias{calibSample}
 \alias{calibSample-methods}
-\alias{calibSample,dataObj_or_synthPopObj,list-method}
-\alias{calibSample,data.frame,list-method}
+\alias{calibSample,df_or_dataObj_or_synthPopObj,dataFrame_or_Table-method}
 \title{Calibrate sample weights}
 \description{
   Calibrate sample weights according to known marginal population totals. Based on initial sample weights, the so-called \emph{g}-weights are computed by generalized raking procedures.
 }
 \section{Methods}{
 \describe{The function provides methods with the following signatures.
-  \item{\code{signature(inp="dataObj_or_synthPopObj", totals="list",...)}}{
-  Argument 'inp' must be an object of class \code{\linkS4class{dataObj}} or \code{\linkS4class{synthPopObj}}.
-  }
-  \item{\code{signature(inp="data.frame", totals="list",...)}}{
-  Argument 'inp' must be an object of class 'data.frame'.
+  \item{\code{signature(inp="df_or_dataObj_or_synthPopObj", totals="dataFrame_or_Table",...)}}{
+  Argument 'inp' must be an object of class \code{data.frame}, \code{\linkS4class{dataObj}} or \code{\linkS4class{synthPopObj}} and the totals must be specified in either objects of class \code{table} or \code{data.frame}. If argument 'totals' is a data.frame it must be provided in a way that in the first columns n-columns the combinations of variables are listed. In the last column, the frequency counts must be specified. Furthermore, variable names of all but the last column must be available also from the sample data specified in argument 'inp'.
+If argument 'total' is a table (e.g. created with function \code{\link{tableWt}}, it must be made sure that the dimnames match the variable names (and levels) of the specified input data set.
   }
 }}
 
 \details{
-  The methods return a list containing both the \emph{g}-weights as well as the final weights (initial sampling weights adjusted by the \emph{g}-weights.
+  The methods return a list containing both the \emph{g}-weights (slot \code{g_weights}) as well as the final weights (slot \code{final_weights}) (initial sampling weights adjusted by the \emph{g}-weights.
 }
 \note{
   This is a faster implementation of parts of \code{\link[sampling]{calib}} from package \code{sampling}. Note that the default calibration method is raking and that the truncated linear method is not yet implemented.
@@ -41,20 +38,40 @@
 
 \examples{
 data(eusilcS)
+eusilcS$agecut <- cut(eusilcS$age, 7)
 inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
-eusilcP <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090"))
 
-# synthPopObj-method
-totals <- list()
-totals[[1]] <- c(3990798, 4191431)
-names(totals) <- "rb090"
-res1 <- calibSample(inp=eusilcP, totals)
+## for simplicity, we are using population data directly from the sample, but you get the idea
+totals1 <- tableWt(eusilcS[, c("agecut","rb090")], weights=eusilcS$rb050)
+totals2 <- tableWt(eusilcS[, c("rb090","agecut")], weights=eusilcS$rb050)
+totals3 <- tableWt(eusilcS[, c("rb090","agecut","db040")], weights=eusilcS$rb050)
+totals4 <- tableWt(eusilcS[, c("agecut","db040","rb090")], weights=eusilcS$rb050)
 
-# data.frame-method
-df <- as.data.frame(eusilcP@sample@data)
-res2 <- calibSample(inp=df, totals, w="db090")
+weights1 <- calibSample(inp, totals1)
+totals1.df <- as.data.frame(totals1)
+weights1.df <- calibSample(inp, totals1.df)
+identical(weights1, weights1.df)
 
-identical(res1, res2)
+# we can also use a data.frame and an optional weight vector as input
+df <- as.data.frame(inp@data)
+w <- inp@data[[inp@weight]]
+weights1.x <- calibSample(df, totals1.df, w=inp@data[[inp@weight]])
+identical(weights1, weights1.x)
+
+weights2 <- calibSample(inp, totals2)
+totals2.df <- as.data.frame(totals2)
+weights2.df <- calibSample(inp, totals2.df)
+identical(weights2, weights2.df)
+
+weights3 <- calibSample(inp, totals3)
+totals3.df <- as.data.frame(totals3)
+weights3.df <- calibSample(inp, totals3.df)
+identical(weights3, weights3.df)
+
+weights4 <- calibSample(inp, totals4)
+totals4.df <- as.data.frame(totals4)
+weights4.df <- calibSample(inp, totals4.df)
+identical(weights4, weights4.df)
 }
 \keyword{methods}
 
