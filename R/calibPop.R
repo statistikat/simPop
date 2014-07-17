@@ -3,8 +3,22 @@ calcFinalWeights <- function(data0, totals0, params) {
   # TODO: speed-improvements
   # each row of output contains indices of a specific margin
   indices_by_constraint <- function(data0, totals0, parameter) {
+    # recode to character and set NA to "NA"
+    myfun <- function(x) {
+      x <- as.character(x)
+      ii <- which(is.na(x))
+      if ( length(ii) > 0 ) {
+        x[ii] <- "NA"
+      }
+      x
+    }
+
     out <- matrix(NA, nrow=nrow(totals0), ncol=nrow(data0))
     totals0 <- as.data.frame(totals0)
+    totals0[,parameter] <- apply(totals0[,parameter], 2, myfun)
+    for ( x in parameter ) {
+      data0[[x]] <- myfun(data0[[x]])
+    }
     for (i in 1:nrow(totals0) ) {
       ex <- paste("out[i,] <- as.integer(", sep="")
       for ( k in seq_along(parameter) ) {
@@ -21,22 +35,45 @@ calcFinalWeights <- function(data0, totals0, params) {
 
   inp <- indices_by_constraint(data0, totals0, params$parameter)
   current_totals <- as.numeric(totals0$N)
-  weights <- as.integer(data0$weights)
+  weights <- as.integer(data0[[params$weight]])
 
   hh_info <- list()
-  hh_info$hh_ids <- as.integer(data0$hid)
-  hh_info$hh_head <- as.integer(data0$pid)
-  hh_info$hh_head[hh_info$hh_head>1] <- 0L
-  hh_info$hh_size <- as.integer(data0$hhsize_calculated)
+  hh_info$hh_ids <- as.integer(data0[[params$hhid]])
+  hh_info$hh_head <- rep(0L, nrow(data0))
+  index <- which(sapply(data0[[params$pid]], function(x) { unlist(strsplit(x, "[.]"))[2] } ) == "1")
+  hh_info$hh_head[index] <- 1L
+  hh_info$hh_size <- as.integer(data0[[params$hhsize]])
 
   w <- .Call("synthPop_calibPop_work", inp=inp, totals=current_totals,
-        weights=weights, hh_info=hh_info, params=params, package="synthPop")
+    weights=weights, hh_info=hh_info, params=params, package="synthPop")
   invisible(w)
 }
 
+calibPop <- function(inp, split, temp = 30, eps.factor = 0.05, maxiter=200,
+  temp.cooldown = 0.975, factor.cooldown = 0.85, min.temp = 10^-3, verbose=FALSE) {
 
-calibPop <- function(data, totals, hid, parameter, split, temp = 30, eps.factor = 0.05, maxiter=200, temp.cooldown = 0.975, factor.cooldown = 0.85, min.temp = 10^-3, verbose=FALSE) {
   x <- NULL
+  data <- inp@pop@data
+  hid <- inp@pop@hhid
+  pid <- inp@pop@pid
+  hhsize <- inp@pop@hhsize
+  hhsize <- inp@pop@hhsize
+  totals <- inp@table
+  parameter <- colnames(inp@table)[-ncol(inp@table)]
+
+  if ( !is.null(split) ) {
+    if ( !split %in% colnames(data) ) {
+      stop("variable specified in argument 'split' must be a column in synthetic population (slot 'data' of argument 'inp')!\n")
+    }
+    if ( !split %in% parameter ) {
+      stop("variable specified in argument 'split' must be a column in slot 'table' of argument 'inp'!\n")
+    }
+  } else {
+    data$tmpsplit <- 1
+    totals$tmpsplit <- 1
+    split <- "tmpsplit"
+  }
+
   params <- list()
   params$temp <- as.numeric(temp)[1]
   params$eps_factor = as.numeric(eps.factor)[1]
@@ -46,6 +83,20 @@ calibPop <- function(data, totals, hid, parameter, split, temp = 30, eps.factor 
   params$min_temp = as.numeric(min.temp)[1]
   params$verbose <- ifelse(verbose, 1L, 0L)
   params$parameter <- parameter
+  params$weight <- inp@pop@weight
+  params$hhid <- hid
+  params$pid <- pid
+  params$hhsize <- hhsize
+
+  # generate donors
+  data2 <- sampHH(data, sizefactor=2, hid=hid, strata=split, hsize=hhsize)
+  data2[[params$weight]] <- 0
+  data2 <- data2[, which(!grepl(hid, colnames(data2))), with=FALSE]
+  cn <- colnames(data2)
+  cn[length(cn)] <- hid
+  setnames(data2, cn)
+  data2 <- data2[,match(colnames(data), cn), with=FALSE]
+  data <- rbind(data, data2)
 
   parallel <- FALSE
   have_win <- Sys.info()["sysname"] == "Windows"
@@ -57,19 +108,12 @@ calibPop <- function(data, totals, hid, parameter, split, temp = 30, eps.factor 
     parallel <- FALSE
   }
 
-  # calculate hhsize if not existing
-  setkeyv(data, hid)
-  res <- data[,.N,by=key(data)]
-  setkeyv(res, hid)
-  setnames(res, c(hid, "hhsize_calculated"))
-  data <- res[data]
-
   ii <- match(parameter, colnames(data))
   data[,ii] <- data[,lapply(.SD,as.factor),.SDcols=parameter]
   rm(ii)
 
   ## split problem by "split"-factor
-  setkeyv(data,split)
+  setkeyv(data, split)
   setkeyv(totals, split)
   split.number <- unique(data[,split,with=F])
 
@@ -106,6 +150,10 @@ calibPop <- function(data, totals, hid, parameter, split, temp = 30, eps.factor 
   }
   # return dataset with new weights
   data$new.weights <- as.integer(unlist(final_weights))
-  data$hhsize_calculated <- NULL
-  return(data)
+  data <- data[data$new.weights==1,]
+  data[[inp@pop@weight]] <- data$new.weights
+  data$new.weights <- NULL
+  inp@pop@data <- data
+  invisible(inp)
 }
+

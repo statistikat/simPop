@@ -16,7 +16,8 @@ simEUSILC(dataS, hid = "db030", wh = "db090", wp = "rb050",
   equidist = TRUE, probs = NULL, gpd = TRUE,
   threshold = NULL, est = "moments", const = NULL,
   alpha = 0.01, residuals = TRUE,
-  components = c("py010n", "py050n", "py090n","py100n", "py110n", "py120n", "py130n", "py140n"),
+  components = c("py010n", "py050n", "py090n",
+    "py100n", "py110n", "py120n", "py130n", "py140n"),
   conditional = c(getCatName(income), "pl030"),
   keep = TRUE, maxit = 500, MaxNWts = 1500,
   tol = .Machine$double.eps^0.5, seed)
@@ -42,7 +43,7 @@ simEUSILC(dataS, hid = "db030", wh = "db090", wp = "rb050",
   \item{probs}{numeric vector with values in \eqn{[0, 1]}; if \code{method} is \code{"multinom"} and \code{breaks} is \code{NULL}, this gives probabilities for quantiles to be used as (positive) break points. If supplied, this is preferred over \code{equidist}.}
   \item{gpd}{logical; if \code{method} is \code{"multinom"}, this indicates whether the upper tail of the personal income should be simulated by random draws from a (truncated) generalized Pareto distribution rather than a uniform distribution.}
   \item{threshold}{a numeric value; if \code{method} is \code{"multinom"}, values for categories above \code{threshold} are drawn from a (truncated) generalized Pareto distribution.}
-  \item{est}{a character string; if \code{method} is \code{"multinom"}, the estimator to be used to fit the generalized Pareto distribution (see \code{\link[POT:fitGPD]{fitgpd}}).}
+  \item{est}{a character string; if \code{method} is \code{"multinom"}, the estimator to be used to fit the generalized Pareto distribution.}% (see \code{\link[POT:fitGPD]{fitgpd}}).}
   \item{const}{numeric; if \code{method} is \code{"twostep"}, this gives a constant to be added before log transformation.}
   \item{alpha}{numeric; if \code{method} is \code{"twostep"}, this gives trimming parameters for the sample data. Trimming is thereby done with respect to the variable specified by \code{additional}. If a numeric vector of length two is supplied, the first element gives the trimming proportion for the lower part and the second element the trimming proportion for the upper part. If a single numeric is supplied, it is used for both. With \code{NULL}, trimming is suppressed.}
   \item{residuals}{logical; if \code{method} is \code{"twostep"}, this indicates whether the random error terms should be obtained by draws from the residuals. If \code{FALSE}, they are drawn from a normal distribution (median and MAD of the residuals are used as parameters).}

@@ -1,4 +1,126 @@
-calibSample <- function(X, d, totals, q=NULL,
+setClassUnion("df_or_dataObj_or_synthPopObj", c("data.frame", "dataObj", "synthPopObj"))
+setClassUnion("dataFrame_or_Table", c("data.frame", "table"))
+setGeneric("calibSample", function(inp, totals, ...) {
+  standardGeneric("calibSample")
+})
+
+setMethod("calibSample", c(inp="df_or_dataObj_or_synthPopObj", totals="dataFrame_or_Table"), function(inp, totals, ...) {
+  if ( class(inp) == "data.frame" ) {
+    samp <- data.table(inp)
+  }
+  if ( class(inp) == "dataObj" ) {
+    samp <- inp@data
+  }
+  if ( class(inp) == "synthPopObj" ) {
+    samp <- inp@sample@data
+  }
+
+  if ( class(totals) == "table" ) {
+    totals <- as.data.frame(totals)
+  }
+
+  if ( ncol(totals) < 2 ) {
+    stop("we need at least one dimension variable and one column for frequencies!\n Check your input!\n")
+  }
+
+  freqs <- totals[,ncol(totals)]
+  totals <- totals[,-ncol(totals), drop=F]
+  vnames <- colnames(totals)
+
+  #  check if vars exist
+  if ( !all(vnames %in% colnames(samp)) ) {
+    print(vnames)
+    stop("not all slotnames of argument 'totals' exist in the sample slot of argument 'inp'!\n")
+  }
+
+  # handle additional arguments
+  args <- list(...)
+  if ( is.null(args$method) ) {
+    method <- "raking"
+  }
+  if ( is.null(args$bounds) ) {
+    bounds <- c(0,10)
+  }
+  if ( is.null(args$maxit) ) {
+    maxit <- 500
+  }
+  if ( is.null(args$tol) ) {
+    tol <- 1e-06
+  }
+  if ( is.null(args$q) ) {
+    q <- NULL
+  }
+  if ( is.null(args$eps) ) {
+    eps <- .Machine$double.eps
+  }
+
+  # everything ok so far
+  tmp <- samp[,vnames,with=FALSE]
+  fac <- apply(tmp, 1, function(x) { paste(x, collapse="-") })
+
+  # check if all combinations are available in the dataset
+  grid <- expand.grid(lapply(tmp, function(x) {
+    unique(x)
+  }))
+
+  # check consistency
+  if ( nrow(grid) > nrow(totals) ) {
+    stop("some combinations of characteristics are missing from input argument 'totals'!\n")
+  }
+  if ( nrow(grid) < nrow(totals) ) {
+    stop("in input argument 'totals' some combinations are listed that are not available from the sample!\n")
+  }
+
+  grid_fac <- apply(grid, 1, function(x) {
+    paste(x, collapse="-")
+  })
+  totals_fac <- apply(totals, 1, function(x) {
+    paste(x, collapse="-")
+  })
+  ii <- match(grid_fac, totals_fac)
+  if ( any(is.na(ii)) ) {
+    stop("some characteristings in argument 'totals' differ from those in the actual data!")
+  }
+
+  # create binary factors
+  X <- calibVars(fac)
+
+  # order totals
+  ii <- match(colnames(X), totals_fac)
+
+  grid <- grid[ii,]
+  freqs <- freqs[ii]
+
+  # initial sample weights
+  if ( class(inp) == "dataObj" ) {
+    w <- samp[[inp@weight]]
+  }
+  if ( class(inp) == "synthPopObj" ) {
+    w <- samp[[inp@sample@weight]]
+  }
+  if ( class(inp) == "data.frame" ) {
+    if ( !is.null(args$w) ) {
+      w <- args$w
+      if ( length(w) != nrow(samp) ) {
+        stop("if argument 'w' was provided, then its dimension must match the number of rows from argument 'inp'!\n")
+      }
+    } else {
+      w <- rep(1, nrow(samp))
+    }
+  }
+
+  totals <- freqs
+
+  # g-weights
+  g_weights <- calibSample_work(X, d=w, totals=totals, q=q, method=method, bounds=bounds, maxit=maxit, tol=tol, eps=eps)
+
+  # final-weights
+  final_weights <- g_weights*w
+
+  invisible(list(g_weights=g_weights, final_weights=final_weights))
+})
+
+calibSample_work <- function(X, d, totals, q=NULL,
   method=c("raking", "linear", "logit"),
   bounds=c(0, 10), maxit=500, tol=1e-06,
   eps=.Machine$double.eps) {

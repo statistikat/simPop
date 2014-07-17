@@ -28,7 +28,7 @@ simContinuous(synthPopObj, additional = "netIncome",
   \item{probs}{numeric vector with values in \eqn{[0, 1]}; if \code{method} is \code{"multinom"} and \code{breaks} is \code{NULL}, this gives probabilities for quantiles to be used as (positive) break points. If supplied, this is preferred over \code{equidist}.}
   \item{gpd}{logical; if \code{method} is \code{"multinom"}, this indicates whether the upper tail of the variable specified by \code{additional} should be simulated by random draws from a (truncated) generalized Pareto distribution rather than a uniform distribution.}
   \item{threshold}{a numeric value; if \code{method} is \code{"multinom"}, values for categories above \code{threshold} are drawn from a (truncated) generalized Pareto distribution.}
-  \item{est}{a character string; if \code{method} is \code{"multinom"}, the estimator to be used to fit the generalized Pareto distribution (see \code{\link[POT:fitGPD]{fitgpd}}).}
+  \item{est}{a character string; if \code{method} is \code{"multinom"}, the estimator to be used to fit the generalized Pareto distribution.}% (see \code{\link[POT:fitGPD]{fitgpd}}).}
   \item{limit}{an optional named list of lists; if multinomial models are computed, this can be used to account for structural zeros. The names of the list components specify the predictor variables for which to limit the possible outcomes of the response. For each predictor, a list containing the possible outcomes of the response for each category of the predictor can be supplied. The probabilities of other outcomes conditional on combinations that contain the specified categories of the supplied predictors are set to 0. Currently, this is only implemented for more than two categories in the response.}
   \item{censor}{an optional named list of lists or \code{data.frame}s; if multinomial models are computed, this can be used to account for structural zeros. The names of the list components specify the categories that should be censored. For each of these categories, a list or \code{data.frame} containing levels of the predictor variables can be supplied. The probability of the specified categories is set to 0 for the respective predictor levels. Currently, this is only implemented for more than two categories in the response.}
   \item{log}{logical; if \code{method} is \code{"lm"}, this indicates whether the linear model should be fitted to the logarithms of the variable specified by \code{additional}. The predicted values are then back-transformed with the exponential function. See \dQuote{Details} for more information.}
@@ -69,7 +69,8 @@ simContinuous(synthPopObj, additional = "netIncome",
 \dontrun{
 data(eusilcS)
 inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
-synthPop <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090", "hsize", "pl030", "pb220a"))
+synthPop <- simStructure(data=inp, method="direct",
+  basicHHvars=c("age", "rb090", "hsize", "pl030", "pb220a"))
 
 # multinomial model with random draws
 eusilcM <- simContinuous(synthPop, additional="netIncome", upper=200000, equidist=FALSE)

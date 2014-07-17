@@ -17,8 +17,7 @@ double calc_obj(IntegerMatrix inp, IntegerVector weights, NumericVector totals) 
 }
 
 // generate a new random solution by setting some households from 0->1 and some from1->0
-IntegerVector generate_new_solution(IntegerVector weights, IntegerVector hh_ids,
-  IntegerVector hh_head, double factor) {
+IntegerVector generate_new_solution(IntegerVector weights, IntegerVector hh_ids, IntegerVector hh_head, double factor) {
   std::vector<int> hh_ids_unique;
   std::vector<int> hh_status_unique;
   for ( int i=0; i<hh_ids.size(); ++i ) {
@@ -27,44 +26,36 @@ IntegerVector generate_new_solution(IntegerVector weights, IntegerVector hh_ids,
       hh_status_unique.push_back(weights[i]);
     }
   }
-  int nr_draws = floor(factor);
 
+  int nr_draws = (int)floor(factor);
   int nr_hh = hh_status_unique.size();
   int nr_active = std::accumulate(hh_status_unique.begin(), hh_status_unique.end(), 0);
   int nr_inactive = nr_hh - nr_active;
 
-  IntegerVector indices_active(nr_active);
-  IntegerVector indices_inactive(nr_active);
-
-  int counter_act = 0;
-  int counter_inact = 0;
+  std::vector<int> indices_active, indices_inactive;
   for ( int i=0; i<nr_hh; ++i ) {
-    // active
     if ( hh_status_unique[i] == 1 ) {
-      indices_active[counter_act] = hh_ids_unique[i];
-      counter_act = counter_act + 1;
-    }
-    // inactive
-    if ( hh_status_unique[i] == 0 ) {
-      indices_inactive[counter_inact] = hh_ids_unique[i];
-      counter_inact = counter_inact + 1;
+      // active
+      indices_active.push_back(hh_ids_unique[i]);
+    } else {
+      // inactive
+      indices_inactive.push_back(hh_ids_unique[i]);
     }
   }
 
   // sampling
-  IntegerVector draws1(nr_draws);
-  IntegerVector draws2(nr_draws);
+  std::vector<int> draws1, draws2;
 
   // fixme: sample without replacement
   int s = 0;
   for ( int i=0; i < nr_draws; ++i ) {
     // select an active household and set it to inactive
-    s = rand() % nr_active;     // v2 in the range 0 to nr_active
-    draws1[i] = indices_active[s];
+    s = rand() % nr_active;     // range: 0 to nr_active
+    draws1.push_back(indices_active[s]);
 
     // select an inactive household and set it to active
-    s = rand() % nr_inactive;   // v2 in the range 0 to nr_inactive
-    draws2[i] = indices_inactive[s];
+    s = rand() % nr_inactive;   // range: 0 to nr_inactive
+    draws2.push_back(indices_inactive[s]);
   }
 
   // fixme: std::find? | rcpp match?
@@ -115,11 +106,11 @@ double calc_factor(double obj, IntegerVector hh_head, IntegerVector hh_size, Int
   for ( int i=0; i<nr_hh; ++i ) {
     sizes[i] = hh_size_unique[i];
   }
-  double factor = obj / median_rcpp(sizes)/10;
+  double med10 = median_rcpp(sizes) / 5;
+  double factor = obj * med10;
   return(factor);
 }
 
-// [[Rcpp::export]]
 IntegerVector calibPop_work(IntegerMatrix inp, NumericVector totals, IntegerVector weights,
   List hh_info, List params) {
 
@@ -178,6 +169,7 @@ IntegerVector calibPop_work(IntegerMatrix inp, NumericVector totals, IntegerVect
 
       // calculate new objective value based on new solution
       obj_new = calc_obj(inp, new_weights, totals);
+
       if ( verb ) {
         Rprintf("current value of objective function: %g (old value: %g)\n", obj_new, obj);
       }

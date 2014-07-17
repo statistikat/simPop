@@ -1,7 +1,19 @@
+Changes in synthPop version 0.1.9
+  * allow more userfriendly input for calibSample()
+  * calibSample() can be applied to objects of class 'synthPopObj'
+  * updated example for ipu
+  * whipple index (original and modified) included
+  * sprague index included
+  * simInitSpatial() to generate districts from a broader region
+
 Changes in synthPop version 0.1.8
   * remove S3-class spBwplot() -> only default method was implemented. Removed option to supply a list of populations; rewritten to use 'synthPopObj'-objects
 
   * fixed man files for spBwplot() and spBwplotStats()
+
+  * updated calibPop() so that the function uses and returns objects of class 'synthPopObj'
+
+  * auxData()-methods to query/set 'sample' slot in 'synthPopObj'-objects
 
 Changes in synthPop version 0.1.7
   * parallel-computing on windows-platforms using doParallel-package

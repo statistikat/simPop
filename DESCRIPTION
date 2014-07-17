@@ -1,12 +1,12 @@
 Package: synthPop
 Type: Package
 Title: Simulation of synthetic populations for surveys based on auxiliary data
-Version: 0.1.7
-Date: 2014-05-15
-Author: Matthias Templ and Bernhard Meindl and Alexander Kowarik and Andreas Alfons
+Version: 0.1.8
+Date: 2014-05-22
+Author: Matthias Templ[aut], Bernhard Meindl[aut], Alexander Kowarik[aut], Andreas Alfons[aut] and Mathieu Ribatet[cph]
 Maintainer: Matthias Templ <matthias.templ@gmail.com>
-Depends: R(>= 3.0.0), lattice, vcd
-Imports: laeken, MASS, Rcpp (>= 0.11.0), e1071, data.table, parallel, nnet, POT, doParallel, foreach, methods
+Depends: R(>= 3.0.0), lattice, vcd, data.table
+Imports: laeken, MASS, Rcpp (>= 0.11.0), e1071, parallel, nnet, doParallel, foreach, methods
 LinkingTo: Rcpp
 Description: Simulate populations for surveys based on auxiliary data.
 License: GPL (>= 2)

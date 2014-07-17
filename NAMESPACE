@@ -1,7 +1,7 @@
 ## imports
 import(doParallel)
 import(foreach)
-import(POT)
+#import(POT)
 import(nnet)
 import(data.table)
 import(e1071)
@@ -14,7 +14,10 @@ importFrom(laeken, calibVars)
 importFrom(MASS, ginv)
 
 ## exports
+exportMethods("auxData")
+exportMethods("auxData<-")
 export(
+  addKnownMargins,
   calibPop,
   calibVars,
   calibSample,
@@ -35,19 +38,21 @@ export(
   simRelation,
   simStructure,
   specifyInput,
-  spBwplot,
   spBwplotStats,
   spBwplot,
   spCdf,
   spCdfplot,
   spMosaic,
+  sprague,
   spTable,
   tableWt,
-  varWt
+  varWt,
+  whipple
 )
 
 exportClasses(
-  "dataObj", "synthPopObj"
+  dataObj,
+  synthPopObj
 )
 
 ## register methods for S3 generics defined in this package
@@ -55,8 +60,6 @@ exportClasses(
 S3method(contingencyWt, default)
 S3method(contingencyWt, matrix)
 S3method(contingencyWt, data.frame)
-# methods for S3 generic 'spCdfplot'
-S3method(spCdfplot, default)
 # methods for S3 generic 'calibVars'
 S3method(calibVars, default)
 S3method(calibVars, matrix)
@@ -74,6 +77,9 @@ S3method(covWt, data.frame)
 # methods for S3 generic 'prepBwplotStats'
 S3method(prepBwplotStats, default)
 S3method(prepBwplotStats, data.frame)
+# methods for S3 generic 'prepCdf'
+S3method(prepCdf, default)
+S3method(prepCdf, data.frame)
 
 ## register methods for existing S3 generics
 # as.array

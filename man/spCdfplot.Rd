@@ -3,67 +3,32 @@
 \alias{spCdfplot}
 \alias{spCdfplot.default}
 \title{
-  Plot (weighted empirical) cumulative distribution functions
+  Plot weighted cumulative distribution functions
 }
 \description{
-  Plot (weighted empirical) cumulative distribution functions for survey 
-  and population data, possibly broken down according to conditioning 
-  variables.  For survey data, sample weights are taken into account.
+  Plot cumulative distribution functions, possibly broken down according to conditioning variables and taking into account sample weights.
 }
 \usage{
-spCdfplot(x, \dots)
-
-\method{spCdfplot}{default}(x, weights = NULL, cond = NULL, dataS, dataP = NULL, 
-          approx = NULL, n = 10000, bounds = TRUE, \dots)
+spCdfplot(inp, x, cond = NULL, approx = c(FALSE, TRUE), 
+  n = 10000, bounds = TRUE, \dots)
 }
 \arguments{
-  \item{x}{for the default method (currently the only method implemented), a 
-    character vector specifying the columns of \code{dataS} and \code{dataP} to 
-    be plotted.}
-  \item{weights}{a character string specifying the column of \code{dataS} that 
-    contains the (personal) sample weights.}
-  \item{cond}{an optional character vector specifying conditioning variables.}
-  \item{dataS}{a \code{data.frame} containing household survey data.}
-  \item{dataP}{optional; a \code{data.frame} containing simulated population 
-    data or a list of such \code{data.frame}s.}
-  \item{approx}{logicals indicating whether approximations of the cumulative 
-    distribution functions should be computed.  The default is to use 
-    \code{FALSE} for the survey data and \code{TRUE} for any population data.  
-    If no population data are supplied, a single logical should be used.  On 
-    the other hand, if any population data are supplied, the behavior is as 
-    follows.  If a single logical is supplied, it is used for the population 
-    data and \code{FALSE} is used for the survey data.  If a vector of length 
-    two is supplied, the first value is used for the survey data and the second 
-    for the population data.  Note that if multiple populations are supplied, 
-    the same value is used for all of them.}
-  \item{n}{integers specifying the number of points at which the approximations 
-    for the respective data sets take place (see 
-    \code{\link[stats:approxfun]{approx}}).  If a single value is supplied, it 
-    is used wherever \code{approx} is \code{TRUE}.  If a vector of length two 
-    and any population data are supplied, the first value is used for the 
-    survey data and the second for the population data (in case the 
-    corresponding values of \code{approx} are \code{TRUE}).  Note that if 
-    multiple populations are supplied, the same value is used for all of them.}
-  \item{bounds}{a logical indicating whether vertical lines should be drawn at 
-    0 and 1 (the bounds for cumulative distribution functions).}
-  \item{\dots}{for the generic function, further arguments to be passed down to 
-    methods.  For the default method, further arguments to be passed to 
-    \code{\link[lattice]{xyplot}}.}
+  \item{inp}{an object of class \code{\linkS4class{synthPopObj}} containing survey sample and synthetic population data.}
+  \item{x}{a character vector specifying the columns of data available in the sample and the population (specified in input object 'inp') to be plotted.}
+  \item{cond}{an optional character vector (of length 1, if used) specifying the conditioning variable.}
+  \item{approx}{logicals indicating whether approximations of the cumulative distribution functions should be computed.  The default is to use \code{FALSE} for the survey data and \code{TRUE} for the population data.}
+  \item{n}{integers specifying the number of points at which the approximations take place (see \code{\link[stats:approxfun]{approx}}).  It is used wherever \code{approx} is \code{TRUE}.}
+  \item{bounds}{a logical indicating whether vertical lines should be drawn at 0 and 1 (the bounds for cumulative distribution functions).}
+  \item{\dots}{further arguments to be passed to \code{\link[lattice]{xyplot}}.}
 }
 \details{
-  Sample weights are taken into account by adjusting the step height.  To be 
-  precise, the weighted step height for an observation is defined as its weight 
-  divided by the sum of all weights\eqn{\ ( w_{i} / \sum_{j = 1}^{n} w_{j} ).}{.}
+  Weights are directly extracted from the input object \code{inp} and are taken into account by adjusting the step height.  To be precise, the weighted step height for an observation is defined as its weight divided by the sum of all weights\eqn{\ ( w_{i} / \sum_{j = 1}^{n} w_{j} ).}{.}
 }
 \value{
-  An object of class \code{"trellis"}, as returned by 
-  \code{\link[lattice]{xyplot}}.
+  An object of class \code{"trellis"}, as returned by \code{\link[lattice]{xyplot}}.
 }
 \author{
   Andreas Alfons
-}
-\note{
-  A formula interface may be added in the future.
 }
 \seealso{
   \code{\link{spCdf}}, \code{\link[lattice]{xyplot}}
@@ -76,13 +41,19 @@ spCdfplot(x, \dots)
 
 set.seed(1234)  # for reproducibility
 data(eusilcS)   # load sample data
+inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", 
+  strata="db040", weight="db090")
+synthPop <- simStructure(data=inp, method="direct",
+  basicHHvars=c("age", "rb090", "hsize", "pl030", "pb220a"))
+
 # multinomial model with random draws
-eusilcM <- simEUSILC(eusilcS, upper = 200000, equidist = FALSE)
-# two-step regression
-eusilcT <- simEUSILC(eusilcS, method = "twostep")
-# plot results by gender
-spCdfplot("netIncome", "rb050", "rb090", dataS = eusilcS, 
-    dataP = list(M = eusilcM, T = eusilcT), layout = c(1, 2))
+eusilcM <- simContinuous(synthPop, additional="netIncome", 
+  upper=200000, equidist=FALSE)
+class(eusilcM)
+
+# plot results
+spCdfplot(eusilcM, "netIncome", cond=NULL)
+spCdfplot(eusilcM, "netIncome", cond="rb090", layout=c(1,2))
 }
 }
 \keyword{hplot}
