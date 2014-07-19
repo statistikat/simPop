@@ -1,5 +1,6 @@
 \name{totalsRG}
 \alias{totalsRG}
+\alias{totalsRGtab}
 \docType{data}
 \title{
 Population totals Region times Gender for Austria 2006
@@ -7,7 +8,9 @@ Population totals Region times Gender for Austria 2006
 \description{
 Population characteristics Region times Gender from Austria.
 }
-\usage{data(popRegionGender)}
+\usage{data(totalsRG)
+\data(totalsRGtab)
+}
 \format{
   totalsRG: A data frame with 18 observations on the following 3 variables.
   \describe{

@@ -1,6 +1,7 @@
 \name{synthPopObj-class}
 \docType{class}
 \alias{synthPopObj-class}
+\alias{show,synthPopObj-method}
 
 \title{Class \code{"synthPopObj"}}
 \description{
@@ -18,15 +19,23 @@ Objects are automatically created in function \code{\link{simStructure}}.
   }
 }
 \section{Methods}{
-No methods defined with class "synthPopObj" in the signature.
+A show method is defined with class "synthPopObj".
 }
 \author{
-  Bernhard Meindl
+  Bernhard Meindl and Matthias Templ
 }
 \seealso{
 \code{\linkS4class{dataObj}}
 }
 \examples{
 showClass("synthPopObj")
+
+## show method: generate an object of class synthPop first
+data(eusilcS)
+inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
+eusilcP <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090"))
+class(eusilcP)
+## shows some basic information:
+eusilcP
 }
 \keyword{classes}

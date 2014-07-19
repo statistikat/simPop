@@ -1,6 +1,7 @@
 \name{dataObj-class}
 \docType{class}
 \alias{dataObj-class}
+\alias{show,dataObj-method}
 
 \title{Class \code{"dataObj"}}
 \description{
@@ -21,10 +22,10 @@ Objects can be created by calls of the form \code{new("dataObj", ...)} but are u
   }
 }
 \section{Methods}{
-No methods defined with class "dataObj" in the signature.
+A show (print) method of class "dataObj" is implemented.
 }
 \author{
-Bernhard Meindl
+Bernhard Meindl and Matthias Templ
 }
 
 \seealso{
@@ -32,5 +33,11 @@ Bernhard Meindl
 }
 \examples{
 showClass("dataObj")
+
+## show method, generate an object of class dataObj first
+data(eusilcS)
+inp <- specifyInput(data=eusilcS, hhid="db030", weight="rb050", strata="db040")
+## shows some basic information:
+inp
 }
 \keyword{classes}

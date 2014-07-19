@@ -42,6 +42,7 @@ Henry S. Shryock and Jacob S. Siegel, Methods and Materials of Demography (New Y
 Matthias Templ
 }
 \seealso{
+\code{\linkS4class{sprague}}
 }
 \examples{
 age <- sample(1:100, 5000, replace=TRUE)
