@@ -70,10 +70,12 @@ S3method(calibVars, data.frame)
 S3method(corWt, default)
 S3method(corWt, matrix)
 S3method(corWt, data.frame)
+S3method(corWt, dataObj)
 # methods for S3 generic 'covWt'
 S3method(covWt, default)
 S3method(covWt, matrix)
 S3method(covWt, data.frame)
+S3method(covWt, dataObj)
 # methods for S3 generic 'prepBwplotStats'
 S3method(prepBwplotStats, default)
 S3method(prepBwplotStats, data.frame)

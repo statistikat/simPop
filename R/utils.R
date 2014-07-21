@@ -421,6 +421,23 @@ covWt.matrix <- function(x, weights, ...) {
 # method for data.frames
 covWt.data.frame <- function(x, weights, ...) covWt(as.matrix(x), weights)
 
+covWt.dataObj <- function(x, vars) {
+  dat <- x@data
+  if ( is.null(dat) ) {
+    return(NULL)
+  } else {
+    ii <- match(vars, colnames(dat))
+    if ( any(is.na(ii)) ) {
+      stop("please provide valid variables that exist in the input object!\n")
+    }
+    tmpdat <- dat[,vars,with=F]
+    if ( !is.null(x@weight) ) {
+      return(covWt.matrix(as.matrix(tmpdat), weight=dat[[x@weight]]))
+    } else {
+      return(covWt.matrix(as.matrix(tmpdat)))
+    }
+  }
+}
 
 ## weighted correlation matrix
 
@@ -454,6 +471,24 @@ corWt.matrix <- function(x, weights, ...) {
 # method for data.frames
 corWt.data.frame <- function(x, weights, ...) corWt(as.matrix(x), weights)
 
+# method for objects of class "dataObj"
+corWt.dataObj <- function(x, vars, ...) {
+  dat <- x@data
+  if ( is.null(dat) ) {
+    return(NULL)
+  } else {
+    ii <- match(vars, colnames(dat))
+    if ( any(is.na(ii)) ) {
+      stop("please provide valid variables that exist in the input object!\n")
+    }
+    tmpdat <- dat[,vars,with=F]
+    if ( !is.null(x@weight) ) {
+      return(corWt.matrix(as.matrix(tmpdat), weight=dat[[x@weight]]))
+    } else {
+      return(corWt.matrix(as.matrix(tmpdat)))
+    }
+  }
+}
 
 ## weighted cross product
 # designed for internal use, hence no error handling
@@ -481,7 +516,7 @@ manageSynthPopObj <- function(x, var, sample=FALSE, set=FALSE, values=NULL) {
       return(invisible(x@sample@data[[var]]))
     } else {
       return(invisible(x@pop@data[[var]]))
-    }    
+    }
   }
   if ( set == TRUE ) {
     if ( is.null(values) ) {

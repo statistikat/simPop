@@ -10,6 +10,7 @@
 \alias{corWt.default}
 \alias{corWt.matrix}
 \alias{corWt.data.frame}
+\alias{corWt.dataObj}
 \title{
   Weighted mean, variance, covariance matrix and correlation matrix
 }
@@ -30,6 +31,8 @@ covWt(x, \dots)
 
 \method{covWt}{data.frame}(x, weights, \dots)
 
+\method{covWt}{dataObj}(x, vars, \dots)
+
 corWt(x, \dots)
 
 \method{corWt}{default}(x, y, weights, \dots)
@@ -37,12 +40,16 @@ corWt(x, \dots)
 \method{corWt}{matrix}(x, weights, \dots)
 
 \method{corWt}{data.frame}(x, weights, \dots)
+
+\method{corWt}{dataObj}(x, vars, \dots)
 }
 \arguments{
   \item{x}{for \code{meanWt} and \code{varWt}, a numeric vector.  For 
-    \code{covWt} and \code{corWt}, a numeric vector, matrix or 
-    \code{data.frame}.}
+    \code{covWt} and \code{corWt}, a numeric vector, matrix, \code{data.frame} 
+    or \code{\linkS4class{dataObj}}. In case of a \code{\linkS4class{dataObj}}, weights are 
+    automatically used from the S4-object itself.} 
   \item{y}{a numeric vector.  If missing, this defaults to \code{x}.}
+  \item{vars}{a character vector of variable names that should be used for the calculation.}
   \item{weights}{an optional numeric vector containing sample weights.}
   \item{na.rm}{a logical indicating whether any \code{NA} or \code{NaN} values 
     should be removed from \code{x} before computation.  Note that the default 
@@ -84,6 +91,11 @@ corWt(x, \dots)
 data(eusilcS)
 meanWt(eusilcS$netIncome, weights=eusilcS$rb050)
 sqrt(varWt(eusilcS$netIncome, weights=eusilcS$rb050))
+
+data(eusilcS)
+inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
+corWt(inp, vars=c("age", "netIncome")) # dataObj-method
+covWt(inp, vars=c("age", "netIncome")) # dataObj-method
 }
 \keyword{univar}
 \keyword{multivariate}
