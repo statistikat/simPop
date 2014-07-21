@@ -1,7 +1,9 @@
 \name{utils}
 \Rdversion{1.1}
-\alias{meanWt}
-\alias{varWt}
+\alias{meanWt.default}
+\alias{meanWt.dataObj}
+\alias{varWt.default}
+\alias{varWt.dataObj}
 \alias{covWt}
 \alias{covWt.default}
 \alias{covWt.matrix}
@@ -20,9 +22,17 @@
   account sample weights.
 }
 \usage{
-meanWt(x, weights, na.rm = TRUE)
+meanWt(x, \dots)
 
-varWt(x, weights, na.rm = TRUE)
+\method{meanWt}{default}(x, weights, na.rm = TRUE)
+
+\method{meanWt}{dataObj}(x, vars, na.rm = TRUE)
+
+varWt(x, \dots)
+
+\method{varWt}{default}(x, weights, na.rm = TRUE)
+
+\method{varWt}{dataObj}(x, weights, na.rm = TRUE)
 
 covWt(x, \dots)
 
@@ -45,7 +55,8 @@ corWt(x, \dots)
 \method{corWt}{dataObj}(x, vars, \dots)
 }
 \arguments{
-  \item{x}{for \code{meanWt} and \code{varWt}, a numeric vector.  For
+  \item{x}{for \code{meanWt} and \code{varWt}, a numeric vector or an object of
+  class \code{\linkS4class{dataObj}}. For
     \code{covWt} and \code{corWt}, a numeric vector, matrix, \code{data.frame}
     or \code{\linkS4class{dataObj}}. In case of a \code{\linkS4class{dataObj}}, weights are
     automatically used from the S4-object itself.}
@@ -68,6 +79,9 @@ corWt(x, \dots)
 
   \code{covWt} and \code{corWt} always remove missing values pairwise and
   call \code{cov} and \code{cor}, respectively, if \code{weights} is missing.
+
+  \code{meanWt}, \code{varWt}, \code{covWt} and \code{corWt} all make use of slot \code{weights}
+  of the input object if the \code{dataObj}-method is used.
 }
 \value{
   For \code{meanWt}, the (weighted) mean.
@@ -93,10 +107,12 @@ data(eusilcS)
 meanWt(eusilcS$netIncome, weights=eusilcS$rb050)
 sqrt(varWt(eusilcS$netIncome, weights=eusilcS$rb050))
 
-data(eusilcS)
+# dataObj-methods
 inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
-corWt(inp, vars=c("age", "netIncome")) # dataObj-method
-covWt(inp, vars=c("age", "netIncome")) # dataObj-method
+meanWt(inp, vars="netIncome")
+sqrt(varWt(inp, vars="netIncome"))
+corWt(inp, vars=c("age", "netIncome"))
+covWt(inp, vars=c("age", "netIncome"))
 }
 \keyword{univar}
 \keyword{multivariate}
