@@ -1,4 +1,6 @@
-quantileWt <- function(x, weights = NULL, probs = seq(0, 1, 0.25), na.rm = TRUE) {
+quantileWt <- function(x, ...) UseMethod("quantileWt")
+
+quantileWt.default <- function(x, weights=NULL, probs=seq(0, 1, 0.25), na.rm=TRUE, ...) {
   # initializations
   if ( !is.numeric(x) ) {
     stop("'x' must be a numeric vector!\n")
@@ -32,4 +34,25 @@ quantileWt <- function(x, weights = NULL, probs = seq(0, 1, 0.25), na.rm = TRUE)
   select <- sapply(probs, function(p) min(which(rw >= p)))
   q <- x[select]
   invisible(q)
+}
+
+quantileWt.dataObj <- function(x, vars, probs=seq(0, 1, 0.25), na.rm=TRUE, ...) {
+  dat <- x@data
+  if ( is.null(dat) ) {
+    return(NULL)
+  } else {
+    if ( length(vars) > 1 ) {
+      stop("only one variable can be specified!\n")
+    }
+    ii <- match(vars, colnames(dat))
+    if ( any(is.na(ii)) ) {
+      stop("please provide valid variables that exist in the input object!\n")
+    }
+    tmpdat <- dat[[vars]]
+    if ( !is.null(x@weight) ) {
+      return(quantileWt.default(tmpdat, weights=dat[[x@weight]], probs=probs, na.rm=na.rm))
+    } else {
+      return(quantileWt.default(tmpdat, probs=probs, na.rm=na.rm))
+    }
+  }
 }

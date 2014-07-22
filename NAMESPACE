@@ -58,6 +58,10 @@ exportClasses(
 
 ## register methods for S3 generics defined in this package
 
+# methods for S3 generic 'quantileWt'
+S3method(quantileWt, default)
+S3method(quantileWt, dataObj)
+
 # methods for S3 generic 'meanWt'
 S3method(meanWt, default)
 S3method(meanWt, dataObj)
