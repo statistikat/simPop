@@ -26,15 +26,15 @@
 \usage{
 meanWt(x, \dots)
 
-\method{meanWt}{default}(x, weights, na.rm = TRUE)
+\method{meanWt}{default}(x, weights, na.rm = TRUE, \ldots)
 
-\method{meanWt}{dataObj}(x, vars, na.rm = TRUE)
+\method{meanWt}{dataObj}(x, vars, na.rm = TRUE, \ldots)
 
 varWt(x, \dots)
 
-\method{varWt}{default}(x, weights, na.rm = TRUE)
+\method{varWt}{default}(x, weights, na.rm = TRUE, \ldots)
 
-\method{varWt}{dataObj}(x, vars, na.rm = TRUE)
+\method{varWt}{dataObj}(x, vars, na.rm = TRUE, \ldots)
 
 covWt(x, \dots)
 
