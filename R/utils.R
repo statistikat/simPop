@@ -466,7 +466,7 @@ covWt.matrix <- function(x, weights, ...) {
 # method for data.frames
 covWt.data.frame <- function(x, weights, ...) covWt(as.matrix(x), weights)
 
-covWt.dataObj <- function(x, vars) {
+covWt.dataObj <- function(x, vars, ...) {
   dat <- x@data
   if ( is.null(dat) ) {
     return(NULL)
@@ -477,7 +477,7 @@ covWt.dataObj <- function(x, vars) {
     }
     tmpdat <- dat[,vars,with=F]
     if ( !is.null(x@weight) ) {
-      return(covWt.matrix(as.matrix(tmpdat), weight=dat[[x@weight]]))
+      return(covWt.matrix(as.matrix(tmpdat), weights=dat[[x@weight]]))
     } else {
       return(covWt.matrix(as.matrix(tmpdat)))
     }
@@ -528,7 +528,7 @@ corWt.dataObj <- function(x, vars, ...) {
     }
     tmpdat <- dat[,vars,with=F]
     if ( !is.null(x@weight) ) {
-      return(corWt.matrix(as.matrix(tmpdat), weight=dat[[x@weight]]))
+      return(corWt.matrix(as.matrix(tmpdat), weights=dat[[x@weight]]))
     } else {
       return(corWt.matrix(as.matrix(tmpdat)))
     }

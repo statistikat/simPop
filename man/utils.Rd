@@ -1,7 +1,9 @@
 \name{utils}
 \Rdversion{1.1}
+\alias{meanWt}
 \alias{meanWt.default}
 \alias{meanWt.dataObj}
+\alias{varWt}
 \alias{varWt.default}
 \alias{varWt.dataObj}
 \alias{covWt}
@@ -32,7 +34,7 @@ varWt(x, \dots)
 
 \method{varWt}{default}(x, weights, na.rm = TRUE)
 
-\method{varWt}{dataObj}(x, weights, na.rm = TRUE)
+\method{varWt}{dataObj}(x, vars, na.rm = TRUE)
 
 covWt(x, \dots)
 
