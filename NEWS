@@ -7,6 +7,7 @@ Changes in synthPop version 0.1.9
   * simInitSpatial() to generate districts from a broader region
   * dataObj-methods for covWt() and corWt()
   * dataObj-methods for meanWt() and varWt()
+  * method addWeights<- to modify sampling weights based on output from calibSample()
 
 Changes in synthPop version 0.1.8
   * remove S3-class spBwplot() -> only default method was implemented. Removed option to supply a list of populations; rewritten to use 'synthPopObj'-objects

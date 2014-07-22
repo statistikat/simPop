@@ -16,6 +16,7 @@ importFrom(MASS, ginv)
 ## exports
 exportMethods("auxData")
 exportMethods("auxData<-")
+exportMethods("addWeights<-")
 export(
   addKnownMargins,
   calibPop,
