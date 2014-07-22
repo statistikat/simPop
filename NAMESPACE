@@ -22,13 +22,13 @@ export(
   calibVars,
   calibSample,
   contingencyWt,
+  meanWt,
   corWt,
   covWt,
   getBreaks,
   getCat,
   ipu,
   manageSynthPopObj,
-  meanWt,
   quantileWt,
   sampHH,
   simCategorical,
@@ -56,6 +56,15 @@ exportClasses(
 )
 
 ## register methods for S3 generics defined in this package
+
+# methods for S3 generic 'meanWt'
+S3method(meanWt, default)
+S3method(meanWt, dataObj)
+
+# methods for S3 generic 'varWt'
+S3method(varWt, default)
+S3method(varWt, dataObj)
+
 # methods for S3 generic 'contingencyWt'
 S3method(contingencyWt, default)
 S3method(contingencyWt, matrix)
@@ -70,10 +79,12 @@ S3method(calibVars, data.frame)
 S3method(corWt, default)
 S3method(corWt, matrix)
 S3method(corWt, data.frame)
+S3method(corWt, dataObj)
 # methods for S3 generic 'covWt'
 S3method(covWt, default)
 S3method(covWt, matrix)
 S3method(covWt, data.frame)
+S3method(covWt, dataObj)
 # methods for S3 generic 'prepBwplotStats'
 S3method(prepBwplotStats, default)
 S3method(prepBwplotStats, data.frame)

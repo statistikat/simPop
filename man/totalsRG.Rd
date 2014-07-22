@@ -9,7 +9,7 @@ Population totals Region times Gender for Austria 2006
 Population characteristics Region times Gender from Austria.
 }
 \usage{data(totalsRG)
-\data(totalsRGtab)
+data(totalsRGtab)
 }
 \format{
   totalsRG: A data frame with 18 observations on the following 3 variables.
