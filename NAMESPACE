@@ -36,6 +36,7 @@ export(
   simComponents,
   simContinuous,
   simEUSILC,
+  simInitSpatial,
   simRelation,
   simStructure,
   specifyInput,
