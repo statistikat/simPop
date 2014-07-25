@@ -43,6 +43,7 @@ calcFinalWeights <- function(data0, totals0, params) {
   index <- which(sapply(data0[[params$pid]], function(x) { unlist(strsplit(x, "[.]"))[2] } ) == "1")
   hh_info$hh_head[index] <- 1L
   hh_info$hh_size <- as.integer(data0[[params$hhsize]])
+  hh_info$median_hhsize <- median(hh_info$hh_size[hh_info$hh_head==1], na.rm=TRUE)
 
   w <- .Call("synthPop_calibPop_work", inp=inp, totals=current_totals,
     weights=weights, hh_info=hh_info, params=params, package="synthPop")
@@ -52,14 +53,17 @@ calcFinalWeights <- function(data0, totals0, params) {
 calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
   temp.cooldown = 0.9, factor.cooldown = 0.85, min.temp = 10^-3, verbose=FALSE) {
 
+  if ( class(inp) != "synthPopObj" ) {
+    stop("argument 'inp' must be of class 'synthPopObj'!\n")
+  }
+
   x <- NULL
-  data <- inp@pop@data
-  hid <- inp@pop@hhid
-  pid <- inp@pop@pid
-  hhsize <- inp@pop@hhsize
-  hhsize <- inp@pop@hhsize
-  totals <- inp@table
-  parameter <- colnames(inp@table)[-ncol(inp@table)]
+  data <- popData(inp)
+  hid <- popObj(inp)@hhid
+  pid <- popObj(inp)@pid
+  hhsize <- popObj(inp)@hhsize
+  totals <- tableObj(inp)
+  parameter <- colnames(totals)[-ncol(totals)]
 
   if ( !is.null(split) ) {
     verbose <- FALSE
@@ -84,7 +88,7 @@ calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
   params$min_temp = as.numeric(min.temp)[1]
   params$verbose <- ifelse(verbose, 1L, 0L)
   params$parameter <- parameter
-  params$weight <- inp@pop@weight
+  params$weight <- popObj(inp)@weight
   params$hhid <- hid
   params$pid <- pid
   params$hhsize <- hhsize

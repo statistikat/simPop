@@ -6,9 +6,9 @@ using namespace Rcpp;
 
 // objective function
 NumericVector calc_obj(IntegerMatrix inp, IntegerVector weights, NumericVector totals) {
-  // in jeder zeile von inp stehen die indices eines constraints
-  // der dazugehoerige totalwert steht in totals[i]
-  // weights == 1 -> person ausgewaehlt
+  // in each row of inp we have the indices of a single constraint
+  // the corresponding total is available from totals[i]
+  // weights == 1 -> person is in synthetic population
   NumericVector obj(1);
   for ( int i=0; i < totals.size(); ++i ) {
     obj[0] = obj[0] + abs(sum(inp(i,_)*weights) - totals[i]);
@@ -73,44 +73,6 @@ IntegerVector generate_new_solution(IntegerVector weights, IntegerVector hh_ids,
   return(w_neu);
 }
 
-double median_rcpp(IntegerVector x) {
-   IntegerVector y = clone(x);
-   int n, half;
-   double y1, y2;
-   n = y.size();
-   half = n / 2;
-   if(n % 2 == 1) {
-      // median for odd length vector
-      std::nth_element(y.begin(), y.begin()+half, y.end());
-      return y[half] / 1.0;
-   } else {
-      // median for even length vector
-      std::nth_element(y.begin(), y.begin()+half, y.end());
-      y1 = y[half];
-      std::nth_element(y.begin(), y.begin()+half-1, y.begin()+half);
-      y2 = y[half-1];
-      return (y1 + y2) / 2.0;
-   }
-}
-
-double calc_factor(double obj, IntegerVector hh_head, IntegerVector hh_size, IntegerVector weights) {
-  std::vector<int> hh_size_unique; // unique and active
-  for ( int i=0; i<weights.size(); ++i ) {
-    if ( hh_head[i] == 1 && weights[i] == 1 ) {
-      hh_size_unique.push_back(hh_size[i]);
-    }
-  }
-
-  int nr_hh = hh_size_unique.size();
-  IntegerVector sizes(nr_hh);
-  for ( int i=0; i<nr_hh; ++i ) {
-    sizes[i] = hh_size_unique[i];
-  }
-  double med10 = median_rcpp(sizes) / 5;
-  double factor = obj * med10;
-  return(factor);
-}
-
 IntegerVector calibPop_work(IntegerMatrix inp, NumericVector totals, IntegerVector weights,
   List hh_info, List params) {
 
@@ -124,7 +86,8 @@ IntegerVector calibPop_work(IntegerMatrix inp, NumericVector totals, IntegerVect
   IntegerVector hh_ids = hh_info["hh_ids"];
   IntegerVector hh_head = hh_info["hh_head"];
   IntegerVector hh_size = hh_info["hh_size"];
-
+  NumericVector median_hhsize_x = hh_info["median_hhsize"];
+  double median_hhsize = median_hhsize_x[0];
   NumericVector temp_x = params["temp"];
   double temp = temp_x[0];
   NumericVector eps_factor_x = params["eps_factor"];
@@ -146,7 +109,7 @@ IntegerVector calibPop_work(IntegerMatrix inp, NumericVector totals, IntegerVect
   // calculate objective value based on initial solution
   obj = calc_obj(inp, weights, totals)[0];
 
-  double factor = calc_factor(obj, hh_head, hh_size, weights);
+  double factor = (median_hhsize / 5) * obj;
   if ( obj <= eps ) {
     if ( verb ) {
       Rprintf("We have nothing to do and are already finished!\nValue of objective function: %g | (required precision=%g)\n", obj, eps);
