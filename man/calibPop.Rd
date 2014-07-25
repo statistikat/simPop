@@ -8,7 +8,7 @@ Calibration of 0/1 weights by Simulated Annealing
 A Simulated Annealing Algorithm for calibration of synthetic population data available in a \code{\linkS4class{synthPopObj}}-object. The aims is to find, given a population, a combination of different households which optimally satisfy, in the sense of an acceptable error, a given table of specific known marginals. The known marginals are also already available in slot 'table' of the input object 'inp'.
 }
 \usage{
-calibPop(inp, split, temp=30, eps.factor=0.05, maxiter=200, temp.cooldown=0.975,
+calibPop(inp, split, temp=1, eps.factor=0.05, maxiter=200, temp.cooldown=0.9,
   factor.cooldown=0.85, min.temp=10^-3, verbose=FALSE)
 }
 \arguments{
@@ -37,7 +37,7 @@ a factor (between 0 and 1) specifying the rate at which the number of permutatio
 minimal temperature at which the algorithm will stop.
 }
   \item{verbose}{
-boolean variable; if TRUE some additional verbose output is provided.
+boolean variable; if TRUE some additional verbose output is provided, however only if \code{split} is NULL. Otherwise the computation is performed in parallel and no useful output can be provided.
 }
 }
 \details{
@@ -66,10 +66,10 @@ synthPop <- simCategorical(synthPop, additional=c("pl030", "pb220a"), method="mu
 margins <- as.data.frame(
   xtabs(rep(1, nrow(eusilcP)) ~ eusilcP$region + eusilcP$gender + eusilcP$citizenship))
 colnames(margins) <- c("db040", "rb090", "pb220a", "freq")
-synthPop <- addKnownMargins(inp, margins)
+synthPop <- addKnownMargins(synthPop, margins)
 
 # apply simulated annealing
-synthPop_adj <- calibPop(synthPop, split="db040", temp, eps.factor=0.1))
+synthPop_adj <- calibPop(synthPop, split="db040", temp=1, eps.factor=0.1)
 }
 }
 \keyword{datasets}

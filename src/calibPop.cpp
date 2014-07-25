@@ -5,13 +5,13 @@
 using namespace Rcpp;
 
 // objective function
-double calc_obj(IntegerMatrix inp, IntegerVector weights, NumericVector totals) {
+NumericVector calc_obj(IntegerMatrix inp, IntegerVector weights, NumericVector totals) {
   // in jeder zeile von inp stehen die indices eines constraints
   // der dazugehoerige totalwert steht in totals[i]
   // weights == 1 -> person ausgewaehlt
-  double obj=0.0;
+  NumericVector obj(1);
   for ( int i=0; i < totals.size(); ++i ) {
-    obj = obj + fabs(sum(inp(i,_)*weights) - totals[i]);
+    obj[0] = obj[0] + abs(sum(inp(i,_)*weights) - totals[i]);
   }
   return(obj);
 }
@@ -138,13 +138,13 @@ IntegerVector calibPop_work(IntegerMatrix inp, NumericVector totals, IntegerVect
   NumericVector min_temp_x = params["min_temp"];
   double min_temp = min_temp_x[0];
   int cooldown = 0;
-  double obj, obj_new = 0.0;
+  double obj,obj_new = 0.0;
 
   //acceptable error
   double eps = eps_factor*sum(weights);
 
   // calculate objective value based on initial solution
-  obj = calc_obj(inp, weights, totals);
+  obj = calc_obj(inp, weights, totals)[0];
 
   double factor = calc_factor(obj, hh_head, hh_size, weights);
   if ( obj <= eps ) {
@@ -158,7 +158,7 @@ IntegerVector calibPop_work(IntegerMatrix inp, NumericVector totals, IntegerVect
   int change = 0;
   double prob = 0.0;
   NumericVector samp_result(1);
-  while( temp > min_temp ) {
+  while ( temp > min_temp ) {
     if ( verb ) {
       Rprintf("current temperature: %f (minimal temp=%f)\n", temp, min_temp);
     }
@@ -168,10 +168,10 @@ IntegerVector calibPop_work(IntegerMatrix inp, NumericVector totals, IntegerVect
       new_weights = generate_new_solution(weights, hh_ids, hh_head, factor);
 
       // calculate new objective value based on new solution
-      obj_new = calc_obj(inp, new_weights, totals);
+      obj_new = calc_obj(inp, new_weights, totals)[0];
 
       if ( verb ) {
-        Rprintf("current value of objective function: %g (old value: %g)\n", obj_new, obj);
+        Rprintf("--> value of objective: %g (previous=%g)\n", obj_new, obj);
       }
       if ( obj_new <= eps ) {
         obj = obj_new;
@@ -197,6 +197,9 @@ IntegerVector calibPop_work(IntegerMatrix inp, NumericVector totals, IntegerVect
         prob = exp(-(obj_new-obj)/temp);
         samp_result = runif(1);
         if ( samp_result[0] <= prob ) {
+          if ( verb ) {
+            Rprintf("----> worse solution accepted! (samp=%g | prob=%g)]\n", samp_result[0], prob);
+          }
           for ( int z=0; z<weights.size(); ++z ) {
             weights[z] = new_weights[z];
           }

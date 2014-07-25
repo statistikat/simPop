@@ -49,8 +49,8 @@ calcFinalWeights <- function(data0, totals0, params) {
   invisible(w)
 }
 
-calibPop <- function(inp, split, temp = 30, eps.factor = 0.05, maxiter=200,
-  temp.cooldown = 0.975, factor.cooldown = 0.85, min.temp = 10^-3, verbose=FALSE) {
+calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
+  temp.cooldown = 0.9, factor.cooldown = 0.85, min.temp = 10^-3, verbose=FALSE) {
 
   x <- NULL
   data <- inp@pop@data
@@ -62,6 +62,7 @@ calibPop <- function(inp, split, temp = 30, eps.factor = 0.05, maxiter=200,
   parameter <- colnames(inp@table)[-ncol(inp@table)]
 
   if ( !is.null(split) ) {
+    verbose <- FALSE
     if ( !split %in% colnames(data) ) {
       stop("variable specified in argument 'split' must be a column in synthetic population (slot 'data' of argument 'inp')!\n")
     }
