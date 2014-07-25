@@ -5,7 +5,7 @@
 \alias{addWeights<--methods}
 \alias{addWeights<-,dataObj,list-method}
 \alias{addWeights<-,synthPopObj,list-method}
-\title{Methods for Function \code{auxData}}
+\title{Methods for Function \code{addWeights}}
 \description{
  allows to modify sampling weights of an \code{\linkS4class{dataObj}} or \code{\linkS4class{synthPopObj}}-object.
 As input the output of \code{\link{calibSample}} must be used.
