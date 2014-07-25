@@ -21,20 +21,22 @@ setMethod("show", "dataObj", function(object){
 })
 
 setMethod("show", "synthPopObj", function(object){
-  if ( is.null(object@pop) ) {
+  if ( is.null(popObj(object)) ) {
     cat("synthetic population has not been generated!\n")
   } else {
     dname <- "synthetic population"
     cat("\n")
     cat("-------------- \n")
-    cat(dname, " of size \n", nrow(object@pop@data), "x", ncol(object@pop@data), "\n")
+    dd <- dim(popData(object))
+    cat(dname, " of size \n", dd[1], "x", dd[2], "\n")
     cat("\n")
     cat("build from a sample of size \n")
-    cat(nrow(object@sample@data),"x",ncol(object@sample@data))
+    dd <- dim(sampleData(object))
+    cat(dd[1],"x",dd[2])
     cat("\n")
     cat("-------------- \n\n")
     cat("variables in the population:\n")
-    cat(paste(colnames(object@pop@data), collapse=","))
+    cat(paste(colnames(popData(object)), collapse=","))
     cat("\n")
   }
 })

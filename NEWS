@@ -11,6 +11,7 @@ Changes in synthPop version 0.1.9
   * dataObj-method for quantileWt()
   * updated default parameters for calibPop(). Previous choices for starting temperature were much to high and too many worse solution were accepted.
   * fixed example for calibPop()
+  * new accessor/set functions sampleData, sampleObj, sampleObj<-, popData, popObj, popObj<-, tableObj with updated man-page
 
 Changes in synthPop version 0.1.8
   * remove S3-class spBwplot() -> only default method was implemented. Removed option to supply a list of populations; rewritten to use 'synthPopObj'-objects

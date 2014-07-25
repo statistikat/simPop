@@ -14,8 +14,13 @@ importFrom(laeken, calibVars)
 importFrom(MASS, ginv)
 
 ## exports
-exportMethods("auxData")
-exportMethods("auxData<-")
+exportMethods("sampleObj")
+exportMethods("sampleObj<-")
+exportMethods("sampleData")
+exportMethods("popObj")
+exportMethods("popObj<-")
+exportMethods("popData")
+exportMethods("tableObj")
 exportMethods("addWeights<-")
 export(
   addKnownMargins,
