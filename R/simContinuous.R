@@ -429,7 +429,7 @@ simContinuous <- function(synthPopObj, additional = "netIncome",
       if ( have_win ) {
         cl <- makePSOCKcluster(nr_cores)
         registerDoParallel(cl)
-        values <- foreach(x=levels(dataS[[strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
+        valuesCat <- foreach(x=levels(dataS[[strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
           generateValues_multinom(
             dataSample=dataS[dataS[[strata]] == x,],
             dataPop=dataP[indStrata[[x]], predNames, with=F], params
