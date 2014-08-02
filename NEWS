@@ -1,3 +1,9 @@
+Changes in synthPop version 0.2.1
+  * fixed a bug in simContinuous (win only) reported by olivier.
+
+Changes in synthPop version 0.2.0
+  * version drop for final delivery
+
 Changes in synthPop version 0.1.9
   * allow more userfriendly input for calibSample()
   * calibSample() can be applied to objects of class 'synthPopObj'
