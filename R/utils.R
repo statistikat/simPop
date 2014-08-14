@@ -1,3 +1,33 @@
+# calculate parameters for parallel processing
+# returns a list with following elements
+# - have_win: TRUE if windows system, FALSE else
+# - nr_cores: number of cpus to use
+# - parallel: TRUE if parallel computing should be applied
+parallelParameters <- function(nr_cpus=NULL, nr_strata) {
+  control <- list()
+  control$have_win <- Sys.info()["sysname"] == "Windows"
+
+  cpus_available <- detectCores()
+  if ( !is.null(nr_cpus) && nr_cpus > cpus_available) {
+    stop("there are only",cpus_available,"cpus available in your system!\n")
+  }
+  if ( !is.null(nr_cpus) && nr_cpus < 1) {
+    stop("we must use at least one cpu!\n")
+  }
+
+  if ( !is.null(nr_cpus) ) {
+    control$nr_cores <- min(nr_cpus, nr_strata)
+  } else {
+    if ( cpus_available > 1 & nr_strata > 1 ) {
+      control$nr_cores <- min(cpus_available-1, nr_strata) # keep at least one core available
+    } else {
+      control$nr_cores <- 1
+    }
+  }
+  control$parallel <- ifelse(control$nr_cores>1, TRUE, FALSE)
+  control
+}
+
 ## check break points for categorization
 checkBreaks <- function(x) {
   if(!is.numeric(x) || length(x) < 2) {
