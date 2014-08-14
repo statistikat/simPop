@@ -10,7 +10,7 @@
 simRelation(synthPopObj, relation = "relate", head = "head", direct = NULL,
   additional = c("nation", "ethnic", "religion"),
   limit = NULL, censor = NULL, maxit = 500,
-  MaxNWts = 2000, eps = NULL, seed)
+  MaxNWts = 2000, eps = NULL, nr_cpus=NULL, seed)
 }
 \arguments{
   \item{synthPopObj}{a \code{synthPopObj} containing population and household survey data as well as optionally margins in standardized format.}
@@ -21,6 +21,7 @@ simRelation(synthPopObj, relation = "relate", head = "head", direct = NULL,
   \item{limit}{this can be used to account for structural zeros. If only one additional variable is requested, a named list of lists should be supplied. The names of the list components specify the predictor variables for which to limit the possible outcomes of the response. For each predictor, a list containing the possible outcomes of the response for each category of the predictor can be supplied. The probabilities of other outcomes conditional on combinations that contain the specified categories of the supplied predictors are set to 0. If more than one additional variable is requested, such a list of lists can be supplied for each variable as a component of yet another list, with the component names specifying the respective variables.}
   \item{censor}{this can be used to account for structural zeros. If only one additional variable is requested, a named list of lists or \code{data.frame}s should be supplied. The names of the list components specify the categories that should be censored. For each of these categories, a list or \code{data.frame} containing levels of the predictor variables can be supplied. The probability of the specified categories is set to 0 for the respective predictor levels. If more than one additional variable is requested, such a list of lists or \code{data.frame}s can be supplied for each variable as a component of yet another list, with the component names specifying the respective variables.}
   \item{maxit, MaxNWts}{control parameters to be passed to \code{\link[nnet]{multinom}} and \code{\link[nnet]{nnet}}. See the help file for \code{\link[nnet]{nnet}}.}
+  \item{nr_cpus}{if specified, an integer number defining the number of cpus that should be used for parallel processing.}
   \item{eps}{a small positive numeric value, or \code{NULL} (the default). In the former case, estimated probabilities smaller than this are assumed to result from structural zeros and are set to exactly 0.}
   \item{seed}{optional; an integer value to be used as the seed of the random number generator, or an integer vector containing the state of the random number generator to be restored.}
 }

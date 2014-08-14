@@ -246,19 +246,9 @@ simContinuous <- function(synthPopObj, additional = "netIncome",
   alpha = 0.01, residuals = TRUE, keep = TRUE,
   maxit = 500, MaxNWts = 1500,
   tol = .Machine$double.eps^0.5,
-  eps = NULL, seed) {
+  nr_cpus=NULL, eps = NULL, seed) {
 
   x <- NULL
-
-  parallel <- FALSE
-  have_win <- Sys.info()["sysname"] == "Windows"
-  nr_cores <- detectCores()
-  if ( nr_cores > 2 ) {
-    parallel <- TRUE
-    nr_cores <- nr_cores-1 # keep one core available
-  } else {
-    parallel <- FALSE
-  }
 
   samp <- synthPopObj@sample
   pop <- synthPopObj@pop
@@ -268,6 +258,13 @@ simContinuous <- function(synthPopObj, additional = "netIncome",
 
   dataS <- samp@data
   dataP <- pop@data
+
+  # parameters for parallel computing
+  nr_strata <- length(levels(dataS[[strata]]))
+  pp <- parallelParameters(nr_cpus=nr_cpus, nr_strata=)
+  parallel <- pp$parallel
+  nr_cores <- pp$nr_cores
+  have_win <- pp$have_win; rm(pp)
 
   ## initializations
   if ( !missing(seed) ) {

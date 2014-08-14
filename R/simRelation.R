@@ -218,17 +218,6 @@ simRelation <- function(synthPopObj, relation = "relate", head = "head",
 
   x <- NULL
 
-  ##### initializations
-  parallel <- FALSE
-  have_win <- Sys.info()["sysname"] == "Windows"
-  nr_cores <- detectCores()
-  if ( nr_cores > 2 ) {
-    parallel <- TRUE
-    nr_cores <- nr_cores-1 # keep one core available
-  } else {
-    parallel <- FALSE
-  }
-
   # set seed of random number generator
   if ( !missing(seed) ) {
     set.seed(seed)
@@ -244,6 +233,13 @@ simRelation <- function(synthPopObj, relation = "relate", head = "head",
   dataP <- pop@data
 
   varNames <- c(hid=hid, w=w, strata=strata, basic, relation=relation, additional)
+
+  # parameters for parallel computing
+  nr_strata <- length(levels(dataS[[strata]]))
+  pp <- parallelParameters(nr_cpus=nr_cpus, nr_strata=)
+  parallel <- pp$parallel
+  nr_cores <- pp$nr_cores
+  have_win <- pp$have_win; rm(pp)
 
   # check data
   if ( all(varNames %in% names(dataS)) ) {

@@ -139,7 +139,7 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
 
 simCategorical <- function(synthPopObj, additional,
   method=c("multinom", "distribution", "naivebayes"),
-  limit=NULL, censor=NULL, maxit=500, MaxNWts=1500, eps=NULL, seed=1) {
+  limit=NULL, censor=NULL, maxit=500, MaxNWts=1500, eps=NULL, nr_cpus=NULL, seed=1) {
 
   x <- NULL
 
@@ -153,15 +153,12 @@ simCategorical <- function(synthPopObj, additional,
     stop("variables already exist in the population!\n")
   }
 
-  parallel <- FALSE
-  have_win <- Sys.info()["sysname"] == "Windows"
-  nr_cores <- detectCores()
-  if ( nr_cores > 2 ) {
-    parallel <- TRUE
-    nr_cores <- nr_cores-1 # keep one core available
-  } else {
-    parallel <- FALSE
-  }
+  # parameters for parallel computing
+  nr_strata <- length(levels(data_sample[[dataS@strata]]))
+  pp <- parallelParameters(nr_cpus=nr_cpus, nr_strata=nr_strata)
+  parallel <- pp$parallel
+  nr_cores <- pp$nr_cores
+  have_win <- pp$have_win; rm(pp)
 
   ##### initializations
   if ( !missing(seed) ) {

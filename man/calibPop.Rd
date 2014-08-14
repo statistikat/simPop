@@ -9,7 +9,7 @@ A Simulated Annealing Algorithm for calibration of synthetic population data ava
 }
 \usage{
 calibPop(inp, split, temp=1, eps.factor=0.05, maxiter=200, temp.cooldown=0.9,
-  factor.cooldown=0.85, min.temp=10^-3, verbose=FALSE)
+  factor.cooldown=0.85, min.temp=10^-3, nr_cpus=NULL, verbose=FALSE)
 }
 \arguments{
   \item{inp}{
@@ -35,6 +35,9 @@ a factor (between 0 and 1) specifying the rate at which the number of permutatio
 }
   \item{min.temp}{
 minimal temperature at which the algorithm will stop.
+}
+  \item{nr_cpus}{
+  if specified, an integer number defining the number of cpus that should be used for parallel processing.
 }
   \item{verbose}{
 boolean variable; if TRUE some additional verbose output is provided, however only if \code{split} is NULL. Otherwise the computation is performed in parallel and no useful output can be provided.

@@ -51,7 +51,7 @@ calcFinalWeights <- function(data0, totals0, params) {
 }
 
 calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
-  temp.cooldown = 0.9, factor.cooldown = 0.85, min.temp = 10^-3, verbose=FALSE) {
+  temp.cooldown = 0.9, factor.cooldown = 0.85, min.temp = 10^-3, nr_cpus=NULL, verbose=FALSE) {
 
   if ( class(inp) != "synthPopObj" ) {
     stop("argument 'inp' must be of class 'synthPopObj'!\n")
@@ -103,15 +103,12 @@ calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
   data2 <- data2[,match(colnames(data), cn), with=FALSE]
   data <- rbind(data, data2)
 
-  parallel <- FALSE
-  have_win <- Sys.info()["sysname"] == "Windows"
-  nr_cores <- detectCores()
-  if ( nr_cores > 2 ) {
-    parallel <- TRUE
-    nr_cores <- nr_cores-1 # keep one core available
-  } else {
-    parallel <- FALSE
-  }
+  # parameters for parallel computing
+  nr_strata <- length(unique(data[,split,with=F]))
+  pp <- parallelParameters(nr_cpus=nr_cpus, nr_strata=nr_strata)
+  parallel <- pp$parallel
+  nr_cores <- pp$nr_cores
+  have_win <- pp$have_win; rm(pp)
 
   ii <- match(parameter, colnames(data))
   data[,ii] <- data[,lapply(.SD,as.factor),.SDcols=parameter]
