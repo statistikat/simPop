@@ -132,7 +132,7 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
   sim <- as.list(rep.int(NA, length(splitP)))
   sim[whichP] <- mapply(spSample, NSplit[whichP], pSplit, SIMPLIFY=FALSE)
   sim <- unsplit(sim, dataPop[, basic, with=F])
-  sim <- grid[sim,]
+  sim <- grid[sim,,drop=FALSE]
   rownames(sim) <- rownames(dataPop)
   sim
 }
