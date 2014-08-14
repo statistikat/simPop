@@ -1,8 +1,8 @@
 Package: synthPop
 Type: Package
 Title: Simulation of synthetic populations for surveys based on auxiliary data
-Version: 0.2.1
-Date: 2014-08-02
+Version: 0.2.2
+Date: 2014-08-14
 Author: Bernhard Meindl, Matthias Templ, Andreas Alfons, Alexander Kowarik
 Maintainer: Matthias Templ and Bernhard Meindl <office@data-analysis.com>
 Depends: R(>= 3.0.0), lattice, vcd, data.table

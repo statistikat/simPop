@@ -1,3 +1,9 @@
+Changes in synthPop version 0.2.2
+  * new parameter 'nr_cpus' for calibPop(), simCategorical(), simContinuous() and simRelation() manually defining how many cpus should be used
+  * updated man-pages
+  * new helper-function 'parallelParameters()' returing a list with parameters 'have_win', 'parallel' and 'nr_cores'
+  * fixed a bug in simCategorical if only one additional variable is simulated
+
 Changes in synthPop version 0.2.1
   * fixed a bug in simContinuous (win only) reported by olivier.
 
