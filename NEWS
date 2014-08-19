@@ -1,3 +1,6 @@
+Changes in synthPop version 0.2.3
+  * fix in simContinuous() reported by Oliver
+
 Changes in synthPop version 0.2.2
   * new parameter 'nr_cpus' for calibPop(), simCategorical(), simContinuous() and simRelation() manually defining how many cpus should be used
   * updated man-pages
