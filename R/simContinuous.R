@@ -261,7 +261,7 @@ simContinuous <- function(synthPopObj, additional = "netIncome",
 
   # parameters for parallel computing
   nr_strata <- length(levels(dataS[[strata]]))
-  pp <- parallelParameters(nr_cpus=nr_cpus, nr_strata=)
+  pp <- parallelParameters(nr_cpus=nr_cpus, nr_strata=nr_strata)
   parallel <- pp$parallel
   nr_cores <- pp$nr_cores
   have_win <- pp$have_win; rm(pp)
