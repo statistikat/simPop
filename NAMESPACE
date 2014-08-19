@@ -12,6 +12,7 @@ import("Rcpp")
 importFrom(lattice, bwplot, panel.bwplot)
 importFrom(laeken, calibVars)
 importFrom(MASS, ginv)
+importFrom(colorspace, diverge_hcl)
 
 ## exports
 exportMethods("sampleObj")

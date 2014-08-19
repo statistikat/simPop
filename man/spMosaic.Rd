@@ -7,22 +7,23 @@
   Create mosaic plots of expected (i.e., estimated) and realized (i.e., simulated) population sizes.
 }
 \usage{
-spMosaic(x, \dots)
+spMosaic(x, method = c("split", "color"), \dots)
 }
 \arguments{
   \item{x}{An object of class \code{"spTable"} created using function \code{\link{spTable}}.}
-  \item{\dots}{further arguments to be passed to \code{\link[vcd]{cotabplot}}.}
+  \item{method}{A character string specifying the plot method. Possible values are \code{"split"} to plot the expected population sizes on the left hand side and the realized population sizes on the right hand side, and \code{"color"}} to plot only realized population sizes with cells colored according to the relative differences with the expected population sizes.
+  \item{\dots}{if \code{method} is \code{"split"}, further arguments to be passed to \code{\link[vcd]{cotabplot}}.  If \code{method} is \code{"color"}, further arguments to be passed to \code{\link[vcd]{strucplot}}}.
 }
 \details{
-  The two tables of expected and realized population sizes are combined into a single table, with an additional conditioning variable indicating expected and realized values. A conditional plot of this table is then produced using
-  \code{\link[vcd]{cotabplot}}.
+  If \code{method} is \code{"split"}, the two tables of expected and realized population sizes are combined into a single table, with an additional conditioning variable indicating expected and realized values. A conditional plot of this table is then produced using \code{\link[vcd]{cotabplot}}.
 }
 \author{
   Andreas Alfons and Bernhard Meindl
 }
 
 \seealso{
-  \code{\link{spTable}}, \code{\link[vcd]{cotabplot}}
+  \code{\link{spTable}}, \code{\link[vcd]{cotabplot}}, 
+  \code{\link[vcd]{strucplot}}
 }
 \examples{
 set.seed(1234)  # for reproducibility
@@ -32,6 +33,14 @@ samp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize",
 eusilcP <- simStructure(data=samp, method="direct", basicHHvars=c("age","rb090"))
 abb <- c("B","LA","Vi","C","St","UA","Sa","T","Vo")
 tab <- spTable(eusilcP, select=c("rb090", "db040", "hsize"))
-spMosaic(tab, labeling=labeling_border(abbreviate=c(db040=TRUE)))
+
+# expected and realized population sizes
+spMosaic(tab, method = "split", 
+  labeling=labeling_border(abbreviate=c(db040=TRUE)))
+
+# realized population sizes colored according to relative 
+# differences with expected population sizes
+spMosaic(tab, method = "color", 
+  labeling=labeling_border(abbreviate=c(db040=TRUE)))
 }
 \keyword{hplot}
