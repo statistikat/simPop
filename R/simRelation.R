@@ -214,7 +214,7 @@ simulateValues <- function(dataSample, dataPop, params) {
 
 simRelation <- function(synthPopObj, relation = "relate", head = "head",
   direct = NULL, additional = c("nation", "ethnic", "religion"),
-  limit = NULL, censor = NULL, maxit = 500, MaxNWts = 2000, eps = NULL, seed) {
+  limit = NULL, censor = NULL, maxit = 500, MaxNWts = 2000, eps = NULL, nr_cpus=NULL, seed) {
 
   x <- NULL
 
@@ -236,7 +236,7 @@ simRelation <- function(synthPopObj, relation = "relate", head = "head",
 
   # parameters for parallel computing
   nr_strata <- length(levels(dataS[[strata]]))
-  pp <- parallelParameters(nr_cpus=nr_cpus, nr_strata=)
+  pp <- parallelParameters(nr_cpus=nr_cpus, nr_strata=nr_strata)
   parallel <- pp$parallel
   nr_cores <- pp$nr_cores
   have_win <- pp$have_win; rm(pp)

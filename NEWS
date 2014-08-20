@@ -1,3 +1,7 @@
+Changes in synthPop version 0.2.4
+  * feature: generate colored mosaic plots in spMosaic()
+  * fix: missing argument and code-mismatch in simRelation()
+
 Changes in synthPop version 0.2.3
   * fix in simContinuous() reported by Oliver
 
