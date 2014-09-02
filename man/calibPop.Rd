@@ -50,6 +50,9 @@ The objective function for simulated annealing is defined by the sum of absolute
 For every factor-level in \dQuote{split}, data must at least contain as many entries of this kind as target marginals.
 
 Possible donors are automatically generated within the procedure.
+
+The number of cpus are selected automatically in the following manner. The number of cpus is equal the number of strata. However, if the number of cpus is less than the number of strata, the number of cpus - 1 is used by default. 
+This should be the best strategy, but the user can also overwrite this decision.
 }
 \value{
 Returns an object of class \code{\linkS4class{synthPopObj}} with an updated population listed in slot 'pop'.
