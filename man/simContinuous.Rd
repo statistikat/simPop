@@ -52,6 +52,9 @@ simContinuous(synthPopObj, additional = "netIncome",
   If \code{zeros} is \code{TRUE}, \code{log} is \code{TRUE}, \code{const} is \code{NULL} and there are negative values, a multinomial log-linear model is used to predict negative, zero and positive observations. Categories for the negative values are thereby defined by \code{breaks}. In the second step, a linear model is used to predict the positive values and negative values are drawn from uniform distributions in the respective classes.
 
   If \code{zeros} is \code{FALSE}, \code{log} is \code{TRUE} and \code{const} is \code{NULL}, a two-step model is used if there are non-positive values in the variable specified by \code{additional}. Whether a log-linear or a multinomial log-linear model is used depends on the number of categories to be used for the non-positive values, as defined by \code{breaks}. Again, positive values are then predicted with a linear model and non-positive values are drawn from uniform distributions.
+  
+The number of cpus are selected automatically in the following manner. The number of cpus is equal the number of strata. However, if the number of cpus is less than the number of strata, the number of cpus - 1 is used by default. 
+This should be the best strategy, but the user can also overwrite this decision.
 }
 \value{
   An object of class \code{\linkS4class{synthPopObj}} containing survey data as well as the simulated population data including the continuous variable specified by \code{additional} and possibly simulated categories for the desired continous variable.

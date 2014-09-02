@@ -27,6 +27,10 @@ simRelation(synthPopObj, relation = "relate", head = "head", direct = NULL,
 }
 \details{
   The values of a new variable are simulated in three steps, where the second step is optional. First, the values of the household heads are simulated with multinomial log-linear models. Second, individuals directly related to the corresponding household head (as specified by the argument \code{direct}) inherit the value of the latter. Third, the values of the remaining individuals are simulated with multinomial log-linear models in which the value of the respective household head is used as an additional predictor.
+  
+The number of cpus are selected automatically in the following manner. The number of cpus is equal the number of strata. However, if the number of cpus is less than the number of strata, the number of cpus - 1 is used by default. 
+This should be the best strategy, but the user can also overwrite this decision.
+
 }
 \value{
   An object of class \code{\linkS4class{synthPopObj}} containing survey data as well as the simulated population data including the categorical variables specified by \code{additional}.
