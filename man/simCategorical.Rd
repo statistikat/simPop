@@ -19,8 +19,12 @@ simCategorical(synthPopObj, additional,
   \item{censor}{if \code{method} is \code{"multinom"}, this can be used to account for structural zeros. If only one additional variable is requested, a named list of lists or \code{data.frame}s should be supplied. The names of the list components specify the categories that should be censored. For each of these categories, a list or \code{data.frame} containing levels of the predictor variables can be supplied. The probability of the specified categories is set to 0 for the respective predictor levels. If more than one additional variable is requested, such a list of lists or \code{data.frame}s can be supplied for each variable as a component of yet another list, with the component names specifying the respective variables.}
   \item{maxit, MaxNWts}{control parameters to be passed to \code{\link[nnet]{multinom}} and \code{\link[nnet]{nnet}}. See the help file for \code{\link[nnet]{nnet}}.}
   \item{eps}{a small positive numeric value, or \code{NULL} (the default). In the former case and if \code{method} is \code{"multinom"}, estimated probabilities smaller than this are assumed to result from structural zeros and are set to exactly 0.}
-  \item{nr_cpus}{if specified, an integer number defining the number of cpus that should be used for parallel processing.}
+  \item{nr_cpus}{if specified, an integer number defining the number of cpus that should be used for parallel processing. }
   \item{seed}{optional; an integer value to be used as the seed of the random number generator, or an integer vector containing the state of the random number generator to be restored.}
+}
+\details{
+The number of cpus are selected automatically in the following manner. The number of cpus is equal the number of strata. However, if the number of cpus is less than the number of strata, the number of cpus - 1 is used by default. 
+This should be the best strategy, but the user can also overwrite this decision.
 }
 \value{
   An object of class \code{\linkS4class{synthPopObj}} containing survey data as well as the simulated population data including the categorical variables specified by argument \code{additional}.
@@ -37,7 +41,8 @@ simCategorical(synthPopObj, additional,
 \dontrun{
 data(eusilcS) # load sample data
 inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
-synthPop <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090"))
+## in the following, nr_cpus are selected automatically
+synthPop <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090"), nr_cpus=NULL)
 synthPop <- simCategorical(synthPop, additional=c("pl030", "pb220a"), method="multinom")
 summary(synthPop)
 }
