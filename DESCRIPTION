@@ -8,8 +8,6 @@ Maintainer: Matthias Templ and Bernhard Meindl <office@data-analysis.com>
 Depends: R(>= 3.0.0), lattice, vcd, data.table
 Imports: laeken, MASS, Rcpp (>= 0.11.0), e1071, parallel, nnet, doParallel, foreach, colorspace, methods
 LinkingTo: Rcpp
-Description: Simulate populations for surveys based on auxiliary data including model-based methods, calibration  and 
-combinatorial optimization tools. 
-Devoloped with support of the International Household Survey Network, DFID Trust Fund TF011722
+Description: Simulate populations for surveys based on auxiliary data including model-based methods, calibration  and combinatorial optimization tools. Developed with support of the International Household Survey Network, DFID Trust Fund TF011722
 License: GPL (>= 2)
 LazyLoad: yes
