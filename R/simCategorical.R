@@ -234,7 +234,7 @@ simCategorical <- function(synthPopObj, additional,
           generateValues_distribution(
             dataSample=data_sample[data_sample[[dataS@strata]] == x,],
             dataPop=data_pop[indStrata[[x]], predNames, with=F], params)
-        })
+        },mc.cores=nr_cores)
       }
     } else {
       values <- lapply(levels(data_sample[[dataS@strata]]), function(x) {
@@ -320,7 +320,7 @@ simCategorical <- function(synthPopObj, additional,
             dataSample=data_sample[data_sample[[dataS@strata]] == x,],
             dataPop=data_pop[indStrata[[x]], predNames, with=F], params
           )
-        })
+        },mc.cores=nr_cores)
       }
     } else {
       values <- lapply(levels(data_sample[[dataS@strata]]), function(x) {

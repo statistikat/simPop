@@ -140,7 +140,7 @@ calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
           data0=data[split.number[x]],
           totals0=totals[which(totals[,split,with=F]==as.character(split.number[x][[split]])),],
           params=params)
-      })
+      },mc.cores=nr_cores)
     }
   } else {
     final_weights <- lapply(1:nrow(split.number), function(x) {

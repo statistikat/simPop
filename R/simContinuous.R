@@ -441,7 +441,7 @@ simContinuous <- function(synthPopObj, additional = "netIncome",
             dataSample=dataS[dataS[[strata]] == x,],
             dataPop=dataP[indStrata[[x]], predNames, with=F], params
           )
-        })
+        },mc.cores=nr_cores)
       }
     } else {
       valuesCat <- lapply(levels(dataS[[strata]]), function(x) {
@@ -566,7 +566,7 @@ simContinuous <- function(synthPopObj, additional = "netIncome",
             dataSample=dataS[dataS[[strata]] == x,],
             dataPop=dataP[indStrata[[x]], predNames, with=F], params
           )
-        })
+        },mc.cores=nr_cores)
       }
     } else {
       valuesCat <- lapply(levels(dataS[[strata]]), function(x) {
@@ -669,7 +669,7 @@ simContinuous <- function(synthPopObj, additional = "netIncome",
             dataSample=dataS[dataS[[strata]] == x,],
             dataPop=dataP[indStrata[[x]], predNames, with=F], params
           )
-        })
+        },mc.cores=nr_cores)
       }
     } else {
       valuesTmp <- lapply(levels(dataS[[strata]]), function(x) {
