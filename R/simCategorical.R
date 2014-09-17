@@ -219,7 +219,7 @@ simCategorical <- function(synthPopObj, additional,
       # windows
       if ( have_win ) {
         cl <- makePSOCKcluster(nr_cores)
-        registerDoParallel(cl)
+        registerDoParallel(cl,cores=nr_cores)
         values <- foreach(x=levels(data_sample[[dataS@strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
           generateValues_distribution(
             dataSample=data_sample[data_sample[[dataS@strata]] == x,],
@@ -304,7 +304,7 @@ simCategorical <- function(synthPopObj, additional,
     if ( parallel ) {
       if ( have_win ) {
         cl <- makePSOCKcluster(nr_cores)
-        registerDoParallel(cl)
+        registerDoParallel(cl,cores=nr_cores)
         values <- foreach(x=levels(data_sample[[dataS@strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
           generateValues(
             dataSample=data_sample[data_sample[[dataS@strata]] == x,],

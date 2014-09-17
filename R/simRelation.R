@@ -319,7 +319,7 @@ simRelation <- function(synthPopObj, relation = "relate", head = "head",
       # windows
       if ( have_win ) {
         cl <- makePSOCKcluster(nr_cores)
-        registerDoParallel(cl)
+        registerDoParallel(cl,cores=nr_cores)
         values <- foreach(x=levels(dataS[[strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
           simulateValues(
             dataSample=dataS[dataS[[strata]] == x,],

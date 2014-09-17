@@ -123,7 +123,7 @@ calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
     # windows
     if ( have_win ) {
       cl <- makePSOCKcluster(nr_cores)
-      registerDoParallel(cl)
+      registerDoParallel(cl,cores=nr_cores)
       final_weights <- foreach(x=1:nrow(split.number), .options.snow=list(preschedule=TRUE)) %dopar% {
         calcFinalWeights(
           data0=data[split.number[x]],
