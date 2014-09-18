@@ -220,16 +220,14 @@ simCategorical <- function(synthPopObj, additional,
       if ( have_win ) {
         cl <- makePSOCKcluster(nr_cores)
         registerDoParallel(cl,cores=nr_cores)
-        values <- foreach(x=levels(data_sample[[dataS@strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
+        values <- foreach(x=levels(data_sample[[dataS@strata]]), .options.snow=list(preschedule=FALSE)) %dopar% {
           generateValues_distribution(
             dataSample=data_sample[data_sample[[dataS@strata]] == x,],
             dataPop=data_pop[indStrata[[x]], predNames, with=F], params
           )
         }
         stopCluster(cl)
-      }
-      # linux/max
-      if ( !have_win ) {
+      }else if ( !have_win ) {# linux/max
         values <- mclapply(levels(data_sample[[dataS@strata]]), function(x) {
           generateValues_distribution(
             dataSample=data_sample[data_sample[[dataS@strata]] == x,],
@@ -265,13 +263,10 @@ simCategorical <- function(synthPopObj, additional,
       formula.cmd <- paste("suppressWarnings(multinom(", formula.cmd,
         ", weights=", dataS@weight, ", data=dataSample, trace=FALSE",
         ", maxit=",maxit, ", MaxNWts=", MaxNWts,"))", sep="")
-    }
-    # simulation via recursive partitioning and regression trees
-    if ( method == "ctree" ) {
+    }else if ( method == "ctree" ) {# simulation via recursive partitioning and regression trees
       formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
       formula.cmd <- paste("suppressWarnings(ctree(", formula.cmd, ", weights=as.integer(dataSample$", dataS@weight, "), data=dataSample))", sep="")
-    }
-    if ( method == "naivebayes" ) {
+    }else if ( method == "naivebayes" ) {
       formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
       formula.cmd <- paste("naiveBayes(", formula.cmd, ", data=dataSample, usekernel=TRUE)", sep="")
     }
@@ -305,16 +300,14 @@ simCategorical <- function(synthPopObj, additional,
       if ( have_win ) {
         cl <- makePSOCKcluster(nr_cores)
         registerDoParallel(cl,cores=nr_cores)
-        values <- foreach(x=levels(data_sample[[dataS@strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
+        values <- foreach(x=levels(data_sample[[dataS@strata]]), .options.snow=list(preschedule=FALSE)) %dopar% {
           generateValues(
             dataSample=data_sample[data_sample[[dataS@strata]] == x,],
             dataPop=data_pop[indStrata[[x]], predNames, with=F], params
           )
         }
         stopCluster(cl)
-      }
-      # linux/mac
-      if ( !have_win) {
+      }else if ( !have_win) {# linux/mac
         values <- mclapply(levels(data_sample[[dataS@strata]]), function(x) {
           generateValues(
             dataSample=data_sample[data_sample[[dataS@strata]] == x,],
