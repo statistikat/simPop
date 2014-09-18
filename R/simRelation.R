@@ -327,9 +327,7 @@ simRelation <- function(synthPopObj, relation = "relate", head = "head",
           )
         }
         stopCluster(cl)
-      }
-      # linux/mac
-      if ( !have_win ) {
+      }else if ( !have_win ) {# linux/mac
         values <- mclapply(levels(dataS[[strata]]), function(x) {
           simulateValues(
             dataSample=dataS[dataS[[strata]] == x,],
