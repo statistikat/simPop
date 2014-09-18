@@ -132,9 +132,7 @@ calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
         )
       }
       stopCluster(cl)
-    }
-    # linux/mac
-    if ( !have_win ) {
+    }else if ( !have_win ) {# linux/mac
       final_weights <- mclapply(1:nrow(split.number), function(x) {
         calcFinalWeights(
           data0=data[split.number[x]],
