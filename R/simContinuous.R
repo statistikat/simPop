@@ -433,9 +433,7 @@ simContinuous <- function(synthPopObj, additional = "netIncome",
           )
         }
         stopCluster(cl)
-      }
-      # linux/mac
-      if ( !have_win ) {
+      }else if ( !have_win ) {# linux/mac
         valuesCat <- mclapply(levels(dataS[[strata]]), function(x) {
           generateValues_multinom(
             dataSample=dataS[dataS[[strata]] == x,],
@@ -558,9 +556,7 @@ simContinuous <- function(synthPopObj, additional = "netIncome",
           )
         }
         stopCluster(cl)
-      }
-      # linux/mac
-      if ( !have_win ) {
+      }else if ( !have_win ) {# linux/mac
         valuesCat <- mclapply(levels(dataS[[strata]]), function(x) {
           generateValues_binary(
             dataSample=dataS[dataS[[strata]] == x,],
@@ -661,9 +657,7 @@ simContinuous <- function(synthPopObj, additional = "netIncome",
           )
         }
         stopCluster(cl)
-      }
-      # linux/mac
-      if ( !have_win ) {
+      }else if ( !have_win ) {# linux/mac
         valuesTmp <- mclapply(levels(dataS[[strata]]), function(x) {
           generateValues_lm(
             dataSample=dataS[dataS[[strata]] == x,],
