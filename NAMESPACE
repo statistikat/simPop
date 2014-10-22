@@ -111,4 +111,4 @@ S3method(as.array, spTable)
 S3method(as.table, spTable)
 # print
 S3method(print, spTable)
-useDynLib(synthPop)
+useDynLib(simPop)
