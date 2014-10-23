@@ -65,7 +65,7 @@ gpdmple <- function(x, threshold, start, ..., std.err.type =
   
   nlpot <- function(scale, shape) { 
     ans <- -.C("gpdlik", exceed, nat, threshold, scale,
-                shape, dns = double(1), PACKAGE = "synthPop")$dns
+                shape, dns = double(1), PACKAGE = "simPop")$dns
 
     if ((shape > 0) & (shape <1))
      ans <- lambda * ((1 / (1 - shape) - 1)^alpha) + ans
@@ -712,7 +712,7 @@ samlmu <- function (x, nmom = 4, sort.data = TRUE)
   
   lmom <- .C("samlmu", as.double(xok), as.integer(nmom.actual),
              as.integer(n), lmom = double(nmom.actual),
-             PACKAGE = "synthPop")$lmom
+             PACKAGE = "simPop")$lmom
   names(lmom) <- rnames
   return(lmom)
 }
@@ -881,7 +881,7 @@ gpdmle <- function(x, threshold, start, ...,
   
   nlpot <- function(scale, shape) { 
     -.C("gpdlik", exceed, nat, threshold, scale,
-        shape, dns = double(1), PACKAGE = "synthPop")$dns
+        shape, dns = double(1), PACKAGE = "simPop")$dns
   }
   
   nn <- length(x)
