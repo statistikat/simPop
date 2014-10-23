@@ -1,3 +1,3 @@
 .onAttach <- function(lib, pkg) {
-  packageStartupMessage(paste("Package synthPop",utils::packageVersion("synthPop"),"has been loaded!\n"))
+  packageStartupMessage(paste("Package simPop",utils::packageVersion("simPop"),"has been loaded!\n"))
 }
