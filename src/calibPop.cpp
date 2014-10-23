@@ -79,7 +79,8 @@ IntegerVector calibPop_work(IntegerMatrix inp, NumericVector totals, IntegerVect
   IntegerVector new_weights(weights.size());
 
   bool verb = false;
-  if ( params["verbose"] == 1 ) {
+  int verbTF = params["verbose"];
+  if ( verbTF == 1 ) {
     verb = true;
   }
 
