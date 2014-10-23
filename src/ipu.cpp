@@ -31,8 +31,8 @@ NumericVector ipu_work(NumericMatrix inp, NumericVector con, NumericVector w, do
         }
       }
     }
-    double meanweight;
-    meanweight=mean(w);
+    //double meanweight;
+    //meanweight=mean(w);
     // recalculate gamma_vals
     for ( int i=0; i < nr_con; ++i ) {
       gamma_vals_new[i] = (fabs(sum(inp(_,i)*w)-con[i])) / con[i];
