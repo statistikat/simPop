@@ -20,9 +20,11 @@ As input the output of \code{\link{calibSample}} must be used.
 }}}
 
 \examples{
+\dontrun{
 data(eusilcS)
 data(totalsRG)
 inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
 addWeights(inp) <- calibSample(inp, totalsRG)
+}
 }
 \keyword{methods}

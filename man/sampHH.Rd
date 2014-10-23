@@ -38,6 +38,7 @@ the data frame of new households.
 Bernhard Meindl and Matthias Templ
 }
 \examples{
+\dontrun{
 data(eusilcP)
 pop <- eusilcP
 colnames(pop)[3] <- "hhsize"
@@ -51,5 +52,6 @@ system.time(x2 <- sampHH(pop, strata=NULL, hsize="hhsize"))
 pop <- pop[,-which(colnames(pop)=="hhsize")]
 system.time(y1 <- sampHH(pop, strata="region", hsize=NULL))
 system.time(y2 <- sampHH(pop, strata=NULL, hsize=NULL))
+}
 }
 \keyword{ manip }

@@ -37,6 +37,7 @@ If argument 'total' is a table (e.g. created with function \code{\link{tableWt}}
 \keyword{survey}
 
 \examples{
+\dontrun{
 data(eusilcS)
 eusilcS$agecut <- cut(eusilcS$age, 7)
 inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
@@ -72,6 +73,7 @@ weights4 <- calibSample(inp, totals4)
 totals4.df <- as.data.frame(totals4)
 weights4.df <- calibSample(inp, totals4.df)
 identical(weights4, weights4.df)
+}
 }
 \keyword{methods}
 
