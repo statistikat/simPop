@@ -27,6 +27,7 @@ an object of class \code{\linkS4class{synthPopObj}} with updated slot 'table'.
 Bernhard Meindl
 }
 \examples{
+\dontrun{
 data(eusilcS)
 data(eusilcP)
 inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
@@ -38,5 +39,6 @@ margins <- as.data.frame(
 colnames(margins) <- c("db040", "rb090", "pb220a", "freq")
 inp <- addKnownMargins(inp, margins)
 str(inp)
+}
 }
 \keyword{ manip }
