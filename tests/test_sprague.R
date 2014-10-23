@@ -1,5 +1,5 @@
 ## test sprague index:
-library(synthPop)
+library(simPop)
 x <- data.frame(age=as.factor(c(
   "0-4",
   "5-9","10-14","15-19", "20-24",
