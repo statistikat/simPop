@@ -580,8 +580,8 @@ crossprodWt <- function(x, weights) {
 }
 
 manageSynthPopObj <- function(x, var, sample=FALSE, set=FALSE, values=NULL) {
-  if ( class(x) != "synthPopObj" ) {
-    stop("wrong input of argument 'x' (needs to be of class 'synthPopObj')!\n")
+  if ( class(x) != "simPopObj" ) {
+    stop("wrong input of argument 'x' (needs to be of class 'simPopObj')!\n")
   }
   if ( length(var) != 1 ) {
     stop("only one variable can be used at a time!\n")
