@@ -11,7 +11,7 @@ NumericVector calc_obj(IntegerMatrix inp, IntegerVector weights, NumericVector t
   // weights == 1 -> person is in synthetic population
   NumericVector obj(1);
   for ( int i=0; i < totals.size(); ++i ) {
-    obj[0] = obj[0] + abs(sum(inp(i,_)*weights) - totals[i]);
+    obj[0] = obj[0] + fabs(sum(inp(i,_)*weights) - totals[i]);
   }
   return(obj);
 }

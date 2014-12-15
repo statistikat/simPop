@@ -1,3 +1,9 @@
+Changes in synthPop version 0.2.6
+  * fix clang-compiler warning
+
+Changes in synthPop version 0.2.5
+  * multiple fixes and performance improvements
+
 Changes in synthPop version 0.2.4
   * feature: generate colored mosaic plots in spMosaic()
   * fix: missing argument and code-mismatch in simRelation()
