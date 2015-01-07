@@ -16,7 +16,7 @@ NumericVector calc_obj(IntegerMatrix inp, IntegerVector weights, NumericVector t
   return(obj);
 }
 
-// generate a new random solution by setting some households from 0->1 and some from1->0
+// generate a new random solution by setting some households from 0->1 and some from 1->0
 IntegerVector generate_new_solution(IntegerVector weights, IntegerVector hh_ids, IntegerVector hh_head, double factor) {
   std::vector<int> hh_ids_unique;
   std::vector<int> hh_status_unique;
@@ -51,19 +51,19 @@ IntegerVector generate_new_solution(IntegerVector weights, IntegerVector hh_ids,
   NumericVector ss(1);
   for ( int i=0; i < nr_draws; ++i ) {
     // select an active household and set it to inactive
-    //s = rand() % nr_active;     // range: 0 to nr_active
     ss = floor(runif(1,0,nr_active));     // range: 0 to nr_active
-    s = ss[1];
-    if(s > nr_active)
+    s = (int)ss[0];
+    if ( s > nr_active ) {
       s = nr_active;
+    }
     draws1.push_back(indices_active[s]);
 
     // select an inactive household and set it to active
-    //s = rand() % nr_inactive;   // range: 0 to nr_inactive
     ss = floor(runif(1,0,nr_inactive));
-    s = ss[1];
-    if(s > nr_inactive)
-          s = nr_inactive;
+    s = (int)ss[0];
+    if ( s > nr_inactive ) {
+      s = nr_inactive;
+    }
     draws2.push_back(indices_inactive[s]);
   }
 
