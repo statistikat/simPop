@@ -1,3 +1,10 @@
+Changes in synthPop version 0.2.9
+  * manageSynthPopObj to manageSimPopObj
+  * bug in calibPop.cpp solved (segmentation fault)
+
+Changes in synthPop version 0.2.8
+  * random numbers in C++ instead of using R
+
 Changes in synthPop version 0.2.6
   * fix clang-compiler warning
 
