@@ -33,7 +33,7 @@ setClass(
 setClassUnion('dataObjOrNULL', c('dataObj', 'NULL'))
 
 setClass(
-  Class='synthPopObj',
+  Class='simPopObj',
   representation=representation(
     sample='dataObjOrNULL',
     table='dataframeOrNULL',
