@@ -1,38 +1,38 @@
-Changes in synthPop version 0.2.9
+Changes in simPop version 0.2.9
   * manageSynthPopObj to manageSimPopObj
   * bug in calibPop.cpp solved (segmentation fault)
 
-Changes in synthPop version 0.2.8
+Changes in simPop version 0.2.8
   * random numbers in C++ instead of using R
 
-Changes in synthPop version 0.2.6
+Changes in simPop version 0.2.6
   * fix clang-compiler warning
 
-Changes in synthPop version 0.2.5
+Changes in simPop version 0.2.5
   * multiple fixes and performance improvements
 
-Changes in synthPop version 0.2.4
+Changes in simPop version 0.2.4
   * feature: generate colored mosaic plots in spMosaic()
   * fix: missing argument and code-mismatch in simRelation()
 
-Changes in synthPop version 0.2.3
+Changes in simPop version 0.2.3
   * fix in simContinuous() reported by Oliver
 
-Changes in synthPop version 0.2.2
+Changes in simPop version 0.2.2
   * new parameter 'nr_cpus' for calibPop(), simCategorical(), simContinuous() and simRelation() manually defining how many cpus should be used
   * updated man-pages
   * new helper-function 'parallelParameters()' returing a list with parameters 'have_win', 'parallel' and 'nr_cores'
   * fixed a bug in simCategorical if only one additional variable is simulated
 
-Changes in synthPop version 0.2.1
+Changes in simPop version 0.2.1
   * fixed a bug in simContinuous (win only) reported by olivier.
 
-Changes in synthPop version 0.2.0
+Changes in simPop version 0.2.0
   * version drop for final delivery
 
-Changes in synthPop version 0.1.9
+Changes in simPop version 0.1.9
   * allow more userfriendly input for calibSample()
-  * calibSample() can be applied to objects of class 'synthPopObj'
+  * calibSample() can be applied to objects of class 'simPopObj'
   * updated example for ipu
   * whipple index (original and modified) included
   * sprague index included
@@ -45,16 +45,16 @@ Changes in synthPop version 0.1.9
   * fixed example for calibPop()
   * new accessor/set functions sampleData, sampleObj, sampleObj<-, popData, popObj, popObj<-, tableObj with updated man-page
 
-Changes in synthPop version 0.1.8
-  * remove S3-class spBwplot() -> only default method was implemented. Removed option to supply a list of populations; rewritten to use 'synthPopObj'-objects
+Changes in simPop version 0.1.8
+  * remove S3-class spBwplot() -> only default method was implemented. Removed option to supply a list of populations; rewritten to use 'simPopObj'-objects
 
   * fixed man files for spBwplot() and spBwplotStats()
 
-  * updated calibPop() so that the function uses and returns objects of class 'synthPopObj'
+  * updated calibPop() so that the function uses and returns objects of class 'simPopObj'
 
-  * auxData()-methods to query/set 'sample' slot in 'synthPopObj'-objects
+  * auxData()-methods to query/set 'sample' slot in 'simPopObj'-objects
 
-Changes in synthPop version 0.1.7
+Changes in simPop version 0.1.7
   * parallel-computing on windows-platforms using doParallel-package
 
   * removed spTable.formula method (did not work correctly, anyway)
@@ -65,19 +65,19 @@ Changes in synthPop version 0.1.7
 
   * refactorization of calibPop.R to allow parallel computing
 
-Changes in synthPop version 0.1.6
+Changes in simPop version 0.1.6
   * removed method 'ctree' from simCategorical() -> perhaps add it later
 
-  * removed argument 'basic' from simCategorical(). The function now uses variables listed in slot @basicHHvars of the input object of class 'synthPopObj'.
+  * removed argument 'basic' from simCategorical(). The function now uses variables listed in slot @basicHHvars of the input object of class 'simPopObj'.
 
   * made check that slot basicHHvars after simStructure() contains at least one variable.
 
-  * new utility-function manageSynthPopObj() to get/set variables in objects of class 'synthPopObj'
+  * new utility-function manageSynthPopObj() to get/set variables in objects of class 'simPopObj'
   * updated a lot of Rd-Files with (now) working examples
 
   * updated simEUSILC()
 
-Changes in synthPop version 0.1.5
+Changes in simPop version 0.1.5
   * combined classes 'sampleObj' and 'popObj' into 'dataObj'
 
   * renamed specify_sample() to specifyInput()
@@ -86,11 +86,11 @@ Changes in synthPop version 0.1.5
 
   * Parallelization of simContinous() on non-windows platforms
 
-  * porting simContinous() to use new class 'synthPopObj' as input
+  * porting simContinous() to use new class 'simPopObj' as input
 
 
-Changes in synthPop version 0.1.4
-  * starting to use new classes 'sampleObj', 'popObj' and 'synthPopObj' for the entire package
+Changes in simPop version 0.1.4
+  * starting to use new classes 'sampleObj', 'popObj' and 'simPopObj' for the entire package
 
   * various fixes and improvements such as a new c++ implementation of calibVars()
 
@@ -98,14 +98,14 @@ Changes in synthPop version 0.1.4
 
   * remove method 'liblinear' from simCategorical() - has never really worked
 
-Changes in synthPop version 0.1.3
+Changes in simPop version 0.1.3
   * parallelize simRelevation() on non-windows platforms
 
   * c++ algorithm for simulated annealing in calibPop()
 
   * multiple commits to fix documentation and cran-notes/warnings when checking
 
-Changes in synthPop version 0.1.2
+Changes in simPop version 0.1.2
   * temporarily add explicit parallel-option to calibPop() for testing-purposes
 
   * more efficient implementation of auxiliary-function resample() used in calibPop()
@@ -114,14 +114,14 @@ Changes in synthPop version 0.1.2
 
   * added R/zzz.R to get current package version on loading the package
 
-Changes in synthPop version 0.1.1
+Changes in simPop version 0.1.1
   * more efficient c++ implementation of iterative proportional updating
 
   * multiple imports from package simPopulation
 
-  * reorganizations (simAnnealing -> synthPop,...)
+  * reorganizations (simAnnealing -> simPop,...)
 
-Changes in synthPop version 0.1.0
+Changes in simPop version 0.1.0
 
   + code largely based on version 0.4.1 of simPopulation
 

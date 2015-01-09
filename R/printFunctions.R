@@ -20,7 +20,7 @@ setMethod("show", "dataObj", function(object){
   }
 })
 
-setMethod("show", "synthPopObj", function(object){
+setMethod("show", "simPopObj", function(object){
   if ( is.null(popObj(object)) ) {
     cat("synthetic population has not been generated!\n")
   } else {

@@ -1,4 +1,4 @@
-\name{synthPopMethods}
+\name{simPopMethods}
 \docType{methods}
 \alias{sampleObj}
 \alias{sampleObj-methods}
@@ -12,40 +12,40 @@
 \alias{popData}
 \alias{tableObj}
 \alias{tableObj-methods}
-\alias{sampleObj,synthPopObj-method}
-\alias{sampleObj<-,synthPopObj,dataObj-method}
-\alias{sampleData,synthPopObj-method}
-\alias{popObj,synthPopObj-method}
-\alias{popObj<-,synthPopObj,dataObj-method}
-\alias{popData,synthPopObj-method}
-\alias{tableObj,synthPopObj-method}
+\alias{sampleObj,simPopObj-method}
+\alias{sampleObj<-,simPopObj,dataObj-method}
+\alias{sampleData,simPopObj-method}
+\alias{popObj,simPopObj-method}
+\alias{popObj<-,simPopObj,dataObj-method}
+\alias{popData,simPopObj-method}
+\alias{tableObj,simPopObj-method}
 
-\title{Methods to query/set slots from objects of class \code{\linkS4class{synthPopObj}}.}
+\title{Methods to query/set slots from objects of class \code{\linkS4class{simPopObj}}.}
 \description{
- The methods allow to query or replace various information of \code{\linkS4class{synthPopObj}}-objects.
+ The methods allow to query or replace various information of \code{\linkS4class{simPopObj}}-objects.
 }
 \section{Methods}{
 \describe{
-  Below, the methods to access/set various slots of \code{\linkS4class{synthPopObj}}-objects are shown.
-\item{\code{sampleObj} with \code{signature(object="synthPopObj")}}{
+  Below, the methods to access/set various slots of \code{\linkS4class{simPopObj}}-objects are shown.
+\item{\code{sampleObj} with \code{signature(object="simPopObj")}}{
   returns slot 'sample' of the input object.
 }
-\item{\code{sampleObj<-} with \code{signature(object="synthPopObj", value="dataObj")}}{
+\item{\code{sampleObj<-} with \code{signature(object="simPopObj", value="dataObj")}}{
   replaces slot 'sample' of the input object with the object \code{value}.
 }
-\item{\code{sampleData} with \code{signature(object="synthPopObj")}}{
+\item{\code{sampleData} with \code{signature(object="simPopObj")}}{
   returns slot 'data' of slot 'sample' of the input object.
 }
-\item{\code{popObj} with \code{signature(object="synthPopObj")}}{
+\item{\code{popObj} with \code{signature(object="simPopObj")}}{
   returns slot 'pop' of the input object.
 }
-\item{\code{popObj<-} with \code{signature(object="synthPopObj", value="dataObj")}}{
+\item{\code{popObj<-} with \code{signature(object="simPopObj", value="dataObj")}}{
   replaces slot 'pop' of the input object with the object \code{value}.
 }
-\item{\code{popData} with \code{signature(object="synthPopObj")}}{
+\item{\code{popData} with \code{signature(object="simPopObj")}}{
   returns slot 'data' of slot 'pop' of the input object.
 }
-\item{\code{tableObj} with \code{signature(object="synthPopObj")}}{
+\item{\code{tableObj} with \code{signature(object="simPopObj")}}{
   returns slot 'table' of the input object.
 }
 }

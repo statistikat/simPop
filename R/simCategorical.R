@@ -137,17 +137,17 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
   sim
 }
 
-simCategorical <- function(synthPopObj, additional,
+simCategorical <- function(simPopObj, additional,
   method=c("multinom", "distribution", "naivebayes"),
   limit=NULL, censor=NULL, maxit=500, MaxNWts=1500, eps=NULL, nr_cpus=NULL, seed=1) {
 
   x <- NULL
 
-  dataP <- synthPopObj@pop
-  dataS <- synthPopObj@sample
+  dataP <- simPopObj@pop
+  dataS <- simPopObj@sample
   data_pop <- dataP@data
   data_sample <- dataS@data
-  basic <- synthPopObj@basicHHvars
+  basic <- simPopObj@basicHHvars
 
   if ( any(additional %in% colnames(data_pop)) ) {
     stop("variables already exist in the population!\n")
@@ -247,8 +247,8 @@ simCategorical <- function(synthPopObj, additional,
     for ( i in additional ) {
       data_pop[[i]] <- values[,i]
     }
-    synthPopObj@pop@data <- data_pop
-    return(invisible(synthPopObj))
+    simPopObj@pop@data <- data_pop
+    return(invisible(simPopObj))
   }
 
   # any other method
@@ -328,6 +328,6 @@ simCategorical <- function(synthPopObj, additional,
     data_pop[[i]] <- values
     predNames <- c(predNames, i)
   }
-  synthPopObj@pop@data <- data_pop
-  invisible(synthPopObj)
+  simPopObj@pop@data <- data_pop
+  invisible(simPopObj)
 }

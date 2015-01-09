@@ -1,9 +1,9 @@
-\name{synthPopObj-class}
+\name{simPopObj-class}
 \docType{class}
-\alias{synthPopObj-class}
-\alias{show,synthPopObj-method}
+\alias{simPopObj-class}
+\alias{show,simPopObj-method}
 
-\title{Class \code{"synthPopObj"}}
+\title{Class \code{"simPopObj"}}
 \description{
 An object that is used throughout the package containing information on the sample (in slot \code{sample}), the population (slot \code{pop}) and optionally some margins in form of a table (slot \code{table}).
 }
@@ -19,7 +19,7 @@ Objects are automatically created in function \code{\link{simStructure}}.
   }
 }
 \section{Methods}{
-A show method is defined with class "synthPopObj".
+A show method is defined with class "simPopObj".
 }
 \author{
   Bernhard Meindl and Matthias Templ
@@ -28,9 +28,9 @@ A show method is defined with class "synthPopObj".
 \code{\linkS4class{dataObj}}
 }
 \examples{
-showClass("synthPopObj")
+showClass("simPopObj")
 
-## show method: generate an object of class synthPop first
+## show method: generate an object of class simPop first
 data(eusilcS)
 inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
 eusilcP <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090"))

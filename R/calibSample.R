@@ -1,17 +1,17 @@
-setClassUnion("df_or_dataObj_or_synthPopObj", c("data.frame", "dataObj", "synthPopObj"))
+setClassUnion("df_or_dataObj_or_simPopObj", c("data.frame", "dataObj", "simPopObj"))
 setClassUnion("dataFrame_or_Table", c("data.frame", "table"))
 setGeneric("calibSample", function(inp, totals, ...) {
   standardGeneric("calibSample")
 })
 
-setMethod("calibSample", c(inp="df_or_dataObj_or_synthPopObj", totals="dataFrame_or_Table"), function(inp, totals, ...) {
+setMethod("calibSample", c(inp="df_or_dataObj_or_simPopObj", totals="dataFrame_or_Table"), function(inp, totals, ...) {
   if ( class(inp) == "data.frame" ) {
     samp <- data.table(inp)
   }
   if ( class(inp) == "dataObj" ) {
     samp <- inp@data
   }
-  if ( class(inp) == "synthPopObj" ) {
+  if ( class(inp) == "simPopObj" ) {
     samp <- inp@sample@data
   }
 
@@ -95,7 +95,7 @@ setMethod("calibSample", c(inp="df_or_dataObj_or_synthPopObj", totals="dataFrame
   if ( class(inp) == "dataObj" ) {
     w <- samp[[inp@weight]]
   }
-  if ( class(inp) == "synthPopObj" ) {
+  if ( class(inp) == "simPopObj" ) {
     w <- samp[[inp@sample@weight]]
   }
   if ( class(inp) == "data.frame" ) {

@@ -16,7 +16,7 @@ simStructure(dataS, method = c("direct", "multinom", "distribution"), basicHHvar
   \item{seed}{optional; an integer value to be used as the seed of the random number generator, or an integer vector containing the state of the random number generator to be restored.}
 }
 \value{
-  An object of class \code{synthPopObj} containing the simulated population household structure as well as the underlying sample that was provided as input.
+  An object of class \code{simPopObj} containing the simulated population household structure as well as the underlying sample that was provided as input.
 }
 \author{Bernhard Meindl and Andreas Alfons}
 \note{

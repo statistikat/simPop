@@ -13,8 +13,8 @@ addKnownMargins <- function(inp, margins) {
     vals <- margins[,ncol(margins)]
     margins <- margins[,-ncol(margins), drop=FALSE]
   }
-  if ( !class(inp) == "synthPopObj" ) {
-    stop("input argument 'inp' must be of class 'synthPopObj'!\n")
+  if ( !class(inp) == "simPopObj" ) {
+    stop("input argument 'inp' must be of class 'simPopObj'!\n")
   }
   if ( !all(colnames(margins) %in% colnames(dataP)) ) {
     stop("all variables existing in input 'margins' must also be existing in the

@@ -29,7 +29,7 @@ Bernhard Meindl and Matthias Templ
 }
 
 \seealso{
-\code{\linkS4class{synthPopObj}}
+\code{\linkS4class{simPopObj}}
 }
 \examples{
 showClass("dataObj")

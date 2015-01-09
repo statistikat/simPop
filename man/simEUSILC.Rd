@@ -55,7 +55,7 @@ simEUSILC(dataS, hid = "db030", wh = "db090", wp = "rb050",
   \item{seed}{optional; an integer value to be used as the seed of the random number generator, or an integer vector containing the state of the random number generator to be restored.}
 }
 \value{
-  An object of class \code{\linkS4class{synthPopObj}} containing the simulated EU-SILC population data as well as the underlying sample.
+  An object of class \code{\linkS4class{simPopObj}} containing the simulated EU-SILC population data as well as the underlying sample.
 }
 \note{
   This is a wrapper calling \code{\link{simStructure}}, \code{\link{simCategorical}}, \code{\link{simContinuous}} and \code{\link{simComponents}}.

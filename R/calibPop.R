@@ -46,16 +46,16 @@ calcFinalWeights <- function(data0, totals0, params) {
   hh_info$hh_size <- as.integer(data0[[params$hhsize]])
   hh_info$median_hhsize <- median(hh_info$hh_size[hh_info$hh_head==1], na.rm=TRUE)
 
-  w <- .Call("synthPop_calibPop_work", inp=inp, totals=current_totals,
-    weights=weights, hh_info=hh_info, params=params, package="synthPop")
+  w <- .Call("simPop_calibPop_work", inp=inp, totals=current_totals,
+    weights=weights, hh_info=hh_info, params=params, package="simPop")
   invisible(w)
 }
 
 calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
   temp.cooldown = 0.9, factor.cooldown = 0.85, min.temp = 10^-3, nr_cpus=NULL, verbose=FALSE) {
 
-  if ( class(inp) != "synthPopObj" ) {
-    stop("argument 'inp' must be of class 'synthPopObj'!\n")
+  if ( class(inp) != "simPopObj" ) {
+    stop("argument 'inp' must be of class 'simPopObj'!\n")
   }
 
   if ( length(split) > 1 ) {

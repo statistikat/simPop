@@ -60,7 +60,7 @@ export(
 
 exportClasses(
   dataObj,
-  synthPopObj
+  simPopObj
 )
 
 ## register methods for S3 generics defined in this package

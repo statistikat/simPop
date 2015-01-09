@@ -19,7 +19,7 @@ ipu <- function(inp, con, hid=NULL, eps=1e-07, verbose=FALSE) {
   }
   w <- as.numeric(rep(1,nrow(inp)))
   con <- as.numeric(unlist(con))
-  w <- .Call("synthPop_ipu_work", inp, con, w, eps=eps, verbose=ifelse(verbose, 1L, 0L), package="synthPop")
+  w <- .Call("simPop_ipu_work", inp, con, w, eps=eps, verbose=ifelse(verbose, 1L, 0L), package="simPop")
   out <- cbind(hhid, inp)
   out <- as.data.frame(out)
   out$weights <- w

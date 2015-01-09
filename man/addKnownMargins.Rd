@@ -1,7 +1,7 @@
 \name{addKnownMargins}
 \alias{addKnownMargins}
 \title{
-add known margins/totals for a combination of variables for the population to an object of class \code{\linkS4class{synthPopObj}}.
+add known margins/totals for a combination of variables for the population to an object of class \code{\linkS4class{simPopObj}}.
 }
 \description{
 The function takes a data.frame containing known marginals/totals for a some variables that must exist in the population (stored in slot 'pop' of input object 'inp') and updates slot 'table' of the input object. This slot finally contains the known totals.
@@ -11,7 +11,7 @@ addKnownMargins(inp, margins)
 }
 \arguments{
 \item{inp}{
-  a \code{synthPopObj} containing population and household survey data as well as optionally margins in standardized format.}
+  a \code{simPopObj} containing population and household survey data as well as optionally margins in standardized format.}
 \item{margins}{
   a \code{data.frame} containing for a combination of unique variable levels for n-variables the number of known occurences in the population. The numbers must be listed in the last column of data.frame 'margins' while the characteristics must be listed in the first 'n' columns.
 }
@@ -21,7 +21,7 @@ households are drawn from the data and new ID's are generated for
 the new households.
 }
 \value{
-an object of class \code{\linkS4class{synthPopObj}} with updated slot 'table'.
+an object of class \code{\linkS4class{simPopObj}} with updated slot 'table'.
 }
 \author{
 Bernhard Meindl

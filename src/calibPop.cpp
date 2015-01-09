@@ -202,7 +202,7 @@ IntegerVector calibPop_work(IntegerMatrix inp, NumericVector totals, IntegerVect
 
 // exporting for package (compileAttributes())
 IntegerVector calibPop_work(IntegerMatrix inp, NumericVector totals, IntegerVector weights, List hh_info, List params);
-RcppExport SEXP synthPop_calibPop_work(SEXP inpSEXP, SEXP totalsSEXP, SEXP weightsSEXP, SEXP hh_infoSEXP, SEXP paramsSEXP) {
+RcppExport SEXP simPop_calibPop_work(SEXP inpSEXP, SEXP totalsSEXP, SEXP weightsSEXP, SEXP hh_infoSEXP, SEXP paramsSEXP) {
 BEGIN_RCPP
     SEXP __sexp_result;
     {
