@@ -1,5 +1,5 @@
-\name{manageSynthPopObj}
-\alias{manageSynthPopObj}
+\name{manageSimPopObj}
+\alias{manageSimPopObj}
 \title{
   get and set variables from population or sample data stored in an object of class \code{\linkS4class{simPopObj}}.
 }
@@ -7,7 +7,7 @@
   This functions allows to get or set variables in slots \code{pop} and \code{sample} of \code{\linkS4class{simPopObj}}-objects. This is a utility function that is useful for writing custom wrapper functions.
 }
 \usage{
-manageSynthPopObj(x, var, sample=FALSE, set=FALSE, values=NULL)
+manageSimPopObj(x, var, sample=FALSE, set=FALSE, values=NULL)
 }
 \arguments{
   \item{x}{an object of class \code{\linkS4class{simPopObj}}.}
@@ -21,7 +21,7 @@ manageSynthPopObj(x, var, sample=FALSE, set=FALSE, values=NULL)
   An object of class \code{\linkS4class{simPopObj}} (if 'set' is TRUE) or a vector (if 'set' is FALSE).
 }
 \author{
-  Bernhard Meindl
+  Bernhard Meindl and Matthias Templ
 }
 
 \examples{
@@ -30,7 +30,7 @@ inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040",
   weight="db090")
 simPopObj <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090"))
 
-head(manageSynthPopObj(simPopObj, var="age", sample=FALSE, set=FALSE))
-head(manageSynthPopObj(simPopObj, var="age", sample=TRUE, set=FALSE))
+head(manageSimPopObj(simPopObj, var="age", sample=FALSE, set=FALSE))
+head(manageSimPopObj(simPopObj, var="age", sample=TRUE, set=FALSE))
 }
 \keyword{manip}
