@@ -15,7 +15,7 @@ IntegerMatrix binary_representation(IntegerVector levels, IntegerVector values) 
 }
 
 IntegerMatrix binary_representation(IntegerVector levels, IntegerVector values);
-RcppExport SEXP synthPop_binary_representation(SEXP levelsSEXP, SEXP valuesSEXP) {
+RcppExport SEXP simPop_binary_representation(SEXP levelsSEXP, SEXP valuesSEXP) {
 BEGIN_RCPP
     SEXP __sexp_result;
     {

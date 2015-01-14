@@ -14,7 +14,7 @@ setReplaceMethod("addWeights", signature = c("dataObj", "list"), definition = fu
   invisible(object)
 })
 
-setReplaceMethod("addWeights", signature = c("synthPopObj", "list"), definition = function(object, value) {
+setReplaceMethod("addWeights", signature = c("simPopObj", "list"), definition = function(object, value) {
   if ( is.null(object@sample) ) {
     stop("No sample information is provided in the input object!\n")
   }

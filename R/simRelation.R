@@ -212,7 +212,7 @@ simulateValues <- function(dataSample, dataPop, params) {
   sim
 }
 
-simRelation <- function(synthPopObj, relation = "relate", head = "head",
+simRelation <- function(simPopObj, relation = "relate", head = "head",
   direct = NULL, additional = c("nation", "ethnic", "religion"),
   limit = NULL, censor = NULL, maxit = 500, MaxNWts = 2000, eps = NULL, nr_cpus=NULL, seed) {
 
@@ -223,12 +223,12 @@ simRelation <- function(synthPopObj, relation = "relate", head = "head",
     set.seed(seed)
   }
 
-  sample <- synthPopObj@sample
-  pop <- synthPopObj@pop
+  sample <- simPopObj@sample
+  pop <- simPopObj@pop
   w <- sample@weight
   hid <- sample@hhid
   strata <- sample@strata
-  basic <- synthPopObj@basicHHvars
+  basic <- simPopObj@basicHHvars
   dataS <- sample@data
   dataP <- pop@data
 
@@ -323,7 +323,7 @@ simRelation <- function(synthPopObj, relation = "relate", head = "head",
         values <- foreach(x=levels(dataS[[strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
           simulateValues(
             dataSample=dataS[dataS[[strata]] == x,],
-            dataPop=dataP[indStrata[[x]], c(predNames, synthPopObj@pop@hhid), with=FALSE], params
+            dataPop=dataP[indStrata[[x]], c(predNames, simPopObj@pop@hhid), with=FALSE], params
           )
         }
         stopCluster(cl)
@@ -331,7 +331,7 @@ simRelation <- function(synthPopObj, relation = "relate", head = "head",
         values <- mclapply(levels(dataS[[strata]]), function(x) {
           simulateValues(
             dataSample=dataS[dataS[[strata]] == x,],
-            dataPop=dataP[indStrata[[x]], c(predNames, synthPopObj@pop@hhid), with=FALSE], params
+            dataPop=dataP[indStrata[[x]], c(predNames, simPopObj@pop@hhid), with=FALSE], params
           )
         }, mc.cores = max(nr_cores,length(levels(dataS[[strata]]))))
       }
@@ -339,7 +339,7 @@ simRelation <- function(synthPopObj, relation = "relate", head = "head",
       values <- lapply(levels(dataS[[strata]]), function(x) {
         simulateValues(
           dataSample=dataS[dataS[[strata]] == x,],
-          dataPop=dataP[indStrata[[x]], c(predNames, synthPopObj@pop@hhid), with=FALSE], params
+          dataPop=dataP[indStrata[[x]], c(predNames, simPopObj@pop@hhid), with=FALSE], params
         )
       })
     }
@@ -350,6 +350,6 @@ simRelation <- function(synthPopObj, relation = "relate", head = "head",
     predNames <- c(predNames, i)
   }
   # return simulated data
-  synthPopObj@pop@data <- dataP
-  invisible(synthPopObj)
+  simPopObj@pop@data <- dataP
+  invisible(simPopObj)
 }

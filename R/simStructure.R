@@ -162,7 +162,7 @@ simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), 
   dataP$weight <- 1
 
   pop <- new("dataObj", data=dataP, hhid=dataS@hhid, hhsize=dataS@hhsize, pid=dataS@pid, strata=dataS@strata, weight="weight", ispopulation=TRUE)
-  out <- new("synthPopObj", sample=dataS, table=NULL, pop=pop)
+  out <- new("simPopObj", sample=dataS, table=NULL, pop=pop)
   out@basicHHvars <- basicHHvars
   invisible(out)
 }

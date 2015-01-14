@@ -1,6 +1,6 @@
 ## goal: calculate household weights that should also fulfil person-type constraints
 rm(list=ls())
-library(synthPop)
+library(simPop)
 # load sample and population data
 data(eusilcS)
 data(eusilcP)
@@ -59,7 +59,7 @@ data.frame(required=unlist(con), is=is)
 
 ######Basic not converting example
 # basic example
-require(synthPop)
+require(simPop)
 inp <- as.data.frame(matrix(0, nrow=8, ncol=7))
 colnames(inp) <- c("hhid","hh1","hh2","p1","p2","p3","p4")
 inp$hhid <- 1:8

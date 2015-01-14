@@ -5,7 +5,7 @@
 Calibration of 0/1 weights by Simulated Annealing
 }
 \description{
-A Simulated Annealing Algorithm for calibration of synthetic population data available in a \code{\linkS4class{synthPopObj}}-object. The aims is to find, given a population, a combination of different households which optimally satisfy, in the sense of an acceptable error, a given table of specific known marginals. The known marginals are also already available in slot 'table' of the input object 'inp'.
+A Simulated Annealing Algorithm for calibration of synthetic population data available in a \code{\linkS4class{simPopObj}}-object. The aims is to find, given a population, a combination of different households which optimally satisfy, in the sense of an acceptable error, a given table of specific known marginals. The known marginals are also already available in slot 'table' of the input object 'inp'.
 }
 \usage{
 calibPop(inp, split, temp=1, eps.factor=0.05, maxiter=200, temp.cooldown=0.9,
@@ -13,7 +13,7 @@ calibPop(inp, split, temp=1, eps.factor=0.05, maxiter=200, temp.cooldown=0.9,
 }
 \arguments{
   \item{inp}{
-an object of class \code{\linkS4class{synthPopObj}} with slot 'table' being non-null! (see \code{\link{addKnownMargins}}.
+an object of class \code{\linkS4class{simPopObj}} with slot 'table' being non-null! (see \code{\link{addKnownMargins}}.
 }
   \item{split}{
 given strata in which the problem will be split. Has to correspond to a column population data (slot 'pop' of input argument 'inp') . For example \code{split = c("region")}, problem will be split for different regions. Parallel computing is performed automatically, if possible.
@@ -55,7 +55,7 @@ The number of cpus are selected automatically in the following manner. The numbe
 This should be the best strategy, but the user can also overwrite this decision.
 }
 \value{
-Returns an object of class \code{\linkS4class{synthPopObj}} with an updated population listed in slot 'pop'.
+Returns an object of class \code{\linkS4class{simPopObj}} with an updated population listed in slot 'pop'.
 }
 \author{
 Bernhard Meindl, Johannes Gussenbauer and Matthias Templ
@@ -65,17 +65,17 @@ Bernhard Meindl, Johannes Gussenbauer and Matthias Templ
 data(eusilcS) # load sample data
 data(eusilcP) # population data
 inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
-synthPop <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090"))
-synthPop <- simCategorical(synthPop, additional=c("pl030", "pb220a"), method="multinom")
+simPop <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090"))
+simPop <- simCategorical(simPop, additional=c("pl030", "pb220a"), method="multinom")
 
 # add margins
 margins <- as.data.frame(
   xtabs(rep(1, nrow(eusilcP)) ~ eusilcP$region + eusilcP$gender + eusilcP$citizenship))
 colnames(margins) <- c("db040", "rb090", "pb220a", "freq")
-synthPop <- addKnownMargins(synthPop, margins)
+simPop <- addKnownMargins(simPop, margins)
 
 # apply simulated annealing
-synthPop_adj <- calibPop(synthPop, split="db040", temp=1, eps.factor=0.1)
+simPop_adj <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1)
 }
 }
 \keyword{datasets}

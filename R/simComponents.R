@@ -1,4 +1,4 @@
-simComponents <- function(synthPopObj, total="netIncome",
+simComponents <- function(simPopObj, total="netIncome",
   components = c("py010n", "py050n", "py090n", "py100n", "py110n", "py120n", "py130n", "py140n"),
   conditional=c(getCatName(total), "pl030"), replaceEmpty=c("sequential", "min"), seed) {
 
@@ -7,9 +7,9 @@ simComponents <- function(synthPopObj, total="netIncome",
     set.seed(seed)
   }
 
-  dataP <- synthPopObj@pop@data
-  dataS <- synthPopObj@sample@data
-  w <- synthPopObj@pop@strata
+  dataP <- simPopObj@pop@data
+  dataS <- simPopObj@sample@data
+  w <- simPopObj@pop@strata
 
   if ( length(total) != 1 ) {
     stop("currently only one continuous variable can be split at a time\n")
@@ -114,6 +114,6 @@ simComponents <- function(synthPopObj, total="netIncome",
   for ( i in 1:ncol(out) ) {
     dataP[,colnames(out)[i]] <- out[,i]
   }
-  synthPopObj@pop@data <- dataP
-  invisible(synthPopObj)
+  simPopObj@pop@data <- dataP
+  invisible(simPopObj)
 }

@@ -40,21 +40,27 @@ calcFinalWeights <- function(data0, totals0, params) {
   hh_info <- list()
   hh_info$hh_ids <- as.integer(data0[[params$hhid]])
   hh_info$hh_head <- rep(0L, nrow(data0))
-  index <- which(sapply(data0[[params$pid]], function(x) { unlist(strsplit(x, "[.]"))[2] } ) == "1")
+  index <- which(sapply(data0[[params$pid]], function(x) {
+    unlist(strsplit(x, "[.]"))[2] }) == "1")
   hh_info$hh_head[index] <- 1L
   hh_info$hh_size <- as.integer(data0[[params$hhsize]])
   hh_info$median_hhsize <- median(hh_info$hh_size[hh_info$hh_head==1], na.rm=TRUE)
 
-  w <- .Call("synthPop_calibPop_work", inp=inp, totals=current_totals,
-    weights=weights, hh_info=hh_info, params=params, package="synthPop")
+  w <- .Call("simPop_calibPop_work", inp=inp, totals=current_totals,
+    weights=weights, hh_info=hh_info, params=params, package="simPop")
   invisible(w)
 }
 
 calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
   temp.cooldown = 0.9, factor.cooldown = 0.85, min.temp = 10^-3, nr_cpus=NULL, verbose=FALSE) {
 
-  if ( class(inp) != "synthPopObj" ) {
-    stop("argument 'inp' must be of class 'synthPopObj'!\n")
+  if ( class(inp) != "simPopObj" ) {
+    stop("argument 'inp' must be of class 'simPopObj'!\n")
+  }
+
+  if ( length(split) > 1 ) {
+    split <- split[1]
+    warning("only first variable will be used to divide the population into strata")
   }
 
   x <- NULL
@@ -104,7 +110,7 @@ calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
   data <- rbind(data, data2)
 
   # parameters for parallel computing
-  nr_strata <- length(unique(data[,split,with=F]))
+  nr_strata <- length(unique(data[[split]]))
   pp <- parallelParameters(nr_cpus=nr_cpus, nr_strata=nr_strata)
   parallel <- pp$parallel
   nr_cores <- pp$nr_cores

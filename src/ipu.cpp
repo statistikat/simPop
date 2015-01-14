@@ -67,7 +67,7 @@ NumericVector ipu_work(NumericMatrix inp, NumericVector con, NumericVector w, do
 
 // exporting for package (compileAttributes())
 NumericVector ipu_work(NumericMatrix inp, NumericVector con, NumericVector w, double eps, IntegerVector verbose);
-RcppExport SEXP synthPop_ipu_work(SEXP inpSEXP, SEXP conSEXP, SEXP wSEXP, SEXP epsSEXP, SEXP verboseSEXP) {
+RcppExport SEXP simPop_ipu_work(SEXP inpSEXP, SEXP conSEXP, SEXP wSEXP, SEXP epsSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
   SEXP __sexp_result;
   {

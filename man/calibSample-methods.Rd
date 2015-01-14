@@ -2,15 +2,15 @@
 \docType{methods}
 \alias{calibSample}
 \alias{calibSample-methods}
-\alias{calibSample,df_or_dataObj_or_synthPopObj,dataFrame_or_Table-method}
+\alias{calibSample,df_or_dataObj_or_simPopObj,dataFrame_or_Table-method}
 \title{Calibrate sample weights}
 \description{
   Calibrate sample weights according to known marginal population totals. Based on initial sample weights, the so-called \emph{g}-weights are computed by generalized raking procedures.
 }
 \section{Methods}{
 \describe{The function provides methods with the following signatures.
-  \item{\code{signature(inp="df_or_dataObj_or_synthPopObj", totals="dataFrame_or_Table",...)}}{
-  Argument 'inp' must be an object of class \code{data.frame}, \code{\linkS4class{dataObj}} or \code{\linkS4class{synthPopObj}} and the totals must be specified in either objects of class \code{table} or \code{data.frame}. If argument 'totals' is a data.frame it must be provided in a way that in the first columns n-columns the combinations of variables are listed. In the last column, the frequency counts must be specified. Furthermore, variable names of all but the last column must be available also from the sample data specified in argument 'inp'.
+  \item{\code{signature(inp="df_or_dataObj_or_simPopObj", totals="dataFrame_or_Table",...)}}{
+  Argument 'inp' must be an object of class \code{data.frame}, \code{\linkS4class{dataObj}} or \code{\linkS4class{simPopObj}} and the totals must be specified in either objects of class \code{table} or \code{data.frame}. If argument 'totals' is a data.frame it must be provided in a way that in the first columns n-columns the combinations of variables are listed. In the last column, the frequency counts must be specified. Furthermore, variable names of all but the last column must be available also from the sample data specified in argument 'inp'.
 If argument 'total' is a table (e.g. created with function \code{\link{tableWt}}, it must be made sure that the dimnames match the variable names (and levels) of the specified input data set.
   }
 }}

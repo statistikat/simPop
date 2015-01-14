@@ -579,7 +579,7 @@ crossprodWt <- function(x, weights) {
 }))
 }
 
-manageSynthPopObj <- function(x, var, sample=FALSE, set=FALSE, values=NULL) {
+manageSimPopObj <- function(x, var, sample=FALSE, set=FALSE, values=NULL) {
   if ( class(x) != "simPopObj" ) {
     stop("wrong input of argument 'x' (needs to be of class 'simPopObj')!\n")
   }

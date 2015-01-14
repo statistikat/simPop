@@ -1,6 +1,6 @@
 rm(list=ls())
 library(Rcpp)
-library(synthPop)
+library(simPop)
 data(eusilcP)
 data(eusilcS)
 

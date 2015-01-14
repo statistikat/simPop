@@ -1,16 +1,16 @@
 \name{manageSynthPopObj}
 \alias{manageSynthPopObj}
 \title{
-  get and set variables from population or sample data stored in an object of class \code{\linkS4class{synthPopObj}}.
+  get and set variables from population or sample data stored in an object of class \code{\linkS4class{simPopObj}}.
 }
 \description{
-  This functions allows to get or set variables in slots \code{pop} and \code{sample} of \code{\linkS4class{synthPopObj}}-objects. This is a utility function that is useful for writing custom wrapper functions.
+  This functions allows to get or set variables in slots \code{pop} and \code{sample} of \code{\linkS4class{simPopObj}}-objects. This is a utility function that is useful for writing custom wrapper functions.
 }
 \usage{
 manageSynthPopObj(x, var, sample=FALSE, set=FALSE, values=NULL)
 }
 \arguments{
-  \item{x}{an object of class \code{\linkS4class{synthPopObj}}.}
+  \item{x}{an object of class \code{\linkS4class{simPopObj}}.}
   \item{var}{character vector of length 1; variable name that should be set or extracted.}
   \item{sample}{a logical indicating whether \code{var} should be extracted/set from slot 'sample' (TRUE) or slot 'pop' (FALSE).}
   \item{set}{logical; if TRUE, argument 'values' is set to either the sample or population data stored in 'x', depending on argument 'sample'. If FALSE, the desired variable given by 'var' is returned from either the sample or the pop slot of 'x'.}
@@ -18,7 +18,7 @@ manageSynthPopObj(x, var, sample=FALSE, set=FALSE, values=NULL)
 }
 
 \value{
-  An object of class \code{\linkS4class{synthPopObj}} (if 'set' is TRUE) or a vector (if 'set' is FALSE).
+  An object of class \code{\linkS4class{simPopObj}} (if 'set' is TRUE) or a vector (if 'set' is FALSE).
 }
 \author{
   Bernhard Meindl
@@ -28,9 +28,9 @@ manageSynthPopObj(x, var, sample=FALSE, set=FALSE, values=NULL)
 data(eusilcS)
 inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040",
   weight="db090")
-synthPopObj <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090"))
+simPopObj <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090"))
 
-head(manageSynthPopObj(synthPopObj, var="age", sample=FALSE, set=FALSE))
-head(manageSynthPopObj(synthPopObj, var="age", sample=TRUE, set=FALSE))
+head(manageSynthPopObj(simPopObj, var="age", sample=FALSE, set=FALSE))
+head(manageSynthPopObj(simPopObj, var="age", sample=TRUE, set=FALSE))
 }
 \keyword{manip}
