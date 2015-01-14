@@ -7,7 +7,7 @@
   Simulate continuous variables of population data using multinomial log-linear models combined with random draws from the resulting categories or (two-step) regression models combined with random error terms. The household structure of the population data and any other categorical predictors need to be simulated beforehand.
 }
 \usage{
-simContinuous(synthPopObj, additional = "netIncome",
+simContinuous(simPopObj, additional = "netIncome",
   method = c("multinom", "lm"), zeros = TRUE,
   breaks = NULL, lower = NULL, upper = NULL,
   equidist = TRUE, probs = NULL, gpd = TRUE,
@@ -18,7 +18,7 @@ simContinuous(synthPopObj, additional = "netIncome",
   tol = .Machine$double.eps^0.5, nr_cpus = NULL, eps = NULL, seed)
 }
 \arguments{
-  \item{synthPopObj}{a \code{\linkS4class{synthPopObj}} holding household survey data, population data and optionally some margins.}
+  \item{simPopObj}{a \code{\linkS4class{simPopObj}} holding household survey data, population data and optionally some margins.}
   \item{additional}{a character string specifying the additional continuous variable of \code{dataS} that should be simulated for the population data. Currently, only one additional variable can be simulated at a time.}
   \item{method}{a character string specifying the method to be used for simulating the continuous variable. Accepted values are \code{"multinom"}, for using multinomial log-linear models combined with random draws from the resulting ategories, and \code{"lm"}, for using (two-step) regression models combined with random error terms.}
   \item{zeros}{a logical indicating whether the variable specified by \code{additional} is semi-continuous, i.e., contains a considerable amount of zeros. If \code{TRUE} and \code{method} is \code{"multinom"}, a separate factor level for zeros in the response is used. If \code{TRUE} and \code{method} is \code{"lm"}, a two-step model is applied. The first step thereby uses a log-linear or multinomial log-linear model (see \dQuote{Details}).}
@@ -57,7 +57,7 @@ The number of cpus are selected automatically in the following manner. The numbe
 This should be the best strategy, but the user can also overwrite this decision.
 }
 \value{
-  An object of class \code{\linkS4class{synthPopObj}} containing survey data as well as the simulated population data including the continuous variable specified by \code{additional} and possibly simulated categories for the desired continous variable.
+  An object of class \code{\linkS4class{simPopObj}} containing survey data as well as the simulated population data including the continuous variable specified by \code{additional} and possibly simulated categories for the desired continous variable.
 }
 \author{
   Bernhard Meindl and Andreas Alfons (based on code by Stefan Kraft)
@@ -73,15 +73,15 @@ This should be the best strategy, but the user can also overwrite this decision.
 \dontrun{
 data(eusilcS)
 inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
-synthPop <- simStructure(data=inp, method="direct",
+simPop <- simStructure(data=inp, method="direct",
   basicHHvars=c("age", "rb090", "hsize", "pl030", "pb220a"))
 
 # multinomial model with random draws
-eusilcM <- simContinuous(synthPop, additional="netIncome", upper=200000, equidist=FALSE)
+eusilcM <- simContinuous(simPop, additional="netIncome", upper=200000, equidist=FALSE)
 class(eusilcM)
 
 # two-step regression
-eusilcT <- simContinuous(synthPop, additional="netIncome", method = "lm")
+eusilcT <- simContinuous(simPop, additional="netIncome", method = "lm")
 class(eusilcT)
 }
 }

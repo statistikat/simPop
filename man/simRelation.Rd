@@ -7,13 +7,13 @@
   Simulate categorical variables of population data taking relationships between household members into account. The household structure of the population data needs to be simulated beforehand using \code{\link{simStructure}}.
 }
 \usage{
-simRelation(synthPopObj, relation = "relate", head = "head", direct = NULL,
+simRelation(simPopObj, relation = "relate", head = "head", direct = NULL,
   additional = c("nation", "ethnic", "religion"),
   limit = NULL, censor = NULL, maxit = 500,
   MaxNWts = 2000, eps = NULL, nr_cpus=NULL, seed)
 }
 \arguments{
-  \item{synthPopObj}{a \code{synthPopObj} containing population and household survey data as well as optionally margins in standardized format.}
+  \item{simPopObj}{a \code{simPopObj} containing population and household survey data as well as optionally margins in standardized format.}
   \item{relation}{a character string specifying the columns of \code{dataS} and \code{dataP}, respectively, that define the relationships between the household members.}
   \item{head}{a character string specifying the category of the variable given by \code{relation} that identifies the household head.}
   \item{direct}{a character string specifying categories of the variable given by \code{relation}. Simulated individuals with those categories directly inherit the values of the additional variables from the household head. The default is \code{NULL} such that no individuals directly inherit value from the household head.}
@@ -33,7 +33,7 @@ This should be the best strategy, but the user can also overwrite this decision.
 
 }
 \value{
-  An object of class \code{\linkS4class{synthPopObj}} containing survey data as well as the simulated population data including the categorical variables specified by \code{additional}.
+  An object of class \code{\linkS4class{simPopObj}} containing survey data as well as the simulated population data including the categorical variables specified by \code{additional}.
 }
 \author{Andreas Alfons and Bernhard Meindl}
 \note{
@@ -50,7 +50,7 @@ samp <- specifyInput(data=ghanaS, hhid="hhid", strata="region", weight="weight")
 ghanaP <- simStructure(data=samp, method="direct", basicHHvars=c("age", "sex", "relate"))
 class(ghanaP)
 
-ghanaP <- simRelation(synthPopObj=ghanaP, relation="relate", head="head")
+ghanaP <- simRelation(simPopObj=ghanaP, relation="relate", head="head")
 str(ghanaP)
 }
 }

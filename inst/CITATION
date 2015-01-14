@@ -1,4 +1,4 @@
-package <- "synthPop"
+package <- "simPop"
 citHeader(paste("To cite package '", package, "' in publications use:", sep=""))
 
 desc <- packageDescription(package)

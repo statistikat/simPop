@@ -7,14 +7,14 @@
   Simulate components of continuous variables of population data by resampling fractions from survey data. The continuous variable to be split and any categorical conditioning variables need to be simulated beforehand.
 }
 \usage{
-simComponents(synthPopObj, total="netIncome",
+simComponents(simPopObj, total="netIncome",
   components=c("py010n", "py050n", "py090n", "py100n",
     "py110n","py120n", "py130n", "py140n"),
   conditional=c(getCatName(total), "pl030"),
   replaceEmpty=c("sequential", "min"), seed)
 }
 \arguments{
-  \item{synthPopObj}{a \code{\linkS4class{synthPopObj}}-object.}
+  \item{simPopObj}{a \code{\linkS4class{simPopObj}}-object.}
   \item{total}{a character string specifying the continuous variable of dataP that should be split into components. Currently, only one variable can be split at a time.}
   \item{components}{a character vector specifying the components in \code{dataS} that should be simulated for the population data.}
   \item{conditional}{an optional character vector specifying categorical conditioning variables for resampling. The fractions occurring in \code{dataS} are then drawn from the respective subsets defined by these variables.}
@@ -22,7 +22,7 @@ simComponents(synthPopObj, total="netIncome",
   \item{seed}{optional; an integer value to be used as the seed of the random number generator, or an integer vector containing the state of the random number generator to be restored.}
 }
 \value{
-  An object of class \code{\linkS4class{synthPopObj}} containing survey data as well as the simulated population data including the components of the continuous variable specified by \code{total} and \code{components}.
+  An object of class \code{\linkS4class{simPopObj}} containing survey data as well as the simulated population data including the components of the continuous variable specified by \code{total} and \code{components}.
 }
 \author{Stefan Kraft and Andreas Alfons and Bernhard Meindl}
 \note{
@@ -37,29 +37,29 @@ simComponents(synthPopObj, total="netIncome",
 data(eusilcS)
 inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize",
   strata="db040", weight="db090")
-synthPopObj <- simStructure(data=inp, method="direct",
+simPopObj <- simStructure(data=inp, method="direct",
   basicHHvars=c("age", "rb090", "hsize", "pl030", "pb220a"))
-synthPopObj <- simContinuous(synthPopObj, additional = "netIncome",
+simPopObj <- simContinuous(simPopObj, additional = "netIncome",
   method="multinom", upper=200000, equidist=FALSE)
 
 # categorize net income for use as conditioning variable
-sIncome <- manageSynthPopObj(synthPopObj, var="netIncome", sample=TRUE, set=FALSE)
-sWeight <- manageSynthPopObj(synthPopObj, var="rb050", sample=TRUE, set=FALSE)
-pIncome <- manageSynthPopObj(synthPopObj, var="netIncome", sample=FALSE, set=FALSE)
+sIncome <- manageSynthPopObj(simPopObj, var="netIncome", sample=TRUE, set=FALSE)
+sWeight <- manageSynthPopObj(simPopObj, var="rb050", sample=TRUE, set=FALSE)
+pIncome <- manageSynthPopObj(simPopObj, var="netIncome", sample=FALSE, set=FALSE)
 
 breaks <- getBreaks(x=sIncome, w=sWeight, upper=Inf, equidist=FALSE)
-synthPopObj <- manageSynthPopObj(synthPopObj, var="netIncomeCat", sample=TRUE,
+simPopObj <- manageSynthPopObj(simPopObj, var="netIncomeCat", sample=TRUE,
   set=TRUE, values=getCat(x=sIncome, breaks))
-synthPopObj <- manageSynthPopObj(synthPopObj, var="netIncomeCat", sample=FALSE,
+simPopObj <- manageSynthPopObj(simPopObj, var="netIncomeCat", sample=FALSE,
   set=TRUE, values=getCat(x=pIncome, breaks))
 
 # simulate net income components
-synthPopObj <- simComponents(synthPopObj=synthPopObj, total="netIncome",
+simPopObj <- simComponents(simPopObj=simPopObj, total="netIncome",
   components=c("py010n","py050n","py090n","py100n","py110n","py120n","py130n","py140n"),
   conditional = c("netIncomeCat", "pl030"), replaceEmpty = "sequential", seed=1 )
 
-class(synthPopObj)
-str(synthPopObj)
+class(simPopObj)
+str(simPopObj)
 }
 }
 \keyword{datagen}

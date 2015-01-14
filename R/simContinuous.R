@@ -237,7 +237,7 @@ generateValues_binary <- function(dataSample, dataPop, params) {
   unsplit(sim, dataPop, drop=TRUE)
 }
 
-simContinuous <- function(synthPopObj, additional = "netIncome",
+simContinuous <- function(simPopObj, additional = "netIncome",
   method = c("multinom", "lm"), zeros = TRUE,
   breaks = NULL, lower = NULL, upper = NULL,
   equidist = TRUE, probs = NULL, gpd = TRUE,
@@ -250,9 +250,9 @@ simContinuous <- function(synthPopObj, additional = "netIncome",
 
   x <- NULL
 
-  samp <- synthPopObj@sample
-  pop <- synthPopObj@pop
-  basic <- synthPopObj@basicHHvars
+  samp <- simPopObj@sample
+  pop <- simPopObj@pop
+  basic <- simPopObj@basicHHvars
   strata <- samp@strata
   weight <- samp@weight
 
@@ -275,7 +275,7 @@ simContinuous <- function(synthPopObj, additional = "netIncome",
     stop("currently only one additional variable can be generated at a time")
   }
   if ( !additional %in% colnames(samp@data) ) {
-    stop("variable 'additional' must be included in the sample of input 'synthPopObj'!\n")
+    stop("variable 'additional' must be included in the sample of input 'simPopObj'!\n")
   }
 
   varNames <- c(weight, strata, basic, additional)
@@ -702,6 +702,6 @@ simContinuous <- function(synthPopObj, additional = "netIncome",
 
   # return simulated data
   dataP[[additional]] <- values
-  synthPopObj@pop@data <- dataP
-  invisible(synthPopObj)
+  simPopObj@pop@data <- dataP
+  invisible(simPopObj)
 }

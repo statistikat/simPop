@@ -30,10 +30,10 @@ simEUSILC <- function(dataS, hid = "db030", wh = "db090",
   ## simulate household structure
   structure <- c(age, gender)
   inp <- specifyInput(data=dataS, hhid=hid, weight=wh, hhsize=hsize, strata=strata, pid=pid)
-  synthPop <- simStructure(dataS=inp, basicHHvars=structure)
+  simPop <- simStructure(dataS=inp, basicHHvars=structure)
 
-  dataS <- synthPop@sample@data
-  dataP <- synthPop@pop@data
+  dataS <- simPop@sample@data
+  dataP <- simPop@pop@data
 
   # construct age categories (if requested)
   categorizeAge <- isTRUE(categorizeAge)
@@ -53,15 +53,15 @@ simEUSILC <- function(dataS, hid = "db030", wh = "db090",
     # use age class as predictor instead of age
     structure <- c(ageCat, gender)
   } else ageCat <- NULL
-  synthPop@pop@data <- dataP
-  synthPop@sample@data <- dataS
+  simPop@pop@data <- dataP
+  simPop@sample@data <- dataS
 
   ## simulate additional categorical variables
   basic <- c(structure, if(is.null(hsize)) "hsize" else hsize)
-  synthPop <- simCategorical(synthPop, additional=categorical, maxit=maxit, MaxNWts=MaxNWts)
+  simPop <- simCategorical(simPop, additional=categorical, maxit=maxit, MaxNWts=MaxNWts)
 
-  dataS <- synthPop@sample@data
-  dataP <- synthPop@pop@data
+  dataS <- simPop@sample@data
+  dataP <- simPop@pop@data
 
   ## simulate income
   basic <- union(basic, categorical)
@@ -86,31 +86,31 @@ simEUSILC <- function(dataS, hid = "db030", wh = "db090",
   }
   incomeCat <- getCatName(income)
   dataS[[incomeCat]] <- getCat(dataS[[income]], breaks, zeros)
-  synthPop@sample@data <- dataS
-  synthPop@pop@data <- dataP
+  simPop@sample@data <- dataS
+  simPop@pop@data <- dataP
 
   if ( useMultinom ) {
     # multinomial model with random draws from resulting categories
     if ( is.null(threshold) && missingBreaks && (!isTRUE(equidist) || !is.null(probs)) ) {
       threshold <- breaks[length(breaks)-2]
     }
-    synthPop <- simContinuous(synthPop, additional=income, zeros=zeros, breaks=breaks,
+    simPop <- simContinuous(simPop, additional=income, zeros=zeros, breaks=breaks,
       gpd=gpd, threshold=threshold, est=est, keep=TRUE, maxit=maxit, MaxNWts=MaxNWts)
   } else {
     # two-step model
-    synthPop <- simContinuous(synthPop, additional=income, method="lm", zeros=zeros,
+    simPop <- simContinuous(simPop, additional=income, method="lm", zeros=zeros,
       breaks=breaks, log=TRUE, const=const, alpha=alpha,
       residuals=residuals, maxit=maxit, MaxNWts=MaxNWts, tol=tol)
-    dataP <- synthPop@pop@data
+    dataP <- simPop@pop@data
     dataP[[incomeCat]] <- getCat(dataP[[income]], breaks, zeros)
-    synthPop@pop@data <- dataP
+    simPop@pop@data <- dataP
   }
 
   ## simulate income components
-  synthPop <- simComponents(synthPop, total=income, components=components, conditional=conditional)
+  simPop <- simComponents(simPop, total=income, components=components, conditional=conditional)
 
   # round income components and adjust income
-  dataP <- synthPop@pop@data
+  dataP <- simPop@pop@data
   dataP[, (components) := lapply(.SD, round, digits=2), .SDcols = components]
   dataP[[income]] <- rowSums(dataP[, components, with=F])
 
@@ -118,7 +118,7 @@ simEUSILC <- function(dataS, hid = "db030", wh = "db090",
   if ( !keep ) {
     dataP <- dataP[, setdiff(names(dataP), c(ageCat, incomeCat)), with=F]
   }
-  synthPop@pop@data <- dataP
-  return(invisible(synthPop))
+  simPop@pop@data <- dataP
+  return(invisible(simPop))
 }
 

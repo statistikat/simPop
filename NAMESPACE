@@ -35,7 +35,7 @@ export(
   getBreaks,
   getCat,
   ipu,
-  manageSynthPopObj,
+  manageSimPopObj,
   quantileWt,
   sampHH,
   simCategorical,
@@ -60,7 +60,7 @@ export(
 
 exportClasses(
   dataObj,
-  synthPopObj
+  simPopObj
 )
 
 ## register methods for S3 generics defined in this package

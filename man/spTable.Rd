@@ -10,7 +10,7 @@
 spTable(inp, select)
 }
 \arguments{
-  \item{inp}{an object of class \code{\linkS4class{synthPopObj}} containing household survey and simulated population data.}
+  \item{inp}{an object of class \code{\linkS4class{simPopObj}} containing household survey and simulated population data.}
   \item{select}{character; vector defining the columns in slots 'pop' and 'sample' of argument 'input' that should be used for tabulation.}
 }
 \details{

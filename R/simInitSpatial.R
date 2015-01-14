@@ -1,4 +1,4 @@
-simInitSpatial <- function(synthPopObj, additional, region, tspatial) {
+simInitSpatial <- function(simPopObj, additional, region, tspatial) {
   # simplified version of generateValues_distribution
   generateValues_spatial <- function(dataTable, dataPop, params) {
     if( !nrow(dataTable) ) {
@@ -16,11 +16,11 @@ simInitSpatial <- function(synthPopObj, additional, region, tspatial) {
   }
   
   x <- NULL
-  dataP <- synthPopObj@pop
-  dataS <- synthPopObj@sample
+  dataP <- simPopObj@pop
+  dataS <- simPopObj@sample
   data_pop <- dataP@data
   data_sample <- dataS@data
-  basic <- synthPopObj@basicHHvars
+  basic <- simPopObj@basicHHvars
 
   if ( length(additional) != 1 ) {
     stop("currently exactly one additional spatial variable can be generated!\n")
@@ -56,11 +56,11 @@ simInitSpatial <- function(synthPopObj, additional, region, tspatial) {
   # check other variables levels
   m <- match(region, colnames(data_pop))
   if ( is.na(m) ) {
-    stop("variable listed in argument 'region' is not available in the synthetic population data of of input 'synthPopObj'!\n")
+    stop("variable listed in argument 'region' is not available in the synthetic population data of of input 'simPopObj'!\n")
   }
   m <- match(region, colnames(data_sample))
   if ( is.na(m) ) {
-    stop("variable listed in argument 'region' is not available in the sample dataset of input 'synthPopObj'!\n")
+    stop("variable listed in argument 'region' is not available in the sample dataset of input 'simPopObj'!\n")
   }  
   
   # generation of our table
@@ -96,6 +96,6 @@ simInitSpatial <- function(synthPopObj, additional, region, tspatial) {
   data_pop[[additional]] <- unlist(values)
   
   # check
-  synthPopObj@pop@data <- data_pop
-  invisible(synthPopObj)
+  simPopObj@pop@data <- data_pop
+  invisible(simPopObj)
 }

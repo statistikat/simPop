@@ -3,7 +3,7 @@ calibVars.default <- function(x) {
   if(length(x) == 0) matrix(integer(), 0, 0)
   x <- as.factor(x)
   levs <- levels(x)
-  res <- .Call("synthPop_binary_representation", levels=1:length(levels(x)), values=as.integer(x), package="synthPop")
+  res <- .Call("simPop_binary_representation", levels=1:length(levels(x)), values=as.integer(x), package="simPop")
   colnames(res) <- levs
   rownames(res) <- names(x)  # set rownames from original vector
   res    

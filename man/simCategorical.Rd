@@ -7,13 +7,13 @@
   Simulate categorical variables of population data. The household structure of the population data needs to be simulated beforehand.
 }
 \usage{
-simCategorical(synthPopObj, additional,
+simCategorical(simPopObj, additional,
   method=c("multinom", "distribution", "naivebayes"),
   limit=NULL, censor=NULL, maxit=500, MaxNWts=1500, eps=NULL, nr_cpus=NULL, seed=1)
 }
 \arguments{
-  \item{synthPopObj}{a \code{synthPopObj} containing population and household survey data as well as optionally margins in standardized format.}
-  \item{additional}{a character vector specifying additional categorical variables available in the sample object of \code{synthPopObj} that should be simulated for the population data.}
+  \item{simPopObj}{a \code{simPopObj} containing population and household survey data as well as optionally margins in standardized format.}
+  \item{additional}{a character vector specifying additional categorical variables available in the sample object of \code{simPopObj} that should be simulated for the population data.}
   \item{method}{a character string specifying the method to be used for simulating the additional categorical variables. Accepted values are \code{"multinom"} (estimation of the conditional probabilities using multinomial log-linear models and random draws from the resulting distributions), or \code{"distribution"} (random draws from the observed conditional distributions of their multivariate realizations) and and \code{naivebayes} (classification based on naive bayes approach).}
   \item{limit}{if \code{method} is \code{"multinom"}, this can be used to account for structural zeros. If only one additional variable is requested, a named list of lists should be supplied. The names of the list components specify the predictor variables for which to limit the possible outcomes of the response. For each predictor, a list containing the possible outcomes of the response for each category of the predictor can be supplied. The probabilities of other outcomes conditional on combinations that contain the specified categories of the supplied predictors are set to 0. If more than one additional variable is requested, such a list of lists can be supplied for each variable as a component of yet another list, with the component names specifying the respective variables.}
   \item{censor}{if \code{method} is \code{"multinom"}, this can be used to account for structural zeros. If only one additional variable is requested, a named list of lists or \code{data.frame}s should be supplied. The names of the list components specify the categories that should be censored. For each of these categories, a list or \code{data.frame} containing levels of the predictor variables can be supplied. The probability of the specified categories is set to 0 for the respective predictor levels. If more than one additional variable is requested, such a list of lists or \code{data.frame}s can be supplied for each variable as a component of yet another list, with the component names specifying the respective variables.}
@@ -27,7 +27,7 @@ The number of cpus are selected automatically in the following manner. The numbe
 This should be the best strategy, but the user can also overwrite this decision.
 }
 \value{
-  An object of class \code{\linkS4class{synthPopObj}} containing survey data as well as the simulated population data including the categorical variables specified by argument \code{additional}.
+  An object of class \code{\linkS4class{simPopObj}} containing survey data as well as the simulated population data including the categorical variables specified by argument \code{additional}.
 }
 \author{Bernhard Meindl and Andreas Alfons and Stefan Kraft}
 \note{
@@ -42,9 +42,9 @@ This should be the best strategy, but the user can also overwrite this decision.
 data(eusilcS) # load sample data
 inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
 ## in the following, nr_cpus are selected automatically
-synthPop <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090"), nr_cpus=NULL)
-synthPop <- simCategorical(synthPop, additional=c("pl030", "pb220a"), method="multinom")
-summary(synthPop)
+simPop <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090"), nr_cpus=NULL)
+simPop <- simCategorical(simPop, additional=c("pl030", "pb220a"), method="multinom")
+summary(simPop)
 }
 }
 \keyword{datagen}
