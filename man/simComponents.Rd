@@ -43,14 +43,14 @@ simPopObj <- simContinuous(simPopObj, additional = "netIncome",
   method="multinom", upper=200000, equidist=FALSE)
 
 # categorize net income for use as conditioning variable
-sIncome <- manageSynthPopObj(simPopObj, var="netIncome", sample=TRUE, set=FALSE)
-sWeight <- manageSynthPopObj(simPopObj, var="rb050", sample=TRUE, set=FALSE)
-pIncome <- manageSynthPopObj(simPopObj, var="netIncome", sample=FALSE, set=FALSE)
+sIncome <- manageSimPopObj(simPopObj, var="netIncome", sample=TRUE, set=FALSE)
+sWeight <- manageSimPopObj(simPopObj, var="rb050", sample=TRUE, set=FALSE)
+pIncome <- manageSimPopObj(simPopObj, var="netIncome", sample=FALSE, set=FALSE)
 
 breaks <- getBreaks(x=sIncome, w=sWeight, upper=Inf, equidist=FALSE)
-simPopObj <- manageSynthPopObj(simPopObj, var="netIncomeCat", sample=TRUE,
+simPopObj <- manageSimPopObj(simPopObj, var="netIncomeCat", sample=TRUE,
   set=TRUE, values=getCat(x=sIncome, breaks))
-simPopObj <- manageSynthPopObj(simPopObj, var="netIncomeCat", sample=FALSE,
+simPopObj <- manageSimPopObj(simPopObj, var="netIncomeCat", sample=FALSE,
   set=TRUE, values=getCat(x=pIncome, breaks))
 
 # simulate net income components
