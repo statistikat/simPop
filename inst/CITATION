@@ -1,11 +1,13 @@
 package <- "simPop"
 citHeader(paste("To cite package '", package, "' in publications use:", sep=""))
 
-desc <- packageDescription(package)
-title <- paste(package, desc$Title, sep=": ")
-vers <- paste("R package version", desc$Version)
-year <- sub(".*(2[[:digit:]]{3})-.*", "\\1", desc$Date)
-author <- desc$Author
+if(!exists("meta") || is.null(meta)) {
+  meta <- packageDescription(package)
+}
+title <- paste(package, meta$Title, sep=": ")
+vers <- paste("R package version", meta$Version)
+year <- sub(".*(2[[:digit:]]{3})-.*", "\\1", meta$Date)
+author <- meta$Author
 authorList <- unlist(strsplit(author, "(, and |, | and )"))
 authorList <- do.call(personList, lapply(authorList, as.person))
 url <- paste("http://CRAN.R-project.org/package=", package, sep="")
