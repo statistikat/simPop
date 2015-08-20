@@ -1,3 +1,6 @@
+Changes in simPop version 0.2.10
+  * improvements in simContinous(): new parameters 'byHousehold' and 'basicOnly'
+
 Changes in simPop version 0.2.9
   * manageSynthPopObj to manageSimPopObj
   * bug in calibPop.cpp solved (segmentation fault)

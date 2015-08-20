@@ -246,9 +246,9 @@ simContinuous <- function(simPopObj, additional = "netIncome",
   alpha = 0.01, residuals = TRUE, keep = TRUE,
   maxit = 500, MaxNWts = 1500,
   tol = .Machine$double.eps^0.5,
-  nr_cpus=NULL, eps = NULL, seed) {
+  nr_cpus=NULL, eps = NULL, basicOnly=TRUE, byHousehold=FALSE, seed) {
 
-  x <- NULL
+  x <- hhid <- vals <- id <- V1 <- NULL
 
   samp <- simPopObj@sample
   pop <- simPopObj@pop
@@ -258,6 +258,13 @@ simContinuous <- function(simPopObj, additional = "netIncome",
 
   dataS <- samp@data
   dataP <- pop@data
+
+  # preparations for formulas and models
+  if ( basicOnly ) {
+    predNames <- basic  # names of predictor variables
+  } else {
+    predNames <- setdiff(names(dataP), c(pop@hhid, pop@pid, pop@weight))
+  }
 
   # parameters for parallel computing
   nr_strata <- length(levels(dataS[[strata]]))
@@ -278,7 +285,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     stop("variable 'additional' must be included in the sample of input 'simPopObj'!\n")
   }
 
-  varNames <- c(weight, strata, basic, additional)
+  varNames <- c(predNames, weight, additional, strata)
   dataS <- dataS[,varNames, with=F]
   method <- match.arg(method)
   zeros <- isTRUE(zeros)
@@ -299,10 +306,27 @@ simContinuous <- function(simPopObj, additional = "netIncome",
   if ( length(exclude) ) {
     dataS <- dataS[-exclude,]
   }
+
+  # temporarily impute missing values in additional variables using hotdeck
+  if ( !basicOnly ) {
+    if ( is.null(pop@strata) ) {
+      impVars <- setdiff(predNames, c(weight, basic, pop@hhsize))
+    } else {
+      impVars <- setdiff(predNames, c(strata,weight, basic, pop@hhsize))
+    }
+    if ( length(impVars) > 0 ) {
+      dataP_orig <- dataP[,impVars,with=F]
+      dataP <- hotdeck(dataP, variable=impVars, domain_var=pop@strata, imp_var=FALSE)
+    } else {
+      dataP_orig <- NULL
+    }
+  }
+
   # variables are coerced to factors
-  select <- c(strata, basic)
+  select <- predNames # strata always included
   dataS <- checkFactor(dataS, select)
   dataP <- checkFactor(dataP, select)
+
   # sample data of variable to be simulated
   additionalS <- dataS[[additional]]
 
@@ -374,8 +398,6 @@ simContinuous <- function(simPopObj, additional = "netIncome",
   N <- nrow(dataP)
   indP <- 1:N
   indStrata <- split(indP, dataP[[strata]])
-  # preparations for formulas and models
-  predNames <- basic  # names of predictor variables
   fpred <- paste(predNames, collapse = " + ")  # for formula
   # check if population data contains factor levels that do not exist
   # in the sample
@@ -433,7 +455,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
           )
         }
         stopCluster(cl)
-      }else if ( !have_win ) {# linux/mac
+      } else if ( !have_win ) {# linux/mac
         valuesCat <- mclapply(levels(dataS[[strata]]), function(x) {
           generateValues_multinom(
             dataSample=dataS[dataS[[strata]] == x,],
@@ -657,7 +679,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
           )
         }
         stopCluster(cl)
-      }else if ( !have_win ) {# linux/mac
+      } else if ( !have_win ) {# linux/mac
         valuesTmp <- mclapply(levels(dataS[[strata]]), function(x) {
           generateValues_lm(
             dataSample=dataS[dataS[[strata]] == x,],
@@ -695,9 +717,30 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     }
   }
 
+  # reset imputed variables in population
+  if ( !basicOnly ) {
+    if ( !is.null(dataP_orig) ) {
+      for ( i in 1:ncol(dataP_orig)) {
+        cmd <- paste0("dataP[,",colnames(dataP_orig)[i],":=dataP_orig$",colnames(dataP_orig)[i],"]")
+        eval(parse(text=cmd))
+      }
+    }
+  }
+
   # attach new variable(s) to population data
   if ( useMultinom && keep ) {
     dataP[[name]] <- valuesCat
+  }
+
+  # calculate mean of new variable by household
+  if ( byHousehold ) {
+    xx <- data.table(id=1:length(values), hhid=dataP[[pop@hhid]], vals=values)
+    setkey(xx, hhid)
+    yy <- xx[,mean(vals, na.rm=TRUE), by=key(xx)]
+    xx <- merge(xx, yy, all.x=TRUE)
+    setkey(xx, id)
+    xx[is.nan(V1), V1:=NA]
+    values <- xx$V1
   }
 
   # return simulated data

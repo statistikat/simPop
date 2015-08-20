@@ -13,6 +13,7 @@ importFrom(lattice, bwplot, panel.bwplot,packet.number,panel.points,panel.reflin
 importFrom(laeken, calibVars)
 importFrom(MASS, ginv)
 importFrom(colorspace, diverge_hcl)
+importFrom(VIM, hotdeck)
 
 ## exports
 exportMethods("sampleObj")

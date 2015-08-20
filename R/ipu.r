@@ -4,7 +4,7 @@ ipu <- function(inp, con, hid=NULL, eps=1e-07, verbose=FALSE) {
     inp <- as.matrix(inp)
     colnames(inp) <- cnames
   }
-  
+
   if ( is.null(hid) ) {
     hhid <- 1:nrow(inp)
   } else {
@@ -27,6 +27,9 @@ ipu <- function(inp, con, hid=NULL, eps=1e-07, verbose=FALSE) {
 }
 ipu2 <- function(dat,conP,conH,hid=NULL,epsP=1e-2,epsH=1e-2,verbose=FALSE,
     w=NULL,bound=4,maxIter=200,meanHH=TRUE){
+
+  wvst <- melt <- calibWeight <- wValue <- f <- value <- baseWeight <- NULL
+
   # dat sollte ein data.table sein
   # w ein Name eines Basisgewichts oder NULL
   ncp <- length(conP) # number of constraints on person level
@@ -48,12 +51,12 @@ ipu2 <- function(dat,conP,conH,hid=NULL,epsP=1e-2,epsH=1e-2,verbose=FALSE,
     delVars <- c("hid")
     hid <- "hid"
     dat[,hid:=1:nrow(dat)]
-    dat[,wvst:=1] 
+    dat[,wvst:=1]
   }else{
-    dat[,wvst:=as.numeric(!duplicated(dat[,hid,with=FALSE]))]  
+    dat[,wvst:=as.numeric(!duplicated(dat[,hid,with=FALSE]))]
   }
-  
-  
+
+
   boundsFak <- function(g1,g0,f,bound=4){ # Berechnet die neuen Gewichte (innerhalb 4, .25 Veraenderungsraten)
     g1 <- g1 * f
     g1[(g1/g0)>bound] <- bound*g0[(g1/g0)>bound]
@@ -62,13 +65,13 @@ ipu2 <- function(dat,conP,conH,hid=NULL,epsP=1e-2,epsH=1e-2,verbose=FALSE,
   }
   mconP <- lapply(conP,melt)##convert tables to long form
   mconH <- lapply(conH,melt)
-  
+
   for(i in seq_along(conP)){
-    dat <- merge(dat,mconP[[i]],by=colnames(mconP[[i]])[-ncol(mconP[[i]])])	
+    dat <- merge(dat,mconP[[i]],by=colnames(mconP[[i]])[-ncol(mconP[[i]])])
     setnames(dat,"value",valueP[i])
   }
   for(i in seq_along(conH)){
-    dat <- merge(dat,mconH[[i]],by=colnames(mconH[[i]])[-ncol(mconH[[i]])])	
+    dat <- merge(dat,mconH[[i]],by=colnames(mconH[[i]])[-ncol(mconH[[i]])])
     setnames(dat,"value",valueH[i])
   }
   pCalVar <- paste0("pcal",1:ncp)
@@ -90,14 +93,14 @@ ipu2 <- function(dat,conP,conH,hid=NULL,epsP=1e-2,epsH=1e-2,verbose=FALSE,
   calIter <- 1
   while(error&&calIter<=maxIter){
     error <- FALSE
-    
+
     ### Person calib
     for(i in seq_along(conP)){
       dat[,wValue:=sum(calibWeight),by=eval(pColNames[[i]])]
       setnames(dat,valueP[i],"value")
       dat[,f:=value/wValue,by=eval(pColNames[[i]])]
       if(!is.null(bound)){
-        dat[,calibWeight:=boundsFak(calibWeight,baseWeight,f,bound=bound),by=eval(pColNames[[i]])]  
+        dat[,calibWeight:=boundsFak(calibWeight,baseWeight,f,bound=bound),by=eval(pColNames[[i]])]
       }else{
         dat[,calibWeight:=f*calibWeight,by=eval(pColNames[[i]])]
       }
@@ -116,7 +119,7 @@ ipu2 <- function(dat,conP,conH,hid=NULL,epsP=1e-2,epsH=1e-2,verbose=FALSE,
       setnames(dat,valueH[i],"value")
       dat[,f:=value/wValue,by=eval(hColNames[[i]])]
       if(!is.null(bound)){
-        dat[,calibWeight:=boundsFak(calibWeight,baseWeight,f,bound=bound),by=eval(hColNames[[i]])]  
+        dat[,calibWeight:=boundsFak(calibWeight,baseWeight,f,bound=bound),by=eval(hColNames[[i]])]
       }else{
         dat[,calibWeight:=f*calibWeight,by=eval(hColNames[[i]])]
       }
@@ -151,7 +154,7 @@ ipu2 <- function(dat,conP,conH,hid=NULL,epsP=1e-2,epsH=1e-2,verbose=FALSE,
     renameVars <- names(dat)[names(dat)%in%usedVarNames]
     setnames(dat,renameVars,paste0(renameVars,"_safekeeping"))
   }
-  invisible(dat)  
+  invisible(dat)
 }
 
 
