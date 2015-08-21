@@ -1,3 +1,7 @@
+Changes in simPop version 0.2.11
+  * new methods samp, samp<-,pop,and pop<- to extract/modify variables in sample/population on a simPopObj
+  * adjust manageSimPopObj() to use these methods
+
 Changes in simPop version 0.2.10
   * improvements in simContinous(): new parameters 'byHousehold' and 'basicOnly'
 

@@ -24,6 +24,10 @@ exportMethods("popObj<-")
 exportMethods("popData")
 exportMethods("tableObj")
 exportMethods("addWeights<-")
+exportMethods("samp")
+exportMethods("samp<-")
+exportMethods("pop")
+exportMethods("pop<-")
 export(
   addKnownMargins,
   calibPop,

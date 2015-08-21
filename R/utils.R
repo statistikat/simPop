@@ -380,7 +380,6 @@ minDist <- function(i, indDonors, donors) {
 }
 
 
-
 ## weighted mean
 meanWt <- function(x, ...) UseMethod("meanWt")
 
@@ -571,12 +570,12 @@ corWt.dataObj <- function(x, vars, ...) {
 crossprodWt <- function(x, weights) {
   ci <- 1:ncol(x)
   sapply(ci, function(j) sapply(ci, function(i) {
-                                select <- !is.na(x[, i]) & !is.na(x[, j])
-                                xi <- x[select, i]
-                                xj <- x[select, j]
-                                w <- weights[select]
-                                sum(xi*xj*w) / (sum(w)-1)
-}))
+    select <- !is.na(x[, i]) & !is.na(x[, j])
+    xi <- x[select, i]
+    xj <- x[select, j]
+    w <- weights[select]
+    sum(xi*xj*w) / (sum(w)-1)
+  }))
 }
 
 manageSimPopObj <- function(x, var, sample=FALSE, set=FALSE, values=NULL) {
@@ -588,9 +587,9 @@ manageSimPopObj <- function(x, var, sample=FALSE, set=FALSE, values=NULL) {
   }
   if ( set==FALSE ) {
     if ( sample ) {
-      return(invisible(x@sample@data[[var]]))
+      return(invisible(samp(x, var=var)))
     } else {
-      return(invisible(x@pop@data[[var]]))
+      return(invisible(pop(x, var=var)))
     }
   }
   if ( set == TRUE ) {
@@ -598,10 +597,79 @@ manageSimPopObj <- function(x, var, sample=FALSE, set=FALSE, values=NULL) {
       stop("you need to provide values!\n")
     }
     if ( sample ) {
-      x@sample@data[[var]] <- values
+      samp(x, var=var) <- values
     } else {
-      x@pop@data[[var]] <- values
+      pop(x, var=var) <- values
     }
     return(invisible(x))
   }
 }
+
+setGeneric("samp", function(obj, var) {
+  standardGeneric("samp")
+})
+setMethod("samp", "simPopObj", function(obj, var) {
+  if ( is.numeric(var) ) {
+    if ( !all(var <= ncol(obj@sample@data)) ) {
+      stop("check input 'var'!\n")
+    }
+  }
+  if ( is.character(var) ) {
+    cn <- colnames(obj@sample@data)
+    var <- var[var%in%cn]
+    if ( length(var) == 0 ) {
+      return(NULL)
+    }
+  }
+  if ( is.data.table(obj@pop@data)) {
+    obj@sample@data[,var,with=F]
+  } else {
+    obj@sample@data[,var,drop=F]
+  }
+})
+setGeneric("samp<-", function(obj, var, value) {
+  standardGeneric("samp<-")
+})
+setReplaceMethod("samp", "simPopObj", function(obj, var, value) {
+  if ( length(var) != 1) {
+    stop("we can only set one variable!\n")
+  }
+  obj@sample@data[[var]] <- value
+  validObject(obj)
+  obj
+})
+
+setGeneric("pop", function(obj, var) {
+  standardGeneric("pop")
+})
+setMethod("pop", "simPopObj", function(obj, var) {
+  if ( is.numeric(var) ) {
+    if ( !all(var <= ncol(obj@pop@data)) ) {
+      stop("check input 'var'!\n")
+    }
+  }
+  if ( is.character(var) ) {
+    cn <- colnames(obj@pop@data)
+    var <- var[var%in%cn]
+    if ( length(var) == 0 ) {
+      return(NULL)
+    }
+  }
+  if ( is.data.table(obj@pop@data)) {
+    obj@pop@data[,var,with=F]
+  } else {
+    obj@pop@data[,var,drop=F]
+  }
+})
+setGeneric("pop<-", function(obj, var, value) {
+  standardGeneric("pop<-")
+})
+setReplaceMethod("pop", "simPopObj", function(obj, var, value) {
+  if ( length(var) != 1) {
+    stop("we can only set one variable!\n")
+  }
+  obj@pop@data[[var]] <- value
+  validObject(obj)
+  obj
+})
+
