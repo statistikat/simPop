@@ -237,6 +237,119 @@ generateValues_binary <- function(dataSample, dataPop, params) {
   unsplit(sim, dataPop, drop=TRUE)
 }
 
+runModel <- function(dataS, dataP, params, typ) {
+  x <- NULL
+  strata <- params$strata
+  pp <- parallelParameters(nr_cpus=params$nr_cpus, nr_strata=length(levels(dataS[[strata]])))
+  indStrata <- params$indStrata
+  predNames <- params$predNames
+  additional <- params$additional
+
+  if ( pp$parallel ) {
+    # windows
+    if ( pp$have_win ) {
+      cl <- makePSOCKcluster(pp$nr_cores)
+      registerDoParallel(cl,cores=pp$nr_cores)
+      if ( typ=="multinom" ) {
+        valuesCat <- foreach(x=levels(dataS[[strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
+          generateValues_multinom(
+            dataSample=dataS[dataS[[strata]] == x,],
+            dataPop=dataP[indStrata[[x]], predNames, with=F], params
+          )
+        }
+      }
+      if ( typ=="binary" ) {
+        valuesCat <- foreach(x=levels(dataS[[strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
+          generateValues_binary(
+            dataSample=dataS[dataS[[strata]] == x,],
+            dataPop=dataP[indStrata[[x]], predNames, with=F], params
+          )
+        }
+      }
+      if ( typ=="lm" ) {
+        valuesCat <- foreach(x=levels(dataS[[strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
+          generateValues_lm(
+            dataSample=dataS[dataS[[strata]] == x,],
+            dataPop=dataP[indStrata[[x]], predNames, with=F], params
+          )
+        }
+      }
+      stopCluster(cl)
+    }
+
+    # linux/mac
+    if ( !pp$have_win ) {
+      if ( typ=="multinom" ) {
+        valuesCat <- mclapply(levels(dataS[[strata]]), function(x) {
+          generateValues_multinom(
+            dataSample=dataS[dataS[[strata]] == x,],
+            dataPop=dataP[indStrata[[x]], predNames, with=F], params
+          )
+        },mc.cores=pp$nr_cores)
+      }
+      if ( typ=="binary" ) {
+        valuesCat <- mclapply(levels(dataS[[strata]]), function(x) {
+          generateValues_binary(
+            dataSample=dataS[dataS[[strata]] == x,],
+            dataPop=dataP[indStrata[[x]], predNames, with=F], params
+          )
+        },mc.cores=pp$nr_cores)
+      }
+      if ( typ=="lm" ) {
+        valuesCat <- mclapply(levels(dataS[[strata]]), function(x) {
+          generateValues_lm(
+            dataSample=dataS[dataS[[strata]] == x,],
+            dataPop=dataP[indStrata[[x]], predNames, with=F], params
+          )
+        },mc.cores=pp$nr_cores)
+      }
+    }
+  } else {
+    if ( typ=="multinom" ) {
+      valuesCat <- lapply(levels(dataS[[strata]]), function(x) {
+        generateValues_multinom(
+          dataSample=dataS[dataS[[strata]] == x,c(predNames, additional), with=F],
+          dataPop=dataP[indStrata[[x]], predNames, with=F], params
+        )
+      })
+    }
+    if ( typ=="binary" ) {
+      valuesCat <- lapply(levels(dataS[[strata]]), function(x) {
+        generateValues_binary(
+          dataSample=dataS[dataS[[strata]] == x,],
+          dataPop=dataP[indStrata[[x]], predNames, with=F], params
+        )
+      })
+    }
+    if ( typ=="lm" ) {
+      valuesCat <- lapply(levels(dataS[[strata]]), function(x) {
+        generateValues_lm(
+          dataSample=dataS[dataS[[strata]] == x,],
+          dataPop=dataP[indStrata[[x]], predNames, with=F], params
+        )
+      })
+    }
+  }
+
+  # check for errors
+  res <- sapply(valuesCat, class)
+  if ( any(res=="try-error") ) {
+    stop(paste0("Error in estimating the linear model. Try to specify a more simple model!\n"))
+  }
+
+  if ( typ=="multinom" ) {
+    response <- dataS[[params$name]]
+    valuesCat <- factor(unsplit(valuesCat, dataP[[strata]]), levels=levels(response))
+  }
+  if ( typ=="binary" ) {
+    valuesCat <- unsplit(valuesCat, dataP[, strata, drop=FALSE])
+  }
+  if ( typ=="lm" ) {
+    valuesCat <- unlist(valuesCat, dataP[[strata]])
+  }
+  return(valuesCat)
+}
+
 simContinuous <- function(simPopObj, additional = "netIncome",
   method = c("multinom", "lm"), zeros = TRUE,
   breaks = NULL, lower = NULL, upper = NULL,
@@ -246,7 +359,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
   alpha = 0.01, residuals = TRUE, keep = TRUE,
   maxit = 500, MaxNWts = 1500,
   tol = .Machine$double.eps^0.5,
-  nr_cpus=NULL, eps = NULL, basicOnly=TRUE, byHousehold=FALSE, seed) {
+  nr_cpus=NULL, eps = NULL, regModel="basic", byHousehold=FALSE, seed) {
 
   x <- hhid <- vals <- id <- V1 <- NULL
 
@@ -259,19 +372,9 @@ simContinuous <- function(simPopObj, additional = "netIncome",
   dataS <- samp@data
   dataP <- pop@data
 
-  # preparations for formulas and models
-  if ( basicOnly ) {
-    predNames <- basic  # names of predictor variables
-  } else {
-    predNames <- setdiff(names(dataP), c(pop@hhid, pop@pid, pop@weight))
+  if ( additional %in% names(dataP)) {
+    stop(paste0("Variable '",additional,"' already available in the synthetic population!\n"))
   }
-
-  # parameters for parallel computing
-  nr_strata <- length(levels(dataS[[strata]]))
-  pp <- parallelParameters(nr_cpus=nr_cpus, nr_strata=nr_strata)
-  parallel <- pp$parallel
-  nr_cores <- pp$nr_cores
-  have_win <- pp$have_win; rm(pp)
 
   ## initializations
   if ( !missing(seed) ) {
@@ -285,7 +388,11 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     stop("variable 'additional' must be included in the sample of input 'simPopObj'!\n")
   }
 
-  varNames <- c(predNames, weight, additional, strata)
+  regInput <- regressionInput(simPopObj, additional=additional, regModel=regModel)
+  predNames <- regInput[[1]]$predNames
+  estimationModel <- regInput[[1]]$formula
+
+  varNames <- unique(c(predNames, weight, additional, strata))
   dataS <- dataS[,varNames, with=F]
   method <- match.arg(method)
   zeros <- isTRUE(zeros)
@@ -302,28 +409,26 @@ simContinuous <- function(simPopObj, additional = "netIncome",
   }
 
   # observations with missings are excluded from simulation
-  exclude <- getExclude(dataS)
+  exclude <- getExclude(dataS[,c(additional,predNames),with=F]) # fixes #31?
   if ( length(exclude) ) {
     dataS <- dataS[-exclude,]
   }
 
-  # temporarily impute missing values in additional variables using hotdeck
-  if ( !basicOnly ) {
-    if ( is.null(pop@strata) ) {
-      impVars <- setdiff(predNames, c(weight, basic, pop@hhsize))
-    } else {
-      impVars <- setdiff(predNames, c(strata,weight, basic, pop@hhsize))
-    }
-    if ( length(impVars) > 0 ) {
-      dataP_orig <- dataP[,impVars,with=F]
-      dataP <- hotdeck(dataP, variable=impVars, domain_var=pop@strata, imp_var=FALSE)
-    } else {
-      dataP_orig <- NULL
-    }
+  # temporarily impute missing values in additional variables using hotdeck in the population
+  if ( is.null(pop@strata) ) {
+    impVars <- setdiff(predNames, c(weight,basic,pop@hhsize))
+  } else {
+    impVars <- setdiff(predNames, c(strata,weight,basic,pop@hhsize))
+  }
+  if ( length(impVars) > 0 ) {
+    dataP_orig <- dataP[,impVars,with=F]
+    dataP <- hotdeck(dataP, variable=impVars, domain_var=pop@strata, imp_var=FALSE)
+  } else {
+    dataP_orig <- NULL
   }
 
   # variables are coerced to factors
-  select <- predNames # strata always included
+  select <- c(predNames, samp@strata) # strata always included
   dataS <- checkFactor(dataS, select)
   dataP <- checkFactor(dataP, select)
 
@@ -398,7 +503,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
   N <- nrow(dataP)
   indP <- 1:N
   indStrata <- split(indP, dataP[[strata]])
-  fpred <- paste(predNames, collapse = " + ")  # for formula
+  #fpred <- paste(predNames, collapse = " + ")  # for formula
   # check if population data contains factor levels that do not exist
   # in the sample
   newLevels <- lapply(predNames, function(nam) {
@@ -412,7 +517,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
   ## preparations for multinomial or binomial logit model
   if ( useMultinom || useLogit ) {
     name <- getCatName(additional)
-    fstring <- paste(name , "~" , fpred)  # formula for model as string
+    estimationModel <- gsub(additional, name, estimationModel)
   }
 
   if ( useMultinom ) {
@@ -430,7 +535,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     params$excludeLevels <- excludeLevels
     # command needs to be constructed as string
     # this is actually a pretty ugly way of fitting the model
-    params$command <- paste("suppressWarnings(multinom(", fstring,
+    params$command <- paste("suppressWarnings(multinom(", estimationModel,
       ", weights=", weight, ", data=dataSample, trace=FALSE",
       ", maxit=maxit, MaxNWts=MaxNWts))", sep="")
     params$maxit <- maxit
@@ -442,50 +547,34 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     params$newLevels <- newLevels
     params$name <- name
     params$response <- response
+    params$strata <- strata
+    params$nr_cpus <- nr_cpus
+    params$indStrata <- indStrata
+    params$predNames <- predNames
+    params$additional <- additional
+    cat("running multinom with the following model:\n")
+    cat(gsub("))",")",gsub("suppressWarnings[(]","",params$command)),"\n")
 
-    if ( parallel ) {
-      # windows
-      if ( have_win ) {
-        cl <- makePSOCKcluster(nr_cores)
-        registerDoParallel(cl,cores=nr_cores)
-        valuesCat <- foreach(x=levels(dataS[[strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
-          generateValues_multinom(
-            dataSample=dataS[dataS[[strata]] == x,],
-            dataPop=dataP[indStrata[[x]], predNames, with=F], params
-          )
-        }
-        stopCluster(cl)
-      } else if ( !have_win ) {# linux/mac
-        valuesCat <- mclapply(levels(dataS[[strata]]), function(x) {
-          generateValues_multinom(
-            dataSample=dataS[dataS[[strata]] == x,],
-            dataPop=dataP[indStrata[[x]], predNames, with=F], params
-          )
-        },mc.cores=nr_cores)
-      }
-    } else {
-      valuesCat <- lapply(levels(dataS[[strata]]), function(x) {
-        generateValues_multinom(
-          dataSample=dataS[dataS[[strata]] == x,],
-          dataPop=dataP[indStrata[[x]], predNames, with=F], params
-        )
-      })
-    }
-    valuesCat <- factor(unsplit(valuesCat, dataP[[strata]]), levels=levels(response))
+    # run in parallel if possible
+    valuesCat <- runModel(dataS, dataP, params, typ="multinom")
 
     ## simulate (semi-)continuous values
     tcat <- table(valuesCat)
     ncat <- length(tcat)
+
     icat <- 1:ncat
     values <- as.list(rep.int(NA, ncat))
     # zeros
+
     if ( zeros ) {
+      # bug: missing 0 even though zeros is not null?
       izero <- which(breaks == 0)
       values[izero] <- 0
       tcat <- tcat[-izero]
       ncat <- length(tcat)
       icat <- icat[-izero]
     }
+
     # values to be simulated with linear model or draws from Pareto
     # distribution
     if ( useLm ) {
@@ -540,14 +629,14 @@ simContinuous <- function(simPopObj, additional = "netIncome",
       indS <- additionalS != 0
     }
     dataS[[name]] <- as.integer(indS)
-    formula <- as.formula(fstring)  # formula for model
+    estimationModel <- as.formula(estimationModel)  # formula for model
     # auxiliary model for all strata (used in case of empty combinations)
     useAux <- !is.null(tol)
     if ( useAux ) {
       if ( length(tol) != 1 || tol <= 0 ) {
         stop("'tol' must be a single small positive value!\n")
       }
-      X <- model.matrix(formula, data=dataS)
+      X <- model.matrix(estimationModel, data=dataS)
       y <- dataS[[name]]
       weights <- dataS[[weight]]
       mod <- logitreg(X, y, weights=weights)
@@ -565,36 +654,14 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     params$weight <- weight
     params$useAux <- useAux
     params$name <- name
+    params$strata <- strata
+    params$nr_cpus <- nr_cpus
+    params$indStrata <- indStrata
+    params$predNames <- predNames
+    params$additional <- additional
 
-    if ( parallel ) {
-      # windows
-      if ( have_win ) {
-        cl <- makePSOCKcluster(nr_cores)
-        registerDoParallel(cl,cores=nr_cores)
-        valuesCat <- foreach(x=levels(dataS[[strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
-          generateValues_binary(
-            dataSample=dataS[dataS[[strata]] == x,],
-            dataPop=dataP[indStrata[[x]], predNames, with=F], params
-          )
-        }
-        stopCluster(cl)
-      }else if ( !have_win ) {# linux/mac
-        valuesCat <- mclapply(levels(dataS[[strata]]), function(x) {
-          generateValues_binary(
-            dataSample=dataS[dataS[[strata]] == x,],
-            dataPop=dataP[indStrata[[x]], predNames, with=F], params
-          )
-        },mc.cores=nr_cores)
-      }
-    } else {
-      valuesCat <- lapply(levels(dataS[[strata]]), function(x) {
-        generateValues_binary(
-          dataSample=dataS[dataS[[strata]] == x,],
-          dataPop=dataP[indStrata[[x]], predNames, with=F], params
-        )
-      })
-    }
-    valuesCat <- unsplit(valuesCat, dataP[, strata, drop=FALSE])
+    # run in parallel if possible
+    valuesCat <- runModel(dataS, dataP, params, typ="binary")
   }
 
   if ( useLm ) {
@@ -609,7 +676,12 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     }
     if ( useMultinom || useLogit ) {
       # adjust population data
-      dataPop <- dataP[which(indP), , drop=FALSE]
+      ii <- which(indP)
+      if ( length(ii) > 0 ) {
+        dataPop <- dataP[which(indP), , drop=FALSE]
+      } else {
+        dataPop <- dataP
+      }
       # list indStrata is adjusted so that it only contains
       # indices of persons in population with non-zero value
       indStrata <- split(1:nrow(dataPop), dataPop[[strata]])
@@ -624,7 +696,6 @@ simContinuous <- function(simPopObj, additional = "netIncome",
       bounds <- quantileWt(additionalS, dataS[[weight]], p)
       select <- additionalS > bounds[1] & additionalS < bounds[2]
       dataSample <- dataS[select, , drop=FALSE]
-
       # check if all relevant levels of predictor variables are still
       # contained in sample after trimming
       # if not, trimming is not applied and a warning message is generated
@@ -646,14 +717,14 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     } else {
       fname <- additional
     }
-    fstring <- paste(fname, " ~ ", fpred, sep = "")
+    fstring <- paste0(fname, " ~ ", unlist(strsplit(estimationModel,"~"))[2])
     formula <- as.formula(fstring)
     # auxiliary model for all strata (used in case of empty combinations)
     weights <- dataSample[[weight]]
     mod <- lm(formula, weights=weights, data=dataSample)
     coef <- coef(mod)
-    # simulate values
 
+    # simulate values
     params <- list()
     params$coef <- coef
     params$command <- paste("lm(", fstring,", weights=", weight, ", data=dataSample)", sep="")
@@ -666,36 +737,13 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     params$formula <- formula
     params$residuals <- residuals
     params$log <- log
+    params$strata <- strata
+    params$nr_cpus <- nr_cpus
+    params$indStrata <- indStrata
+    params$predNames <- predNames
+    params$additional <- additional
 
-    if ( parallel ) {
-      # windows
-      if ( have_win ) {
-        cl <- makePSOCKcluster(nr_cores)
-        registerDoParallel(cl,cores=nr_cores)
-        valuesTmp <- foreach(x=levels(dataS[[strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
-          generateValues_lm(
-            dataSample=dataS[dataS[[strata]] == x,],
-            dataPop=dataP[indStrata[[x]], predNames, with=F], params
-          )
-        }
-        stopCluster(cl)
-      } else if ( !have_win ) {# linux/mac
-        valuesTmp <- mclapply(levels(dataS[[strata]]), function(x) {
-          generateValues_lm(
-            dataSample=dataS[dataS[[strata]] == x,],
-            dataPop=dataP[indStrata[[x]], predNames, with=F], params
-          )
-        },mc.cores=nr_cores)
-      }
-    } else {
-      valuesTmp <- lapply(levels(dataS[[strata]]), function(x) {
-        generateValues_lm(
-          dataSample=dataS[dataS[[strata]] == x,],
-          dataPop=dataP[indStrata[[x]], predNames, with=F], params
-        )
-      })
-    }
-    valuesTmp <- unlist(valuesTmp, dataPop[[strata]])
+    valuesTmp <- runModel(dataS, dataP, params, typ="lm")
 
     ## put simulated values together
     if ( useMultinom ) {
@@ -718,12 +766,10 @@ simContinuous <- function(simPopObj, additional = "netIncome",
   }
 
   # reset imputed variables in population
-  if ( !basicOnly ) {
-    if ( !is.null(dataP_orig) ) {
-      for ( i in 1:ncol(dataP_orig)) {
-        cmd <- paste0("dataP[,",colnames(dataP_orig)[i],":=dataP_orig$",colnames(dataP_orig)[i],"]")
-        eval(parse(text=cmd))
-      }
+  if ( !is.null(dataP_orig) ) {
+    for ( i in 1:ncol(dataP_orig)) {
+      cmd <- paste0("dataP[,",colnames(dataP_orig)[i],":=dataP_orig$",colnames(dataP_orig)[i],"]")
+      eval(parse(text=cmd))
     }
   }
 

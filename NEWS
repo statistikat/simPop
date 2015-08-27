@@ -1,3 +1,7 @@
+Changes in simPop version 0.2.12
+  * adding some utility functions for the sga-project that are not exported
+  * improve simContinuous() in order to allow to specify the model that should be used for estimation.
+
 Changes in simPop version 0.2.11
   * new methods samp, samp<-,pop,and pop<- to extract/modify variables in sample/population on a simPopObj
   * adjust manageSimPopObj() to use these methods

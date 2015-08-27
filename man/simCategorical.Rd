@@ -9,7 +9,7 @@
 \usage{
 simCategorical(simPopObj, additional,
   method=c("multinom", "distribution", "naivebayes"),
-  limit=NULL, censor=NULL, maxit=500, MaxNWts=1500, eps=NULL, nr_cpus=NULL, seed=1)
+  limit=NULL, censor=NULL, maxit=500, MaxNWts=1500, eps=NULL, nr_cpus=NULL, regModel = NULL, seed=1)
 }
 \arguments{
   \item{simPopObj}{a \code{simPopObj} containing population and household survey data as well as optionally margins in standardized format.}
@@ -20,10 +20,19 @@ simCategorical(simPopObj, additional,
   \item{maxit, MaxNWts}{control parameters to be passed to \code{\link[nnet]{multinom}} and \code{\link[nnet]{nnet}}. See the help file for \code{\link[nnet]{nnet}}.}
   \item{eps}{a small positive numeric value, or \code{NULL} (the default). In the former case and if \code{method} is \code{"multinom"}, estimated probabilities smaller than this are assumed to result from structural zeros and are set to exactly 0.}
   \item{nr_cpus}{if specified, an integer number defining the number of cpus that should be used for parallel processing. }
+  \item{regModel}{allows to specify the variables or model that is used when simulating additional categorical variables. The following choices are available if different from NULL.
+  \itemize{
+  \item{'basic'}{only the basic household variables (generated with \code{\link{simStructure}}) are used.}
+    \item{'available'}{all available variables (that are common in the sample and the synthetic population such as previously generated varaibles) excluding id-variables, strata variables and household sizes are used for the modelling. This parameter should be used with care because all factors are automatically used as factors internally.}
+    \item{formula-object}{Users may also specify a specifiy formula (class 'formula') that will be used. Checks are performed that all required variables are available.}
+  }
+  If method 'distribution' is used, it is only possible to specify a vector of length one containing one of the choices described above.
+  If parameter 'regModel' is NULL, only basic household variables are used in any case.
+  }
   \item{seed}{optional; an integer value to be used as the seed of the random number generator, or an integer vector containing the state of the random number generator to be restored.}
 }
 \details{
-The number of cpus are selected automatically in the following manner. The number of cpus is equal the number of strata. However, if the number of cpus is less than the number of strata, the number of cpus - 1 is used by default. 
+The number of cpus are selected automatically in the following manner. The number of cpus is equal the number of strata. However, if the number of cpus is less than the number of strata, the number of cpus - 1 is used by default.
 This should be the best strategy, but the user can also overwrite this decision.
 }
 \value{

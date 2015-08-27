@@ -16,7 +16,7 @@ simContinuous(simPopObj, additional = "netIncome",
   alpha = 0.01, residuals = TRUE, keep = TRUE,
   maxit = 500, MaxNWts = 1500,
   tol = .Machine$double.eps^0.5, nr_cpus = NULL, eps = NULL,
-  basicOnly = TRUE, byHousehold = FALSE, seed)
+  regModel = "basic", byHousehold = FALSE, seed)
 }
 \arguments{
   \item{simPopObj}{a \code{\linkS4class{simPopObj}} holding household survey data, population data and optionally some margins.}
@@ -41,8 +41,12 @@ simContinuous(simPopObj, additional = "netIncome",
   \item{tol}{if \code{method} is \code{"lm"} and \code{zeros} is \code{TRUE}, a small positive numeric value or \code{NULL}. When fitting a log-linear model within a stratum, factor levels may not exist in the sample but are likely to exist in the population. However, the coefficient for such factor levels will be 0. Therefore, coefficients smaller than \code{tol} in absolute value are replaced by coefficients from an auxiliary model that is fit to the whole sample. If \code{NULL}, no auxiliary log-linear model is computed and no coefficients are replaced.}
   \item{nr_cpus}{if specified, an integer number defining the number of cpus that should be used for parallel processing.}
   \item{eps}{a small positive numeric value, or \code{NULL} (the default). In the former case and if (multinomial) log-linear models are computed, estimated probabilities smaller than this are assumed to result from structural zeros and are set to exactly 0.}
-  \item{basicOnly}{if TRUE, use only basic (core) variables as predictor variables, else all generated variable available
-  in current population object are used}
+  \item{regModel}{allows to specify the model that should be for the simulation of the additional continuous variable. The following choices are possible:
+  \itemize{
+    \item{'basic'}{only the basic household-variables (generated with \code{\link{simStructure}}) are used.}
+    \item{'available'}{all available variables (that are common in the sample and the syntetic population (e.g. previously generated variables) are used for the modeling. Should be used with care because all variables are automatically used as factors!}
+    \item{formula-object}: Users may also specify a specific formula (class 'formula') that will be used. Checks are performed that all required variables are available.}
+  }
   \item{byHousehold}{if TRUE, predicted values are replaced with the mean within each household.}
   \item{seed}{optional; an integer value to be used as the seed of the random number generator, or an integer vector containing the state of the random number generator to be restored.}
 }

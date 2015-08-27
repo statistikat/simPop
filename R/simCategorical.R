@@ -137,20 +137,42 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
   sim
 }
 
+
 simCategorical <- function(simPopObj, additional,
   method=c("multinom", "distribution", "naivebayes"),
-  limit=NULL, censor=NULL, maxit=500, MaxNWts=1500, eps=NULL, nr_cpus=NULL, seed=1) {
+  limit=NULL, censor=NULL, maxit=500, MaxNWts=1500, eps=NULL, nr_cpus=NULL,
+  regModel=NULL, seed=1) {
 
   x <- NULL
 
-  dataP <- simPopObj@pop
-  dataS <- simPopObj@sample
-  data_pop <- dataP@data
-  data_sample <- dataS@data
+  dataP <- popObj(simPopObj)
+  dataS <- sampleObj(simPopObj)
+  data_pop <- popData(simPopObj)
+  data_sample <- sampleData(simPopObj)
   basic <- simPopObj@basicHHvars
 
   if ( any(additional %in% colnames(data_pop)) ) {
     stop("variables already exist in the population!\n")
+  }
+
+  if ( method=="distribution" & !is.null(regModel) ) {
+    if ( class(regModel)=="formula" ) {
+      regModel <- list(regModel)
+    }
+  }
+  if ( method=="distribution" ) {
+    if ( is.null(regModel) ) {
+      regModel <- "basic"
+    } else {
+      if ( length(regModel)!=1 ) {
+        stop("For method 'distribution' parameter regModel must bei either NULL, a formula or
+          'basic' or 'available'!\n")
+      }
+    }
+  } else {
+    if ( is.null(regModel) ) {
+      regModel <- rep("basic", length(additional))
+    }
   }
 
   # parameters for parallel computing
@@ -165,28 +187,6 @@ simCategorical <- function(simPopObj, additional,
     set.seed(seed)  # set seed of random number generator
   }
   method <- match.arg(method)
-
-  if ( method == "multinom" ) {
-    basic <- c(basic, dataP@hhsize)
-  }
-  if ( !all(basic %in% colnames(data_pop)) ) {
-    stop("undefined variables in the population data -> check your input!\n")
-  }
-
-  # check sample data against additional parameter
-  if ( !all(additional %in% colnames(data_sample)) )  {
-    stop("undefined variables in the sample data -> check your input!\n")
-  }
-
-  # observations with missings are excluded from simulation
-  exclude <- getExclude(data_sample)
-  if ( length(exclude) > 0 ) {
-    data_sample <- data_sample[-exclude,]
-  }
-
-  # variables are coerced to factors
-  data_sample <- checkFactor(data_sample, c(dataS@strata, basic, additional))
-  data_pop <- checkFactor(data_pop, c(dataP@strata, basic))
 
   # check arguments to account for structural zeros
   if ( length(additional) == 1 ) {
@@ -205,14 +205,24 @@ simCategorical <- function(simPopObj, additional,
   indStrata <- split(1:N, data_pop[[dataP@strata]])
 
   ##### simulation
-  # predictor variables
-  predNames <- basic  # names of predictor variables
-
   if ( method == "distribution" ) {
+    regInput <- regressionInput(simPopObj, additional=additional[1], regModel=regModel[1])
+    predNames <- setdiff(regInput[[1]]$predNames, c(dataS@hhsize, dataS@strata))
+
+    # observations with missings are excluded from simulation
+    # fix #31?
+    exclude <- getExclude(data_sample[,c(additional,predNames),with=F])
+    if ( length(exclude) > 0 ) {
+      data_sample <- data_sample[-exclude,]
+    }
+    data_sample <- checkFactor(data_sample, c(dataS@strata, predNames, additional))
+    data_pop <- checkFactor(data_pop, c(dataP@strata, predNames))
+
     params <- list()
     params$grid <- expand.grid(lapply(data_sample[,additional, with=F], levels))
     params$additional <- additional
-    params$basic <- basic
+    params$basic <- predNames
+    cat("Variables used for method 'distribution':\n"); print(params$basic)
     params$w <- dataS@weight
 
     if ( parallel ) {
@@ -223,22 +233,24 @@ simCategorical <- function(simPopObj, additional,
         values <- foreach(x=levels(data_sample[[dataS@strata]]), .options.snow=list(preschedule=FALSE)) %dopar% {
           generateValues_distribution(
             dataSample=data_sample[data_sample[[dataS@strata]] == x,],
-            dataPop=data_pop[indStrata[[x]], predNames, with=F], params
+            dataPop=data_pop[indStrata[[x]], params$basic, with=F], params
           )
         }
         stopCluster(cl)
-      }else if ( !have_win ) {# linux/max
+      }
+      # linux/max
+      if ( !have_win ) {
         values <- mclapply(levels(data_sample[[dataS@strata]]), function(x) {
           generateValues_distribution(
             dataSample=data_sample[data_sample[[dataS@strata]] == x,],
-            dataPop=data_pop[indStrata[[x]], predNames, with=F], params)
-        },mc.cores=nr_cores)
+            dataPop=data_pop[indStrata[[x]], params$basic, with=F], params)
+        }, mc.cores=nr_cores)
       }
     } else {
       values <- lapply(levels(data_sample[[dataS@strata]]), function(x) {
         generateValues_distribution(
-          dataSample=data_sample[data_sample[[dataS@strata]] == x,],
-          dataPop=data_pop[indStrata[[x]], predNames, with=F], params)
+          dataSample=data_sample[data_sample[[dataS@strata]] == x,c(additional,params$basic),with=F],
+          dataPop=data_pop[indStrata[[x]], params$basic, with=F], params)
       })
     }
     values <- do.call("rbind", values)
@@ -252,29 +264,52 @@ simCategorical <- function(simPopObj, additional,
   }
 
   # any other method
+  counter <- 0
   for ( i in additional ) {
-    cat("dealing with level",i,"\n")
+    counter <- counter+1
+    cat(paste0("Simulating variable '",i,"'.\n"))
+
+    regInput <- regressionInput(simPopObj, additional=additional[counter], regModel=regModel[counter])
+    predNames <- setdiff(regInput[[1]]$predNames, c(dataS@hhsize, dataS@strata))
+
+    # observations with missings are excluded from simulation
+    exclude <- getExclude(data_sample[,c(additional,predNames),with=F])
+    if ( length(exclude) > 0 ) {
+      sampWork <- data_sample[-exclude,]
+    } else {
+      sampWork <- data_sample
+    }
+
+    # variables are coerced to factors
+    sampWork <- checkFactor(sampWork, c(dataS@strata, predNames, additional))
+    data_pop <- checkFactor(data_pop, c(dataP@strata, predNames))
+
     # components of multinomial model are specified
-    levelsResponse <- levels(data_sample[[i]])
+    levelsResponse <- levels(sampWork[[i]])
 
     # simulation of variables using a sequence of multinomial models
     if ( method == "multinom" ) {
       formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
-      formula.cmd <- paste("suppressWarnings(multinom(", formula.cmd,
+      formula.cmd <- paste0("suppressWarnings(multinom(", formula.cmd,
         ", weights=", dataS@weight, ", data=dataSample, trace=FALSE",
-        ", maxit=",maxit, ", MaxNWts=", MaxNWts,"))", sep="")
-    }else if ( method == "ctree" ) {# simulation via recursive partitioning and regression trees
-      formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
-      formula.cmd <- paste("suppressWarnings(ctree(", formula.cmd, ", weights=as.integer(dataSample$", dataS@weight, "), data=dataSample))", sep="")
-    }else if ( method == "naivebayes" ) {
-      formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
-      formula.cmd <- paste("naiveBayes(", formula.cmd, ", data=dataSample, usekernel=TRUE)", sep="")
+        ", maxit=",maxit, ", MaxNWts=", MaxNWts,"))")
+      cat("we are running the following multinom-model:\n")
+      cat(formula.cmd,"\n")
     }
+    # simulation via recursive partitioning and regression trees
+    #if ( method == "ctree" ) {
+    #  formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
+    #  formula.cmd <- paste("suppressWarnings(ctree(", formula.cmd, ", weights=as.integer(dataSample$", dataS@weight, "), data=dataSample))", sep="")
+    #}
+    #if ( method == "naivebayes" ) {
+    #  formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
+    #  formula.cmd <- paste("naiveBayes(", formula.cmd, ", data=dataSample, usekernel=TRUE)", sep="")
+    #}
 
     # check if population data contains factor levels that do not exist
     # in the sample
     newLevels <- lapply(predNames, function(nam) {
-      levelsS <- levels(data_sample[[nam]])
+      levelsS <- levels(sampWork[[nam]])
       levelsP <- levels(data_pop[[nam]])
       levelsP[!(levelsP %in% levelsS)]
     })
@@ -302,23 +337,25 @@ simCategorical <- function(simPopObj, additional,
         registerDoParallel(cl,cores=nr_cores)
         values <- foreach(x=levels(data_sample[[dataS@strata]]), .options.snow=list(preschedule=FALSE)) %dopar% {
           generateValues(
-            dataSample=data_sample[data_sample[[dataS@strata]] == x,],
+            dataSample=sampWork[sampWork[[dataS@strata]] == x,],
             dataPop=data_pop[indStrata[[x]], predNames, with=F], params
           )
         }
         stopCluster(cl)
-      }else if ( !have_win) {# linux/mac
+      }
+      # linux/mac
+      if ( !have_win) {
         values <- mclapply(levels(data_sample[[dataS@strata]]), function(x) {
           generateValues(
-            dataSample=data_sample[data_sample[[dataS@strata]] == x,],
+            dataSample=sampWork[sampWork[[dataS@strata]] == x,],
             dataPop=data_pop[indStrata[[x]], predNames, with=F], params
           )
-        },mc.cores=nr_cores)
+        }, mc.cores=nr_cores)
       }
     } else {
       values <- lapply(levels(data_sample[[dataS@strata]]), function(x) {
         generateValues(
-          dataSample=data_sample[data_sample[[dataS@strata]] == x,],
+          dataSample=sampWork[sampWork[[dataS@strata]] == x,],
           dataPop=data_pop[indStrata[[x]], predNames, with=F], params
         )
       })
