@@ -363,8 +363,7 @@ simCategorical <- function(simPopObj, additional,
     values <- factor(unsplit(values, data_pop[[dataP@strata]]), levels=levelsResponse)
     ## add new categorical variable to data set
     data_pop[[i]] <- values
-    predNames <- c(predNames, i)
+    simPopObj@pop@data <- data_pop
   }
-  simPopObj@pop@data <- data_pop
   invisible(simPopObj)
 }
