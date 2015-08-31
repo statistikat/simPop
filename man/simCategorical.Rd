@@ -9,7 +9,8 @@
 \usage{
 simCategorical(simPopObj, additional,
   method=c("multinom", "distribution", "naivebayes"),
-  limit=NULL, censor=NULL, maxit=500, MaxNWts=1500, eps=NULL, nr_cpus=NULL, regModel = NULL, seed=1)
+  limit=NULL, censor=NULL, maxit=500, MaxNWts=1500, 
+  eps=NULL, nr_cpus=NULL, regModel = NULL, seed=1)
 }
 \arguments{
   \item{simPopObj}{a \code{simPopObj} containing population and household survey data as well as optionally margins in standardized format.}

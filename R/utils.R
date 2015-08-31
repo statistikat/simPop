@@ -752,41 +752,41 @@ factorNA <- function(x, always = FALSE) {
     } else factor(x, exclude=c())
   }
 }
-
-# Function uni.distribution: random draws from the weighted univariate distribution of
-# the original data (maybe better from the SUF, but then the SUF always has to be used as well)
-univariate.dis <- function(puf,data,additional,w){
-  if (sum(is.na(data[,additional]))>0 & sum(is.na(data[,additional])) != dim(data)[1]) {
-    var <- factorNA(data[,additional],always=TRUE)
-  } else if (sum(is.na(data[,additional])) == dim(data)[1]) {
-    var <- factor(c(NA, data[,additional]), exclude=c())[-1]
-  } else {
-    var <- as.factor(data[,additional])
-  }
-  tab <- wtd.table(var,weights=data[,w],type="table")
-  p <- tab/sum(data[,w])
-  puf[,additional] <- sample(x=levels(var)[levels(var) %in% names(tab)],size=dim(puf)[1],prob=p,replace=T)
-  return(puf)
-}
-
-# Function con.distribution: random draws from the weighted conditional distribution
-# (conditioned on a factor variable)
-conditional.dis <- function(puf,data,additional,conditional,w){
-  if (sum(is.na(data[,additional]))>0 & sum(is.na(data[,additional])) != dim(data)[1]) {
-    var <- factorNA(data[,additional],always=TRUE)
-  } else if (sum(is.na(data[,additional])) == dim(data)[1]) {
-    var <- factor(c(NA, data[,additional]), exclude=c())[-1]
-  } else {
-    var <- as.factor(data[,additional])
-  }
-  puf[,additional] <- NA
-  for (i in 1:length(levels(puf[,conditional]))) {
-    tab <- wtd.table(var[data[,conditional]==levels(data[,conditional])[i]],weights=data[data[,conditional]==levels(data[,conditional])[i],w],type="table")
-    p <- tab/sum(tab)
-    puf[which(puf[,conditional]==levels(puf[,conditional])[i]),additional] <- sample(x=levels(var)[levels(var) %in% names(tab)],size=dim(puf[which(puf[,conditional]==levels(data[,conditional])[i]),])[1],prob=p,replace=T)
-  }
-  return(puf)
-}
+# 
+# # Function uni.distribution: random draws from the weighted univariate distribution of
+# # the original data (maybe better from the SUF, but then the SUF always has to be used as well)
+# univariate.dis <- function(puf,data,additional,w){
+#   if (sum(is.na(data[,additional]))>0 & sum(is.na(data[,additional])) != dim(data)[1]) {
+#     var <- factorNA(data[,additional],always=TRUE)
+#   } else if (sum(is.na(data[,additional])) == dim(data)[1]) {
+#     var <- factor(c(NA, data[,additional]), exclude=c())[-1]
+#   } else {
+#     var <- as.factor(data[,additional])
+#   }
+#   tab <- wtd.table(var,weights=data[,w],type="table")
+#   p <- tab/sum(data[,w])
+#   puf[,additional] <- sample(x=levels(var)[levels(var) %in% names(tab)],size=dim(puf)[1],prob=p,replace=T)
+#   return(puf)
+# }
+# 
+# # Function con.distribution: random draws from the weighted conditional distribution
+# # (conditioned on a factor variable)
+# conditional.dis <- function(puf,data,additional,conditional,w){
+#   if (sum(is.na(data[,additional]))>0 & sum(is.na(data[,additional])) != dim(data)[1]) {
+#     var <- factorNA(data[,additional],always=TRUE)
+#   } else if (sum(is.na(data[,additional])) == dim(data)[1]) {
+#     var <- factor(c(NA, data[,additional]), exclude=c())[-1]
+#   } else {
+#     var <- as.factor(data[,additional])
+#   }
+#   puf[,additional] <- NA
+#   for (i in 1:length(levels(puf[,conditional]))) {
+#     tab <- wtd.table(var[data[,conditional]==levels(data[,conditional])[i]],weights=data[data[,conditional]==levels(data[,conditional])[i],w],type="table")
+#     p <- tab/sum(tab)
+#     puf[which(puf[,conditional]==levels(puf[,conditional])[i]),additional] <- sample(x=levels(var)[levels(var) %in% names(tab)],size=dim(puf[which(puf[,conditional]==levels(data[,conditional])[i]),])[1],prob=p,replace=T)
+#   }
+#   return(puf)
+# }
 utility <- function(x, y, type="all"){
   if(type=="all" | type=="measure2"){
     measure2 <- ncol(x) / ncol(y)

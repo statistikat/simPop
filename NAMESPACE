@@ -14,6 +14,11 @@ importFrom(laeken, calibVars)
 importFrom(MASS, ginv)
 importFrom(colorspace, diverge_hcl)
 importFrom(VIM, hotdeck)
+importFrom("graphics", "par")
+importFrom("stats", "as.formula", "chisq.test", "coef", "cor", "cov",
+             "dlogis", "formula", "lm", "mad", "median", "model.matrix",
+             "optim", "plogis", "ppoints", "predict", "quantile", "rexp",
+             "rnorm", "runif", "uniroot", "var", "weighted.mean")
 
 ## exports
 exportMethods("sampleObj")

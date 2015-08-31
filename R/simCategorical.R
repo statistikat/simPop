@@ -140,8 +140,8 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
 
 simCategorical <- function(simPopObj, additional,
   method=c("multinom", "distribution", "naivebayes"),
-  limit=NULL, censor=NULL, maxit=500, MaxNWts=1500, eps=NULL, nr_cpus=NULL,
-  regModel=NULL, seed=1) {
+  limit=NULL, censor=NULL, maxit=500, MaxNWts=1500, 
+  eps=NULL, nr_cpus=NULL, regModel=NULL, seed=1) {
 
   x <- NULL
 
