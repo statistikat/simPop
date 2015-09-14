@@ -428,7 +428,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
   }
 
   # variables are coerced to factors
-  select <- c(predNames, samp@strata) # strata always included
+  select <- unique(c(predNames, samp@strata)) # strata always included
   dataS <- checkFactor(dataS, select)
   dataP <- checkFactor(dataP, select)
 
