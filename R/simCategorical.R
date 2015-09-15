@@ -140,11 +140,12 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
 
 simCategorical <- function(simPopObj, additional,
   method=c("multinom", "distribution", "naivebayes"),
-  limit=NULL, censor=NULL, maxit=500, MaxNWts=1500, 
+  limit=NULL, censor=NULL, maxit=500, MaxNWts=1500,
   eps=NULL, nr_cpus=NULL, regModel=NULL, seed=1) {
 
   x <- NULL
 
+  method <- match.arg(method)
   dataP <- popObj(simPopObj)
   dataS <- sampleObj(simPopObj)
   data_pop <- popData(simPopObj)
@@ -186,7 +187,7 @@ simCategorical <- function(simPopObj, additional,
   if ( !missing(seed) ) {
     set.seed(seed)  # set seed of random number generator
   }
-  method <- match.arg(method)
+
 
   # check arguments to account for structural zeros
   if ( length(additional) == 1 ) {
@@ -281,8 +282,8 @@ simCategorical <- function(simPopObj, additional,
     }
 
     # variables are coerced to factors
-    sampWork <- checkFactor(sampWork, c(dataS@strata, predNames, additional))
-    data_pop <- checkFactor(data_pop, c(dataP@strata, predNames))
+    sampWork <- checkFactor(sampWork, unique(c(dataS@strata, predNames, additional)))
+    data_pop <- checkFactor(data_pop, unique(c(dataP@strata, predNames)))
 
     # components of multinomial model are specified
     levelsResponse <- levels(sampWork[[i]])
@@ -294,7 +295,7 @@ simCategorical <- function(simPopObj, additional,
         ", weights=", dataS@weight, ", data=dataSample, trace=FALSE",
         ", maxit=",maxit, ", MaxNWts=", MaxNWts,"))")
       cat("we are running the following multinom-model:\n")
-      cat(formula.cmd,"\n")
+      cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n")
     }
     # simulation via recursive partitioning and regression trees
     #if ( method == "ctree" ) {
