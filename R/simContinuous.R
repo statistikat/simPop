@@ -205,16 +205,17 @@ generateValues_binary <- function(dataSample, dataPop, params) {
   # add 0 variable to combinations for use of 'model.matrix'
   Xnew <- cbind(grid, 0)
   names(Xnew) <- c(predNames, name)
-  Xnew <- model.matrix(formula, data=Xnew)
+  Xnew <- model.matrix(params$command, data=Xnew)
+
   # fit logit model
-  X <- model.matrix(formula, data=dataSample)
+  X <- model.matrix(params$command, data=dataSample)
   y <- dataSample[[name]]
   weights <- dataSample[[weight]]
   mod <- logitreg(X, y, weights=weights)
   # add parameters from auxiliary model if necessary
   if ( useAux ) {
     indPar <- abs(mod$par) < tol
-    mod$par[indPar] <- par[indPar]
+    mod$par[indPar] <- params$par[indPar]
   }
   # predict probabilities
   tmp <- exp(Xnew %*% mod$par)
@@ -227,11 +228,15 @@ generateValues_binary <- function(dataSample, dataPop, params) {
   # generate realizations for each combination
   if ( length(exclude) == 0 ) {
     ncomb <- as.integer(sapply(indGrid, length))
-    sim <- lapply(1:length(ncomb), function(k) { spSample(ncomb[k], c(1-p[k], p[k])) - 1 })
+    sim <- lapply(1:length(ncomb), function(k) {
+      spSample(ncomb[k], c(1-p[k], p[k])) - 1
+    })
   } else {
     ncomb <- as.integer(sapply(indGrid[-exclude], length))
     sim <- as.list(rep.int(NA, length(indGrid)))
-    sim[-exclude] <- lapply(1:length(ncomb), function(k) { spSample(ncomb[k], c(1-p[k], p[k])) - 1 })
+    sim[-exclude] <- lapply(1:length(ncomb), function(k) {
+      spSample(ncomb[k], c(1-p[k], p[k])) - 1
+    })
   }
   # return realizations
   unsplit(sim, dataPop, drop=TRUE)
@@ -243,7 +248,7 @@ runModel <- function(dataS, dataP, params, typ) {
   pp <- parallelParameters(nr_cpus=params$nr_cpus, nr_strata=length(levels(dataS[[strata]])))
   indStrata <- params$indStrata
   predNames <- params$predNames
-  additional <- params$additional
+  additional <- c(params$additional, params$name)
 
   if ( pp$parallel ) {
     # windows
@@ -551,7 +556,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     params$nr_cpus <- nr_cpus
     params$indStrata <- indStrata
     params$predNames <- predNames
-    params$additional <- additional
+    params$additional <- c(additional, weight)
     cat("running multinom with the following model:\n")
     cat(gsub("))",")",gsub("suppressWarnings[(]","",params$command)),"\n")
 
@@ -641,6 +646,8 @@ simContinuous <- function(simPopObj, additional = "netIncome",
       weights <- dataS[[weight]]
       mod <- logitreg(X, y, weights=weights)
       par <- mod$par
+    } else {
+      par <- NULL
     }
 
     ## simulate binary vector
@@ -659,7 +666,8 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     params$indStrata <- indStrata
     params$predNames <- predNames
     params$additional <- additional
-
+    params$par <- par
+    params$command <- estimationModel
     # run in parallel if possible
     valuesCat <- runModel(dataS, dataP, params, typ="binary")
   }
@@ -728,11 +736,12 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     params <- list()
     params$coef <- coef
     params$command <- paste("lm(", fstring,", weights=", weight, ", data=dataSample)", sep="")
+    params$name <- fname
     params$excludeLevels <- excludeLevels
     params$hasNewLevels <- hasNewLevels
     params$newLevels <- newLevels
     params$predNames <- predNames
-    params$additional <- additional
+    params$additional <- c(additional, weight)
     params$const <- const
     params$formula <- formula
     params$residuals <- residuals
@@ -741,7 +750,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     params$nr_cpus <- nr_cpus
     params$indStrata <- indStrata
     params$predNames <- predNames
-    params$additional <- additional
+    params$additional <- c(additional, weight)
 
     valuesTmp <- runModel(dataS, dataP, params, typ="lm")
 
