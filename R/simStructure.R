@@ -154,7 +154,7 @@ simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), 
     cmd <- paste0(cmd,")")
   } else {
     if ( method == "direct" ) {
-      cmd <- paste0(cmd, ", ",dataS@strata,"=strata[indices])")
+      cmd <- paste0(cmd, ", ",dataS@strata,"=strata[indices]", expr,")")
     } else {
       cmd <- paste0(cmd, ", ",dataS@strata,"=dataPH$strata[hidNew]", expr, ")")
     }
