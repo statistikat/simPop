@@ -149,11 +149,18 @@ simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), 
     expr <- ""
   }
 
-  command <- paste("data.table(",dataS@hhid, "=hidNew, ", dataS@hhsize, "=hsize[indices], ", dataS@strata, "=",
-    if( method == "direct" ) "strata[indices]" else "dataPH$strata[hidNew]", expr, ")", sep="")
-
+  cmd <- paste0("data.table(", dataS@hhid, "=hidNew, ", dataS@hhsize, "=hsize[indices]")
+  if ( is.null(dataS@strata) ) {
+    cmd <- paste0(cmd,")")
+  } else {
+    if ( method == "direct" ) {
+      cmd <- paste0(cmd, ", ",dataS@strata,"=strata[indices])")
+    } else {
+      cmd <- paste0(cmd, ", ",dataS@strata,"=dataPH$strata[hidNew]", expr, ")")
+    }
+  }
   # evaluate command and return result
-  dataP <- eval(parse(text=command))
+  dataP <- eval(parse(text=cmd))
   setkeyv(dataP, dataS@hhid)
 
   sizes <- dataP[,.N, by=key(dataP)]
