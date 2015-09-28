@@ -364,7 +364,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
   alpha = 0.01, residuals = TRUE, keep = TRUE,
   maxit = 500, MaxNWts = 1500,
   tol = .Machine$double.eps^0.5,
-  nr_cpus=NULL, eps = NULL, regModel="basic", byHousehold=FALSE, seed) {
+  nr_cpus=NULL, eps = NULL, regModel="basic", byHousehold=FALSE, imputeMissings=FALSE, seed) {
 
   x <- hhid <- vals <- id <- V1 <- NULL
 
@@ -399,6 +399,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
 
   varNames <- unique(c(predNames, weight, additional, strata))
   dataS <- dataS[,varNames, with=F]
+
   method <- match.arg(method)
   zeros <- isTRUE(zeros)
   log <- isTRUE(log)
@@ -414,22 +415,45 @@ simContinuous <- function(simPopObj, additional = "netIncome",
   }
 
   # observations with missings are excluded from simulation
-  exclude <- getExclude(dataS[,c(additional,predNames),with=F]) # fixes #31?
-  if ( length(exclude) ) {
-    dataS <- dataS[-exclude,]
+  #exclude <- getExclude(dataS[,c(additional,predNames),with=F]) # fixes #31?
+  #if ( length(exclude) ) {
+  #  dataS <- dataS[-exclude,]
+  #}
+
+  # temporarily impute (using hotdeck) / or check (if imputeMissings=FALSE)
+  # missing values in additional variables in the sample
+  if ( is.null(samp@strata) ) {
+    modelVars <- setdiff(predNames, c(weight,basic,pop@hhsize))
+  } else {
+    modelVars <- setdiff(predNames, c(strata,weight,basic,pop@hhsize))
   }
 
-  # temporarily impute missing values in additional variables using hotdeck in the population
-  if ( is.null(pop@strata) ) {
-    impVars <- setdiff(predNames, c(weight,basic,pop@hhsize))
-  } else {
-    impVars <- setdiff(predNames, c(strata,weight,basic,pop@hhsize))
+  if ( length(modelVars) > 0 & imputeMissings ) {
+    dataS_orig <- dataS[,modelVars,with=F]
+    dataS <- hotdeck(dataS, variable=modelVars, domain_var=sample@strata, imp_var=FALSE)
   }
-  if ( length(impVars) > 0 ) {
-    dataP_orig <- dataP[,impVars,with=F]
-    dataP <- hotdeck(dataP, variable=impVars, domain_var=pop@strata, imp_var=FALSE)
-  } else {
-    dataP_orig <- NULL
+
+  # check for NAs and warn user
+  if ( !imputeMissings) {
+    naTab <- dataS[,lapply(.SD, is.na), .SDcols=c(additional,predNames)]
+    perc.miss <- sum(rowSums(naTab)!=0) / nrow(dataS)
+    if ( perc.miss > 0 ) {
+      wm <- paste0("There are ~",formatC(100*perc.miss,format="f", digits=1),"% ")
+      wm <- paste0(wm, "observations in the response/predictors with at least one missing variable.\n")
+      wm <- paste0(wm, "If you get errors in the estimation procedure, consider to recode these missing ")
+      wm <- paste0(wm, "values (e.g. by assigning an additional category) or try to specify a different model.\n\n")
+      for ( z in 1:ncol(naTab) ) {
+        vv <- colnames(naTab)[z]
+        missv <- sum(naTab[[z]])
+        missp <- formatC(100*missv/nrow(dataS),format="f", digits=1)
+        if ( vv == additional ) {
+          wm <- paste0(wm, "Variable '",vv,"' (response): ",missv," missing values (~",missp,"%).\n")
+        } else {
+          wm <- paste0(wm, "Variable '",vv,"' (predictor): ",missv," missing values (~",missp,"%).\n")
+        }
+      }
+      warning(wm)
+    }
   }
 
   # variables are coerced to factors
@@ -774,10 +798,10 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     }
   }
 
-  # reset imputed variables in population
-  if ( !is.null(dataP_orig) ) {
-    for ( i in 1:ncol(dataP_orig)) {
-      cmd <- paste0("dataP[,",colnames(dataP_orig)[i],":=dataP_orig$",colnames(dataP_orig)[i],"]")
+  # reset imputed variables in sample
+  if ( imputeMissings ) {
+    for ( i in 1:ncol(dataS_orig)) {
+      cmd <- paste0("dataS[,",colnames(dataS_orig)[i],":=dataS_orig$",colnames(dataS_orig)[i],"]")
       eval(parse(text=cmd))
     }
   }

@@ -1,3 +1,8 @@
+Changes in simPop version 0.2.14
+  * Warn the user about missing values in variables used in the model in simContinuous()
+  * additional argument *imputeMissings* (default=FALSE) in simContinuous()
+  * do not impute missing variables in population data
+
 Changes in simPop version 0.2.13
   * bug in simContinuous solved
   * simStructure now works also when no stratification variable is specified

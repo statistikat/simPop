@@ -16,7 +16,7 @@ simContinuous(simPopObj, additional = "netIncome",
   alpha = 0.01, residuals = TRUE, keep = TRUE,
   maxit = 500, MaxNWts = 1500,
   tol = .Machine$double.eps^0.5, nr_cpus = NULL, eps = NULL,
-  regModel = "basic", byHousehold = FALSE, seed)
+  regModel = "basic", byHousehold = FALSE, imputeMissings = FALSE, seed)
 }
 \arguments{
   \item{simPopObj}{a \code{\linkS4class{simPopObj}} holding household survey data, population data and optionally some margins.}
@@ -48,6 +48,8 @@ simContinuous(simPopObj, additional = "netIncome",
     \item{formula-object}: Users may also specify a specific formula (class 'formula') that will be used. Checks are performed that all required variables are available.}
   }
   \item{byHousehold}{if TRUE, predicted values are replaced with the mean within each household.}
+  \item{imputeMissings}{if TRUE, missing values in variables that are used for the underlying model
+  are imputed using hock-deck.}
   \item{seed}{optional; an integer value to be used as the seed of the random number generator, or an integer vector containing the state of the random number generator to be restored.}
 }
 \details{
