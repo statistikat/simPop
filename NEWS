@@ -1,3 +1,6 @@
+Changes in simPop version 0.2.15
+  * Improvements in samp() and pop(). If argument 'var' is NULL (default), the complete dataset is returned.
+
 Changes in simPop version 0.2.14
   * Warn the user about missing values in variables used in the model in simContinuous()
   * additional argument *imputeMissings* (default=FALSE) in simContinuous()

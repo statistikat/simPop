@@ -605,27 +605,33 @@ manageSimPopObj <- function(x, var, sample=FALSE, set=FALSE, values=NULL) {
   }
 }
 
-setGeneric("samp", function(obj, var) {
+setGeneric("samp", function(obj, var=NULL) {
   standardGeneric("samp")
 })
-setMethod("samp", "simPopObj", function(obj, var) {
+setMethod("samp", "simPopObj", function(obj, var=NULL) {
+  sampData <- as.data.table(obj@sample@data)
+  cn <- names(sampData)
+  if ( is.null(var) ) {
+    return(sampData)
+  }
   if ( is.numeric(var) ) {
-    if ( !all(var <= ncol(obj@sample@data)) ) {
-      stop("check input 'var'!\n")
-    }
+    varI <- match(var, 1:ncol(sampData))
+    vars <- cn[which(!is.na(varI))]
   }
   if ( is.character(var) ) {
-    cn <- colnames(obj@sample@data)
-    var <- var[var%in%cn]
-    if ( length(var) == 0 ) {
-      return(NULL)
-    }
+    varI <- match(var, names(sampData))
+    var <- var[which(!is.na(varI))]
   }
-  if ( is.data.table(obj@pop@data)) {
-    obj@sample@data[,var,with=F]
-  } else {
-    obj@sample@data[,var,drop=F]
+  if ( all(is.na(varI)) ) {
+    warning("No specified variable was found in the sample! Check input 'var'!\n")
+    return(NULL)
   }
+  if ( any(is.na(varI)) ) {
+    ww <- "The following variables/indices were not found in the sample:\n"
+    ww <- paste0(ww, paste(var[is.na(varI)], collapse=" | "))
+    warning(ww)
+  }
+  return(sampData[,var,with=F])
 })
 setGeneric("samp<-", function(obj, var, value) {
   standardGeneric("samp<-")
@@ -639,27 +645,33 @@ setReplaceMethod("samp", "simPopObj", function(obj, var, value) {
   obj
 })
 
-setGeneric("pop", function(obj, var) {
+setGeneric("pop", function(obj, var=NULL) {
   standardGeneric("pop")
 })
-setMethod("pop", "simPopObj", function(obj, var) {
+setMethod("pop", "simPopObj", function(obj, var=NULL) {
+  popData <- as.data.table(obj@pop@data)
+  cn <- names(popData)
+  if ( is.null(var) ) {
+    return(popData)
+  }
   if ( is.numeric(var) ) {
-    if ( !all(var <= ncol(obj@pop@data)) ) {
-      stop("check input 'var'!\n")
-    }
+    varI <- match(var, 1:ncol(popData))
+    vars <- cn[which(!is.na(varI))]
   }
   if ( is.character(var) ) {
-    cn <- colnames(obj@pop@data)
-    var <- var[var%in%cn]
-    if ( length(var) == 0 ) {
-      return(NULL)
-    }
+    varI <- match(var, names(popData))
+    var <- var[which(!is.na(varI))]
   }
-  if ( is.data.table(obj@pop@data)) {
-    obj@pop@data[,var,with=F]
-  } else {
-    obj@pop@data[,var,drop=F]
+  if ( all(is.na(varI)) ) {
+    warning("No specified variable was found in the synthetic population! Check input 'var'!\n")
+    return(NULL)
   }
+  if ( any(is.na(varI)) ) {
+    ww <- "The following variables/indices were not found in the synthetic population:\n"
+    ww <- paste0(ww, paste(var[is.na(varI)], collapse=" | "))
+    warning(ww)
+  }
+  return(popData[,var,with=F])
 })
 setGeneric("pop<-", function(obj, var, value) {
   standardGeneric("pop<-")
@@ -752,7 +764,7 @@ factorNA <- function(x, always = FALSE) {
     } else factor(x, exclude=c())
   }
 }
-# 
+#
 # # Function uni.distribution: random draws from the weighted univariate distribution of
 # # the original data (maybe better from the SUF, but then the SUF always has to be used as well)
 # univariate.dis <- function(puf,data,additional,w){
@@ -768,7 +780,7 @@ factorNA <- function(x, always = FALSE) {
 #   puf[,additional] <- sample(x=levels(var)[levels(var) %in% names(tab)],size=dim(puf)[1],prob=p,replace=T)
 #   return(puf)
 # }
-# 
+#
 # # Function con.distribution: random draws from the weighted conditional distribution
 # # (conditioned on a factor variable)
 # conditional.dis <- function(puf,data,additional,conditional,w){

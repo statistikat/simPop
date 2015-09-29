@@ -22,8 +22,7 @@ pop(obj, var) <- value
 \arguments{
 \item{obj}{An object of class \code{\link{simPopObj-class}}}
 
-\item{var}{variable name or index for the variable in slot 'samp' of object with the slot name to be
-accessed.}
+\item{var}{variable name or index for the variable in slot 'samp' of object with the slot name to be accessed. If \code{NULL}, the entire dataset (sample or population) is returned.}
 
 \item{value}{Content replacing whatever the variable in slot \code{var} in \code{obj}
 currently holds.}
