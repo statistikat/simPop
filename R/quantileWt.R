@@ -1,5 +1,50 @@
+#' Weighted sample quantiles
+#' 
+#' Compute quantiles taking into account sample weights.
+#' 
+#' If weights are not specified then \code{quantile(x, probs, na.rm=na.rm,
+#' names=FALSE, type=1)} is used for the computation.
+#' 
+#' Note probabilities outside \eqn{[0, 1]} cause an error.
+#' 
+#' @name quantileWt
+#' @aliases quantileWt quantileWt.default quantileWt.dataObj
+#' @docType methods
+#' @param x a numeric vector.
+#' @param weights an optional numeric vector containing sample weights.
+#' @param vars a character vector of length 1 specifying a variable name that
+#' is available in the data-slot of \code{x} and which is used for the
+#' calculation.
+#' @param probs a numeric vector of probabilities with values in \eqn{[0, 1]}.
+#' @param na.rm a logical indicating whether any \code{NA} or \code{NaN} values
+#' should be removed from \code{x} before the quantiles are computed.  Note
+#' that the default is \code{TRUE}, contrary to the function
+#' \code{\link[stats]{quantile}}.
+#' @param \dots for the generic function \code{quantileWt} additional arguments
+#' to be passed to methods.  Additional arguments not included in the
+#' definition of the methods are currently ignored.
+#' @return A vector of the (weighted) sample quantiles.
+#' @export
+#' @author Stefan Kraft and Bernhard Meindl
+#' 
+#' A basic version of this function was provided by Cedric Beguin and Beat
+#' Hulliger.
+#' @seealso \code{\link[stats]{quantile}}
+#' @keywords univar
+#' @examples
+#' 
+#' data(eusilcS)
+#' (quantileWt(eusilcS$netIncome, weights=eusilcS$rb050))
+#' 
+#' # dataObj-method
+#' inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
+#' (quantileWt(inp, vars="netIncome"))
+#' 
 quantileWt <- function(x, ...) UseMethod("quantileWt")
+NULL
 
+#' @rdname quantileWt
+#' @export
 quantileWt.default <- function(x, weights=NULL, probs=seq(0, 1, 0.25), na.rm=TRUE, ...) {
   # initializations
   if ( !is.numeric(x) ) {
@@ -35,7 +80,10 @@ quantileWt.default <- function(x, weights=NULL, probs=seq(0, 1, 0.25), na.rm=TRU
   q <- x[select]
   invisible(q)
 }
+NULL
 
+#' @rdname quantileWt
+#' @export
 quantileWt.dataObj <- function(x, vars, probs=seq(0, 1, 0.25), na.rm=TRUE, ...) {
   dat <- x@data
   if ( is.null(dat) ) {
@@ -56,3 +104,4 @@ quantileWt.dataObj <- function(x, vars, probs=seq(0, 1, 0.25), na.rm=TRUE, ...) 
     }
   }
 }
+NULL

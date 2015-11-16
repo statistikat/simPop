@@ -1,3 +1,46 @@
+#' Mosaic plots of expected and realized population sizes
+#' 
+#' Create mosaic plots of expected (i.e., estimated) and realized (i.e.,
+#' simulated) population sizes.
+#' 
+#' If \code{method} is \code{"split"}, the two tables of expected and realized
+#' population sizes are combined into a single table, with an additional
+#' conditioning variable indicating expected and realized values. A conditional
+#' plot of this table is then produced using \code{\link[vcd]{cotabplot}}.
+#' 
+#' @name spMosaic
+#' @param x An object of class \code{"spTable"} created using function
+#' \code{\link{spTable}}.
+#' @param method A character string specifying the plot method. Possible values
+#' are \code{"split"} to plot the expected population sizes on the left hand
+#' side and the realized population sizes on the right hand side, and
+#' \code{"color"}
+#' @param \dots if \code{method} is \code{"split"}, further arguments to be
+#' passed to \code{\link[vcd]{cotabplot}}.  If \code{method} is \code{"color"},
+#' further arguments to be passed to \code{\link[vcd]{strucplot}}
+#' @author Andreas Alfons and Bernhard Meindl
+#' @seealso \code{\link{spTable}}, \code{\link[vcd]{cotabplot}},
+#' \code{\link[vcd]{strucplot}}
+#' @keywords hplot
+#' @export
+#' @examples
+#' set.seed(1234)  # for reproducibility
+#' data(eusilcS)   # load sample data
+#' samp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize",
+#'   strata="db040", weight="db090")
+#' eusilcP <- simStructure(data=samp, method="direct", basicHHvars=c("age","rb090"))
+#' abb <- c("B","LA","Vi","C","St","UA","Sa","T","Vo")
+#' tab <- spTable(eusilcP, select=c("rb090", "db040", "hsize"))
+#' 
+#' # expected and realized population sizes
+#' spMosaic(tab, method = "split", 
+#'   labeling=labeling_border(abbreviate=c(db040=TRUE)))
+#' 
+#' # realized population sizes colored according to relative 
+#' # differences with expected population sizes
+#' spMosaic(tab, method = "color", 
+#'   labeling=labeling_border(abbreviate=c(db040=TRUE)))
+#' 
 spMosaic <- function(x, method = c("split", "color"), ...) {
   if ( !class(x) == "spTable" ) { 
     stop("input argument 'x' must be of class 'spTable'!\n")
@@ -66,7 +109,8 @@ spShading <- function(observed, residuals, expected, df = NULL, steps = 201,
   
   ## obtain color information
   col.bins <- seq(r[1], r[2], length.out=steps)
-  legend.col <- rev(diverge_hcl(steps, h=my.h, c=my.c, l=rev(my.l), 
+  ## TODO: replace with heat_hcl: check how it looks like
+  legend.col <- rev(heat_hcl(steps, h=my.h, c=my.c, l=rev(my.l), 
                                 power=power))
   
   ## store lty information for legend

@@ -1,13 +1,55 @@
 Package: simPop
 Type: Package
 Title: Simulation of Synthetic Populations for Survey Data Considering Auxiliary Information
-Version: 0.2.15
-Date: 2015-09-29
+Version: 0.2.2
+Date: 2015-11-13
 Author: Bernhard Meindl, Matthias Templ, Andreas Alfons, Alexander Kowarik, and with contributions from Mathieu Ribatet
-Maintainer: Matthias Templ<matthias.templ@gmail.com>
+Maintainer: Matthias Templ <matthias.templ@gmail.com>
 Depends: R(>= 3.0.0), lattice, vcd, data.table
 Imports: laeken, MASS, Rcpp (>= 0.11.0), e1071, parallel, nnet, doParallel, foreach, colorspace, VIM, methods
 LinkingTo: Rcpp
 Description: Tools and methods to simulate populations for surveys based on auxiliary data. The tools include model-based methods, calibration and combinatorial optimization algorithms. The package was developed with support of the International Household Survey Network, DFID Trust Fund TF011722.
 License: GPL (>= 2)
 LazyLoad: yes
+Collate:
+    '0classes.R'
+    'addKnownMargins.R'
+    'addWeights.r'
+    'calibPop.R'
+    'calibSample.R'
+    'calibVars.R'
+    'contingencyWt.R'
+    'fitGPD.R'
+    'getBreaks.R'
+    'getCat.R'
+    'get_silc.R'
+    'ipu.r'
+    'meanWt.R'
+    'printFunctions.R'
+    'quantileWt.R'
+    'sampHH.R'
+    'simCategorical.R'
+    'simComponents.R'
+    'simContinuous.R'
+    'simEUSILC.R'
+    'simGPD.R'
+    'simInitSpatial.R'
+    'simPop-package-package.R'
+    'simRelation.R'
+    'simStructure.R'
+    'spBwplot.R'
+    'spBwplotStats.R'
+    'spCdf.R'
+    'spCdfplot.R'
+    'spMosaic.R'
+    'spPredict.R'
+    'spSample.R'
+    'spTable.R'
+    'specifyInput.R'
+    'sprague.R'
+    'tableWt.R'
+    'utility.R'
+    'utils.R'
+    'whipple.R'
+    'dataSets.R'
+    'zzz.R'

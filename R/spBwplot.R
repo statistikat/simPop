@@ -1,3 +1,66 @@
+#' Weighted box plots
+#' 
+#' Produce box-and-whisker plots of continuous or semi-continuous variables,
+#' possibly broken down according to conditioning variables and taking into
+#' account sample weights.
+#' 
+#' Missing values are ignored for producing box plots and weights are directly
+#' extracted from the input object \code{inp}.
+#' 
+#' @name spBwplot
+#' @aliases spBwplot panelSpBwplot getBwplotStats prepBwplotStats.data.frame prepBwplotStats.default
+#' @param inp an object of class \code{\linkS4class{simPopObj}} containing
+#' survey sample and synthetic population data.
+#' @param x a character vector specifying the columns of data available in the
+#' sample and the population (specified in input object 'inp') to be plotted.
+#' @param cond an optional character vector (of length 1, if used) specifying
+#' the conditioning variable.
+#' @param horizontal a logical indicating whether the boxes should be
+#' horizontal or vertical.
+#' @param coef a numeric value that determines the extension of the whiskers.
+#' @param zeros a logical indicating whether the variables specified by
+#' \code{x} are semi-continuous, i.e., contain a considerable amount of zeros.
+#' If \code{TRUE}, the box widths correspond to the proportion of non-zero data
+#' points and the (weighted) box plot statistics are computed for these
+#' non-zero data points only.
+#' @param minRatio a numeric value in \eqn{(0,1]}; if \code{zeros} is
+#' \code{TRUE}, the boxes may become unreadable for a large proportion of
+#' zeros. In such a case, this can be used to specify a minimum ratio for the
+#' box widths. Variable box widths for semi-continuous variables can be
+#' suppressed by setting this value to 1.
+#' @param do.out a logical indicating whether data points that lie beyond the
+#' extremes of the whiskers should be plotted. Note that this is \code{FALSE}
+#' by default.
+#' @param \dots further arguments to be passed to
+#' \code{\link[lattice:xyplot]{bwplot}}.
+#' @return An object of class \code{"trellis"}, as returned by
+#' \code{\link[lattice:xyplot]{bwplot}}.
+#' @author Andreas Alfons and Bernhard Meindl
+#' @seealso \code{\link{spBwplotStats}}, \code{\link[lattice:xyplot]{bwplot}}
+#' @keywords hplot
+#' @export
+#' @examples
+#' 
+#' ## these take some time and are not run automatically
+#' ## copy & paste to the R command line
+#' 
+#' set.seed(1234)  # for reproducibility
+#' data(eusilcS)   # load sample data
+#' inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", 
+#'   strata="db040", weight="db090")
+#' simPop <- simStructure(data=inp, method="direct",
+#'   basicHHvars=c("age", "rb090", "hsize", "pl030", "pb220a"))
+#' 
+#' # multinomial model with random draws
+#' eusilcM <- simContinuous(simPop, additional="netIncome", 
+#'   regModel  = ~rb090+hsize+pl030+pb220a+hsize,
+#'   upper=200000, equidist=FALSE)
+#' class(eusilcM)
+#' 
+#' # plot results
+#' spBwplot(eusilcM, x="netIncome", cond=NULL)
+#' spBwplot(eusilcM, x="netIncome", cond="rb090", layout=c(1,2))
+#' 
 spBwplot <- function(inp, x, cond = NULL, horizontal = TRUE,
                      coef = 1.5, zeros = TRUE, minRatio = NULL, 
                      do.out = FALSE, ...) {
@@ -80,8 +143,12 @@ spBwplot <- function(inp, x, cond = NULL, horizontal = TRUE,
   ## call 'bwplot'
   localBwplot(as.formula(form), values, horizontal=horizontal, coef=coef, zeros=zeros, ratio=ratio, do.out=FALSE, outliers=out, ...)
 }
+NULL
+
 
 ## panel function
+#' @rdname spBwplot
+#' @export
 panelSpBwplot <- function(x, y, coef=1.5, zeros = TRUE, ratio, outliers, subscripts, ...) {
   out <- outliers[subscripts]
   if ( zeros ) {
@@ -95,11 +162,15 @@ panelSpBwplot <- function(x, y, coef=1.5, zeros = TRUE, ratio, outliers, subscri
   }
   panel.points(x[out], y[out], ...)
 }
+NULL
 
 
 ## internal utility functions
 
 # get data.frame and all required statistics
+#' @rdname spBwplot
+#' @export
+#' @keywords internal
 getBwplotStats <- function(x, weights = NULL, cond = NULL, data, ..., name = "") {
   if ( is.null(cond) ) {
     x <- data[, x, with=FALSE]
@@ -131,10 +202,18 @@ getBwplotStats <- function(x, weights = NULL, cond = NULL, data, ..., name = "")
     list(values=values, n=n, nzero=nzero, out=out)
   }
 }
+NULL
 
 # prepare one or more variables
+#' @rdname spBwplot
+#' @export
+#' @keywords internal
 prepBwplotStats <- function(x, w, ..., name = "") UseMethod("prepBwplotStats")
+NULL
 
+#' @rdname spBwplot
+#' @export
+#' @keywords internal
 prepBwplotStats.data.frame <- function(x, w, ..., name = "") {
   tmp <- lapply(x, prepBwplotStats, w, ..., name=name)
   values <- mapply(function(x, v) cbind(x$values, .var=v), tmp, names(x), SIMPLIFY=FALSE, USE.NAMES=FALSE)
@@ -144,7 +223,11 @@ prepBwplotStats.data.frame <- function(x, w, ..., name = "") {
   out <- do.call(c, lapply(tmp, function(x) x$out))
   list(values=values, n=n, nzero=nzero, out=out)
 }
+NULL
 
+#' @rdname spBwplot
+#' @export
+#' @keywords internal
 prepBwplotStats.default <- function(x, w, ..., name = "") {
   stats <- spBwplotStats(x, w, ...)
   x <- c(stats$stats, stats$out)

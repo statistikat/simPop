@@ -1,3 +1,35 @@
+#' Cross tabulations of expected and realized population sizes.
+#' 
+#' Compute contingency tables of expected (i.e., estimated) and realized (i.e.,
+#' simulated) population sizes. The expected values are obtained with the
+#' Horvitz-Thompson estimator.
+#' 
+#' The contingency tables are computed with \code{\link{tableWt}}.
+#' 
+#' @name spTable
+#' @param inp an object of class \code{\linkS4class{simPopObj}} containing
+#' household survey and simulated population data.
+#' @param select character; vector defining the columns in slots 'pop' and
+#' 'sample' of argument 'input' that should be used for tabulation.
+#' @return A list of class \code{"spTable"} with the following components:
+#' \item{expected}{the contingency table estimated from the survey data.}
+#' \item{realized}{the contingency table computed from the simulated population
+#' data.}
+#' @note Sampling weights are automatically used from the input object 'inp'!
+#' @author Andreas Alfons and Bernhard Meindl
+#' @seealso \code{\link{spMosaic}}, \code{\link{tableWt}}
+#' @keywords dplot
+#' @export
+#' @examples
+#' 
+#' set.seed(1234)  # for reproducibility
+#' data(eusilcS)   # load sample data
+#' samp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize",
+#'   strata="db040", weight="db090")
+#' eusilcP <- simStructure(data=samp, method="direct", basicHHvars=c("age", "rb090"))
+#' res <- spTable(eusilcP, select = c("age", "rb090"))
+#' class(res)
+#' res
 spTable <- function(inp, select) {
   if ( class(inp) != "simPopObj") {
     stop("wrong input! Argument 'inp' must be of class 'simPopObj'!\n")

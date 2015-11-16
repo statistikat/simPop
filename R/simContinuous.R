@@ -355,6 +355,205 @@ runModel <- function(dataS, dataP, params, typ) {
   return(valuesCat)
 }
 
+
+
+
+
+#' Simulate continuous variables of population data
+#' 
+#' Simulate continuous variables of population data using multinomial
+#' log-linear models combined with random draws from the resulting categories
+#' or (two-step) regression models combined with random error terms. The
+#' household structure of the population data and any other categorical
+#' predictors need to be simulated beforehand.
+#' 
+#' If \code{method} is \code{"lm"}, the behavior for two-step models is
+#' described in the following.
+#' 
+#' If \code{zeros} is \code{TRUE} and \code{log} is not \code{TRUE} or the
+#' variable specified by \code{additional} does not contain negative values, a
+#' log-linear model is used to predict whether an observation is zero or not.
+#' Then a linear model is used to predict the non-zero values.
+#' 
+#' If \code{zeros} is \code{TRUE}, \code{log} is \code{TRUE} and \code{const}
+#' is specified, again a log-linear model is used to predict whether an
+#' observation is zero or not. In the linear model to predict the non-zero
+#' values, \code{const} is added to the variable specified by \code{additional}
+#' before the logarithms are taken.
+#' 
+#' If \code{zeros} is \code{TRUE}, \code{log} is \code{TRUE}, \code{const} is
+#' \code{NULL} and there are negative values, a multinomial log-linear model is
+#' used to predict negative, zero and positive observations. Categories for the
+#' negative values are thereby defined by \code{breaks}. In the second step, a
+#' linear model is used to predict the positive values and negative values are
+#' drawn from uniform distributions in the respective classes.
+#' 
+#' If \code{zeros} is \code{FALSE}, \code{log} is \code{TRUE} and \code{const}
+#' is \code{NULL}, a two-step model is used if there are non-positive values in
+#' the variable specified by \code{additional}. Whether a log-linear or a
+#' multinomial log-linear model is used depends on the number of categories to
+#' be used for the non-positive values, as defined by \code{breaks}. Again,
+#' positive values are then predicted with a linear model and non-positive
+#' values are drawn from uniform distributions.
+#' 
+#' The number of cpus are selected automatically in the following manner. The
+#' number of cpus is equal the number of strata. However, if the number of cpus
+#' is less than the number of strata, the number of cpus - 1 is used by
+#' default. This should be the best strategy, but the user can also overwrite
+#' this decision.
+#' 
+#' @name simContinuous
+#' @param simPopObj a \code{\linkS4class{simPopObj}} holding household survey
+#' data, population data and optionally some margins.
+#' @param additional a character string specifying the additional continuous
+#' variable of \code{dataS} that should be simulated for the population data.
+#' Currently, only one additional variable can be simulated at a time.
+#' @param method a character string specifying the method to be used for
+#' simulating the continuous variable. Accepted values are \code{"multinom"},
+#' for using multinomial log-linear models combined with random draws from the
+#' resulting categories, and \code{"lm"}, for using (two-step) regression
+#' models combined with random error terms.
+#' @param zeros a logical indicating whether the variable specified by
+#' \code{additional} is semi-continuous, i.e., contains a considerable amount
+#' of zeros. If \code{TRUE} and \code{method} is \code{"multinom"}, a separate
+#' factor level for zeros in the response is used. If \code{TRUE} and
+#' \code{method} is \code{"lm"}, a two-step model is applied. The first step
+#' thereby uses a log-linear or multinomial log-linear model (see
+#' \dQuote{Details}).
+#' @param breaks an optional numeric vector; if multinomial models are
+#' computed, this can be used to supply two or more break points for
+#' categorizing the variable specified by \code{additional}. If \code{NULL},
+#' break points are computed using weighted quantiles.
+#' @param lower,upper optional numeric values; if multinomial models are
+#' computed and \code{breaks} is \code{NULL}, these can be used to specify
+#' lower and upper bounds other than minimum and maximum, respectively. Note
+#' that if \code{method} is \code{"multinom"} and \code{gpd} is \code{TRUE}
+#' (see below), \code{upper} defaults to \code{Inf}.
+#' @param equidist logical; if \code{method} is \code{"multinom"} and
+#' \code{breaks} is \code{NULL}, this indicates whether the (positive) default
+#' break points should be equidistant or whether there should be refinements in
+#' the lower and upper tail (see \code{\link{getBreaks}}).
+#' @param probs numeric vector with values in \eqn{[0, 1]}; if \code{method} is
+#' \code{"multinom"} and \code{breaks} is \code{NULL}, this gives probabilities
+#' for quantiles to be used as (positive) break points. If supplied, this is
+#' preferred over \code{equidist}.
+#' @param gpd logical; if \code{method} is \code{"multinom"}, this indicates
+#' whether the upper tail of the variable specified by \code{additional} should
+#' be simulated by random draws from a (truncated) generalized Pareto
+#' distribution rather than a uniform distribution.
+#' @param threshold a numeric value; if \code{method} is \code{"multinom"},
+#' values for categories above \code{threshold} are drawn from a (truncated)
+#' generalized Pareto distribution.
+#' @param est a character string; if \code{method} is \code{"multinom"}, the
+#' estimator to be used to fit the generalized Pareto distribution.
+#' @param limit an optional named list of lists; if multinomial models are
+#' computed, this can be used to account for structural zeros. The names of the
+#' list components specify the predictor variables for which to limit the
+#' possible outcomes of the response. For each predictor, a list containing the
+#' possible outcomes of the response for each category of the predictor can be
+#' supplied. The probabilities of other outcomes conditional on combinations
+#' that contain the specified categories of the supplied predictors are set to
+#' 0. Currently, this is only implemented for more than two categories in the
+#' response.
+#' @param censor an optional named list of lists or \code{data.frame}s; if
+#' multinomial models are computed, this can be used to account for structural
+#' zeros. The names of the list components specify the categories that should
+#' be censored. For each of these categories, a list or \code{data.frame}
+#' containing levels of the predictor variables can be supplied. The
+#' probability of the specified categories is set to 0 for the respective
+#' predictor levels. Currently, this is only implemented for more than two
+#' categories in the response.
+#' @param log logical; if \code{method} is \code{"lm"}, this indicates whether
+#' the linear model should be fitted to the logarithms of the variable
+#' specified by \code{additional}. The predicted values are then
+#' back-transformed with the exponential function. See \dQuote{Details} for
+#' more information.
+#' @param const numeric; if \code{method} is \code{"lm"} and \code{log} is
+#' \code{TRUE}, this gives a constant to be added before log transformation.
+#' @param alpha numeric; if \code{method} is \code{"lm"}, this gives trimming
+#' parameters for the sample data. Trimming is thereby done with respect to the
+#' variable specified by \code{additional}. If a numeric vector of length two
+#' is supplied, the first element gives the trimming proportion for the lower
+#' part and the second element the trimming proportion for the upper part. If a
+#' single numeric is supplied, it is used for both. With \code{NULL}, trimming
+#' is suppressed.
+#' @param residuals logical; if \code{method} is \code{"lm"}, this indicates
+#' whether the random error terms should be obtained by draws from the
+#' residuals. If \code{FALSE}, they are drawn from a normal distribution
+#' (median and MAD of the residuals are used as parameters).
+#' @param keep logical; if multinomial models are computed, this indicates
+#' whether the simulated categories should be stored as a variable in the
+#' resulting population data. If \code{TRUE}, the corresponding column name is
+#' given by \code{additional} with postfix \code{"Cat"}.
+#' @param maxit,MaxNWts control parameters to be passed to
+#' \code{\link[nnet]{multinom}} and \code{\link[nnet]{nnet}}. See the help file
+#' for \code{\link[nnet]{nnet}}.
+#' @param tol if \code{method} is \code{"lm"} and \code{zeros} is \code{TRUE},
+#' a small positive numeric value or \code{NULL}. When fitting a log-linear
+#' model within a stratum, factor levels may not exist in the sample but are
+#' likely to exist in the population. However, the coefficient for such factor
+#' levels will be 0. Therefore, coefficients smaller than \code{tol} in
+#' absolute value are replaced by coefficients from an auxiliary model that is
+#' fit to the whole sample. If \code{NULL}, no auxiliary log-linear model is
+#' computed and no coefficients are replaced.
+#' @param nr_cpus if specified, an integer number defining the number of cpus
+#' that should be used for parallel processing.
+#' @param eps a small positive numeric value, or \code{NULL} (the default). In
+#' the former case and if (multinomial) log-linear models are computed,
+#' estimated probabilities smaller than this are assumed to result from
+#' structural zeros and are set to exactly 0.
+#' @param regModel allows to specify the model that should be for the
+#' simulation of the additional continuous variable. The following choices are
+#' possible: \itemize{ \item'basic'only the basic household-variables
+#' (generated with \code{\link{simStructure}}) are used.  \item'available'all
+#' available variables (that are common in the sample and the syntetic
+#' population (e.g. previously generated variables) are used for the modeling.
+#' Should be used with care because all variables are automatically used as
+#' factors!  \item formula-object: Users may also specify a specific formula
+#' (class 'formula') that will be used. Checks are performed that all required
+#' variables are available.}
+#' @param byHousehold if TRUE, predicted values are replaced with the mean
+#' within each household.
+#' @param imputeMissings if TRUE, missing values in variables that are used for
+#' the underlying model are imputed using hock-deck.
+#' @param seed optional; an integer value to be used as the seed of the random
+#' number generator, or an integer vector containing the state of the random
+#' number generator to be restored.
+#' @return An object of class \code{\linkS4class{simPopObj}} containing survey
+#' data as well as the simulated population data including the continuous
+#' variable specified by \code{additional} and possibly simulated categories
+#' for the desired continous variable.
+#' @note The basic household structure and any other categorical predictors
+#' need to be simulated beforehand with the functions
+#' \code{\link{simStructure}} and \code{\link{simCategorical}}, respectively.
+#' @author Bernhard Meindl and Andreas Alfons (based on code by Stefan Kraft)
+#' @seealso \code{\link{simStructure}}, \code{\link{simCategorical}},
+#' \code{\link{simComponents}}, \code{\link{simEUSILC}}
+#' @keywords datagen
+#' @export
+#' @examples
+#' 
+#' data(eusilcS)
+#' inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
+#' simPop <- simStructure(data=inp, method="direct", 
+#'   basicHHvars=c("age", "rb090", "hsize", "pl030", "pb220a"))
+#' 
+#' regModel = ~rb090+hsize+pl030+pb220a
+#' 
+#' # multinomial model with random draws
+#' eusilcM <- simContinuous(simPop, additional="netIncome",
+#'               regModel = regModel, 
+#'               upper=200000, equidist=FALSE)
+#' class(eusilcM)
+#' 
+#' \dontrun{
+#' # two-step regression
+#' eusilcT <- simContinuous(simPop, additional="netIncome", 
+#'               regModel = "basic",
+#'               method = "lm")
+#' class(eusilcT)
+#' }
+#' 
 simContinuous <- function(simPopObj, additional = "netIncome",
   method = c("multinom", "lm"), zeros = TRUE,
   breaks = NULL, lower = NULL, upper = NULL,

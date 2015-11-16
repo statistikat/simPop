@@ -1,3 +1,33 @@
+#' create an object of class 'dataObj' required for further processing
+#' 
+#' create an standardized input object of class 'dataObj' containing
+#' information on weights, household ids, household sizes, person ids and
+#' optionally strata. Outputs of this function are typically used in
+#' \code{\link{simStructure}}.
+#' 
+#' @name specifyInput
+#' @param data a \code{data.frame} or \code{data.table} featuring sample data.
+#' @param hhid character vector of length 1 specifying variable containing
+#' household ids within slot \code{data}.
+#' @param hhsize character vector of length 1 specifying variable containing
+#' household sizes within slot \code{data}. If NULL, household sizes are
+#' automatically calculated.
+#' @param pid character vector of length 1 specifying variable containing
+#' person ids within slot \code{data}. If NULL, person ids are automatically
+#' calculated.
+#' @param weight character vector of length 1 specifying variable holding
+#' sampling weights within slot \code{data}.
+#' @param strata character vector of length 1 specifing variable name within
+#' slot \code{data} of variable holding information on strata, e.g. regions or
+#' NULL if such variable does not exist.
+#' @export
+#' @author Bernhard Meindl
+#' @keywords method
+#' @examples
+#' data(eusilcS)
+#' inp <- specifyInput(data=eusilcS, hhid="db030", weight="rb050", strata="db040")
+#' class(inp)
+#' inp
 specifyInput <- function(data, hhid, hhsize=NULL, pid=NULL, weight, strata=NULL) {
   if ( !class(hhid)=="character" | length(hhid) != 1 | is.na(match(hhid, colnames(data)))) {
     stop("hhid must be a character defining the variable holding household ids and must be of length 1!\n")
