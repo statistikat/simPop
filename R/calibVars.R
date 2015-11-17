@@ -25,7 +25,6 @@ calibVars <- function(x) UseMethod("calibVars")
 NULL
 
 #' @rdname calibVars
-#' @S3method calibVars default
 #' @export
 calibVars.default <- function(x) {
   if(length(x) == 0) matrix(integer(), 0, 0)
@@ -39,13 +38,11 @@ calibVars.default <- function(x) {
 NULL
 
 #' @rdname calibVars
-#' @S3method calibVars matrix
 #' @export
 calibVars.matrix <- function(x) calibVars(as.data.frame(x))
 NULL
 
 #' @rdname calibVars
-#' @S3method calibVars data.frame
 #' @export
 calibVars.data.frame <- function(x) {
   res <- lapply(x, calibVars)  # list of matrices for each variable
