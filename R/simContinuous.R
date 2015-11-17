@@ -97,13 +97,16 @@ generateValues_lm <- function(dataSample, dataPop, params) {
   residuals <- params$residuals
   log <- params$log
 
-  ## remove unused factor levels
-  #for ( i in 1:ncol(dataPop)) {
-  #  if (is.factor(dataPop[[i]])) {
-  #    dataPop[[i]] <- factor(dataPop[[i]])
-  #  }
-  #}
-
+  # fix: for each predictor, the level set must be equal in dataSample and dataPop
+  for ( i in predNames ) {
+    both <- intersect(levels(dataSample[[i]]), levels(dataPop[[i]]))
+    a <- as.character(dataSample[[i]])
+    a[!a%in%both] <- NA
+    b <- as.character(dataPop[[i]])
+    b[!b %in%both] <- NA
+    dataSample[[i]] <- factor(a, levels=both)
+    dataPop[[i]] <- factor(b, levels=both)
+  }
   # unique combinations in the stratum of the population need to be computed for prediction
   indGrid <- split(1:nrow(dataPop), dataPop, drop=TRUE)
   grid <- dataPop[sapply(indGrid, function(i) i[1]), , drop=FALSE]
@@ -135,15 +138,15 @@ generateValues_lm <- function(dataSample, dataPop, params) {
   # fit linear model
   mod <- eval(parse(text=command))
   # add coefficients from auxiliary model if necessary
-  tmp <- coef
-  coef[names(coef(mod))] <- coef(mod)
-  mod$coefficients <- coef
+  #tmp <- coef
+  #coef[names(coef(mod))] <- coef(mod)
+  #mod$coefficients <- coef
   # prediction
   # add 0 variable to combinations for use of 'model.matrix'
   newdata <- cbind(grid, 0)
   names(newdata) <- c(predNames, additional[1])
   newdata <- model.matrix(formula, data=newdata)
-  
+
   if ( length(exclude) == 0 ) {
     pred <- spPredict(mod, newdata)
   } else {
@@ -190,6 +193,7 @@ generateValues_binary <- function(dataSample, dataPop, params) {
   indGrid <- split(1:nrow(dataPop), dataPop, drop=TRUE)
   grid <- dataPop[sapply(indGrid, function(i) i[1]), , drop=FALSE]
   grid <- as.data.frame(grid)
+
   # in sample, observations with NAs have been removed to fit the
   # model, hence population can have additional levels
   # these need to be removed since those probabilities cannot
@@ -218,7 +222,7 @@ generateValues_binary <- function(dataSample, dataPop, params) {
   Xnew <- cbind(grid, 0)
   names(Xnew) <- c(predNames, name)
   Xnew <- model.matrix(params$command, data=Xnew)
-  
+
   # fit logit model
   X <- model.matrix(params$command, data=dataSample)
   y <- dataSample[[name]]
@@ -231,12 +235,12 @@ generateValues_binary <- function(dataSample, dataPop, params) {
 
     # remove non-existing combinations from mod$par
     # reason: auxiliary model is estimated on total population
-    #ii <- setdiff(names(mod$par), colnames(Xnew))
-    #if ( length(ii) >0 ) {
-    #  mod$par <- mod$par[!names(mod$par)%in%ii]
-    #}
+    ii <- setdiff(names(mod$par), colnames(Xnew))
+    if ( length(ii) >0 ) {
+      mod$par <- mod$par[!names(mod$par)%in%ii]
+    }
   }
-  
+
   # predict probabilities
   tmp <- exp(Xnew %*% mod$par)
   # avoid integer overflow
@@ -263,20 +267,26 @@ generateValues_binary <- function(dataSample, dataPop, params) {
 }
 
 genVals <- function(dataSample, dataPop, params, typ) {
+  # unify level-set of predictors
+  for ( i in params$predNames ) {
+    dataSample[[i]] <- cleanFactor(dataSample[[i]])
+    dataPop[[i]] <- cleanFactor(dataPop[[i]])
+  }
+
   if ( !typ %in% c("multinom","lm","binary") ) {
     stop("unsupported value for argument 'type' in genVals()\n")
   }
   if ( typ=="binary") {
-    generateValues_binary(dataSample, dataPop, params)
+    res <- generateValues_binary(dataSample, dataPop, params)
   }
   if ( typ=="lm") {
-    generateValues_lm(dataSample, dataPop, params)
+    res <- generateValues_lm(dataSample, dataPop, params)
   }
   if ( typ=="multinom" ) {
-    generateValues_multinom(dataSample, dataPop, params)
+    res <- generateValues_multinom(dataSample, dataPop, params)
   }
+  res
 }
-
 
 runModel <- function(dataS, dataP, params, typ) {
   x <- NULL
@@ -284,7 +294,7 @@ runModel <- function(dataS, dataP, params, typ) {
   pp <- parallelParameters(nr_cpus=params$nr_cpus, nr_strata=length(levels(dataS[[strata]])))
   indStrata <- params$indStrata
   predNames <- params$predNames
-  additional <- c(params$additional, params$name)
+  additional <- unique(c(params$additional, params$name, params$weight))
   if ( pp$parallel ) {
     # windows
     if ( pp$have_win ) {
@@ -293,10 +303,10 @@ runModel <- function(dataS, dataP, params, typ) {
       valuesCat <- foreach(x=levels(dataS[[strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
         genVals(
           dataSample=dataS[dataS[[strata]] == x,],
-          dataPop=dataP[indStrata[[x]], predNames, with=F], 
-          params, 
+          dataPop=dataP[indStrata[[x]], predNames, with=F],
+          params,
           typ=typ)
-      }      
+      }
       stopCluster(cl)
     }
     # linux/mac
@@ -304,16 +314,16 @@ runModel <- function(dataS, dataP, params, typ) {
       valuesCat <- mclapply(levels(dataS[[strata]]), function(x) {
         genVals(
           dataSample=dataS[dataS[[strata]] == x,],
-          dataPop=dataP[indStrata[[x]], predNames, with=F], 
+          dataPop=dataP[indStrata[[x]], predNames, with=F],
           params=params,
           typ=typ)
-      },mc.cores=pp$nr_cores)      
+      },mc.cores=pp$nr_cores)
     }
   } else {
     valuesCat <- lapply(levels(dataS[[strata]]), function(x) {
       genVals(
         dataSample=dataS[dataS[[strata]] == x,c(predNames, additional), with=F],
-        dataPop=dataP[indStrata[[x]], predNames, with=F], 
+        dataPop=dataP[indStrata[[x]], predNames, with=F],
         params=params,
         typ=typ)
     })
@@ -340,34 +350,34 @@ runModel <- function(dataS, dataP, params, typ) {
 
 
 #' Simulate continuous variables of population data
-#' 
+#'
 #' Simulate continuous variables of population data using multinomial
 #' log-linear models combined with random draws from the resulting categories
 #' or (two-step) regression models combined with random error terms. The
 #' household structure of the population data and any other categorical
 #' predictors need to be simulated beforehand.
-#' 
+#'
 #' If \code{method} is \code{"lm"}, the behavior for two-step models is
 #' described in the following.
-#' 
+#'
 #' If \code{zeros} is \code{TRUE} and \code{log} is not \code{TRUE} or the
 #' variable specified by \code{additional} does not contain negative values, a
 #' log-linear model is used to predict whether an observation is zero or not.
 #' Then a linear model is used to predict the non-zero values.
-#' 
+#'
 #' If \code{zeros} is \code{TRUE}, \code{log} is \code{TRUE} and \code{const}
 #' is specified, again a log-linear model is used to predict whether an
 #' observation is zero or not. In the linear model to predict the non-zero
 #' values, \code{const} is added to the variable specified by \code{additional}
 #' before the logarithms are taken.
-#' 
+#'
 #' If \code{zeros} is \code{TRUE}, \code{log} is \code{TRUE}, \code{const} is
 #' \code{NULL} and there are negative values, a multinomial log-linear model is
 #' used to predict negative, zero and positive observations. Categories for the
 #' negative values are thereby defined by \code{breaks}. In the second step, a
 #' linear model is used to predict the positive values and negative values are
 #' drawn from uniform distributions in the respective classes.
-#' 
+#'
 #' If \code{zeros} is \code{FALSE}, \code{log} is \code{TRUE} and \code{const}
 #' is \code{NULL}, a two-step model is used if there are non-positive values in
 #' the variable specified by \code{additional}. Whether a log-linear or a
@@ -375,13 +385,13 @@ runModel <- function(dataS, dataP, params, typ) {
 #' be used for the non-positive values, as defined by \code{breaks}. Again,
 #' positive values are then predicted with a linear model and non-positive
 #' values are drawn from uniform distributions.
-#' 
+#'
 #' The number of cpus are selected automatically in the following manner. The
 #' number of cpus is equal the number of strata. However, if the number of cpus
 #' is less than the number of strata, the number of cpus - 1 is used by
 #' default. This should be the best strategy, but the user can also overwrite
 #' this decision.
-#' 
+#'
 #' @name simContinuous
 #' @param simPopObj a \code{\linkS4class{simPopObj}} holding household survey
 #' data, population data and optionally some margins.
@@ -512,28 +522,28 @@ runModel <- function(dataS, dataP, params, typ) {
 #' @keywords datagen
 #' @export
 #' @examples
-#' 
+#'
 #' data(eusilcS)
 #' inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
-#' simPop <- simStructure(data=inp, method="direct", 
+#' simPop <- simStructure(data=inp, method="direct",
 #'   basicHHvars=c("age", "rb090", "hsize", "pl030", "pb220a"))
-#' 
+#'
 #' regModel = ~rb090+hsize+pl030+pb220a
-#' 
+#'
 #' # multinomial model with random draws
 #' eusilcM <- simContinuous(simPop, additional="netIncome",
-#'               regModel = regModel, 
+#'               regModel = regModel,
 #'               upper=200000, equidist=FALSE)
 #' class(eusilcM)
-#' 
+#'
 #' \dontrun{
 #' # two-step regression
-#' eusilcT <- simContinuous(simPop, additional="netIncome", 
+#' eusilcT <- simContinuous(simPop, additional="netIncome",
 #'               regModel = "basic",
 #'               method = "lm")
 #' class(eusilcT)
 #' }
-#' 
+#'
 simContinuous <- function(simPopObj, additional = "netIncome",
   method = c("multinom", "lm"), zeros = TRUE,
   breaks = NULL, lower = NULL, upper = NULL,
@@ -877,6 +887,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     params$par <- par
     params$command <- estimationModel
     # run in parallel if possible
+
     valuesCat <- runModel(dataS, dataP, params, typ="binary")
   }
 
@@ -926,7 +937,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     } else {
       dataSample <- dataS
     }
-    
+
     ## fit linear model
     # formula for linear model
     if ( log ) {
@@ -945,7 +956,8 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     params <- list()
     params$coef <- coef
     params$command <- paste("lm(", fstring,", weights=", weight, ", data=dataSample)", sep="")
-    params$name <- fname
+    #params$name <- fname
+    params$name <- additional
     params$excludeLevels <- excludeLevels
     params$hasNewLevels <- hasNewLevels
     params$newLevels <- newLevels
@@ -959,10 +971,8 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     params$nr_cpus <- nr_cpus
     params$indStrata <- indStrata
     params$predNames <- predNames
-    params$additional <- c(additional, weight)
 
     valuesTmp <- runModel(dataS, dataP, params, typ="lm")
-
     ## put simulated values together
     if ( useMultinom ) {
       values[which(indP == 1)] <- valuesTmp

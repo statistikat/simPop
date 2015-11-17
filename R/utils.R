@@ -372,3 +372,24 @@ regressionInput <- function(obj, additional, regModel) {
   }
   return(regInput)
 }
+
+
+# recodes a factor:
+# NA -> _tmpmiss
+# non-available codes are removed (droplevels)
+# required when estimating a model on a strata and
+# not all levels are present in the response
+cleanFactor <- function(x) {
+  missstr <- "_tmpmiss"
+  if ( !is.factor(x) ) {
+    return(x)
+  }
+  y <- as.character(x)
+  indna <- is.na(y)
+  levN <- levels(droplevels(x))
+  if ( any(indna) ) {
+    y[indna] <- missstr
+    levN <- c(levN,missstr)
+  }
+  factor(y, levels=levN)
+}

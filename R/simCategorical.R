@@ -1,27 +1,3 @@
-# recodes a factor:
-# NA -> _tmpmiss
-# non-available codes are removed (droplevels)
-# required when estimating a model on a strata and
-# not all levels are present in the response
-cleanFactor <- function(x) {
-  missstr <- "_tmpmiss"
-  if ( !is.factor(x) ) {
-    return(x)
-  }
-  y <- factor(x, exclude=NULL)
-  ll <- levels(y)
-  y <- as.character(y)
-  indna <- is.na(y)
-  if ( any(indna) ) {
-    y[indna] <- missstr
-    levN <- c(na.omit(ll),missstr)
-    y <- factor(y, levels=levN)
-    return(y)
-  } else {
-    return(x)
-  }
-}
-
 generateValues <- function(dataSample, dataPop, params) {
   if ( !nrow(dataSample) ) {
     return(character())
@@ -118,7 +94,7 @@ generateValues <- function(dataSample, dataPop, params) {
     resample <- function(k, n, p) spSample(n[k], p[k,])
   }
   # generate realizations for each combination
-  
+
   if ( length(exclude) == 0 ) {
     ncomb <- as.integer(sapply(indGrid, length))
     sim <- lapply(1:length(ncomb), resample, ncomb, probs)
@@ -171,16 +147,16 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
 
 
 #' Simulate categorical variables of population data
-#' 
+#'
 #' Simulate categorical variables of population data. The household structure
 #' of the population data needs to be simulated beforehand.
-#' 
+#'
 #' The number of cpus are selected automatically in the following manner. The
 #' number of cpus is equal the number of strata. However, if the number of cpus
 #' is less than the number of strata, the number of cpus - 1 is used by
 #' default. This should be the best strategy, but the user can also overwrite
 #' this decision.
-#' 
+#'
 #' @name simCategorical
 #' @param simPopObj a \code{simPopObj} containing population and household
 #' survey data as well as optionally margins in standardized format.
