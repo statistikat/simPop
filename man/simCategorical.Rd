@@ -4,10 +4,9 @@
 \alias{simCategorical}
 \title{Simulate categorical variables of population data}
 \usage{
-simCategorical(simPopObj, additional, method = c("multinom", "distribution",
-  "naivebayes"), limit = NULL, censor = NULL, maxit = 500,
-  MaxNWts = 1500, eps = NULL, nr_cpus = NULL, regModel = NULL,
-  seed = 1)
+simCategorical(simPopObj, additional, method = c("multinom", "distribution"),
+  limit = NULL, censor = NULL, maxit = 500, MaxNWts = 1500,
+  eps = NULL, nr_cpus = NULL, regModel = NULL, seed = 1)
 }
 \arguments{
 \item{simPopObj}{a \code{simPopObj} containing population and household
@@ -21,9 +20,8 @@ simulated for the population data.}
 simulating the additional categorical variables. Accepted values are
 \code{"multinom"} (estimation of the conditional probabilities using
 multinomial log-linear models and random draws from the resulting
-distributions), or \code{"distribution"} (random draws from the observed
-conditional distributions of their multivariate realizations) and and
-\code{naivebayes} (classification based on naive bayes approach).}
+distributions) or \code{"distribution"} (random draws from the observed
+conditional distributions of their multivariate realizations).}
 
 \item{limit}{if \code{method} is \code{"multinom"}, this can be used to
 account for structural zeros. If only one additional variable is requested,

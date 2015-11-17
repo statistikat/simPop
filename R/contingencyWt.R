@@ -8,7 +8,6 @@
 #' @name contingencyWt
 #' @aliases contingencyWt contingencyWt.default contingencyWt.matrix
 #' contingencyWt.data.frame
-#' @docType method
 #' @param x for the default method, a vector that can be interpreted as factor.
 #' For the matrix and \code{data.frame} methods, the columns should be
 #' interpretable as factors.

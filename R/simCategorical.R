@@ -1,3 +1,27 @@
+# recodes a factor:
+# NA -> _tmpmiss
+# non-available codes are removed (droplevels)
+# required when estimating a model on a strata and
+# not all levels are present in the response
+cleanFactor <- function(x) {
+  missstr <- "_tmpmiss"
+  if ( !is.factor(x) ) {
+    return(x)
+  }
+  y <- factor(x, exclude=NULL)
+  ll <- levels(y)
+  y <- as.character(y)
+  indna <- is.na(y)
+  if ( any(indna) ) {
+    y[indna] <- missstr
+    levN <- c(na.omit(ll),missstr)
+    y <- factor(y, levels=levN)
+    return(y)
+  } else {
+    return(x)
+  }
+}
+
 generateValues <- function(dataSample, dataPop, params) {
   if ( !nrow(dataSample) ) {
     return(character())
@@ -11,9 +35,12 @@ generateValues <- function(dataSample, dataPop, params) {
   w <- params$w
   formula.cmd <- params$formula.cmd
   eps <- params$eps
-  limit <- params$limit
-  censor <- params$censor
-  levelsResponse <- params$levelsResponse
+  limit <- params$limit[[cur.var]]
+  censor <- params$censor[[cur.var]]
+
+  # temporarily recode response vector
+  dataSample[[cur.var]] <- cleanFactor(dataSample[[cur.var]])
+  levelsResponse <- levels(dataSample[[cur.var]])
 
   indGrid <- split(1:nrow(dataPop), dataPop, drop=TRUE)
   grid <- dataPop[sapply(indGrid, function(i) i[1]), , drop=FALSE]
@@ -56,13 +83,13 @@ generateValues <- function(dataSample, dataPop, params) {
   if ( meth %in% "multinom" ) {
     probs <- predict(mod, newdata=newdata, type="probs")
   }
-  if ( meth %in% "naivebayes" ) {
-    probs <- predict(mod, newdata=newdata, type="raw")
-  }
+  #if ( meth %in% "naivebayes" ) {
+  #  probs <- predict(mod, newdata=newdata, type="raw")
+  #}
   # TODO: fix error if level-sets are not equal!
-  if ( meth %in% "ctree" ) {
-    probs <- do.call("rbind", predict(mod, newdata=newdata, type="prob"))
-  }
+  #if ( meth %in% "ctree" ) {
+  #  probs <- do.call("rbind", predict(mod, newdata=newdata, type="prob"))
+  #}
   # set too small probabilities to exactly 0
   if ( !is.null(eps) ) {
     probs[probs < eps] <- 0
@@ -91,6 +118,7 @@ generateValues <- function(dataSample, dataPop, params) {
     resample <- function(k, n, p) spSample(n[k], p[k,])
   }
   # generate realizations for each combination
+  
   if ( length(exclude) == 0 ) {
     ncomb <- as.integer(sapply(indGrid, length))
     sim <- lapply(1:length(ncomb), resample, ncomb, probs)
@@ -163,9 +191,8 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
 #' simulating the additional categorical variables. Accepted values are
 #' \code{"multinom"} (estimation of the conditional probabilities using
 #' multinomial log-linear models and random draws from the resulting
-#' distributions), or \code{"distribution"} (random draws from the observed
-#' conditional distributions of their multivariate realizations) and and
-#' \code{naivebayes} (classification based on naive bayes approach).
+#' distributions) or \code{"distribution"} (random draws from the observed
+#' conditional distributions of their multivariate realizations).
 #' @param limit if \code{method} is \code{"multinom"}, this can be used to
 #' account for structural zeros. If only one additional variable is requested,
 #' a named list of lists should be supplied. The names of the list components
@@ -231,7 +258,7 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
 #' simPop <- simCategorical(simPop, additional=c("pl030", "pb220a"), method="multinom")
 #' summary(simPop)
 simCategorical <- function(simPopObj, additional,
-  method=c("multinom", "distribution", "naivebayes"),
+  method=c("multinom", "distribution"),
   limit=NULL, censor=NULL, maxit=500, MaxNWts=1500,
   eps=NULL, nr_cpus=NULL, regModel=NULL, seed=1) {
 

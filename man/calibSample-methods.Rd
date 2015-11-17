@@ -82,10 +82,10 @@ identical(weights4, weights4.df)
 Andreas Alfons and Bernhard Meindl
 }
 \references{
-Deville, J.-C. and \enc{SaerndalSaerndal}, C.-E. (1992)
+Deville, J.-C. and Saerndal, C.-E. (1992)
 Calibration estimators in survey sampling. \emph{Journal of the American
 Statistical Association}, \bold{87}(418), 376--382.  Deville, J.-C.,
-\enc{SaerndalSaerndal}, C.-E. and Sautory, O. (1993) Generalized raking
+Saerndal, C.-E. and Sautory, O. (1993) Generalized raking
 procedures in survey sampling. \emph{Journal of the American Statistical
 Association}, \bold{88}(423), 1013--1020.
 }
