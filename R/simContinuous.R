@@ -97,6 +97,13 @@ generateValues_lm <- function(dataSample, dataPop, params) {
   residuals <- params$residuals
   log <- params$log
 
+  ## remove unused factor levels
+  #for ( i in 1:ncol(dataPop)) {
+  #  if (is.factor(dataPop[[i]])) {
+  #    dataPop[[i]] <- factor(dataPop[[i]])
+  #  }
+  #}
+
   # unique combinations in the stratum of the population need to be computed for prediction
   indGrid <- split(1:nrow(dataPop), dataPop, drop=TRUE)
   grid <- dataPop[sapply(indGrid, function(i) i[1]), , drop=FALSE]
@@ -122,6 +129,8 @@ generateValues_lm <- function(dataSample, dataPop, params) {
       # drop new factor levels
       grid[, j] <- factor(as.character(grid[, j]), levels=levels(dataSample[[j]]))
     }
+  } else {
+    exclude <- integer()
   }
   # fit linear model
   mod <- eval(parse(text=command))
@@ -132,8 +141,9 @@ generateValues_lm <- function(dataSample, dataPop, params) {
   # prediction
   # add 0 variable to combinations for use of 'model.matrix'
   newdata <- cbind(grid, 0)
-  names(newdata) <- c(predNames, additional)
+  names(newdata) <- c(predNames, additional[1])
   newdata <- model.matrix(formula, data=newdata)
+  
   if ( length(exclude) == 0 ) {
     pred <- spPredict(mod, newdata)
   } else {
@@ -201,12 +211,14 @@ generateValues_binary <- function(dataSample, dataPop, params) {
       # drop new factor levels
       grid[, j] <- factor(as.character(grid[, j]), levels=levels(dataSample[[j]]))
     }
+  } else {
+    exclude <- integer()
   }
   # add 0 variable to combinations for use of 'model.matrix'
   Xnew <- cbind(grid, 0)
   names(Xnew) <- c(predNames, name)
   Xnew <- model.matrix(params$command, data=Xnew)
-
+  
   # fit logit model
   X <- model.matrix(params$command, data=dataSample)
   y <- dataSample[[name]]
@@ -216,7 +228,15 @@ generateValues_binary <- function(dataSample, dataPop, params) {
   if ( useAux ) {
     indPar <- abs(mod$par) < tol
     mod$par[indPar] <- params$par[indPar]
+
+    # remove non-existing combinations from mod$par
+    # reason: auxiliary model is estimated on total population
+    #ii <- setdiff(names(mod$par), colnames(Xnew))
+    #if ( length(ii) >0 ) {
+    #  mod$par <- mod$par[!names(mod$par)%in%ii]
+    #}
   }
+  
   # predict probabilities
   tmp <- exp(Xnew %*% mod$par)
   # avoid integer overflow
@@ -242,6 +262,22 @@ generateValues_binary <- function(dataSample, dataPop, params) {
   unsplit(sim, dataPop, drop=TRUE)
 }
 
+genVals <- function(dataSample, dataPop, params, typ) {
+  if ( !typ %in% c("multinom","lm","binary") ) {
+    stop("unsupported value for argument 'type' in genVals()\n")
+  }
+  if ( typ=="binary") {
+    generateValues_binary(dataSample, dataPop, params)
+  }
+  if ( typ=="lm") {
+    generateValues_lm(dataSample, dataPop, params)
+  }
+  if ( typ=="multinom" ) {
+    generateValues_multinom(dataSample, dataPop, params)
+  }
+}
+
+
 runModel <- function(dataS, dataP, params, typ) {
   x <- NULL
   strata <- params$strata
@@ -249,91 +285,38 @@ runModel <- function(dataS, dataP, params, typ) {
   indStrata <- params$indStrata
   predNames <- params$predNames
   additional <- c(params$additional, params$name)
-
   if ( pp$parallel ) {
     # windows
     if ( pp$have_win ) {
       cl <- makePSOCKcluster(pp$nr_cores)
       registerDoParallel(cl,cores=pp$nr_cores)
-      if ( typ=="multinom" ) {
-        valuesCat <- foreach(x=levels(dataS[[strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
-          generateValues_multinom(
-            dataSample=dataS[dataS[[strata]] == x,],
-            dataPop=dataP[indStrata[[x]], predNames, with=F], params
-          )
-        }
-      }
-      if ( typ=="binary" ) {
-        valuesCat <- foreach(x=levels(dataS[[strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
-          generateValues_binary(
-            dataSample=dataS[dataS[[strata]] == x,],
-            dataPop=dataP[indStrata[[x]], predNames, with=F], params
-          )
-        }
-      }
-      if ( typ=="lm" ) {
-        valuesCat <- foreach(x=levels(dataS[[strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
-          generateValues_lm(
-            dataSample=dataS[dataS[[strata]] == x,],
-            dataPop=dataP[indStrata[[x]], predNames, with=F], params
-          )
-        }
-      }
+      valuesCat <- foreach(x=levels(dataS[[strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
+        genVals(
+          dataSample=dataS[dataS[[strata]] == x,],
+          dataPop=dataP[indStrata[[x]], predNames, with=F], 
+          params, 
+          typ=typ)
+      }      
       stopCluster(cl)
     }
-
     # linux/mac
     if ( !pp$have_win ) {
-      if ( typ=="multinom" ) {
-        valuesCat <- mclapply(levels(dataS[[strata]]), function(x) {
-          generateValues_multinom(
-            dataSample=dataS[dataS[[strata]] == x,],
-            dataPop=dataP[indStrata[[x]], predNames, with=F], params
-          )
-        },mc.cores=pp$nr_cores)
-      }
-      if ( typ=="binary" ) {
-        valuesCat <- mclapply(levels(dataS[[strata]]), function(x) {
-          generateValues_binary(
-            dataSample=dataS[dataS[[strata]] == x,],
-            dataPop=dataP[indStrata[[x]], predNames, with=F], params
-          )
-        },mc.cores=pp$nr_cores)
-      }
-      if ( typ=="lm" ) {
-        valuesCat <- mclapply(levels(dataS[[strata]]), function(x) {
-          generateValues_lm(
-            dataSample=dataS[dataS[[strata]] == x,],
-            dataPop=dataP[indStrata[[x]], predNames, with=F], params
-          )
-        },mc.cores=pp$nr_cores)
-      }
+      valuesCat <- mclapply(levels(dataS[[strata]]), function(x) {
+        genVals(
+          dataSample=dataS[dataS[[strata]] == x,],
+          dataPop=dataP[indStrata[[x]], predNames, with=F], 
+          params=params,
+          typ=typ)
+      },mc.cores=pp$nr_cores)      
     }
   } else {
-    if ( typ=="multinom" ) {
-      valuesCat <- lapply(levels(dataS[[strata]]), function(x) {
-        generateValues_multinom(
-          dataSample=dataS[dataS[[strata]] == x,c(predNames, additional), with=F],
-          dataPop=dataP[indStrata[[x]], predNames, with=F], params
-        )
-      })
-    }
-    if ( typ=="binary" ) {
-      valuesCat <- lapply(levels(dataS[[strata]]), function(x) {
-        generateValues_binary(
-          dataSample=dataS[dataS[[strata]] == x,],
-          dataPop=dataP[indStrata[[x]], predNames, with=F], params
-        )
-      })
-    }
-    if ( typ=="lm" ) {
-      valuesCat <- lapply(levels(dataS[[strata]]), function(x) {
-        generateValues_lm(
-          dataSample=dataS[dataS[[strata]] == x,],
-          dataPop=dataP[indStrata[[x]], predNames, with=F], params
-        )
-      })
-    }
+    valuesCat <- lapply(levels(dataS[[strata]]), function(x) {
+      genVals(
+        dataSample=dataS[dataS[[strata]] == x,c(predNames, additional), with=F],
+        dataPop=dataP[indStrata[[x]], predNames, with=F], 
+        params=params,
+        typ=typ)
+    })
   }
 
   # check for errors
@@ -347,16 +330,13 @@ runModel <- function(dataS, dataP, params, typ) {
     valuesCat <- factor(unsplit(valuesCat, dataP[[strata]]), levels=levels(response))
   }
   if ( typ=="binary" ) {
-    valuesCat <- unsplit(valuesCat, dataP[, strata, drop=FALSE])
+    valuesCat <- unsplit(valuesCat, dataP[[strata]], drop=FALSE)
   }
   if ( typ=="lm" ) {
     valuesCat <- unlist(valuesCat, dataP[[strata]])
   }
   return(valuesCat)
 }
-
-
-
 
 
 #' Simulate continuous variables of population data
@@ -864,6 +844,11 @@ simContinuous <- function(simPopObj, additional = "netIncome",
       if ( length(tol) != 1 || tol <= 0 ) {
         stop("'tol' must be a single small positive value!\n")
       }
+      #nas <- sum(!complete.cases(dataS))
+      #if ( length(nas) > 0 ) {
+      #  warning("\nwe Hotdeck-imputation of missing values sample data required!\n")
+      #  dataS <- hotdeck(dataS, variable=predNames, domain_var=samp@strata, imp_var=FALSE)
+      #}
       X <- model.matrix(estimationModel, data=dataS)
       y <- dataS[[name]]
       weights <- dataS[[weight]]
@@ -922,6 +907,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
 
     ## trim data (if specified)
     if ( !is.null(alpha) ) {
+      additional <- additional[1]
       additionalS <- dataS[[additional]]
       p <- c(alpha[1], 1-alpha[2])
       bounds <- quantileWt(additionalS, dataS[[weight]], p)
@@ -940,7 +926,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     } else {
       dataSample <- dataS
     }
-
+    
     ## fit linear model
     # formula for linear model
     if ( log ) {
@@ -948,7 +934,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     } else {
       fname <- additional
     }
-    fstring <- paste0(fname, " ~ ", unlist(strsplit(estimationModel,"~"))[2])
+    fstring <- paste0(fname, " ~ ", tail(unlist(strsplit(as.character(estimationModel),"~")),1))
     formula <- as.formula(fstring)
     # auxiliary model for all strata (used in case of empty combinations)
     weights <- dataSample[[weight]]
