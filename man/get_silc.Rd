@@ -11,18 +11,6 @@
 \alias{restructureHHid}
 \title{Utility functions for socio-economic data sets}
 \usage{
-getAge(birth, year, data = NULL)
-
-getGender(gender, labels = c("male", "female"), data = NULL)
-
-getEcoStat(ecoStat, data, levels)
-
-getCitizenship(citizenship, data, owncountry, EU, other)
-
-getHsize(data, hhid)
-
-restructureHHid(data, hhid)
-
 factorNA(x, always = FALSE)
 }
 \arguments{
@@ -43,10 +31,6 @@ factorNA(x, always = FALSE)
 \description{
 Various utility functions mainly used for simulating EU-SILC data
 }
-\section{Functions}{
-\itemize{
-\item \code{getGender}: 
-}}
 \examples{
 birth <- sample(1950:2000, 20)
 getAge(birth, 2013)

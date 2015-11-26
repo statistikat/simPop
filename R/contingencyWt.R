@@ -43,6 +43,7 @@ contingencyWt <- function(x, ...) UseMethod("contingencyWt")
 NULL
 
 #' @rdname contingencyWt
+#' @name contingencyWt.default
 #' @export
 contingencyWt.default <- function(x, y, weights = NULL, ...) {
     tab <- tableWt(data.frame(x, y), weights)
@@ -57,6 +58,7 @@ NULL
 #}
 
 #' @rdname contingencyWt
+#' @name contingencyWt.matrix
 #' @export
 contingencyWt.matrix <- function(x, weights = NULL, ...) {
     contingencyWt(as.data.frame(x), weights=weights, ...)
@@ -64,6 +66,7 @@ contingencyWt.matrix <- function(x, weights = NULL, ...) {
 NULL
 
 #' @rdname contingencyWt
+#' @name contingencyWt.data.frame
 #' @export
 contingencyWt.data.frame <- function(x, weights = NULL, ...) {
     # computes *pairwise* contingency coefficients

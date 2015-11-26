@@ -8,12 +8,6 @@
 \title{Construct a matrix of binary variables for calibration}
 \usage{
 calibVars(x)
-
-\method{calibVars}{default}(x)
-
-\method{calibVars}{matrix}(x)
-
-\method{calibVars}{data.frame}(x)
 }
 \arguments{
 \item{x}{a vector that can be interpreted as factor, or a matrix or

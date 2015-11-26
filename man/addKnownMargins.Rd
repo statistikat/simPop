@@ -3,9 +3,6 @@
 \name{addKnownMargins}
 \alias{addKnownMargins}
 \title{add known margins/totals}
-\usage{
-addKnownMargins(inp, margins)
-}
 \arguments{
 \item{inp}{a \code{simPopObj} containing population and household survey
 data as well as optionally margins in standardized format.}

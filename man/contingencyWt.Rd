@@ -6,15 +6,6 @@
 \alias{contingencyWt.default}
 \alias{contingencyWt.matrix}
 \title{Weighted contingency coefficients}
-\usage{
-contingencyWt(x, ...)
-
-\method{contingencyWt}{default}(x, y, weights = NULL, ...)
-
-\method{contingencyWt}{matrix}(x, weights = NULL, ...)
-
-\method{contingencyWt}{data.frame}(x, weights = NULL, ...)
-}
 \arguments{
 \item{x}{for the default method, a vector that can be interpreted as factor.
 For the matrix and \code{data.frame} methods, the columns should be

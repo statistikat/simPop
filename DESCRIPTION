@@ -24,6 +24,7 @@ Collate:
     'getCat.R'
     'get_silc.R'
     'ipu.r'
+    'loadSilc.R'
     'meanWt.R'
     'printFunctions.R'
     'quantileWt.R'

@@ -12,6 +12,7 @@
 NULL
 
 #' @rdname get_silc
+#' @name getAge
 #' @examples 
 #' birth <- sample(1950:2000, 20)
 #' getAge(birth, 2013)
@@ -30,7 +31,8 @@ getAge <- function(birth, year, data = NULL) {
   year - 1 - birth
 }
 
-#' @describeIn get_silc
+#' @rdname get_silc
+#' @name getGender
 #' @param gender variable including information on gender
 #' @param labels labels of a factor variable
 #' @export
@@ -55,6 +57,7 @@ getGender <- function(gender, labels = c("male","female"), data = NULL) {
 #}
 
 #' @rdname get_silc
+#' @name getEcoStat
 #' @param ecoStat variable holding information on the economic status
 #' @examples 
 #' lev <- c("Employee working full-time", "Employee working part-time", 
@@ -73,6 +76,7 @@ getEcoStat <- function(ecoStat , data , levels) {  ## variable pl030 (economic s
 }
 
 #' @rdname get_silc
+#' @name getCitizenship
 #' @examples 
 #' data(eusilcS)
 #' ## destroy info on pb220a to show afterwards the usage of the function
@@ -106,6 +110,7 @@ getCitizenship <- function(citizenship, data, owncountry, EU, other) {
 
 
 #' @rdname get_silc
+#' @name getHsize
 #' @param hhid name or index of variable holding the information on household ID
 #' @examples 
 #' data(eusilcS)
@@ -122,6 +127,7 @@ getHsize <- function(data, hhid)
 }
 
 #' @rdname get_silc
+#' @name restructureHHid
 #' @examples 
 #' hhid <- c(6,6,3,3,3,2,1,1,8,9,9,9,9,7,7)
 #' hhid
@@ -138,24 +144,36 @@ restructureHHid <- function(data, hhid){
 
 #Function factorNA from package simPop: includes NAs as an extra level in the factor
 #' @rdname get_silc
+#' @name factorNA
 #' @examples 
 #' hhid <- factor(c(6,6,3,3,3,2,1,1,NA,9,9,9,9,7,7))
 #' hhid
 #' factorNA(hhid)
 #' @export
-factorNA <- function(x, always = FALSE) {
+factorNA <- function(x, always = FALSE, newval = NA) {
   always <- isTRUE(always)
-  if(is.factor(x)) {
-    l <- levels(x)
-    if(NA %in% l || !(always || any(is.na(x)))) x
-    else {
-      l <- c(l, NA)
-      factor(x, levels=c(levels(x), NA), exclude=c())
+  if(is.na(newval)){
+    if(is.factor(x)) {
+      l <- levels(x)
+      if(NA %in% l || !(always || any(is.na(x)))) x
+      else {
+        l <- c(l, NA)
+        factor(x, levels=c(levels(x), NA), exclude=c())
+      }
+    } else {
+      if(always) {
+        factor(c(NA, x), exclude=c())[-1] # little trick
+      } else factor(x, exclude=c())
     }
-  } else {
-    if(always) {
-      factor(c(NA, x), exclude=c())[-1] # little trick
-    } else factor(x, exclude=c())
+  } else { # newval is a character
+    if(!is.character(newval)) stop("newval must be NA or a character string")
+    if(is.factor(x)) {
+      l <- levels(x)
+      l <- c(l, newval)
+      x <- as.character(x)
+      x[is.na(x)] <- newval
+      factor(x)
+    }
   }
 }
 

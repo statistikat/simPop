@@ -3,9 +3,6 @@
 \name{getCat}
 \alias{getCat}
 \title{Categorize (semi-)continuous variables}
-\usage{
-getCat(x, breaks, zeros = TRUE, right = FALSE)
-}
 \arguments{
 \item{x}{a numeric vector to be categorized.}
 

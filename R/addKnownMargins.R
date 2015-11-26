@@ -3,8 +3,6 @@
 #' add known margins/totals for a combination of variables for the population
 #' to an object of class \code{\linkS4class{simPopObj}}.
 #' 
-
-#' 
 #' @name addKnownMargins
 #' @param inp a \code{simPopObj} containing population and household survey
 #' data as well as optionally margins in standardized format.

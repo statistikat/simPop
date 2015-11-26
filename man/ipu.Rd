@@ -3,9 +3,6 @@
 \name{ipu}
 \alias{ipu}
 \title{iterative proportional updating}
-\usage{
-ipu(inp, con, hid = NULL, eps = 1e-07, verbose = FALSE)
-}
 \arguments{
 \item{inp}{a \code{data.frame} or \code{data.table} containing household ids
 (optionally), counts for household and/or personal level attributes that

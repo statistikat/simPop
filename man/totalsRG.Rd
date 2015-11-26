@@ -22,6 +22,16 @@ StatCube - statistical data base,
 \description{
 Population characteristics Region times Gender from Austria.
 
+Using \code{\link{samp}} \code{\link{samp<-}} it is possible to extract or
+rather modify variables of the sample data within slot \code{data} in slot
+\code{sample} of the \code{\link{simPopObj-class}}-object. Using
+\code{\link{pop}} \code{\link{pop<-}} it is possible to extract or rather
+modify variables of the synthetic population within in slot \code{data} in
+slot \code{sample} of the \code{\link{simPopObj-class}}-object.
+}
+\details{
+Population totals Region times Gender for Austria 2006
+
 Population characteristics Region times Gender from Austria.
 }
 \examples{

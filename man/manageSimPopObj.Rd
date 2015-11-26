@@ -4,9 +4,6 @@
 \alias{manageSimPopObj}
 \title{get and set variables from population or sample data stored in an object of
 class \code{\linkS4class{simPopObj}}.}
-\usage{
-manageSimPopObj(x, var, sample = FALSE, set = FALSE, values = NULL)
-}
 \arguments{
 \item{x}{an object of class \code{\linkS4class{simPopObj}}.}
 

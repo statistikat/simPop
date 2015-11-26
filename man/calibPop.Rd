@@ -4,11 +4,6 @@
 \name{calibPop}
 \alias{calibPop}
 \title{Calibration of 0/1 weights by Simulated Annealing}
-\usage{
-calibPop(inp, split, temp = 1, eps.factor = 0.05, maxiter = 200,
-  temp.cooldown = 0.9, factor.cooldown = 0.85, min.temp = 10^-3,
-  nr_cpus = NULL, verbose = FALSE)
-}
 \arguments{
 \item{inp}{an object of class \code{\linkS4class{simPopObj}} with slot
 'table' being non-null! (see \code{\link{addKnownMargins}}.}

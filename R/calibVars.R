@@ -22,10 +22,11 @@
 #' aux <- calibVars(eusilcS[, c("db040", "rb090")])
 #' head(aux)
 calibVars <- function(x) UseMethod("calibVars")
-NULL
 
+
+#' @method calibVars default
 #' @rdname calibVars
-#' @export
+#' @name calibVars.default
 calibVars.default <- function(x) {
   if(length(x) == 0) matrix(integer(), 0, 0)
   x <- as.factor(x)
@@ -35,14 +36,16 @@ calibVars.default <- function(x) {
   rownames(res) <- names(x)  # set rownames from original vector
   res    
 }
-NULL
+
 
 #' @rdname calibVars
+#' @name calibVars.matrix
 #' @export
 calibVars.matrix <- function(x) calibVars(as.data.frame(x))
 NULL
 
 #' @rdname calibVars
+#' @name calibVars.data.frame
 #' @export
 calibVars.data.frame <- function(x) {
   res <- lapply(x, calibVars)  # list of matrices for each variable

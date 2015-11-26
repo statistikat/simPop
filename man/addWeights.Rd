@@ -6,9 +6,9 @@
 \alias{addWeights<-,dataObj,list-method}
 \alias{addWeights<-,simPopObj,list-method}
 \title{Methods for function \code{addWeights}}
+\format{\preformatted{ NULL
+}}
 \usage{
-addWeights(object) <- value
-
 \S4method{addWeights}{dataObj,list}(object) <- value
 
 \S4method{addWeights}{simPopObj,list}(object) <- value

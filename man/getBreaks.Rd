@@ -3,10 +3,6 @@
 \name{getBreaks}
 \alias{getBreaks}
 \title{Compute break points for categorizing (semi-)continuous variables}
-\usage{
-getBreaks(x, weights = NULL, zeros = TRUE, lower = NULL, upper = NULL,
-  equidist = TRUE, probs = NULL)
-}
 \arguments{
 \item{x}{a numeric vector to be categorized.}
 
