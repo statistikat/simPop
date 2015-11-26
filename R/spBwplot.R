@@ -1,12 +1,12 @@
 #' Weighted box plots
-#' 
+#'
 #' Produce box-and-whisker plots of continuous or semi-continuous variables,
 #' possibly broken down according to conditioning variables and taking into
 #' account sample weights.
-#' 
+#'
 #' Missing values are ignored for producing box plots and weights are directly
 #' extracted from the input object \code{inp}.
-#' 
+#'
 #' @name spBwplot
 #' @aliases spBwplot panelSpBwplot getBwplotStats prepBwplotStats.data.frame prepBwplotStats.default
 #' @param inp an object of class \code{\linkS4class{simPopObj}} containing
@@ -40,48 +40,48 @@
 #' @keywords hplot
 #' @export
 #' @examples
-#' 
+#'
 #' ## these take some time and are not run automatically
 #' ## copy & paste to the R command line
-#' 
+#'
 #' set.seed(1234)  # for reproducibility
 #' data(eusilcS)   # load sample data
-#' inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", 
+#' inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize",
 #'   strata="db040", weight="db090")
 #' simPop <- simStructure(data=inp, method="direct",
 #'   basicHHvars=c("age", "rb090", "hsize", "pl030", "pb220a"))
-#' 
+#'
 #' # multinomial model with random draws
-#' eusilcM <- simContinuous(simPop, additional="netIncome", 
+#' eusilcM <- simContinuous(simPop, additional="netIncome",
 #'   regModel  = ~rb090+hsize+pl030+pb220a+hsize,
-#'   upper=200000, equidist=FALSE)
+#'   upper=200000, equidist=FALSE, nr_cpus=1)
 #' class(eusilcM)
-#' 
+#'
 #' # plot results
 #' spBwplot(eusilcM, x="netIncome", cond=NULL)
 #' spBwplot(eusilcM, x="netIncome", cond="rb090", layout=c(1,2))
-#' 
+#'
 spBwplot <- function(inp, x, cond = NULL, horizontal = TRUE,
-                     coef = 1.5, zeros = TRUE, minRatio = NULL, 
+                     coef = 1.5, zeros = TRUE, minRatio = NULL,
                      do.out = FALSE, ...) {
-  
+
   ## initializations
   if ( !class(inp) == "simPopObj" ) {
     stop("input argument 'inp' must be of class 'simPopObj'!\n")
   }
-  
+
   weights.pop <- inp@pop@weight
   weights.samp <- inp@sample@weight
   dataS <- inp@sample@data
   dataP <- inp@pop@data
-  
+
   if ( !is.character(x) || length(x) == 0 ) {
     stop("'x' must be a character vector of positive length!\n")
   }
   if ( !(all(x %in% colnames(dataP)) & (all(x %in% colnames(dataS)))) ) {
     stop("The variable names specified in argument 'x' must be available both in the population and the sample!\n")
   }
-  
+
   if ( !is.null(cond) && !is.character(cond) ) {
     stop("'cond' must be a character vector or NULL!\n")
     if ( length(cond) != 1 ) {
@@ -91,12 +91,12 @@ spBwplot <- function(inp, x, cond = NULL, horizontal = TRUE,
   if ( !(all(cond %in% colnames(dataP)) & (all(cond %in% colnames(dataS)))) ) {
     stop("The variable names specified in argument 'cond' must be available both in the population and the sample!")
   }
-  
+
   horizontal <- isTRUE(horizontal)
   zeros <- isTRUE(zeros)
   do.out <- isTRUE(do.out)
   lab <- c("Sample", "Population")
-  
+
   ## compute statistics for boxplots and construct objects for 'bwplot'
   # from sample
   tmp <- getBwplotStats(x, weights.samp, cond, dataS, coef=coef, zeros=zeros, do.out=do.out, name=lab[1])
@@ -112,7 +112,7 @@ spBwplot <- function(inp, x, cond = NULL, horizontal = TRUE,
     nzero <- rbind(nzero, tmp$nzero)
   }
   out <- c(out, tmp$out)
-  
+
   ## construct formula for 'bwplot'
   form <- ifelse(horizontal, ".name~.x", ".x~.name")  # basic formula
   if ( length(x) > 1 ) {

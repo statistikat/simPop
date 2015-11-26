@@ -231,7 +231,7 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
 #' inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
 #' ## in the following, nr_cpus are selected automatically
 #' simPop <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090"))
-#' simPop <- simCategorical(simPop, additional=c("pl030", "pb220a"), method="multinom")
+#' simPop <- simCategorical(simPop, additional=c("pl030", "pb220a"), method="multinom", nr_cpus=1)
 #' summary(simPop)
 simCategorical <- function(simPopObj, additional,
   method=c("multinom", "distribution"),

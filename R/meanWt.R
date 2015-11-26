@@ -8,31 +8,50 @@
 #' @title Weighted mean, variance, covariance matrix and correlation matrix
 #' @description Compute mean, variance, covariance matrix and correlation matrix, taking
 #' into account sample weights.
-#'
-#' \code{meanWt} is a simple wrapper that calls \code{mean(x, na.rm=na.rm)} if
+#' \itemize{
+#' \item \code{meanWt}: a simple wrapper that calls \code{mean(x, na.rm=na.rm)} if
 #' \code{weights} is missing and \code{weighted.mean(x, w=weights,
-#' na.rm=na.rm)} otherwise.
-#'
-#' \code{varWt} calls \code{var(x, na.rm=na.rm)} if \code{weights} is missing.
-#'
-#' \code{covWt} and \code{corWt} always remove missing values pairwise and call
+#' na.rm=na.rm)} otherwise. Implemented methods for this generic are:
+#' \itemize{
+#' \item \code{meanWt.default(x, weights, na.rm=TRUE, ...)}
+#' \item \code{meanWt.dataObj(x, vars, na.rm=TRUE, ...)}
+#' }
+#' \item \code{varWt}: calls \code{var(x, na.rm=na.rm)} if \code{weights} is missing.
+#' Implemented methods for this generic are:
+#' \itemize{
+#' \item \code{varWt.default(x, weights, na.rm=TRUE, ...)}
+#' \item \code{varWt.dataObj(x, vars, na.rm=TRUE, ...)}
+#' }
+#' \item \code{covWt} and \code{covWt}: always remove missing values pairwise and call
 #' \code{cov} and \code{cor}, respectively, if \code{weights} is missing.
+#' Implemented methods for these generics are:
+#' \itemize{
+#' \item \code{covWt.default(x, y, weights, ...)}
+#' \item \code{covWt.matrix(x, weights, ...)}
+#' \item \code{covWt.data.frame(x, weights, ...) }
+#' \item \code{covWt.dataObj(x, vars, ...)}
+#' \item \code{corWt.default(x, y, weights, ...)}
+#' \item \code{corWt.matrix(x, weights, ...)}
+#' \item \code{corWt.data.frame(x, weights, ...)}
+#' \item \code{corWt.dataObj(x, vars, ...)}
+#' }
+#' }
+#' The additional parameters are now described:
+#' \itemize{
+#' \item y: a numeric vector.  If missing, this defaults to \code{x}.
+#' \item vars: a character vector of variable names that should be used for the
+#' calculation.
+#' \item na.rm: a logical indicating whether any \code{NA} or \code{NaN} values
+#' should be removed from \code{x} before computation.  Note that the default
+#' is \code{TRUE}.
+#' \item weights: an optional numeric vector containing sample weights.
+#' }
 #'
-#' \code{meanWt}, \code{varWt}, \code{covWt} and \code{corWt} all make use of
-#' slot \code{weights} of the input object if the \code{dataObj}-method is
-#' used.
 #' @param x for \code{meanWt} and \code{varWt}, a numeric vector or an object
 #' of class \code{\linkS4class{dataObj}}. For \code{covWt} and \code{corWt}, a
 #' numeric vector, matrix, \code{data.frame} or \code{\linkS4class{dataObj}}.
 #' In case of a \code{\linkS4class{dataObj}}, weights are automatically used
 #' from the S4-object itself.
-#' @param y a numeric vector.  If missing, this defaults to \code{x}.
-#' @param vars a character vector of variable names that should be used for the
-#' calculation.
-#' @param weights an optional numeric vector containing sample weights.
-#' @param na.rm a logical indicating whether any \code{NA} or \code{NaN} values
-#' should be removed from \code{x} before computation.  Note that the default
-#' is \code{TRUE}.
 #' @param \dots for the generic functions \code{covWt} and \code{corWt},
 #' additional arguments to be passed to methods.  Additional arguments not
 #' included in the definition of the methods are ignored.
@@ -50,6 +69,9 @@
 #' \code{\link[stats:cor]{var}}, \code{\link[stats:cor]{cov}},
 #' \code{\link[stats:cor]{cor}}
 #' @keywords univar multivariate array
+#' @note \code{meanWt}, \code{varWt}, \code{covWt} and \code{corWt} all make use of
+#' slot \code{weights} of the input object if the \code{dataObj}-method is
+#' used.
 NULL
 
 #' @rdname weighted_estimators
@@ -67,7 +89,6 @@ NULL
 #' @export
 meanWt <- function(x, ...) UseMethod("meanWt")
 
-#' @rdname weighted_estimators
 #' @export
 meanWt.default <- function(x, weights, na.rm=TRUE, ...) {
   na.rm <- isTRUE(na.rm)
@@ -75,7 +96,6 @@ meanWt.default <- function(x, weights, na.rm=TRUE, ...) {
   else weighted.mean(x, w=weights, na.rm=na.rm)
 }
 
-#' @rdname weighted_estimators
 #' @export
 meanWt.dataObj <- function(x, vars, na.rm=TRUE, ...) {
   dat <- x@data
@@ -103,8 +123,6 @@ meanWt.dataObj <- function(x, vars, na.rm=TRUE, ...) {
 #' @export
 varWt <- function(x, ...) UseMethod("varWt")
 
-
-#' @rdname weighted_estimators
 #' @export
 varWt.default <- function(x, weights, na.rm=TRUE, ...) {
   na.rm <- isTRUE(na.rm)
@@ -125,8 +143,6 @@ varWt.default <- function(x, weights, na.rm=TRUE, ...) {
   }
 }
 
-
-#' @rdname weighted_estimators
 #' @export
 varWt.dataObj <- function(x, vars, na.rm=TRUE, ...) {
   dat <- x@data
@@ -157,7 +173,6 @@ covWt <- function(x, ...) UseMethod("covWt")
 
 
 ## default method
-#' @rdname weighted_estimators
 #' @export
 covWt.default <- function(x, y, weights, ...) {
   if(missing(y)) y <- x
@@ -180,7 +195,6 @@ covWt.default <- function(x, y, weights, ...) {
 
 
 ### method for matrices
-#' @rdname weighted_estimators
 #' @export
 covWt.matrix <- function(x, weights, ...) {
   if(missing(weights)) cov(x, use = "pairwise.complete.obs")
@@ -196,12 +210,10 @@ covWt.matrix <- function(x, weights, ...) {
 
 
 ### method for data.frames
-#' @rdname weighted_estimators
 #' @export
 covWt.data.frame <- function(x, weights, ...) covWt(as.matrix(x), weights)
 
 
-#' @rdname weighted_estimators
 #' @export
 covWt.dataObj <- function(x, vars, ...) {
   dat <- x@data
@@ -228,10 +240,8 @@ covWt.dataObj <- function(x, vars, ...) {
 #' @rdname weighted_estimators
 #' @export
 corWt <- function(x, ...) UseMethod("corWt")
-NULL
 
 ### default method
-#' @rdname weighted_estimators
 #' @export
 corWt.default <- function(x, y, weights, ...) {
   if(missing(y)) y <- x
@@ -244,7 +254,6 @@ corWt.default <- function(x, y, weights, ...) {
 
 
 #### method for matrices
-#' @rdname weighted_estimators
 #' @export
 corWt.matrix <- function(x, weights, ...) {
   if(missing(weights)) cor(x, use = "pairwise.complete.obs")
@@ -261,13 +270,11 @@ corWt.matrix <- function(x, weights, ...) {
 
 
 ### method for data.frames
-#' @rdname weighted_estimators
 #' @export
 corWt.data.frame <- function(x, weights, ...) corWt(as.matrix(x), weights)
 
 
 ### method for objects of class "dataObj"
-#' @rdname weighted_estimators
 #' @export
 corWt.dataObj <- function(x, vars, ...) {
   dat <- x@data
@@ -291,8 +298,6 @@ corWt.dataObj <- function(x, vars, ...) {
 ### weighted cross product
 ### designed for internal use, hence no error handling
 ### TODO: more efficient solution
-#' @rdname weighted_estimators
-#' @export
 crossprodWt <- function(x, weights) {
   ci <- 1:ncol(x)
   sapply(ci, function(j) sapply(ci, function(i) {
@@ -303,7 +308,3 @@ crossprodWt <- function(x, weights) {
     sum(xi*xj*w) / (sum(w)-1)
   }))
 }
-
-
-
-

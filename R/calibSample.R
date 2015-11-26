@@ -1,16 +1,15 @@
 #' Calibrate sample weights
-#' 
+#'
 #' Calibrate sample weights according to known marginal population totals.
 #' Based on initial sample weights, the so-called \emph{g}-weights are computed
 #' by generalized raking procedures.
-#' 
+#'
 #' The methods return a list containing both the \emph{g}-weights (slot
 #' \code{g_weights}) as well as the final weights (slot \code{final_weights})
 #' (initial sampling weights adjusted by the \emph{g}-weights.
-#' 
-#' @name calibSample-methods
-#' @aliases calibSample calibSample-methods
-#' calibSample,df_or_dataObj_or_simPopObj,dataFrame_or_Table-method
+#'
+#' @name calibSample
+#' @aliases calibSample,df_or_dataObj_or_simPopObj,dataFrame_or_Table-method
 #' @docType methods
 #' @note This is a faster implementation of parts of
 #' \code{\link[sampling]{calib}} from package \code{sampling}. Note that the
@@ -38,43 +37,40 @@
 #' Association}, \bold{88}(423), 1013--1020.
 #' @keywords survey methods
 #' @export calibSample
-#' @exportMethod sampleObj
-#' @exportMethod sampleObj<-
-#' @exportMethod sampleData
 #' @examples
 #' data(eusilcS)
 #' eusilcS$agecut <- cut(eusilcS$age, 7)
 #' inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
-#' 
+#'
 #' ## for simplicity, we are using population data directly from the sample, but you get the idea
 #' totals1 <- tableWt(eusilcS[, c("agecut","rb090")], weights=eusilcS$rb050)
 #' totals2 <- tableWt(eusilcS[, c("rb090","agecut")], weights=eusilcS$rb050)
 #' totals3 <- tableWt(eusilcS[, c("rb090","agecut","db040")], weights=eusilcS$rb050)
 #' totals4 <- tableWt(eusilcS[, c("agecut","db040","rb090")], weights=eusilcS$rb050)
-#' 
+#'
 #' weights1 <- calibSample(inp, totals1)
 #' totals1.df <- as.data.frame(totals1)
 #' weights1.df <- calibSample(inp, totals1.df)
 #' identical(weights1, weights1.df)
-#' 
+#'
 #' # we can also use a data.frame and an optional weight vector as input
 #' df <- as.data.frame(inp@@data)
 #' w <- inp@@data[[inp@@weight]]
 #' weights1.x <- calibSample(df, totals1.df, w=inp@@data[[inp@@weight]])
 #' identical(weights1, weights1.x)
-#' 
+#'
 #' weights2 <- calibSample(inp, totals2)
 #' totals2.df <- as.data.frame(totals2)
 #' weights2.df <- calibSample(inp, totals2.df)
 #' identical(weights2, weights2.df)
-#' 
+#'
 #' \dontrun{
 #' ## approx 10 seconds computation time ...
 #' weights3 <- calibSample(inp, totals3)
 #' totals3.df <- as.data.frame(totals3)
 #' weights3.df <- calibSample(inp, totals3.df)
 #' identical(weights3, weights3.df)
-#' 
+#'
 #' ## approx 10 seconds computation time ...
 #' weights4 <- calibSample(inp, totals4)
 #' totals4.df <- as.data.frame(totals4)
@@ -89,6 +85,7 @@ setGeneric("calibSample", function(inp, totals, ...) {
   standardGeneric("calibSample")
 })
 
+#' @export
 setMethod("calibSample", c(inp="df_or_dataObj_or_simPopObj", totals="dataFrame_or_Table"), function(inp, totals, ...) {
   if ( class(inp) == "data.frame" ) {
     samp <- data.table(inp)

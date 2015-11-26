@@ -13,7 +13,7 @@ NULL
 
 #' @rdname get_silc
 #' @name getAge
-#' @examples 
+#' @examples
 #' birth <- sample(1950:2000, 20)
 #' getAge(birth, 2013)
 #' @export
@@ -37,7 +37,7 @@ getAge <- function(birth, year, data = NULL) {
 #' @param labels labels of a factor variable
 #' @export
 #' @keywords internal
-#' @examples 
+#' @examples
 #' data(eusilcS)
 #' head(getGender("rb090", labels = c("ma","fe"), data=eusilcS))
 getGender <- function(gender, labels = c("male","female"), data = NULL) {
@@ -59,8 +59,8 @@ getGender <- function(gender, labels = c("male","female"), data = NULL) {
 #' @rdname get_silc
 #' @name getEcoStat
 #' @param ecoStat variable holding information on the economic status
-#' @examples 
-#' lev <- c("Employee working full-time", "Employee working part-time", 
+#' @examples
+#' lev <- c("Employee working full-time", "Employee working part-time",
 #'          "Self-employed working full-time", "Self-employed working part-time",
 #'          "Unemployed", "Pupil, student, further training, unpaid work experience",
 #'          "In retirement", "Permanently disabled", "In compulsory military community or service",
@@ -77,7 +77,7 @@ getEcoStat <- function(ecoStat , data , levels) {  ## variable pl030 (economic s
 
 #' @rdname get_silc
 #' @name getCitizenship
-#' @examples 
+#' @examples
 #' data(eusilcS)
 #' ## destroy info on pb220a to show afterwards the usage of the function
 #' owncountry <- "AT"
@@ -87,8 +87,8 @@ getEcoStat <- function(ecoStat , data , levels) {  ## variable pl030 (economic s
 #'            "OAF","OAS","OCE","OEU","OT","OTH","TR","USA","WAF")
 #' eusilcS$fakepb220a <-  factor(sample(c(owncountry, EU, other), nrow(eusilcS), replace = TRUE))
 #' table(eusilcS$fakepb220a)
-#' eusilcS$fakepb220a <- getCitizenship(citizenship = "fakepb220a", 
-#'                                   data=eusilcS, owncountry=owncountry, 
+#' eusilcS$fakepb220a <- getCitizenship(citizenship = "fakepb220a",
+#'                                   data=eusilcS, owncountry=owncountry,
 #'                                   EU=EU, other=other)
 #' table(eusilcS$fakepb220a)
 #' @export
@@ -112,7 +112,7 @@ getCitizenship <- function(citizenship, data, owncountry, EU, other) {
 #' @rdname get_silc
 #' @name getHsize
 #' @param hhid name or index of variable holding the information on household ID
-#' @examples 
+#' @examples
 #' data(eusilcS)
 #' hsize <- getHsize(data=eusilcS)
 #' table(hsize)
@@ -128,7 +128,7 @@ getHsize <- function(data, hhid)
 
 #' @rdname get_silc
 #' @name restructureHHid
-#' @examples 
+#' @examples
 #' hhid <- c(6,6,3,3,3,2,1,1,8,9,9,9,9,7,7)
 #' hhid
 #' df <- data.frame("hhid"=hhid)
@@ -145,7 +145,7 @@ restructureHHid <- function(data, hhid){
 #Function factorNA from package simPop: includes NAs as an extra level in the factor
 #' @rdname get_silc
 #' @name factorNA
-#' @examples 
+#' @examples
 #' hhid <- factor(c(6,6,3,3,3,2,1,1,NA,9,9,9,9,7,7))
 #' hhid
 #' factorNA(hhid)

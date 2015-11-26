@@ -1,8 +1,8 @@
 #' Population totals Region times Gender for Austria 2006
-#' 
+#'
 #' Population characteristics Region times Gender from Austria.
-#' 
-#' 
+#'
+#'
 #' @name totalsRG
 #' @aliases totalsRG totalsRGtab
 #' @docType data
@@ -17,25 +17,25 @@
 #' \url{http://www.statistik.at/web_de/services/datenbank_superstar/}
 #' @keywords datasets
 #' @examples
-#' 
+#'
 #' data(totalsRG)
 #' totalsRG
 #' data(totalsRGtab)
 #' totalsRGtab
-#' 
+#'
 NULL
 
 
 #' Synthetic EU-SILC data
-#' 
+#'
 #' This data set is synthetically generated from real Austrian EU-SILC
 #' (European Union Statistics on Income and Living Conditions) data.
-#' 
+#'
 #' The data set is used as population data in some of the examples in package
 #' \code{simFrame}.  Note that it is included for illustrative purposes only.
 #' It consists of 25 000 households, hence it does not represent the true
 #' population sizes of Austria and its regions.
-#' 
+#'
 #' Only a few of the large number of variables in the original survey are
 #' included in this example data set.  Some variable names are different from
 #' the standardized names used by the statistical agencies, as the latter are
@@ -46,9 +46,9 @@ NULL
 #' were not included in the the generation of this synthetic data set. Thus the
 #' equivalized household income is computed from the available income
 #' components.
-#' 
+#'
 #' @name eusilcP
-#' @aliases eusilcP 
+#' @aliases eusilcP
 #' @docType data
 #' @format A \code{data.frame} with 58 654 observations on the following 28
 #' variables: \describe{ \item{hid}{integer; the household ID.}
@@ -98,10 +98,10 @@ NULL
 #' 2006.  The original sample was provided by Statistics Austria.
 #' @keywords datasets
 #' @examples
-#' 
+#'
 #' data(eusilcP)
 #' summary(eusilcP)
-#' 
+#'
 NULL
 
 
@@ -109,24 +109,24 @@ NULL
 
 
 #' Synthetic EU-SILC survey data
-#' 
+#'
 #' This data set is synthetically generated from real Austrian EU-SILC
 #' (European Union Statistics on Income and Living Conditions) data.
-#' 
+#'
 #' The data set consists of 4641 households and is used as sample data in some
 #' of the examples in package \code{simPopulation}.  Note that it is included
 #' for illustrative purposes only.  The sample weights do not reflect the true
 #' population sizes of Austria and its regions.  The resulting population data
 #' is about 100 times smaller than the real population size to save computation
 #' time.
-#' 
+#'
 #' Only a few of the large number of variables in the original survey are
 #' included in this example data set.  The variable names are rather cryptic
 #' codes, but these are the standardized names used by the statistical
 #' agencies.  Furthermore, the variables \code{hsize}, \code{age} and
 #' \code{netIncome} are not included in the standardized format of EU-SILC
 #' data, but have been derived from other variables for convenience.
-#' 
+#'
 #' @name eusilcS
 #' @docType data
 #' @format A data frame with 11725 observations on the following 18 variables.
@@ -163,44 +163,44 @@ NULL
 #' 2006.  The original sample was provided by Statistics Austria.
 #' @keywords datasets
 #' @examples
-#' 
+#'
 #' data(eusilcS)
 #' summary(eusilcS)
-#' 
+#'
 NULL
 
 
 #' Synthetic EU-SILC 2013 survey data
-#' 
+#'
 #' This data set is synthetically generated from real Austrian EU-SILC
 #' (European Union Statistics on Income and Living Conditions) data 2013.
-#' 
+#'
 #' The data set consists of 5977 households and is used as sample data in some
 #' of the examples in package \code{simPop}.  Note that it is included
 #' for illustrative purposes only.  The sample weights do not reflect the true
-#' population sizes of Austria and its regions.  
-#' 
+#' population sizes of Austria and its regions.
+#'
 #' 62 variables of the original survey are
 #' simulated for this example data set.  The variable names are rather cryptic
 #' codes, but these are the standardized names used by the statistical
 #' agencies.  Furthermore, the variables \code{hsize}, \code{age} and
 #' \code{netIncome} are not included in the standardized format of EU-SILC
 #' data, but have been derived from other variables for convenience.
-#' 
+#'
 #' @name eusilc13puf
 #' @docType data
 #' @format A data frame with 13513 observations on the following 62 variables.
-#' \describe{ 
+#' \describe{
 #' \item{db030}{integer; the household ID.}
 #' \item{hsize}{integer; the number of persons in the household.}
 #' \item{db040}{factor; the federal state in which the household is
 #' located (levels \code{Burgenland}, \code{Carinthia}, \code{Lower Austria},
 #' \code{Salzburg}, \code{Styria}, \code{Tyrol}, \code{Upper Austria},
-#' \code{Vienna} and \code{Vorarlberg}).} 
+#' \code{Vienna} and \code{Vorarlberg}).}
 #' \item{age}{integer; the
-#' person's age.} 
+#' person's age.}
 #' \item{rb090}{factor; the person's gender (levels
-#' \code{male} and \code{female}).} 
+#' \code{male} and \code{female}).}
 #' \item{pid}{personal ID}
 #' \item{weight}{sampling weights}
 #' \item{pl031}{factor; the person's
@@ -210,10 +210,62 @@ NULL
 #' service, \code{5} = in retirement or early retirement or has given up
 #' business, \code{6} = permanently disabled or/and unfit to work or other
 #' inactive person, \code{7} = fulfilling domestic tasks and care
-#' responsibilities).} 
+#' responsibilities).}
 #' \item{pb220a}{factor; the person's citizenship
 #' (levels \code{AT}, \code{EU} and \code{Other}).}
-#' \item{...}{see Eurostat's code book for further variables}
+#' \item{pb190}{for details, see Eurostat's code book}
+#' \item{pe040}{for details, see Eurostat's code book}
+#' \item{pl111}{for details, see Eurostat's code book}
+#' \item{pgrossIncomeCat}{for details, see Eurostat's code book}
+#' \item{pgrossIncome}{for details, see Eurostat's code book}
+#' \item{hgrossIncomeCat}{for details, see Eurostat's code book}
+#' \item{hgrossIncome}{for details, see Eurostat's code book}
+#' \item{hgrossminusCat}{for details, see Eurostat's code book}
+#' \item{hgrossminus}{for details, see Eurostat's code book}
+#' \item{py010g}{for details, see Eurostat's code book}
+#' \item{py021g}{for details, see Eurostat's code book}
+#' \item{py050g}{for details, see Eurostat's code book}
+#' \item{py080g}{for details, see Eurostat's code book}
+#' \item{py090g}{for details, see Eurostat's code book}
+#' \item{py100g}{for details, see Eurostat's code book}
+#' \item{py110g}{for details, see Eurostat's code book}
+#' \item{py120g}{for details, see Eurostat's code book}
+#' \item{py130g}{for details, see Eurostat's code book}
+#' \item{py140g}{for details, see Eurostat's code book}
+#' \item{hy040g}{for details, see Eurostat's code book}
+#' \item{hy050g}{for details, see Eurostat's code book}
+#' \item{hy060g}{for details, see Eurostat's code book}
+#' \item{hy070g}{for details, see Eurostat's code book}
+#' \item{hy080g}{for details, see Eurostat's code book}
+#' \item{hy090g}{for details, see Eurostat's code book}
+#' \item{hy100g}{for details, see Eurostat's code book}
+#' \item{hy110g}{for details, see Eurostat's code book}
+#' \item{hy120g}{for details, see Eurostat's code book}
+#' \item{hy130g}{for details, see Eurostat's code book}
+#' \item{hy140g}{for details, see Eurostat's code book}
+#' \item{rb250}{for details, see Eurostat's code book}
+#' \item{p119000}{for details, see Eurostat's code book}
+#' \item{p038003f}{for details, see Eurostat's code book}
+#' \item{p118000i}{for details, see Eurostat's code book}
+#' \item{aktivi}{for details, see Eurostat's code book}
+#' \item{erwintensneu}{for details, see Eurostat's code book}
+#' \item{rb050}{for details, see Eurostat's code book}
+#' \item{pb040}{for details, see Eurostat's code book}
+#' \item{hb030}{for details, see Eurostat's code book}
+#' \item{px030}{for details, see Eurostat's code book}
+#' \item{rx030}{for details, see Eurostat's code book}
+#' \item{pb030}{for details, see Eurostat's code book}
+#' \item{rb030}{for details, see Eurostat's code book}
+#' \item{hx040}{for details, see Eurostat's code book}
+#' \item{pb150}{for details, see Eurostat's code book}
+#' \item{rx020}{for details, see Eurostat's code book}
+#' \item{px020}{for details, see Eurostat's code book}
+#' \item{hx050}{for details, see Eurostat's code book}
+#' \item{eqInc}{for details, see Eurostat's code book}
+#' \item{hy010}{for details, see Eurostat's code book}
+#' \item{hy020}{for details, see Eurostat's code book}
+#' \item{hy022}{for details, see Eurostat's code book}
+#' \item{hy023}{for details, see Eurostat's code book}
 #' }
 #' @references Eurostat (2013) Description of target variables: Cross-sectional
 #' and longitudinal.
@@ -228,22 +280,22 @@ NULL
 
 
 #' Synthetic GLSS survey data
-#' 
+#'
 #' This data set is synthetically generated from real GLSS (Ghana Living
 #' Standards Survey) data.
-#' 
+#'
 #' The data set consists of 8700 households and is used as sample data in some
 #' of the examples in package \code{simPopulation}.  Note that it is included
 #' for illustrative purposes only.  The sample weights do not reflect the true
 #' population sizes of Ghana and its regions.  The resulting population data is
 #' about 100 times smaller than the real population size to save computation
 #' time.
-#' 
+#'
 #' Only some of the variables in the original survey are included in this
 #' example data set.  Furthermore, categories are aggregated for certain
 #' variables due to the large number of possible outcomes in the original
 #' survey data.
-#' 
+#'
 #' @name ghanaS
 #' @docType data
 #' @format A data frame with 36970 observations on the following 14 variables.
@@ -291,10 +343,10 @@ NULL
 #' original sample was provided by Ghana Statistical Service.
 #' @keywords datasets
 #' @examples
-#' 
+#'
 #' data(ghanaS)
 #' summary(ghanaS)
-#' 
+#'
 NULL
 
 
@@ -303,22 +355,22 @@ NULL
 
 #' Extract and modify variables from population or sample data stored in an
 #' object of class \code{\link{simPopObj-class}}.
-#' 
+#'
 #' Using \code{\link{samp}} \code{\link{samp<-}} it is possible to extract or
 #' rather modify variables of the sample data within slot \code{data} in slot
 #' \code{sample} of the \code{\link{simPopObj-class}}-object. Using
 #' \code{\link{pop}} \code{\link{pop<-}} it is possible to extract or rather
 #' modify variables of the synthetic population within in slot \code{data} in
 #' slot \code{sample} of the \code{\link{simPopObj-class}}-object.
-#' 
-#' 
+#'
+#'
 
 
 #' Population totals Region times Gender for Austria 2006
-#' 
+#'
 #' Population characteristics Region times Gender from Austria.
-#' 
-#' 
+#'
+#'
 #' @name totalsRG
 #' @aliases totalsRG totalsRGtab
 #' @docType data
@@ -333,10 +385,10 @@ NULL
 #' \url{http://www.statistik.at/web_de/services/datenbank_superstar/}
 #' @keywords datasets
 #' @examples
-#' 
+#'
 #' data(totalsRG)
 #' totalsRG
 #' data(totalsRGtab)
 #' totalsRGtab
-#' 
+#'
 NULL

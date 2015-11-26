@@ -1,8 +1,8 @@
 #' add known margins/totals
-#' 
+#'
 #' add known margins/totals for a combination of variables for the population
 #' to an object of class \code{\linkS4class{simPopObj}}.
-#' 
+#'
 #' @name addKnownMargins
 #' @param inp a \code{simPopObj} containing population and household survey
 #' data as well as optionally margins in standardized format.
@@ -14,7 +14,7 @@
 #' variables that must exist in the population (stored in slot 'pop' of input
 #' object 'inp') and updates slot 'table' of the input object. This slot
 #' finally contains the known totals.
-#' 
+#'
 #' households are drawn from the data and new ID's are generated for the new
 #' households.
 #' @return an object of class \code{\linkS4class{simPopObj}} with updated slot
@@ -27,8 +27,8 @@
 #' data(eusilcP)
 #' inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
 #' inp <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090"))
-#' inp <- simCategorical(inp, additional=c("pl030", "pb220a"), method="multinom")
-#' 
+#' inp <- simCategorical(inp, additional=c("pl030", "pb220a"), method="multinom",nr_cpus=1)
+#'
 #' margins <- as.data.frame(
 #'   xtabs(rep(1, nrow(eusilcP)) ~ eusilcP$region + eusilcP$gender + eusilcP$citizenship))
 #' colnames(margins) <- c("db040", "rb090", "pb220a", "freq")
@@ -77,7 +77,7 @@ addKnownMargins <- function(inp, margins) {
   frame <- merge(frame, margins, all.x=TRUE)
   frame <- frame[,lapply(.SD, as.character)]
   frame$N <- as.numeric(frame$N)
-    
+
   ind <- which(is.na(frame$N))
   if ( length(ind) > 0 ) {
     frame$N[ind] <- 0

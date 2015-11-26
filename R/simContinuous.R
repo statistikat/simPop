@@ -533,7 +533,7 @@ runModel <- function(dataS, dataP, params, typ) {
 #' # multinomial model with random draws
 #' eusilcM <- simContinuous(simPop, additional="netIncome",
 #'               regModel = regModel,
-#'               upper=200000, equidist=FALSE)
+#'               upper=200000, equidist=FALSE, nr_cpus=1)
 #' class(eusilcM)
 #'
 #' \dontrun{

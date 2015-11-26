@@ -3,21 +3,11 @@
 #' allows to modify sampling weights of an \code{\linkS4class{dataObj}} or
 #' \code{\linkS4class{simPopObj}}-object. As input the output of
 #' \code{\link{calibSample}} must be used.
-#'
-#' @name addWeights
-#' @docType methods
-#' @section Methods: \describe{ 
-#' \item{list(signature(object="dataObj", value="list"))}{ \code{addWeight(inp) <- x} replaces the variable in slot
-#' "data" containing sampling weights (specified by slot "weight" of input
-#' \code{inp} with \code{x}. \code{x} must be a list that was computed using
-#' \code{\link{calibWeights}}. } 
-#' \item{list(signature(object="simPopObj", value="list"))}{ \code{addWeight(inp) <- x} updates slot "sample" of the
-#' provided object of class \code{\linkS4class{simPopObj}}. It replaces the
-#' variable in slot "data" that contains sampling weights (specified by slot
-#' "weight") of this slot with \code{x}. \code{x} must be a list that was
-#' computed using \code{\link{calibWeights}}. }}
-#' @keywords methods
-#' @export 
+#' @rdname addWeights
+#' @aliases addWeights
+#' @param object an object of class \code{\linkS4class{dataObj}} or \code{\linkS4class{simPopObj}}.
+#' @param value a numeric vector of suitable length
+#' @export
 #' @examples
 #' data(eusilcS)
 #' data(totalsRG)
@@ -27,11 +17,11 @@
 #' addWeights(inp) <- calibSample(inp, totalsRG)
 #' }
 setGeneric("addWeights<-", function(object, value) standardGeneric("addWeights<-"))
-NULL
 
+#' @aliases addWeights<-,dataObj-method
 #' @rdname addWeights
 #' @export
-setReplaceMethod("addWeights", signature = c("dataObj", "list"), definition = function(object, value) {
+setReplaceMethod("addWeights", signature = c("dataObj"), definition=function(object, value) {
   if ( length(value) != 2 ) {
     stop("The provided input must be the output of 'calibWeights()'\n")
   }
@@ -46,10 +36,10 @@ setReplaceMethod("addWeights", signature = c("dataObj", "list"), definition = fu
   invisible(object)
 })
 
-
+#' @aliases addWeights<-,simPopObj-method
 #' @rdname addWeights
 #' @export
-setReplaceMethod("addWeights", signature = c("simPopObj", "list"), definition = function(object, value) {
+setReplaceMethod("addWeights", signature = c("simPopObj"), definition=function(object, value) {
   if ( is.null(object@sample) ) {
     stop("No sample information is provided in the input object!\n")
   }

@@ -1,9 +1,9 @@
 #' Simulate components of continuous variables of population data
-#' 
+#'
 #' Simulate components of continuous variables of population data by resampling
 #' fractions from survey data. The continuous variable to be split and any
 #' categorical conditioning variables need to be simulated beforehand.
-#' 
+#'
 #' @name simComponents
 #' @param simPopObj a \code{\linkS4class{simPopObj}}-object.
 #' @param total a character string specifying the continuous variable of dataP
@@ -47,24 +47,24 @@
 #'   basicHHvars=c("age", "rb090", "hsize", "pl030", "pb220a"))
 #' simPopObj <- simContinuous(simPopObj, additional = "netIncome",
 #'   regModel = ~rb090+hsize+pl030+pb220a+hsize,
-#'   method="multinom", upper=200000, equidist=FALSE)
-#' 
+#'   method="multinom", upper=200000, equidist=FALSE, nr_cpus=1)
+#'
 #' # categorize net income for use as conditioning variable
 #' sIncome <- manageSimPopObj(simPopObj, var="netIncome", sample=TRUE, set=FALSE)
 #' sWeight <- manageSimPopObj(simPopObj, var="rb050", sample=TRUE, set=FALSE)
 #' pIncome <- manageSimPopObj(simPopObj, var="netIncome", sample=FALSE, set=FALSE)
-#' 
+#'
 #' breaks <- getBreaks(x=unlist(sIncome), w=unlist(sWeight), upper=Inf, equidist=FALSE)
 #' simPopObj <- manageSimPopObj(simPopObj, var="netIncomeCat", sample=TRUE,
 #'   set=TRUE, values=getCat(x=unlist(sIncome), breaks))
 #' simPopObj <- manageSimPopObj(simPopObj, var="netIncomeCat", sample=FALSE,
 #'   set=TRUE, values=getCat(x=unlist(pIncome), breaks))
-#' 
+#'
 #' # simulate net income components
 #' simPopObj <- simComponents(simPopObj=simPopObj, total="netIncome",
 #'   components=c("py010n","py050n","py090n","py100n","py110n","py120n","py130n","py140n"),
 #'   conditional = c("netIncomeCat", "pl030"), replaceEmpty = "sequential", seed=1 )
-#' 
+#'
 #' class(simPopObj)
 simComponents <- function(simPopObj, total="netIncome",
   components = c("py010n", "py050n", "py090n", "py100n", "py110n", "py120n", "py130n", "py140n"),

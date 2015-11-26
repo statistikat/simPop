@@ -1,3 +1,10 @@
+setClassUnion('dataframeOrNULL', c('data.frame', 'NULL'))
+setClassUnion('numericOrNULL', c('numeric', 'NULL'))
+setClassUnion('characterOrNULL', c('character', 'NULL'))
+setClassUnion('logicalOrNULL', c('logical', 'NULL'))
+setClassUnion('matrixOrNULL', c('matrix', 'NULL'))
+setClassUnion('listOrNULL', c('list', 'NULL'))
+
 #' @useDynLib simPop
 #' @import doParallel
 #' @import foreach
@@ -14,16 +21,18 @@
 #' @importFrom colorspace heat_hcl
 #' @importFrom VIM hotdeck
 #' @importFrom graphics par
-#' @importFrom stats as.formula chisq.test coef cor cov dlogis formula lm mad 
+#' @importFrom stats as.formula chisq.test coef cor cov dlogis formula lm mad
 #' @importFrom stats median model.matrix optim plogis ppoints predict rnorm runif uniroot var weighted.mean
-# removed  stats quantilerexp 
+# removed  stats quantilerexp
 NULL
 
+
+
 #' Class \code{"dataObj"}
-#' 
+#'
 #' Objects of this class contain information on a population or survey.
-#' 
-#' 
+#'
+#'
 #' @name dataObj-class
 #' @aliases dataObj-class show,dataObj-method
 #' @docType class
@@ -35,29 +44,35 @@ NULL
 #' @keywords classes
 #' @examples
 #' showClass("dataObj")
-#' 
+#'
 #' ## show method, generate an object of class dataObj first
 #' data(eusilcS)
 #' inp <- specifyInput(data=eusilcS, hhid="db030", weight="rb050", strata="db040")
 #' ## shows some basic information:
 #' inp
-#' 
+#'
 NULL
 
 #' Extract and modify variables from population or sample data stored in an
 #' object of class \code{\link{simPopObj-class}}.
-#' 
+#'
 #' Using \code{\link{samp}} \code{\link{samp<-}} it is possible to extract or
 #' rather modify variables of the sample data within slot \code{data} in slot
 #' \code{sample} of the \code{\link{simPopObj-class}}-object. Using
 #' \code{\link{pop}} \code{\link{pop<-}} it is possible to extract or rather
 #' modify variables of the synthetic population within in slot \code{data} in
 #' slot \code{sample} of the \code{\link{simPopObj-class}}-object.
-#' 
-#' 
+#'
+#'
 #' @name get_set-methods
-#' @aliases pop pop<- samp samp<- samp,simPopObj-method pop,simPopObj-method
-#' samp<-,simPopObj-method pop<-,simPopObj-method
+#' @aliases pop pop<- pop,simPopObj-method pop<-,simPopObj-method
+#' samp samp<- samp,simPopObj-method samp<-,simPopObj-method
+#' popData popData,simPopObj-method
+#' sampleData,simPopObj-method
+#' popObj popObj<- popObj<-,simPopObj,dataObj-method popObj,simPopObj-method
+#' sampleData
+#' sampleObj sampleObj<- sampleObj,simPopObj-method sampleObj<-,simPopObj,dataObj-method
+#' tableObj tableObj,simPopObj-method
 #' @docType methods
 #' @param obj An object of class \code{\link{simPopObj-class}}
 #' @param var variable name or index for the variable in slot 'samp' of object
@@ -72,12 +87,12 @@ NULL
 #' \code{\link{pop<-}}, \code{\link{samp<-}}, \code{\link{manageSimPopObj}}
 #' @keywords manip methods
 #' @examples
-#' 
+#'
 #' data(eusilcS)
 #' inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040",
 #' weight="db090")
 #' simPopObj <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090"))
-#' 
+#'
 #' ## get/set variables in sample-object of simPopObj
 #' head(samp(simPopObj, var="age"))
 #' samp(simPopObj, var="newVar") <- 1
@@ -87,7 +102,7 @@ NULL
 #' head(samp(simPopObj, var="newvar"))
 #' ## extract multiple variables
 #' head(samp(simPopObj, var=c("db030","db040")))
-#' 
+#'
 #' ## get/set variables in pop-object of simPopObj
 #' head(pop(simPopObj, var="age"))
 #' pop(simPopObj, var="newVar") <- 1
@@ -97,82 +112,18 @@ NULL
 #' head(pop(simPopObj, var="newvar"))
 #' ## extract multiple variables
 #' head(pop(simPopObj, var=c("db030","db040")))
-#' 
+#'
 NULL
-
-
-
-
-
-#' Methods to query/set slots from objects of class
-#' \code{\linkS4class{simPopObj}}.
-#' 
-#' The methods allow to query or replace various information of
-#' \code{\linkS4class{simPopObj}}-objects.
-#' 
-#' 
-#' @name simPopMethods
-#' @aliases sampleObj sampleObj-methods sampleObj<- sampleObj<--methods
-#' sampleData popObj popObj-methods popObj<- popObj<--methods popData tableObj
-#' tableObj-methods sampleObj,simPopObj-method
-#' sampleObj<-,simPopObj,dataObj-method sampleData,simPopObj-method
-#' popObj,simPopObj-method popObj<-,simPopObj,dataObj-method
-#' popData,simPopObj-method tableObj,simPopObj-method
-#' @docType methods
-#' @section Methods: \describe{ Below, the methods to access/set various slots
-#' of \code{\linkS4class{simPopObj}}-objects are shown.
-#' \item{list("sampleObj")}{ returns slot 'sample' of the input object. }\item{
-#' with }{ returns slot 'sample' of the input object.
-#' }\item{list("signature(object=\"simPopObj\")")}{ returns slot 'sample' of
-#' the input object. } \item{list("sampleObj<-")}{ replaces slot 'sample' of
-#' the input object with the object \code{value}. }\item{ with }{ replaces slot
-#' 'sample' of the input object with the object \code{value}.
-#' }\item{list("signature(object=\"simPopObj\", value=\"dataObj\")")}{ replaces
-#' slot 'sample' of the input object with the object \code{value}. }
-#' \item{list("sampleData")}{ returns slot 'data' of slot 'sample' of the input
-#' object. }\item{ with }{ returns slot 'data' of slot 'sample' of the input
-#' object. }\item{list("signature(object=\"simPopObj\")")}{ returns slot 'data'
-#' of slot 'sample' of the input object. } \item{list("popObj")}{ returns slot
-#' 'pop' of the input object. }\item{ with }{ returns slot 'pop' of the input
-#' object. }\item{list("signature(object=\"simPopObj\")")}{ returns slot 'pop'
-#' of the input object. } \item{list("popObj<-")}{ replaces slot 'pop' of the
-#' input object with the object \code{value}. }\item{ with }{ replaces slot
-#' 'pop' of the input object with the object \code{value}.
-#' }\item{list("signature(object=\"simPopObj\", value=\"dataObj\")")}{ replaces
-#' slot 'pop' of the input object with the object \code{value}. }
-#' \item{list("popData")}{ returns slot 'data' of slot 'pop' of the input
-#' object. }\item{ with }{ returns slot 'data' of slot 'pop' of the input
-#' object. }\item{list("signature(object=\"simPopObj\")")}{ returns slot 'data'
-#' of slot 'pop' of the input object. } \item{list("tableObj")}{ returns slot
-#' 'table' of the input object. }\item{ with }{ returns slot 'table' of the
-#' input object. }\item{list("signature(object=\"simPopObj\")")}{ returns slot
-#' 'table' of the input object. } }
-#' @keywords methods
-#' @examples
-#' 
-#' data(eusilcS)
-#' inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
-#' inpObj <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090"))
-#' class(inpObj)
-#' str(sampleObj(inpObj))
-#' 
-#' inp2 <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="pb220a", weight="db090")
-#' sampleObj(inpObj) <- inp2
-#' str(sampleObj(inpObj))
-#' 
-NULL
-
-
 
 
 
 #' Class \code{"simPopObj"}
-#' 
+#'
 #' An object that is used throughout the package containing information on the
 #' sample (in slot \code{sample}), the population (slot \code{pop}) and
 #' optionally some margins in form of a table (slot \code{table}).
-#' 
-#' 
+#'
+#'
 #' @name simPopObj-class
 #' @aliases simPopObj-class show,simPopObj-method
 #' @docType class
@@ -182,9 +133,9 @@ NULL
 #' @seealso \code{\linkS4class{dataObj}}
 #' @keywords classes
 #' @examples
-#' 
+#'
 #' showClass("simPopObj")
-#' 
+#'
 #' ## show method: generate an object of class simPop first
 #' data(eusilcS)
 #' inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
@@ -192,16 +143,9 @@ NULL
 #' class(eusilcP)
 #' ## shows some basic information:
 #' eusilcP
-#' 
+#'
 NULL
 
-
-setClassUnion('dataframeOrNULL', c('data.frame', 'NULL'))
-setClassUnion('numericOrNULL', c('numeric', 'NULL'))
-setClassUnion('characterOrNULL', c('character', 'NULL'))
-setClassUnion('logicalOrNULL', c('logical', 'NULL'))
-setClassUnion('matrixOrNULL', c('matrix', 'NULL'))
-setClassUnion('listOrNULL', c('list', 'NULL'))
 
 setClass(
   Class='dataObj',
@@ -251,11 +195,11 @@ setClass(
 
 #' get and set variables from population or sample data stored in an object of
 #' class \code{\linkS4class{simPopObj}}.
-#' 
+#'
 #' This functions allows to get or set variables in slots \code{pop} and
 #' \code{sample} of \code{\linkS4class{simPopObj}}-objects. This is a utility
 #' function that is useful for writing custom wrapper functions.
-#' 
+#'
 #' @name manageSimPopObj
 #' @param x an object of class \code{\linkS4class{simPopObj}}.
 #' @param var character vector of length 1; variable name that should be set or
@@ -279,7 +223,7 @@ setClass(
 #' inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040",
 #'   weight="db090")
 #' simPopObj <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090"))
-#' 
+#'
 #' (manageSimPopObj(simPopObj, var="age", sample=FALSE, set=FALSE))
 #' (manageSimPopObj(simPopObj, var="age", sample=TRUE, set=FALSE))
 manageSimPopObj <- function(x, var, sample=FALSE, set=FALSE, values=NULL) {
@@ -309,6 +253,7 @@ manageSimPopObj <- function(x, var, sample=FALSE, set=FALSE, values=NULL) {
   }
 }
 
+#' @export
 setGeneric("samp", function(obj, var=NULL) {
   standardGeneric("samp")
 })
@@ -337,9 +282,12 @@ setMethod("samp", "simPopObj", function(obj, var=NULL) {
   }
   return(sampData[,var,with=F])
 })
+
+#' @export
 setGeneric("samp<-", function(obj, var, value) {
   standardGeneric("samp<-")
 })
+#' @export
 setReplaceMethod("samp", "simPopObj", function(obj, var, value) {
   if ( length(var) != 1) {
     stop("we can only set one variable!\n")
@@ -349,9 +297,12 @@ setReplaceMethod("samp", "simPopObj", function(obj, var, value) {
   obj
 })
 
+#' @export
 setGeneric("pop", function(obj, var=NULL) {
   standardGeneric("pop")
 })
+
+#' @export
 setMethod("pop", "simPopObj", function(obj, var=NULL) {
   popData <- as.data.table(obj@pop@data)
   cn <- names(popData)
@@ -377,9 +328,12 @@ setMethod("pop", "simPopObj", function(obj, var=NULL) {
   }
   return(popData[,var,with=F])
 })
+
+#' @export
 setGeneric("pop<-", function(obj, var, value) {
   standardGeneric("pop<-")
 })
+#' @export
 setReplaceMethod("pop", "simPopObj", function(obj, var, value) {
   if ( length(var) != 1) {
     stop("we can only set one variable!\n")
@@ -389,39 +343,53 @@ setReplaceMethod("pop", "simPopObj", function(obj, var, value) {
   obj
 })
 
+#' @export
 setGeneric("sampleObj", function(object) standardGeneric("sampleObj"))
+#' @export
 setGeneric("sampleObj<-", function(object, value) standardGeneric("sampleObj<-"))
+#' @export
 setMethod("sampleObj", signature="simPopObj", definition=function(object) {
   invisible(object@sample)
 })
+#' @export
 setReplaceMethod("sampleObj", signature = c("simPopObj", "dataObj"), definition = function(object, value) {
   object@sample <- value
   validObject(object)
   invisible(object)
 })
 
+#' @export
 setGeneric("sampleData", function(object) standardGeneric("sampleData"))
+#' @export
 setMethod("sampleData", signature="simPopObj", definition=function(object) {
   invisible(sampleObj(object)@data)
 })
 
+#' @export
 setGeneric("popObj", function(object) standardGeneric("popObj"))
+#' @export
 setGeneric("popObj<-", function(object, value) standardGeneric("popObj<-"))
+#' @export
 setMethod("popObj", signature="simPopObj", definition=function(object) {
   invisible(object@pop)
 })
+#' @export
 setReplaceMethod("popObj", signature = c("simPopObj", "dataObj"), definition = function(object, value) {
   object@pop <- value
   validObject(object)
   invisible(object)
 })
 
+#' @export
 setGeneric("popData", function(object) standardGeneric("popData"))
+#' @export
 setMethod("popData", signature="simPopObj", definition=function(object) {
   invisible(popObj(object)@data)
 })
 
+#' @export
 setGeneric("tableObj", function(object) standardGeneric("tableObj"))
+#' @export
 setMethod("tableObj", signature="simPopObj", definition=function(object) {
   invisible(object@table)
 })

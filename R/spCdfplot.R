@@ -1,13 +1,13 @@
 #' Plot weighted cumulative distribution functions
-#' 
+#'
 #' Plot cumulative distribution functions, possibly broken down according to
 #' conditioning variables and taking into account sample weights.
-#' 
+#'
 #' Weights are directly extracted from the input object \code{inp} and are
 #' taken into account by adjusting the step height.  To be precise, the
 #' weighted step height for an observation is defined as its weight divided by
 #' the sum of all weights\eqn{\ ( w_{i} / \sum_{j = 1}^{n} w_{j} ).}{.}
-#' 
+#'
 #' @name spCdfplot
 #' @aliases spCdfplot spCdfplot.default prepanelSpCdfplot panelSpCdfplot getCdf prepCdf prepCdf.data.frame prepCdf.default
 #' @param inp an object of class \code{\linkS4class{simPopObj}} containing
@@ -35,42 +35,42 @@
 #' @examples
 #' ## these take some time and are not run automatically
 #' ## copy & paste to the R command line
-#' 
+#'
 #' set.seed(1234)  # for reproducibility
 #' data(eusilcS)   # load sample data
-#' inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", 
+#' inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize",
 #'   strata="db040", weight="db090")
 #' simPop <- simStructure(data=inp, method="direct",
 #'   basicHHvars=c("age", "rb090", "hsize", "pl030", "pb220a"))
-#' 
+#'
 #' # multinomial model with random draws
-#' eusilcM <- simContinuous(simPop, additional="netIncome", 
+#' eusilcM <- simContinuous(simPop, additional="netIncome",
 #'   regModel = ~rb090+hsize+pl030+pb220a,
-#'   upper=200000, equidist=FALSE)
+#'   upper=200000, equidist=FALSE, nr_cpus=1)
 #' class(eusilcM)
-#' 
+#'
 #' # plot results
 #' spCdfplot(eusilcM, "netIncome", cond=NULL)
 #' spCdfplot(eusilcM, "netIncome", cond="rb090", layout=c(1,2))
-spCdfplot <- function(inp, x, cond = NULL, approx = c(FALSE, TRUE), 
+spCdfplot <- function(inp, x, cond = NULL, approx = c(FALSE, TRUE),
                       n = 10000, bounds = TRUE, ...) {
   ## initializations
   if ( !class(inp) == "simPopObj" ) {
     stop("input argument 'inp' must be of class 'simPopObj'!\n")
   }
-  
+
   weights.pop <- inp@pop@weight
   weights.samp <- inp@sample@weight
   dataS <- inp@sample@data
   dataP <- inp@pop@data
-  
+
   if ( !is.character(x) || length(x) == 0 ) {
     stop("'x' must be a character vector of positive length!\n")
   }
   if ( !(all(x %in% colnames(dataP)) & (all(x %in% colnames(dataS)))) ) {
     stop("The variable names specified in argument 'x' must be available both in the population and the sample!\n")
   }
-  
+
   if ( !is.null(cond) && !is.character(cond) ) {
     stop("'cond' must be a character vector or NULL!\n")
     if ( length(cond) != 1 ) {
@@ -80,7 +80,7 @@ spCdfplot <- function(inp, x, cond = NULL, approx = c(FALSE, TRUE),
   if ( !(all(cond %in% colnames(dataP)) & (all(cond %in% colnames(dataS)))) ) {
     stop("The variable names specified in argument 'cond' must be available both in the population and the sample!")
   }
-  
+
   # check 'approx'
   if(!is.logical(approx) || length(approx) == 0) approx <- formals()$approx
   else approx <- sapply(rep(approx, length.out=2), isTRUE)
@@ -92,7 +92,7 @@ spCdfplot <- function(inp, x, cond = NULL, approx = c(FALSE, TRUE),
   bounds <- isTRUE(bounds)
   # define labels for grouping variable
   lab <- c("Sample", "Population")
-  
+
   ## construct objects for 'xyplot'
   # from sample
   tmp <- getCdf(x, weights.samp, cond, dataS, approx=approx[1], n=n[1], name=lab[1])
@@ -110,8 +110,8 @@ spCdfplot <- function(inp, x, cond = NULL, approx = c(FALSE, TRUE),
     form <- paste(form, cond, sep=" | ")  # add conditioning to formula
   }
   ## define local version of 'xyplot'
-  localXyplot <- function(form, values, xlab = NULL, ylab = NULL, 
-                          auto.key = TRUE, ..., 
+  localXyplot <- function(form, values, xlab = NULL, ylab = NULL,
+                          auto.key = TRUE, ...,
                           # these arguments are defined so that they aren't supplied twice:
                           x, data, allow.multiple, outer, panel, prepanel, groups) {
     # prepare legend
@@ -120,8 +120,8 @@ spCdfplot <- function(inp, x, cond = NULL, approx = c(FALSE, TRUE),
       if(is.null(auto.key$points)) auto.key$points <- FALSE
       if(is.null(auto.key$lines)) auto.key$lines <- TRUE
     }
-    command <- paste("xyplot(form, data=values, groups=.name,", 
-                     "panel=panelSpCdfplot, prepanel=prepanelSpCdfplot,", 
+    command <- paste("xyplot(form, data=values, groups=.name,",
+                     "panel=panelSpCdfplot, prepanel=prepanelSpCdfplot,",
                      "xlab=xlab, ylab=ylab, auto.key=auto.key, ...)")
     eval(parse(text=command))
   }

@@ -112,18 +112,12 @@ calcFinalWeights <- function(data0, totals0, params) {
 #' @author Bernhard Meindl, Johannes Gussenbauer and Matthias Templ
 #' @keywords datasets
 #' @export
-#' @exportMethod popObj
-#' @exportMethod popObj<-
-#' @exportMethod popData
-#' @exportMethod tableObj
-#' @exportMethod pop
-#' @exportMethod pop<-
 #' @examples
 #' data(eusilcS) # load sample data
 #' data(eusilcP) # population data
 #' inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
 #' simPop <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090"))
-#' simPop <- simCategorical(simPop, additional=c("pl030", "pb220a"), method="multinom")
+#' simPop <- simCategorical(simPop, additional=c("pl030", "pb220a"), method="multinom", nr_cpus=1)
 #'
 #' # add margins
 #' margins <- as.data.frame(
