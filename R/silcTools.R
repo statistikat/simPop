@@ -1,7 +1,7 @@
 ################################################################
-### utility functions for the sga project
-#' @name get_silc
-#' @rdname get_silc
+### utility functions for the sga project on EU-SILC
+#' @name silcTools
+#' @rdname silcTools
 #' @aliases getAge getGender getEcoStat getCitizenship getHsize restructureHHid factorNA
 #' @title Utility functions for socio-economic data sets
 #' @description Various utility functions mainly used for simulating EU-SILC data
@@ -11,7 +11,7 @@
 #' @author Andreas Alfons, Matthias Templ
 NULL
 
-#' @rdname get_silc
+#' @rdname silcTools
 #' @name getAge
 #' @examples
 #' birth <- sample(1950:2000, 20)
@@ -31,7 +31,7 @@ getAge <- function(birth, year, data = NULL) {
   year - 1 - birth
 }
 
-#' @rdname get_silc
+#' @rdname silcTools
 #' @name getGender
 #' @param gender variable including information on gender
 #' @param labels labels of a factor variable
@@ -56,7 +56,7 @@ getGender <- function(gender, labels = c("male","female"), data = NULL) {
 #  hsize <- rep(tab, tab)
 #}
 
-#' @rdname get_silc
+#' @rdname silcTools
 #' @name getEcoStat
 #' @param ecoStat variable holding information on the economic status
 #' @examples
@@ -75,7 +75,7 @@ getEcoStat <- function(ecoStat , data , levels) {  ## variable pl030 (economic s
   return(ecoStat)
 }
 
-#' @rdname get_silc
+#' @rdname silcTools
 #' @name getCitizenship
 #' @examples
 #' data(eusilcS)
@@ -109,7 +109,7 @@ getCitizenship <- function(citizenship, data, owncountry, EU, other) {
 }
 
 
-#' @rdname get_silc
+#' @rdname silcTools
 #' @name getHsize
 #' @param hhid name or index of variable holding the information on household ID
 #' @examples
@@ -126,7 +126,7 @@ getHsize <- function(data, hhid)
   return(hsize)
 }
 
-#' @rdname get_silc
+#' @rdname silcTools
 #' @name restructureHHid
 #' @examples
 #' hhid <- c(6,6,3,3,3,2,1,1,8,9,9,9,9,7,7)
@@ -143,7 +143,7 @@ restructureHHid <- function(data, hhid){
 }
 
 #Function factorNA from package simPop: includes NAs as an extra level in the factor
-#' @rdname get_silc
+#' @rdname silcTools
 #' @name factorNA
 #' @examples
 #' hhid <- factor(c(6,6,3,3,3,2,1,1,NA,9,9,9,9,7,7))
