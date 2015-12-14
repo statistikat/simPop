@@ -106,8 +106,11 @@ simComponents <- function(simPopObj, total="netIncome",
   dataPop <- dataP[indPop,]
 
   # data frame dataFrac contains the fractions of the components
-  dataFrac <- prop.table(as.matrix(dataS[, components, with=FALSE]), 1)
-
+  #dataFrac <- prop.table(as.matrix(dataS[, components, with=FALSE]), 1)
+  dataFrac <- dataS[,.SD, .SDcols=c(components, total)]
+  dataFrac[[total]] <- abs(dataFrac[[total]])
+  dataFrac <- dataFrac[,lapply(.SD, function(x) { x/dataFrac[[total]]}), .SDcols=components]
+  dataFrac <- as.matrix(dataFrac)
   # matrix simFrac stores the simulated fractions
   simFrac <- matrix(ifelse(is.na(dataP[[total]]), NA, 0), nrow=N, ncol=length(components))
   colnames(simFrac) <- components
@@ -178,7 +181,7 @@ simComponents <- function(simPopObj, total="netIncome",
     simFrac[indPop,] <- dataFrac[indices,]
   }
 
-  out <- dataP[[total]] * simFrac
+  out <- abs(dataP[[total]]) * simFrac
   for ( i in 1:ncol(out) ) {
     dataP[,colnames(out)[i]] <- out[,i]
   }
