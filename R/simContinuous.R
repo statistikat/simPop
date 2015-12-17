@@ -502,8 +502,9 @@ runModel <- function(dataS, dataP, params, typ) {
 #' factors!  \item formula-object: Users may also specify a specific formula
 #' (class 'formula') that will be used. Checks are performed that all required
 #' variables are available.}
-#' @param byHousehold if TRUE, predicted values are replaced with the mean
-#' within each household.
+#' @param byHousehold if NULL, simulated values are used as is. If either \code{'sum'},
+#' \code{'mean'} or \code{'random'} is specified, the values are aggregated and each member
+#' of the household gets the same value (mean, sum or a random value) assigned.
 #' @param imputeMissings if TRUE, missing values in variables that are used for
 #' the underlying model are imputed using hock-deck.
 #' @param seed optional; an integer value to be used as the seed of the random
@@ -553,10 +554,16 @@ simContinuous <- function(simPopObj, additional = "netIncome",
   alpha = 0.01, residuals = TRUE, keep = TRUE,
   maxit = 500, MaxNWts = 1500,
   tol = .Machine$double.eps^0.5,
-  nr_cpus=NULL, eps = NULL, regModel="basic", byHousehold=FALSE, imputeMissings=FALSE, seed) {
+  nr_cpus=NULL, eps = NULL, regModel="basic", byHousehold=NULL, imputeMissings=FALSE, seed) {
 
   x <- hhid <- vals <- id <- V1 <- NULL
 
+  if ( !is.null(byHousehold) ) {
+    if ( !byHousehold %in% c("mean","sum","random") ) {
+      stop("invalid value for argument 'byHousehold'. Allowed values are 'mean', 'sum' or 'random'!\n")
+    }
+  }
+  
   samp <- simPopObj@sample
   pop <- simPopObj@pop
   basic <- simPopObj@basicHHvars
@@ -1007,10 +1014,36 @@ simContinuous <- function(simPopObj, additional = "netIncome",
   }
 
   # calculate mean of new variable by household
-  if ( byHousehold ) {
+  if ( !is.null(byHousehold) ) {
     xx <- data.table(id=1:length(values), hhid=dataP[[pop@hhid]], vals=values)
     setkey(xx, hhid)
-    yy <- xx[,mean(vals, na.rm=TRUE), by=key(xx)]
+    
+    if ( byHousehold=="mean" ) {
+      yy <- xx[,mean(vals, na.rm=TRUE), by=key(xx)]
+    }
+    if ( byHousehold=="sum" ) {
+      yy <- xx[,sum(vals, na.rm=TRUE), by=key(xx)]
+    }    
+    if ( byHousehold=="random" ) {
+      # add random number
+      xx[,randId:=sample(1:nrow(xx))]
+      
+      # einpersonen hh filtern
+      zz <- xx[,.N,by="hhid"]
+      ids <- zz$hhid[zz$N==1]
+      yy <- filter(xx, hhid%in%ids) %>% select(hhid, V1=vals)
+      
+      ids <- zz$hhid[zz$N>1]
+      if ( length(ids) > 0 ) {
+        xx2 <- filter(xx, hhid%in%ids)
+        xx2[,randId:=sample(1:nrow(xx2))]
+        setkey(xx2, hhid, randId)
+        
+        yy2 <- xx2 %>% group_by(hhid) %>% slice(1) %>% ungroup %>% select(hhid, V1=vals)
+        yy <- rbind(yy, yy2)
+      }
+      setkey(yy, hhid)
+    }
     xx <- merge(xx, yy, all.x=TRUE)
     setkey(xx, id)
     xx[is.nan(V1), V1:=NA]
