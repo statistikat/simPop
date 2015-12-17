@@ -29,7 +29,7 @@
 #' @param x a numeric vector to be categorized.
 #' @param weights an optional numeric vector containing sample weights.
 #' @param zeros a logical indicating whether \code{x} is semi-continuous, i.e.,
-#' contains a considerable amount of zeros.  See \dQuote{Details} on how this
+#' contains a considerable amount of zeros. See \dQuote{Details} on how this
 #' affects the behavior of the function.
 #' @param lower,upper optional numeric values specifying lower and upper bounds
 #' other than minimum and maximum of \code{x}, respectively.
@@ -39,8 +39,11 @@
 #' @param probs a numeric vector of probabilities with values in \eqn{[0, 1]}
 #' giving quantiles to be used as (positive) break points.  If supplied, this
 #' is preferred over \code{equidist}.
+#' @param strata an optional vector specifying a strata variable (e.g household ids).
+#' if specified, the mean of \code{x} (and also of \code{weights} if specified) is 
+#' computed within each strata before calculating the breaks.
 #' @return A numeric vector of break points.
-#' @author Andreas Alfons
+#' @author Andreas Alfons and Bernhard Meindl
 #' @export
 #' @seealso \code{\link{getCat}}, \code{\link{quantileWt}}
 #' @keywords manip
@@ -56,7 +59,27 @@
 #'     equidist = FALSE)
 #' 
 getBreaks <- function(x, weights = NULL, zeros = TRUE, lower = NULL,
-                      upper = NULL, equidist = TRUE, probs = NULL) {
+  upper = NULL, equidist = TRUE, probs = NULL, strata=NULL) {
+  
+  if ( !is.null(strata) ) {
+    if ( length(strata) != length(x) ) {
+      stop("'strata' must have the same length as 'x'")
+    }    
+    if ( is.null(weights) ) {
+      dat <- data.table(x=x, strata=strata)
+    } else {
+      dat <- data.table(x=x, strata=strata, weights=weights)
+    }
+    setkey(dat, strata)
+    if ( is.null(weights) ) {
+      dat <- dat[,.(x=mean(x, na.rm=TRUE)), by=key(dat)]
+    } else {
+      dat <- dat[,.(x=mean(x, na.rm=TRUE), weights=mean(weights,na.rm=TRUE)), by=key(dat)]
+      weights <- dat$weights
+    }    
+    x <- dat$x
+  }
+  
   # initializations
   if(!is.numeric(x)) stop("'x' must be a numeric vector")
   if(!is.null(weights)) {
