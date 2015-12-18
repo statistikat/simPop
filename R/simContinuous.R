@@ -563,7 +563,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
       stop("invalid value for argument 'byHousehold'. Allowed values are 'mean', 'sum' or 'random'!\n")
     }
   }
-  
+
   samp <- simPopObj@sample
   pop <- simPopObj@pop
   basic <- simPopObj@basicHHvars
@@ -1017,32 +1017,31 @@ simContinuous <- function(simPopObj, additional = "netIncome",
   if ( !is.null(byHousehold) ) {
     xx <- data.table(id=1:length(values), hhid=dataP[[pop@hhid]], vals=values)
     setkey(xx, hhid)
-    
+
     if ( byHousehold=="mean" ) {
       yy <- xx[,mean(vals, na.rm=TRUE), by=key(xx)]
     }
     if ( byHousehold=="sum" ) {
       yy <- xx[,sum(vals, na.rm=TRUE), by=key(xx)]
-    }    
+    }
     if ( byHousehold=="random" ) {
-      # add random number
-      xx[,randId:=sample(1:nrow(xx))]
-      
-      # einpersonen hh filtern
-      zz <- xx[,.N,by="hhid"]
-      ids <- zz$hhid[zz$N==1]
-      yy <- filter(xx, hhid%in%ids) %>% select(hhid, V1=vals)
-      
-      ids <- zz$hhid[zz$N>1]
-      if ( length(ids) > 0 ) {
-        xx2 <- filter(xx, hhid%in%ids)
+      zz <- xx[,.N,by=key(xx)]
+      ids1 <- zz[N==1]
+      yy <- xx[hhid%in%ids1$hhid]
+      yy[,id:=NULL]
+      ids2 <- zz[N>1]
+      if ( nrow(ids2) > 0 ) {
+        xx2 <- xx[hhid %in% ids2$hhid]
         xx2[,randId:=sample(1:nrow(xx2))]
         setkey(xx2, hhid, randId)
-        
-        yy2 <- xx2 %>% group_by(hhid) %>% slice(1) %>% ungroup %>% select(hhid, V1=vals)
+        setkey(xx2, hhid)
+        yy2 <- unique(xx2)
+        yy2[,c("id","randId"):=NULL]
         yy <- rbind(yy, yy2)
       }
       setkey(yy, hhid)
+      yy[,V1:=vals]
+      yy[,vals:=NULL]
     }
     xx <- merge(xx, yy, all.x=TRUE)
     setkey(xx, id)
