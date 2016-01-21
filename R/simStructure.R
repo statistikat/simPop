@@ -195,10 +195,14 @@ simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), 
   if ( is.null(dataS@strata) ) {
     cmd <- paste0(cmd,")")
   } else {
-    if ( method == "direct" ) {
-      cmd <- paste0(cmd, ", ",dataS@strata,"=strata[indices]", expr,")")
+    if ( dataS@strata %in% basicHHvars ) {
+        cmd <- paste0(cmd, expr,")")
     } else {
-      cmd <- paste0(cmd, ", ",dataS@strata,"=dataPH$strata[hidNew]", expr, ")")
+      if ( method == "direct" ) {
+        cmd <- paste0(cmd, ", ",dataS@strata,"=strata[indices]", expr,")")
+      } else {
+        cmd <- paste0(cmd, ", ",dataS@strata,"=dataPH$strata[hidNew]", expr, ")")
+      }      
     }
   }
   # evaluate command and return result
