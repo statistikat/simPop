@@ -216,6 +216,7 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
 #' @param seed optional; an integer value to be used as the seed of the random
 #' number generator, or an integer vector containing the state of the random
 #' number generator to be restored.
+#' @param verbose set to TRUE if additional print output should be shown.
 #' @return An object of class \code{\linkS4class{simPopObj}} containing survey
 #' data as well as the simulated population data including the categorical
 #' variables specified by argument \code{additional}.
@@ -236,7 +237,8 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
 simCategorical <- function(simPopObj, additional,
   method=c("multinom", "distribution"),
   limit=NULL, censor=NULL, maxit=500, MaxNWts=1500,
-  eps=NULL, nr_cpus=NULL, regModel=NULL, seed=1) {
+  eps=NULL, nr_cpus=NULL, regModel=NULL, seed=1,
+  verbose=FALSE) {
 
   x <- NULL
 
@@ -318,7 +320,7 @@ simCategorical <- function(simPopObj, additional,
     params$grid <- expand.grid(lapply(data_sample[,additional, with=F], levels))
     params$additional <- additional
     params$basic <- predNames
-    cat("Variables used for method 'distribution':\n"); print(params$basic)
+    if(verbose) cat("Variables used for method 'distribution':\n"); print(params$basic)
     params$w <- dataS@weight
 
     if ( parallel ) {
@@ -389,8 +391,8 @@ simCategorical <- function(simPopObj, additional,
       formula.cmd <- paste0("suppressWarnings(multinom(", formula.cmd,
         ", weights=", dataS@weight, ", data=dataSample, trace=FALSE",
         ", maxit=",maxit, ", MaxNWts=", MaxNWts,"))")
-      cat("we are running the following multinom-model:\n")
-      cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
+      if(verbose) cat("we are running the following multinom-model:\n")
+      if(verbose) cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
     }
     # simulation via recursive partitioning and regression trees
     #if ( method == "ctree" ) {
