@@ -253,6 +253,11 @@ simCategorical <- function(simPopObj, additional,
     stop("variables already exist in the population!\n")
   }
 
+  if ( length(regModel)==1 & length(additional)>1 ) {
+    if ( regModel[1] %in% c("available","basic") ) {
+      regModel <- rep(regModel, length(additional))
+    }
+  }
   if ( method=="distribution" & !is.null(regModel) ) {
     if ( class(regModel)=="formula" ) {
       regModel <- list(regModel)
