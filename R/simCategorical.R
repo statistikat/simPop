@@ -390,7 +390,7 @@ simCategorical <- function(simPopObj, additional,
         ", weights=", dataS@weight, ", data=dataSample, trace=FALSE",
         ", maxit=",maxit, ", MaxNWts=", MaxNWts,"))")
       cat("we are running the following multinom-model:\n")
-      cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n")
+      cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
     }
     # simulation via recursive partitioning and regression trees
     #if ( method == "ctree" ) {
