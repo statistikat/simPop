@@ -648,7 +648,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
           wm <- paste0(wm, "Variable '",vv,"' (predictor): ",missv," missing values (~",missp,"%).\n")
         }
       }
-      warning(wm)
+      if(verbose) warning(wm)
     }
   }
 
