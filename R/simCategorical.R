@@ -245,6 +245,10 @@ simCategorical <- function(simPopObj, additional,
   method <- match.arg(method)
   dataP <- popObj(simPopObj)
   dataS <- sampleObj(simPopObj)
+  # required because we do not want to change existing populaton by reference
+  # thus a copy of the dataset is taken. additional variables will be added to
+  # this dataset
+  data_pop_o <- copy(popData(simPopObj)) 
   data_pop <- popData(simPopObj)
   data_sample <- sampleData(simPopObj)
   basic <- simPopObj@basicHHvars
@@ -360,9 +364,9 @@ simCategorical <- function(simPopObj, additional,
 
     ## add new categorical variables to data set and return
     for ( i in additional ) {
-      data_pop[[i]] <- values[,i]
+      data_pop_o <- values[,i]
     }
-    simPopObj@pop@data <- data_pop
+    simPopObj@pop@data <- data_pop_o
     return(invisible(simPopObj))
   }
 
@@ -465,8 +469,8 @@ simCategorical <- function(simPopObj, additional,
     }
     values <- factor(unsplit(values, data_pop[[dataP@strata]]), levels=levelsResponse)
     ## add new categorical variable to data set
-    data_pop[[i]] <- values
-    simPopObj@pop@data <- data_pop
+    data_pop_o[[i]] <- values
+    simPopObj@pop@data <- data_pop_o    
   }
   invisible(simPopObj)
 }
