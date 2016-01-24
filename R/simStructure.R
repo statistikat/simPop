@@ -46,7 +46,7 @@ simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), 
       It must be an object of class 'dataObj' that can be created using function specifyInput()!\n")
   }
   if ( dataS@ispopulation ) {
-    warning("dataS should contain sample information!\n")
+    stop("dataS must contain sample information!\n")
   }
 
   if ( is.null(basicHHvars) ) {
@@ -73,12 +73,7 @@ simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), 
 
   # extract variables
   hid <- dataS@data[[dataS@hhid]]
-  if(!dataS@ispopulation){
-    w <- dataS@data[[dataS@weight]]
-  }else{
-    w <- rep(1L,length(hid))  
-  }
-  
+  w <- dataS@data[[dataS@weight]]
   hsize <- dataS@data[[dataS@hhsize]]
   if ( !is.null(dataS@strata) ) {
     strata <- factor(dataS@data[[dataS@strata]])
@@ -200,10 +195,14 @@ simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), 
   if ( is.null(dataS@strata) ) {
     cmd <- paste0(cmd,")")
   } else {
-    if ( method == "direct" ) {
-      cmd <- paste0(cmd, ", ",dataS@strata,"=strata[indices]", expr,")")
+    if ( dataS@strata %in% basicHHvars ) {
+        cmd <- paste0(cmd, expr,")")
     } else {
-      cmd <- paste0(cmd, ", ",dataS@strata,"=dataPH$strata[hidNew]", expr, ")")
+      if ( method == "direct" ) {
+        cmd <- paste0(cmd, ", ",dataS@strata,"=strata[indices]", expr,")")
+      } else {
+        cmd <- paste0(cmd, ", ",dataS@strata,"=dataPH$strata[hidNew]", expr, ")")
+      }      
     }
   }
   # evaluate command and return result

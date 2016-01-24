@@ -648,7 +648,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
           wm <- paste0(wm, "Variable '",vv,"' (predictor): ",missv," missing values (~",missp,"%).\n")
         }
       }
-      warning(wm)
+      if(verbose) warning(wm)
     }
   }
 
@@ -743,6 +743,13 @@ simContinuous <- function(simPopObj, additional = "netIncome",
   if ( useMultinom || useLogit ) {
     name <- getCatName(additional)
     estimationModel <- gsub(additional, name, estimationModel)
+    # remove strata variable from estimation model if we are computing on multiple cores
+    # else multinom fails because the variable has only one factor!
+    if ( !is.null(dataS[[strata]]) ) {
+      if ( parallelParameters(nr_cpus, length(levels(dataS[[strata]])))$nr_cores > 1 ) {
+        estimationModel <- gsub(paste0("[+]",strata),"",estimationModel)
+      }
+    }
   }
 
   if ( useMultinom ) {
