@@ -42,7 +42,6 @@ generateValues <- function(dataSample, dataPop, params) {
   # command needs to be constructed as string
   # this is actually a pretty ugly way of fitting the model
   mod <- eval(parse(text=formula.cmd))  # fitted model
-
   # predict probabilities
   if ( length(exclude) == 0 ) {
     newdata <- grid
@@ -58,6 +57,9 @@ generateValues <- function(dataSample, dataPop, params) {
 
   if ( meth %in% "multinom" ) {
     probs <- predict(mod, newdata=newdata, type="probs")
+  }
+  if ( meth %in% "rpart" ) {
+    probs <- predict(mod, newdata=newdata)
   }
   #if ( meth %in% "naivebayes" ) {
   #  probs <- predict(mod, newdata=newdata, type="raw")
@@ -234,7 +236,7 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
 #' simPop <- simCategorical(simPop, additional=c("pl030", "pb220a"), method="multinom", nr_cpus=1)
 #' summary(simPop)
 simCategorical <- function(simPopObj, additional,
-  method=c("multinom", "distribution"),
+  method=c("multinom", "distribution","rpart"),
   limit=NULL, censor=NULL, maxit=500, MaxNWts=1500,
   eps=NULL, nr_cpus=NULL, regModel=NULL, seed=1) {
 
@@ -390,6 +392,12 @@ simCategorical <- function(simPopObj, additional,
         ", weights=", dataS@weight, ", data=dataSample, trace=FALSE",
         ", maxit=",maxit, ", MaxNWts=", MaxNWts,"))")
       cat("we are running the following multinom-model:\n")
+      cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n")
+    }else if ( method == "rpart" ) {
+      formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
+      formula.cmd <- paste0("suppressWarnings(rpart(", formula.cmd,
+          ", weights=", dataS@weight, ", data=dataSample))")
+      cat("we are running the following partition/tree model:\n")
       cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n")
     }
     # simulation via recursive partitioning and regression trees
