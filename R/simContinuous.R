@@ -510,6 +510,7 @@ runModel <- function(dataS, dataP, params, typ) {
 #' @param seed optional; an integer value to be used as the seed of the random
 #' number generator, or an integer vector containing the state of the random
 #' number generator to be restored.
+#' @param verbose (logical) if \code{TRUE}, additional output is written to the promt
 #' @return An object of class \code{\linkS4class{simPopObj}} containing survey
 #' data as well as the simulated population data including the continuous
 #' variable specified by \code{additional} and possibly simulated categories
@@ -554,9 +555,9 @@ simContinuous <- function(simPopObj, additional = "netIncome",
   alpha = 0.01, residuals = TRUE, keep = TRUE,
   maxit = 500, MaxNWts = 1500,
   tol = .Machine$double.eps^0.5,
-  nr_cpus=NULL, eps = NULL, regModel="basic", byHousehold=NULL, imputeMissings=FALSE, seed) {
+  nr_cpus=NULL, eps = NULL, regModel="basic", byHousehold=NULL, imputeMissings=FALSE, seed, verbose=FALSE) {
 
-  x <- hhid <- vals <- id <- V1 <- NULL
+  x <- hhid <- vals <- id <- V1 <- randId <- NULL
 
   if ( !is.null(byHousehold) ) {
     if ( !byHousehold %in% c("mean","sum","random") ) {

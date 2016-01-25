@@ -28,7 +28,7 @@ giving quantiles to be used as (positive) break points.  If supplied, this
 is preferred over \code{equidist}.}
 
 \item{strata}{an optional vector specifying a strata variable (e.g household ids).
-if specified, the mean of \code{x} (and also of \code{weights} if specified) is 
+if specified, the mean of \code{x} (and also of \code{weights} if specified) is
 computed within each strata before calculating the breaks.}
 }
 \value{
@@ -69,7 +69,7 @@ data(eusilcS)
 getBreaks(eusilcS$netIncome, weights=eusilcS$rb050)
 
 # semi-continuous variable, positive break points not equidistant
-getBreaks(eusilcS$netIncome, weights=eusilcS$rb050, 
+getBreaks(eusilcS$netIncome, weights=eusilcS$rb050,
     equidist = FALSE)
 
 }

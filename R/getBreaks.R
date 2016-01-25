@@ -1,30 +1,30 @@
 #' Compute break points for categorizing (semi-)continuous variables
-#' 
+#'
 #' Compute break points for categorizing continuous or semi-continuous
 #' variables using (weighted) quantiles.  This is a utility function that is
 #' useful for writing custom wrapper functions such as \code{\link{simEUSILC}}.
-#' 
+#'
 #' If \code{equidist} is \code{TRUE}, the behavior is as follows.  If
 #' \code{zeros} is \code{TRUE} as well, the 0\%, 10\%, \dots{}, 90\% quantiles
 #' of the negative values and the 10\%, 20\%, \dots{}, 100\% of the positive
 #' values are computed.  These quantiles are then used as break points together
 #' with 0.  If \code{zeros} is not \code{TRUE}, on the other hand, the 0\%,
 #' 10\%, \dots{}, 100\% quantiles of all values are used.
-#' 
+#'
 #' If \code{equidist} is not \code{TRUE}, the behavior is as follows.  If
 #' \code{zeros} is not \code{TRUE}, the 1\%, 5\%, 10\%, 20\%, 40\%, 60\%, 80\%,
 #' 90\%, 95\% and 99\% quantiles of all values are used for the inner part of
 #' the data (instead of the equidistant 10\%, \dots{}, 90\% quantiles).  If
 #' \code{zeros} is \code{TRUE}, these quantiles are only used for the positive
 #' values while the quantiles of the negative values remain equidistant.
-#' 
+#'
 #' Note that duplicated values among the quantiles are discarded and that the
 #' minimum and maximum are replaced with \code{lower} and \code{upper},
 #' respectively, if these are specified.
-#' 
+#'
 #' The (weighted) quantiles are computed with the function
 #' \code{\link{quantileWt}}.
-#' 
+#'
 #' @name getBreaks
 #' @param x a numeric vector to be categorized.
 #' @param weights an optional numeric vector containing sample weights.
@@ -40,7 +40,7 @@
 #' giving quantiles to be used as (positive) break points.  If supplied, this
 #' is preferred over \code{equidist}.
 #' @param strata an optional vector specifying a strata variable (e.g household ids).
-#' if specified, the mean of \code{x} (and also of \code{weights} if specified) is 
+#' if specified, the mean of \code{x} (and also of \code{weights} if specified) is
 #' computed within each strata before calculating the breaks.
 #' @return A numeric vector of break points.
 #' @author Andreas Alfons and Bernhard Meindl
@@ -48,23 +48,25 @@
 #' @seealso \code{\link{getCat}}, \code{\link{quantileWt}}
 #' @keywords manip
 #' @examples
-#' 
+#'
 #' data(eusilcS)
-#' 
+#'
 #' # semi-continuous variable, positive break points equidistant
 #' getBreaks(eusilcS$netIncome, weights=eusilcS$rb050)
-#' 
+#'
 #' # semi-continuous variable, positive break points not equidistant
-#' getBreaks(eusilcS$netIncome, weights=eusilcS$rb050, 
+#' getBreaks(eusilcS$netIncome, weights=eusilcS$rb050,
 #'     equidist = FALSE)
-#' 
+#'
 getBreaks <- function(x, weights = NULL, zeros = TRUE, lower = NULL,
   upper = NULL, equidist = TRUE, probs = NULL, strata=NULL) {
-  
+
+  . <- NULL
+
   if ( !is.null(strata) ) {
     if ( length(strata) != length(x) ) {
       stop("'strata' must have the same length as 'x'")
-    }    
+    }
     if ( is.null(weights) ) {
       dat <- data.table(x=x, strata=strata)
     } else {
@@ -76,10 +78,10 @@ getBreaks <- function(x, weights = NULL, zeros = TRUE, lower = NULL,
     } else {
       dat <- dat[,.(x=mean(x, na.rm=TRUE), weights=mean(weights,na.rm=TRUE)), by=key(dat)]
       weights <- dat$weights
-    }    
+    }
     x <- dat$x
   }
-  
+
   # initializations
   if(!is.numeric(x)) stop("'x' must be a numeric vector")
   if(!is.null(weights)) {
