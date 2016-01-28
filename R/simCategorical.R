@@ -61,9 +61,6 @@ generateValues <- function(dataSample, dataPop, params) {
     if ( meth %in% "multinom" ) {
       probs <- predict(mod, newdata=newdata, type="probs")
     }else if ( meth %in% "ctree" ) {
-      n <<- newdata
-      s <<- dataSample
-      
       probs <- predict(mod, newdata=data.table(newdata), type="prob")
       probs <- do.call("rbind",probs)
     }
