@@ -71,6 +71,11 @@ specifyInput <- function(data, hhid, hhsize=NULL, pid=NULL, weight=NULL, strata=
     sizes <- data[,.N,by=key(data)]
     data$pid <- paste(data[[hhid]], ".",unlist(sapply(sizes[["N"]], function(x) { seq(1, x) })), sep="")
   }
+  classes <- sapply(data,class)
+  for(i in seq_along(classes)){
+    classes[[i]][1]=="labelled"
+    class(data[[i]]) <- classes[[i]][-1]
+  }
   invisible(new("dataObj", data=data, hhid=hhid, hhsize=hhsize, pid=pid, weight=weight, strata=strata, ispopulation=population))
 }
 
