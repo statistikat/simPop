@@ -60,6 +60,12 @@ generateValues <- function(dataSample, dataPop, params) {
     
     if ( meth %in% "multinom" ) {
       probs <- predict(mod, newdata=newdata, type="probs")
+    }else if ( meth %in% "ctree" ) {
+      n <<- newdata
+      s <<- dataSample
+      
+      probs <- predict(mod, newdata=data.table(newdata), type="prob")
+      probs <- do.call("rbind",probs)
     }
     #if ( meth %in% "naivebayes" ) {
     #  probs <- predict(mod, newdata=newdata, type="raw")
@@ -172,6 +178,7 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
 #' multinomial log-linear models and random draws from the resulting
 #' distributions) or \code{"distribution"} (random draws from the observed
 #' conditional distributions of their multivariate realizations).
+#' \code{"ctree"}  for using Classification trees
 #' @param limit if \code{method} is \code{"multinom"}, this can be used to
 #' account for structural zeros. If only one additional variable is requested,
 #' a named list of lists should be supplied. The names of the list components
@@ -238,7 +245,7 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
 #' simPop <- simCategorical(simPop, additional=c("pl030", "pb220a"), method="multinom", nr_cpus=1)
 #' summary(simPop)
 simCategorical <- function(simPopObj, additional,
-    method=c("multinom", "distribution"),
+    method=c("multinom", "distribution","ctree"),
     limit=NULL, censor=NULL, maxit=500, MaxNWts=1500,
     eps=NULL, nr_cpus=NULL, regModel=NULL, seed=1,
     verbose=FALSE) {
@@ -379,8 +386,12 @@ simCategorical <- function(simPopObj, additional,
   for ( i in additional ) {
     counter <- counter+1
     cat(paste0("Simulating variable '",i,"'.\n"))
-    
-    regInput <- regressionInput(simPopObj, additional=additional[counter], regModel=regModel[counter])
+    if(is.list(regModel)){
+      curRegModel <- regModel[counter]
+    }else{
+      curRegModel <- regModel
+    }
+    regInput <- regressionInput(simPopObj, additional=additional[counter], regModel=curRegModel)
     predNames <- setdiff(regInput[[1]]$predNames, c(dataS@hhsize, dataS@strata))
     
     # observations with missings are excluded from simulation
@@ -408,10 +419,12 @@ simCategorical <- function(simPopObj, additional,
       if(verbose) cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
     }
     # simulation via recursive partitioning and regression trees
-    #if ( method == "ctree" ) {
-    #  formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
-    #  formula.cmd <- paste("suppressWarnings(ctree(", formula.cmd, ", weights=as.integer(dataSample$", dataS@weight, "), data=dataSample))", sep="")
-    #}
+    if ( method == "ctree" ) {
+      formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
+      formula.cmd <- paste("suppressWarnings(ctree(", formula.cmd, ", weights=as.integer(dataSample$", dataS@weight, "), data=dataSample))", sep="")
+      if(verbose) cat("we are running recursive partitioning:\n")
+      if(verbose) cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
+    }
     #if ( method == "naivebayes" ) {
     #  formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
     #  formula.cmd <- paste("naiveBayes(", formula.cmd, ", data=dataSample, usekernel=TRUE)", sep="")
