@@ -785,8 +785,8 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     params$indStrata <- indStrata
     params$predNames <- predNames
     params$additional <- c(additional, weight)
-    cat("running multinom with the following model:\n")
-    cat(gsub("))",")",gsub("suppressWarnings[(]","",params$command)),"\n")
+    if(verbose) cat("running multinom with the following model:\n")
+    if(verbose) cat(gsub("))",")",gsub("suppressWarnings[(]","",params$command)),"\n")
 
     # run in parallel if possible
     valuesCat <- runModel(dataS, dataP, params, typ="multinom")

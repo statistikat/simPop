@@ -378,7 +378,7 @@ simCategorical <- function(simPopObj, additional,
   counter <- 0
   for ( i in additional ) {
     counter <- counter+1
-    cat(paste0("Simulating variable '",i,"'.\n"))
+    if(verbose) cat(paste0("Simulating variable '",i,"'.\n"))
     
     regInput <- regressionInput(simPopObj, additional=additional[counter], regModel=regModel[counter])
     predNames <- setdiff(regInput[[1]]$predNames, c(dataS@hhsize, dataS@strata))
