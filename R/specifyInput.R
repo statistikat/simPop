@@ -73,8 +73,9 @@ specifyInput <- function(data, hhid, hhsize=NULL, pid=NULL, weight=NULL, strata=
   }
   classes <- sapply(data,class)
   for(i in seq_along(classes)){
-    classes[[i]][1]=="labelled"
-    class(data[[i]]) <- classes[[i]][-1]
+    if(classes[[i]][1]=="labelled"){ 
+      class(data[[i]]) <- classes[[i]][-1]
+    }
   }
   invisible(new("dataObj", data=data, hhid=hhid, hhsize=hhsize, pid=pid, weight=weight, strata=strata, ispopulation=population))
 }
