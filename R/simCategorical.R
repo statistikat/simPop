@@ -17,7 +17,6 @@ generateValues <- function(dataSample, dataPop, params) {
     invisible(unlist(head(dataSample[,cur.var,with=FALSE],1)))
   }else{
     # temporarily recode response vector
-    db <- copy(dataSample)
     dataSample[,cur.var:=cleanFactor(.SD),.SDcols=cur.var,with=FALSE]
     levelsResponse <- levels(unlist(dataSample[,cur.var,with=FALSE]))
     
@@ -33,7 +32,7 @@ generateValues <- function(dataSample, dataPop, params) {
     # be predicted from the model
     if ( excludeLevels ) {
       exclude <- mapply(function(pop, new) pop %in% new,
-          pop=grid[, hasNewLevels, drop=FALSE],
+          pop=grid[, hasNewLevels, drop=FALSE,with=FALSE],
           new=newLevels[hasNewLevels])
       if ( is.null(dim(exclude)) ) {
         exclude <- which(any(exclude))
@@ -273,12 +272,18 @@ simCategorical <- function(simPopObj, additional,
     stop("variables already exist in the population!\n")
   }
   
-  if ( length(regModel)==1 & length(additional)>1 ) {
-    if ( regModel[1] %in% c("available","basic") ) {
+  if ( (length(regModel)==1|class(regModel)=="formula") & length(additional)>1 ) {
+    if(class(regModel)=="formula"){
+      regModelL <- list()
+      for(i in seq_along(additional)){
+        regModelL[[i]] <- regModel
+      }
+      regModel <- regModelL
+    }else if ( regModel %in% c("available","basic") ) {
       regModel <- rep(regModel, length(additional))
     }
   }
-  if ( method=="distribution" & !is.null(regModel) ) {
+  if (!is.null(regModel) ) {
     if ( class(regModel)=="formula" ) {
       regModel <- list(regModel)
     }
@@ -297,7 +302,6 @@ simCategorical <- function(simPopObj, additional,
       regModel <- rep("basic", length(additional))
     }
   }
-  
   # parameters for parallel computing
   nr_strata <- length(levels(data_sample[[dataS@strata]]))
   data_sample[,dataS@strata,with=FALSE]
@@ -393,7 +397,7 @@ simCategorical <- function(simPopObj, additional,
   for ( i in additional ) {
     counter <- counter+1
     if(verbose) cat(paste0("Simulating variable '",i,"'.\n"))
-    if(is.list(regModel)){
+    if(length(regModel)>1){
       curRegModel <- regModel[counter]
     }else{
       curRegModel <- regModel
