@@ -13,16 +13,19 @@ generateValues <- function(dataSample, dataPop, params) {
   eps <- params$eps
   limit <- params$limit[[cur.var]]
   censor <- params$censor[[cur.var]]
-  if(length(unique(dataSample[[cur.var]]))==1){
-    invisible(head(dataSample[[cur.var]],1))
+  if(nrow(dataSample[!duplicated(dataSample[,cur.var,with=FALSE])])==1){
+    invisible(unlist(head(dataSample[,cur.var,with=FALSE],1)))
   }else{
     # temporarily recode response vector
-    dataSample[[cur.var]] <- cleanFactor(dataSample[[cur.var]])
-    levelsResponse <- levels(dataSample[[cur.var]])
+    db <- copy(dataSample)
+    dataSample[,cur.var:=cleanFactor(.SD),.SDcols=cur.var,with=FALSE]
+    levelsResponse <- levels(unlist(dataSample[,cur.var,with=FALSE]))
     
+    #indices for unique occurence
     indGrid <- split(1:nrow(dataPop), dataPop, drop=TRUE)
-    grid <- dataPop[sapply(indGrid, function(i) i[1]), , drop=FALSE]
-    grid <- as.data.frame(grid)
+    
+    #get only the first obs with unique combinations
+    grid <- dataPop[sapply(indGrid, function(i) i[1])]
     
     # in sample, observations with NAs have been removed to fit the
     # model, hence population can have additional levels
@@ -47,20 +50,20 @@ generateValues <- function(dataSample, dataPop, params) {
     
     # predict probabilities
     if ( length(exclude) == 0 ) {
-      newdata <- grid
+      newdata <- copy(grid)
     } else {
-      newdata <- grid[-exclude, , drop=FALSE]
+      newdata <- copy(grid[-exclude])
     }
     ind <- match(colnames(newdata), colnames(dataSample))
     for ( i in 1:length(ind) ) {
-      if ( is.factor(newdata[,i]) ) {
-        newdata[,i] <- factor(as.character(newdata[,i]), levels(dataSample[[ind[i]]]))
+      if (is.factor(unlist(newdata[,i,with=FALSE]))) {
+        newdata[,colnames(newdata)[i]:=factor(as.character(unlist(newdata[,colnames(newdata)[i],with=FALSE])),levels(dataSample[[ind[i]]])),with=FALSE]
       }
     }
     
     if ( meth %in% "multinom" ) {
       probs <- predict(mod, newdata=newdata, type="probs")
-    }else if ( meth %in% "ctree" ) {
+    }else if ( meth %in% c("ctree","cforest") ) {
       probs <- predict(mod, newdata=data.table(newdata), type="prob")
       probs <- do.call("rbind",probs)
     }
@@ -176,6 +179,7 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
 #' distributions) or \code{"distribution"} (random draws from the observed
 #' conditional distributions of their multivariate realizations).
 #' \code{"ctree"}  for using Classification trees
+#' \code{"cforest"}  for using random forest
 #' @param limit if \code{method} is \code{"multinom"}, this can be used to
 #' account for structural zeros. If only one additional variable is requested,
 #' a named list of lists should be supplied. The names of the list components
@@ -242,7 +246,7 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
 #' simPop <- simCategorical(simPop, additional=c("pl030", "pb220a"), method="multinom", nr_cpus=1)
 #' summary(simPop)
 simCategorical <- function(simPopObj, additional,
-    method=c("multinom", "distribution","ctree"),
+    method=c("multinom", "distribution","ctree","cforest"),
     limit=NULL, censor=NULL, maxit=500, MaxNWts=1500,
     eps=NULL, nr_cpus=NULL, regModel=NULL, seed=1,
     verbose=FALSE) {
@@ -259,7 +263,12 @@ simCategorical <- function(simPopObj, additional,
   data_pop <- popData(simPopObj)
   data_sample <- sampleData(simPopObj)
   basic <- simPopObj@basicHHvars
-  
+  if(verbose){
+    cat("Dimension of the population:\n")
+    print(dim(data_pop))
+    cat("Dimension of the sample:\n")
+    print(dim(data_sample))
+  }
   if ( any(additional %in% colnames(data_pop)) ) {
     stop("variables already exist in the population!\n")
   }
@@ -291,6 +300,7 @@ simCategorical <- function(simPopObj, additional,
   
   # parameters for parallel computing
   nr_strata <- length(levels(data_sample[[dataS@strata]]))
+  data_sample[,dataS@strata,with=FALSE]
   pp <- parallelParameters(nr_cpus=nr_cpus, nr_strata=nr_strata)
   parallel <- pp$parallel
   nr_cores <- pp$nr_cores
@@ -414,11 +424,16 @@ simCategorical <- function(simPopObj, additional,
           ", maxit=",maxit, ", MaxNWts=", MaxNWts,"))")
       if(verbose) cat("we are running the following multinom-model:\n")
       if(verbose) cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
-    }
-    # simulation via recursive partitioning and regression trees
-    if ( method == "ctree" ) {
+    }else if ( method == "ctree" ) {
+      # simulation via recursive partitioning and regression trees
       formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
       formula.cmd <- paste("suppressWarnings(ctree(", formula.cmd, ", weights=as.integer(dataSample$", dataS@weight, "), data=dataSample))", sep="")
+      if(verbose) cat("we are running recursive partitioning:\n")
+      if(verbose) cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
+    }else if ( method == "cforest" ) {
+      # simulation via recursive partitioning and regression trees
+      formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
+      formula.cmd <- paste("suppressWarnings(cforest(", formula.cmd, ", weights=as.integer(dataSample$", dataS@weight, "), data=dataSample))", sep="")
       if(verbose) cat("we are running recursive partitioning:\n")
       if(verbose) cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
     }
@@ -480,9 +495,14 @@ simCategorical <- function(simPopObj, additional,
                 dataPop=data_pop[indStrata[[x]], predNames, with=F], params
             )
           })
+      print(str(values))
     }
     values <- factor(unsplit(values, data_pop[[dataP@strata]]), levels=levelsResponse)
     ## add new categorical variable to data set
+    print(str(values))
+    print(length(values))
+    print(length(data_pop_o[[i]]))
+    print(i)
     data_pop_o[[i]] <- values
     simPopObj@pop@data <- data_pop_o    
   }
