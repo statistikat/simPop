@@ -392,7 +392,7 @@ simCategorical <- function(simPopObj, additional,
   counter <- 0
   for ( i in additional ) {
     counter <- counter+1
-    cat(paste0("Simulating variable '",i,"'.\n"))
+    if(verbose) cat(paste0("Simulating variable '",i,"'.\n"))
     if(is.list(regModel)){
       curRegModel <- regModel[counter]
     }else{
@@ -495,14 +495,14 @@ simCategorical <- function(simPopObj, additional,
                 dataPop=data_pop[indStrata[[x]], predNames, with=F], params
             )
           })
-      print(str(values))
+#      print(str(values))
     }
     values <- factor(unsplit(values, data_pop[[dataP@strata]]), levels=levelsResponse)
     ## add new categorical variable to data set
-    print(str(values))
-    print(length(values))
-    print(length(data_pop_o[[i]]))
-    print(i)
+#    print(str(values))
+#    print(length(values))
+#    print(length(data_pop_o[[i]]))
+#    print(i)
     data_pop_o[[i]] <- values
     simPopObj@pop@data <- data_pop_o    
   }
