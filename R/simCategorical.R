@@ -227,6 +227,7 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
 #' number generator, or an integer vector containing the state of the random
 #' number generator to be restored.
 #' @param verbose set to TRUE if additional print output should be shown.
+#' @param by defining which variable to use as split up variable of the estimation. Defaults to the strata variable.
 #' @return An object of class \code{\linkS4class{simPopObj}} containing survey
 #' data as well as the simulated population data including the categorical
 #' variables specified by argument \code{additional}.
@@ -248,7 +249,7 @@ simCategorical <- function(simPopObj, additional,
     method=c("multinom", "distribution","ctree","cforest"),
     limit=NULL, censor=NULL, maxit=500, MaxNWts=1500,
     eps=NULL, nr_cpus=NULL, regModel=NULL, seed=1,
-    verbose=FALSE) {
+    verbose=FALSE,by="strata") {
   
   x <- NULL
   
@@ -303,8 +304,19 @@ simCategorical <- function(simPopObj, additional,
     }
   }
   # parameters for parallel computing
-  nr_strata <- length(levels(data_sample[[dataS@strata]]))
-  data_sample[,dataS@strata,with=FALSE]
+  if(by=="strata"){
+    curStrata <- dataS@strata
+  }else{
+    curStrata <- by
+  }
+  if(!curStrata%in%colnames(data_sample)){
+    stop(curStrata," is defined as by variable, but not in the sample data set.")
+  }
+  if(!curStrata%in%colnames(data_pop)){
+    stop(curStrata," is defined as by variable, but not in the population data set.")
+  }
+  nr_strata <- length(levels(data_sample[[curStrata]]))
+  data_sample[,curStrata,with=FALSE]
   pp <- parallelParameters(nr_cpus=nr_cpus, nr_strata=nr_strata)
   parallel <- pp$parallel
   nr_cores <- pp$nr_cores
@@ -330,12 +342,12 @@ simCategorical <- function(simPopObj, additional,
   
   # list indStrata contains the indices of dataP split by strata
   N <- nrow(data_pop)
-  indStrata <- split(1:N, data_pop[[dataP@strata]])
+  indStrata <- split(1:N, data_pop[[curStrata]])
   
   ##### simulation
   if ( method == "distribution" ) {
     regInput <- regressionInput(simPopObj, additional=additional[1], regModel=regModel[1])
-    predNames <- setdiff(regInput[[1]]$predNames, c(dataS@hhsize, dataS@strata))
+    predNames <- setdiff(regInput[[1]]$predNames, c(dataS@hhsize, curStrata))
     
     # observations with missings are excluded from simulation
     # fix #31?
@@ -343,8 +355,8 @@ simCategorical <- function(simPopObj, additional,
     if ( length(exclude) > 0 ) {
       data_sample <- data_sample[-exclude,]
     }
-    data_sample <- checkFactor(data_sample, c(dataS@strata, predNames, additional))
-    data_pop <- checkFactor(data_pop, c(dataP@strata, predNames))
+    data_sample <- checkFactor(data_sample, c(curStrata, predNames, additional))
+    data_pop <- checkFactor(data_pop, c(curStrata, predNames))
     
     params <- list()
     params$grid <- expand.grid(lapply(data_sample[,additional, with=F], levels))
@@ -358,9 +370,9 @@ simCategorical <- function(simPopObj, additional,
       if ( have_win ) {
         cl <- makePSOCKcluster(nr_cores)
         registerDoParallel(cl,cores=nr_cores)
-        values <- foreach(x=levels(data_sample[[dataS@strata]]), .options.snow=list(preschedule=FALSE)) %dopar% {
+        values <- foreach(x=levels(data_sample[[curStrata]]), .options.snow=list(preschedule=FALSE)) %dopar% {
           generateValues_distribution(
-              dataSample=data_sample[data_sample[[dataS@strata]] == x,],
+              dataSample=data_sample[data_sample[[curStrata]] == x,],
               dataPop=data_pop[indStrata[[x]], params$basic, with=F], params
           )
         }
@@ -368,16 +380,16 @@ simCategorical <- function(simPopObj, additional,
       }
       # linux/max
       if ( !have_win ) {
-        values <- mclapply(levels(data_sample[[dataS@strata]]), function(x) {
+        values <- mclapply(levels(data_sample[[curStrata]]), function(x) {
               generateValues_distribution(
-                  dataSample=data_sample[data_sample[[dataS@strata]] == x,],
+                  dataSample=data_sample[data_sample[[curStrata]] == x,],
                   dataPop=data_pop[indStrata[[x]], params$basic, with=F], params)
             }, mc.cores=nr_cores)
       }
     } else {
-      values <- lapply(levels(data_sample[[dataS@strata]]), function(x) {
+      values <- lapply(levels(data_sample[[curStrata]]), function(x) {
             generateValues_distribution(
-                dataSample=data_sample[data_sample[[dataS@strata]] == x,c(additional,params$basic),with=F],
+                dataSample=data_sample[data_sample[[curStrata]] == x,c(additional,params$basic),with=F],
                 dataPop=data_pop[indStrata[[x]], params$basic, with=F], params)
           })
     }
@@ -403,7 +415,7 @@ simCategorical <- function(simPopObj, additional,
       curRegModel <- regModel
     }
     regInput <- regressionInput(simPopObj, additional=additional[counter], regModel=curRegModel)
-    predNames <- setdiff(regInput[[1]]$predNames, c(dataS@hhsize, dataS@strata))
+    predNames <- setdiff(regInput[[1]]$predNames, c(dataS@hhsize, curStrata))
     
     # observations with missings are excluded from simulation
     exclude <- getExclude(data_sample[,c(additional,predNames),with=F])
@@ -414,8 +426,8 @@ simCategorical <- function(simPopObj, additional,
     }
     
     # variables are coerced to factors
-    sampWork <- checkFactor(sampWork, unique(c(dataS@strata, predNames, additional)))
-    data_pop <- checkFactor(data_pop, unique(c(dataP@strata, predNames)))
+    sampWork <- checkFactor(sampWork, unique(c(curStrata, predNames, additional)))
+    data_pop <- checkFactor(data_pop, unique(c(curStrata, predNames)))
     
     # components of multinomial model are specified
     levelsResponse <- levels(sampWork[[i]])
@@ -475,9 +487,9 @@ simCategorical <- function(simPopObj, additional,
       if ( have_win ) {
         cl <- makePSOCKcluster(nr_cores)
         registerDoParallel(cl,cores=nr_cores)
-        values <- foreach(x=levels(data_sample[[dataS@strata]]), .options.snow=list(preschedule=FALSE)) %dopar% {
+        values <- foreach(x=levels(data_sample[[curStrata]]), .options.snow=list(preschedule=FALSE)) %dopar% {
           generateValues(
-              dataSample=sampWork[sampWork[[dataS@strata]] == x,],
+              dataSample=sampWork[sampWork[[curStrata]] == x,],
               dataPop=data_pop[indStrata[[x]], predNames, with=F], params
           )
         }
@@ -485,23 +497,23 @@ simCategorical <- function(simPopObj, additional,
       }
       # linux/mac
       if ( !have_win) {
-        values <- mclapply(levels(data_sample[[dataS@strata]]), function(x) {
+        values <- mclapply(levels(data_sample[[curStrata]]), function(x) {
               generateValues(
-                  dataSample=sampWork[sampWork[[dataS@strata]] == x,],
+                  dataSample=sampWork[sampWork[[curStrata]] == x,],
                   dataPop=data_pop[indStrata[[x]], predNames, with=F], params
               )
             }, mc.cores=nr_cores)
       }
     } else {
-      values <- lapply(levels(data_sample[[dataS@strata]]), function(x) {
+      values <- lapply(levels(data_sample[[curStrata]]), function(x) {
             generateValues(
-                dataSample=sampWork[sampWork[[dataS@strata]] == x,],
+                dataSample=sampWork[sampWork[[curStrata]] == x,],
                 dataPop=data_pop[indStrata[[x]], predNames, with=F], params
             )
           })
 #      print(str(values))
     }
-    values <- factor(unsplit(values, data_pop[[dataP@strata]]), levels=levelsResponse)
+    values <- factor(unsplit(values, data_pop[[curStrata]]), levels=levelsResponse)
     ## add new categorical variable to data set
 #    print(str(values))
 #    print(length(values))
