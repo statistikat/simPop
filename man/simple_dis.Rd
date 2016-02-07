@@ -41,7 +41,8 @@ should have the same categories as given ones. For more advanced methods see sim
 ## we don't have original data, so let's use eusilc
 data(eusilc13puf)
 data(eusilcS)
-v1 <- univariate.dis(eusilcS, eusilc13puf, additional = "db040", weights = "rb050", value = "vector")
+v1 <- univariate.dis(eusilcS, eusilc13puf, additional = "db040",
+weights = "rb050", value = "vector")
 table(v1)
 table(eusilc13puf$db040)
 ## we don't have original data, so let's use eusilc

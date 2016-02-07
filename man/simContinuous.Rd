@@ -5,13 +5,14 @@
 \title{Simulate continuous variables of population data}
 \usage{
 simContinuous(simPopObj, additional = "netIncome", method = c("multinom",
-  "lm"), zeros = TRUE, breaks = NULL, lower = NULL, upper = NULL,
-  equidist = TRUE, probs = NULL, gpd = TRUE, threshold = NULL,
-  est = "moments", limit = NULL, censor = NULL, log = TRUE,
-  const = NULL, alpha = 0.01, residuals = TRUE, keep = TRUE,
-  maxit = 500, MaxNWts = 1500, tol = .Machine$double.eps^0.5,
-  nr_cpus = NULL, eps = NULL, regModel = "basic", byHousehold = NULL,
-  imputeMissings = FALSE, seed, verbose = FALSE)
+  "lm", "poisson"), zeros = TRUE, breaks = NULL, lower = NULL,
+  upper = NULL, equidist = TRUE, probs = NULL, gpd = TRUE,
+  threshold = NULL, est = "moments", limit = NULL, censor = NULL,
+  log = TRUE, const = NULL, alpha = 0.01, residuals = TRUE,
+  keep = TRUE, maxit = 500, MaxNWts = 1500,
+  tol = .Machine$double.eps^0.5, nr_cpus = NULL, eps = NULL,
+  regModel = "basic", byHousehold = NULL, imputeMissings = FALSE, seed,
+  verbose = FALSE, by = "strata")
 }
 \arguments{
 \item{simPopObj}{a \code{\linkS4class{simPopObj}} holding household survey
@@ -24,8 +25,8 @@ Currently, only one additional variable can be simulated at a time.}
 \item{method}{a character string specifying the method to be used for
 simulating the continuous variable. Accepted values are \code{"multinom"},
 for using multinomial log-linear models combined with random draws from the
-resulting categories, and \code{"lm"}, for using (two-step) regression
-models combined with random error terms.}
+resulting categories, \code{"lm"}, for using (two-step) regression
+models combined with random error terms and \code{"poisson"} for using Poisson regression for count variables.}
 
 \item{zeros}{a logical indicating whether the variable specified by
 \code{additional} is semi-continuous, i.e., contains a considerable amount
@@ -158,6 +159,8 @@ number generator, or an integer vector containing the state of the random
 number generator to be restored.}
 
 \item{verbose}{(logical) if \code{TRUE}, additional output is written to the promt}
+
+\item{by}{defining which variable to use as split up variable of the estimation. Defaults to the strata variable.}
 }
 \value{
 An object of class \code{\linkS4class{simPopObj}} containing survey

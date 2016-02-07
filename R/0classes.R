@@ -15,6 +15,7 @@ setClassUnion('listOrNULL', c('list', 'NULL'))
 #' @import vcd
 #' @import methods
 #' @import Rcpp
+#' @import party
 #' @importFrom lattice bwplot panel.bwplot packet.number panel.points panel.refline panel.xyplot
 #' @importFrom laeken calibVars
 #' @importFrom MASS ginv
@@ -282,11 +283,7 @@ setMethod("samp", "simPopObj", function(obj, var=NULL) {
     ww <- paste0(ww, paste(var[is.na(varI)], collapse=" | "))
     warning(ww)
   }
-  if ( length(var)==1 ) {
-    return(sampData[[var]])
-  } else {
-    return(sampData[,var,with=F])
-  }
+  return(sampData[,var,with=F])
 })
 
 #' @export
@@ -297,9 +294,6 @@ setGeneric("samp<-", function(obj, var, value) {
 setReplaceMethod("samp", "simPopObj", function(obj, var, value) {
   if ( length(var) != 1) {
     stop("we can only set one variable!\n")
-  }
-  if ( !is.atomic(value) ) {
-    stop("argument 'value' must be a vector!\n")
   }
   obj@sample@data[[var]] <- value
   validObject(obj)
@@ -335,11 +329,7 @@ setMethod("pop", "simPopObj", function(obj, var=NULL) {
     ww <- paste0(ww, paste(var[is.na(varI)], collapse=" | "))
     warning(ww)
   }
-  if ( length(var)==1 ) {
-    return(popData(obj)[[var]])
-  } else {
-    return(popData[,var,with=F])
-  }
+  return(popData[,var,with=F])
 })
 
 #' @export
@@ -350,9 +340,6 @@ setGeneric("pop<-", function(obj, var, value) {
 setReplaceMethod("pop", "simPopObj", function(obj, var, value) {
   if ( length(var) != 1) {
     stop("we can only set one variable!\n")
-  }
-  if ( !is.atomic(value) ) {
-    stop("argument 'value' must be a vector!\n")
   }
   obj@pop@data[[var]] <- value
   validObject(obj)
