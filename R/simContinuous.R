@@ -96,7 +96,7 @@ generateValues_lm <- function(dataSample, dataPop, params) {
   levels <- params$levels
   residuals <- params$residuals
   log <- params$log
-  
+
   # fix: for each predictor, the level set must be equal in dataSample and dataPop
   for ( i in predNames ) {
     both <- intersect(levels(dataSample[[i]]), levels(dataPop[[i]]))
@@ -111,7 +111,7 @@ generateValues_lm <- function(dataSample, dataPop, params) {
   indGrid <- split(1:nrow(dataPop), dataPop, drop=TRUE)
   grid <- dataPop[sapply(indGrid, function(i) i[1]), , drop=FALSE]
   grid <- as.data.frame(grid)
-  
+
   # in sample, observations with NAs have been removed to fit the
   # model, hence population can have additional levels
   # these need to be removed since those probabilities cannot
@@ -146,7 +146,7 @@ generateValues_lm <- function(dataSample, dataPop, params) {
   newdata <- cbind(grid, 0)
   names(newdata) <- c(predNames, additional[1])
   newdata <- model.matrix(formula, data=newdata)
-  
+
   if ( length(exclude) == 0 ) {
     pred <- spPredict(mod, newdata)
   } else {
@@ -191,7 +191,7 @@ generateValues_poisson <- function(dataSample, dataPop, params) {
   levels <- params$levels
   residuals <- params$residuals
   log <- params$log
-  
+
   # fix: for each predictor, the level set must be equal in dataSample and dataPop
   for ( i in predNames ) {
     both <- intersect(levels(dataSample[[i]]), levels(dataPop[[i]]))
@@ -206,7 +206,7 @@ generateValues_poisson <- function(dataSample, dataPop, params) {
   indGrid <- split(1:nrow(dataPop), dataPop, drop=TRUE)
   grid <- dataPop[sapply(indGrid, function(i) i[1]), , drop=FALSE]
   grid <- as.data.frame(grid)
-  
+
   # in sample, observations with NAs have been removed to fit the
   # model, hence population can have additional levels
   # these need to be removed since those probabilities cannot
@@ -240,7 +240,7 @@ generateValues_poisson <- function(dataSample, dataPop, params) {
   # add 0 variable to combinations for use of 'model.matrix'
   newdata <- cbind(grid, 0)
   names(newdata) <- c(predNames, additional[1])
-  
+
   if ( length(exclude) == 0 ) {
     pred <- round(predict(mod, newdata=newdata,type="response"))
   } else {
@@ -412,7 +412,7 @@ runModel <- function(dataS, dataP, params, typ) {
     }
   } else {
     valuesCat <- lapply(levels(dataS[[strata]]), function(x) {
-       if(verbose){
+       if(params$verbose){
          cat("Current by group for the binary model:",x,"\n")
        }
       genVals(
@@ -650,7 +650,8 @@ simContinuous <- function(simPopObj, additional = "netIncome",
   alpha = 0.01, residuals = TRUE, keep = TRUE,
   maxit = 500, MaxNWts = 1500,
   tol = .Machine$double.eps^0.5,
-  nr_cpus=NULL, eps = NULL, regModel="basic", byHousehold=NULL, imputeMissings=FALSE, seed, verbose=FALSE,by="strata") {
+  nr_cpus=NULL, eps = NULL, regModel="basic", byHousehold=NULL,
+  imputeMissings=FALSE, seed, verbose=FALSE,by="strata") {
 
   x <- hhid <- vals <- id <- V1 <- randId <- NULL
 
@@ -799,7 +800,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
       useLm <- FALSE
       usePoisson <- TRUE
     }
-    
+
     if ( log ) {
       if ( is.null(const) ) {
         ## use log-transformation
@@ -905,6 +906,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     params$indStrata <- indStrata
     params$predNames <- predNames
     params$additional <- c(additional, weight)
+    params$verbose <- verbose
     if(verbose) cat("running multinom with the following model:\n")
     if(verbose) cat(gsub("))",")",gsub("suppressWarnings[(]","",params$command)),"\n")
 
@@ -1024,6 +1026,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     params$additional <- additional
     params$par <- par
     params$command <- estimationModel
+    params$verbose <- verbose
     # run in parallel if possible
 
     valuesCat <- runModel(dataS, dataP, params, typ="binary")
@@ -1094,7 +1097,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
       mod <- glm(formula, weights=weights, data=dataSample,family=poisson())
       coef <- coef(mod)
     }
-    
+
 
     # simulate values
     params <- list()
@@ -1119,12 +1122,13 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     params$nr_cpus <- nr_cpus
     params$indStrata <- indStrata
     params$predNames <- predNames
+    params$verbose <- verbose
     if(useLm){
       valuesTmp <- runModel(dataS, dataP, params, typ="lm")
     }else if(usePoisson){
       valuesTmp <- runModel(dataS, dataP, params, typ="poisson")
     }
-    
+
     ## put simulated values together
     if ( useMultinom ) {
       values[which(indP == 1)] <- valuesTmp
