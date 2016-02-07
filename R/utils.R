@@ -254,7 +254,9 @@ logitreg <- function(x, y, weights = rep(1, length(y)), start = rep(0, p), ...) 
     -2 * (w * dlogis(eta) * ifelse(y, 1/p, -1/(1-p))) %*% X
   }
   # some preparations
-  if(is.null(dim(x))) dim(x) <- c(length(x), 1)
+  if(is.null(dim(x))){
+    dim(x) <- c(length(x), 1)
+  }
   dn <- dimnames(x)[[2]]
   if(!length(dn)) dn <- paste("Var", 1:ncol(x), sep="")
   p <- ncol(x)

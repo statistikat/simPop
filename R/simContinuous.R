@@ -276,7 +276,10 @@ generateValues_binary <- function(dataSample, dataPop, params) {
   if ( !nrow(dataSample) ) {
     return(numeric())
   }
-
+  # if all y values are the same return the same value for everybody
+  if(length(unique(dataSample[[name]]))==1){
+    return(rep(dataSample[[name]][1],nrow(dataPop)))
+  }
   # unique combinations in the stratum of the population need to be computed for prediction
   indGrid <- split(1:nrow(dataPop), dataPop, drop=TRUE)
   grid <- dataPop[sapply(indGrid, function(i) i[1]), , drop=FALSE]
@@ -409,7 +412,9 @@ runModel <- function(dataS, dataP, params, typ) {
     }
   } else {
     valuesCat <- lapply(levels(dataS[[strata]]), function(x) {
-       cat(x,"\n")
+       if(verbose){
+         cat("Current by group for the binary model:",x,"\n")
+       }
       genVals(
         dataSample=dataS[dataS[[strata]] == x,c(predNames, additional), with=F],
         dataPop=dataP[indStrata[[x]], predNames, with=F],
@@ -701,6 +706,10 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     log <- FALSE
     warning("For Poisson regression the log=TRUE parameter is ignored and the numeric variable is not transformed.")
   }
+  if(!is.null(alpha)&&method=="poisson"){
+    alpha <- NULL
+    warning("For Poisson regression the alpha!=NULL is not yet implemented and therefore set to NULL.")
+  }
   if ( is.numeric(alpha) && length(alpha) > 0 ) {
     alpha <- rep(alpha, length.out=2)
     if ( !all(is.finite(alpha)) || any(alpha < 0) || sum(alpha) >= 1 ) {
@@ -976,6 +985,9 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     estimationModel <- as.formula(estimationModel)  # formula for model
     # auxiliary model for all strata (used in case of empty combinations)
     useAux <- !is.null(tol)
+    if(method=="poisson"){
+      useAux <- FALSE
+    }
     if ( useAux ) {
       if ( length(tol) != 1 || tol <= 0 ) {
         stop("'tol' must be a single small positive value!\n")
@@ -1126,7 +1138,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
         } else {
           values <- ifelse(is.na(indP), NA, 0) # only zeros
         }
-        values[which(indP == 1)] <- valuesTmp
+        values[indP] <- unlist(valuesTmp)
       } else {
         values <- valuesTmp
       }
