@@ -394,6 +394,7 @@ simCategorical <- function(simPopObj, additional,
           })
     }
     values <- do.call("rbind", values)
+    values <- values[unlist(indStrata),,drop=F]
 
     ## add new categorical variables to data set and return
     for ( i in additional ) {
