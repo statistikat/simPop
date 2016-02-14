@@ -7,7 +7,7 @@
 #' @description Various utility functions mainly used for simulating EU-SILC data
 #' @param file data set in R binary format, csv or sav (SPSS) of merged EU-SILC data.
 #' @param filed data set including the household register information
-#' @param filer data set including the personal register information 
+#' @param filer data set including the personal register information
 #' @param filep data set including the personal information
 #' @param fileh data set including the household information
 #' @param year year of origin
@@ -15,8 +15,8 @@
 #' @param x public-use file (for checkCol function) or orginal data
 #' @param y scientific-use file (for checkCol function)
 #' @param vars variables to be selected for function chooseSILCvars
-#' @details Collection of functions to import, select and modify data EU-SILC data. 
-#' Either file (merged data) or single files have to be provided for loadSILC().  
+#' @details Collection of functions to import, select and modify data EU-SILC data.
+#' Either file (merged data) or single files have to be provided for loadSILC().
 #' @author Matthias Templ
 NULL
 
@@ -29,23 +29,23 @@ NULL
 #' filer <- "zielvar_r_eurostat2013.sav"
 #' filep <- "zielvar_p_eurostat2013.sav"
 #' fileh <- "zielvar_h_eurostat2013.sav"
-#' suf4 <- loadSILC(filed = filed, 
-#'                  filer = filer, 
-#'                  filep = filep, 
+#' suf4 <- loadSILC(filed = filed,
+#'                  filer = filer,
+#'                  filep = filep,
 #'                  fileh = fileh)
 #' }
-#' @export 
-loadSILC <- function(file = NULL, 
-                     filed = NULL, 
-                     filer = NULL, 
-                     filep = NULL, 
-                     fileh = NULL, 
+#' @export
+loadSILC <- function(file = NULL,
+                     filed = NULL,
+                     filer = NULL,
+                     filep = NULL,
+                     fileh = NULL,
                      year = 2013,
                      country = "Austria"){
   if(is.null(file)) comment1 <- "unmerged original files imported"
   if(is.null(filep)) comment1 <- "already merged original files imported"
   if(!is.null(file) & !is.null(filed)) stop("provide a merged file or unmerged files but not both")
-  
+
   ##########################################
   ## read orginal file (if exists)
   if(!is.null(file)){
@@ -55,10 +55,10 @@ loadSILC <- function(file = NULL,
       x <- get(xyz)
     }
     if(substr(file, nc - 2, nc) == "sav"){
-      x <- haven:::read_spss(file)
+      x <- haven::read_spss(file)
     }
     if(substr(file, nc - 2, nc) == "csv"){
-      x <- utils:::read.csv2(file, header=TRUE, sep=",")
+      x <- utils::read.csv2(file, header=TRUE, sep=",")
     }
     if(country == "France"){
       DB135 <- NULL
@@ -78,32 +78,32 @@ loadSILC <- function(file = NULL,
       x_r <- get(xyzp)
       xyzp <- load(filed)
       x_d <- get(xyzp)
-    } 
+    }
     if(substr(filep, nc - 2, nc) == "sav"){
-      x_p <- read_spss(filep)
-      x_h <- read_spss(fileh)
-      x_r <- read_spss(filer)
-      x_d <- read_spss(filed)
+      x_p <- haven::read_spss(filep)
+      x_h <- haven::read_spss(fileh)
+      x_r <- haven::read_spss(filer)
+      x_d <- haven::read_spss(filed)
     }
     if(substr(filep, nc - 2, nc) == "csv"){
       x_p <- read.csv2(filep, header=TRUE, sep=",")
       x_h <- read.csv2(fileh, header=TRUE, sep=",")
       x_r <- read.csv2(filer, header=TRUE, sep=",")
       x_d <- read.csv2(filed, header=TRUE, sep=",")
-    }     
+    }
     ## ensure that colnames are lower case
     names(x_d) <- tolower(names(x_d))
     names(x_h) <- tolower(names(x_h))
     names(x_p) <- tolower(names(x_p))
     names(x_r) <- tolower(names(x_r))
-    
+
     x <- list("p"=x_p,
               "h"=x_h,
               "r"=x_r,
               "d"=x_d
     )
   }
-  
+
   return(x)
 }
 
@@ -115,23 +115,23 @@ loadSILC <- function(file = NULL,
 #' filer <- "zielvar_r_eurostat2013.sav"
 #' filep <- "zielvar_p_eurostat2013.sav"
 #' fileh <- "zielvar_h_eurostat2013.sav"
-#' suf4 <- loadSILC(filed = filed, 
-#'                  filer = filer, 
-#'                  filep = filep, 
+#' suf4 <- loadSILC(filed = filed,
+#'                  filer = filer,
+#'                  filep = filep,
 #'                  fileh = fileh)
-#' suf <- mergeSILC(d = suf4[["d"]], 
-#'                  r = suf4[["r"]], 
-#'                  h = suf4[["h"]], 
+#' suf <- mergeSILC(d = suf4[["d"]],
+#'                  r = suf4[["r"]],
+#'                  h = suf4[["h"]],
 #'                  p = suf4[["p"]])
-#' }                   
+#' }
 #' @export
 mergeSILC <- function(filed, filer, fileh, filep){
-  ## x ... list with four elements 
+  ## x ... list with four elements
   pers <- merge(x=filer, y=filep, by.x="rb030", by.y="pb030", all.x=TRUE)
   pers$pb030 <- pers$rb030
   hh <- merge(x=filed, y=fileh, by.x="db030", by.y="hb030", all.x=TRUE)
   hh$hb030 <- hh$db030
-  if(!("rx030" %in% colnames(pers))) pers$rx030 <- pers$rb040 
+  if(!("rx030" %in% colnames(pers))) pers$rx030 <- pers$rb040
   if(!("rx030" %in% colnames(hh))) hh$rx030 <- hh$pb030
   if(!("hb030" %in% colnames(hh))) hh$hb030 <- pers$db030
   m <- merge(x=pers, y=hh, by.x="rx030", by.y="hb030")
@@ -139,16 +139,16 @@ mergeSILC <- function(filed, filer, fileh, filep){
 }
 
 mergeSILC2 <- function(filed, filer, fileh, filep){
-  ## x ... list with four elements 
+  ## x ... list with four elements
   filed <- data.table(filed, key = "db030")
   filer <- data.table(filer, key = "rb030")
   fileh <- data.table(fileh, key = "hb030")
-  filep <- data.table(filep, key = "pb030") 
+  filep <- data.table(filep, key = "pb030")
   pers <- merge(x=filer, y=filep, all.x=TRUE, by.x="rb030", by.y="pb030")
   pers$pb030 <- pers$rb030
   hh <- merge(x=filed, y=fileh, all.x=TRUE, by.x="db030", by.y="hb030")
   hh$hb030 <- hh$db030
-  if(!("rx030" %in% colnames(pers))) pers$rx030 <- pers$rb040 
+  if(!("rx030" %in% colnames(pers))) pers$rx030 <- pers$rb040
   if(!("rx030" %in% colnames(hh))) hh$rx030 <- hh$pb030
   if(!("hb030" %in% colnames(hh))) hh$hb030 <- pers$db030
   hb030 <- NULL
@@ -163,13 +163,13 @@ mergeSILC2 <- function(filed, filer, fileh, filep){
 #' @name checkCol
 #' @examples
 #' data(eusilc13puf)
-#' ## instead of scientific-use file or 
+#' ## instead of scientific-use file or
 #' ## original data we took the 2006 synthetic data
 #' data(eusilcS)
 #' ## check which columns of y are in x
 #' checkCol(eusilc13puf, eusilcS)
 #' @export
-checkCol <- function(x, y=suf){
+checkCol <- function(x, y){
   int <- intersect(colnames(x), colnames(y))
   w <- which(!(colnames(y) %in% colnames(x)))
   cn <- colnames(y)[w]
@@ -186,9 +186,9 @@ checkCol <- function(x, y=suf){
 #' chooseSILCvars(x)
 #' }
 #' @export
-chooseSILCvars <- function(x, vars = c("db030", "db040", "rb030", "rb080", "rb090", "pl031", "pb220a", "py010g", 
-                                       "py021g", "py050g",  "py080g", "py090g", "py100g", "py110g", "py120g", "py130g", 
-                                       "py140g", "hy040g", "hy050g", "hy060g",  "hy070g", "hy080g" , "hy090g" ,"hy100g" , 
+chooseSILCvars <- function(x, vars = c("db030", "db040", "rb030", "rb080", "rb090", "pl031", "pb220a", "py010g",
+                                       "py021g", "py050g",  "py080g", "py090g", "py100g", "py110g", "py120g", "py130g",
+                                       "py140g", "hy040g", "hy050g", "hy060g",  "hy070g", "hy080g" , "hy090g" ,"hy100g" ,
                                        "hy110g", "hy120g", "hy130g", "hy140g", "db090", "rb050", "pb190", "pe040",
                                        "pl051","pl111" , "rb010"), country = NULL){
   x <- x[, vars]
@@ -201,24 +201,24 @@ chooseSILCvars <- function(x, vars = c("db030", "db040", "rb030", "rb080", "rb09
   if(!is.factor(x$pl111)) x$pl111 <- factor(x$pl111)
   if(!is.factor(x$rb010)) x$rb010 <- factor(x$rb010)
   if(!is.factor(x$pl031)) x$pl031 <- factor(x$pl031)
-  
-  ## category 1 is too small:  
+
+  ## category 1 is too small:
   tab <- table(x$pe040, useNA = "always")[2]
   if(tab < 10){
     x$pe040 <- revalue(x$pe040, c("0"="0-1", "1"="0-1" ))
     message(cat("Note: number of categories in pe040 was too small ( count =", tab, ").\n Categories 0 and 1 in pe040 have been combined to category 0-1\n"))
   }
-  
+
   if(country == "Austria"){
-    x$db040 <- factor(x$db040, 
-                      labels= c("Burgenland", "Lower Austria", "Vienna", 
-                                "Carinthia", "Styria", "Upper Austria", 
+    x$db040 <- factor(x$db040,
+                      labels= c("Burgenland", "Lower Austria", "Vienna",
+                                "Carinthia", "Styria", "Upper Austria",
                                 "Salzburg", "Tyrol", "Vorarlberg"))
   }
-  
+
   x <- x[order(x$db030),]
   x$db030 <- restructureHHid(x)
-  
+
   return(x)
 }
 
@@ -228,7 +228,7 @@ chooseSILCvars <- function(x, vars = c("db030", "db040", "rb030", "rb080", "rb09
 #' @examples
 #' \dontrun{
 #' ## wrapper to prepare SILC data
-#' ## on original silc data 
+#' ## on original silc data
 #' x <- loadSILC("new_workfile.RData")
 #' x <- chooseSILCvars(x)
 #' modifySILC(x)
@@ -249,19 +249,19 @@ modifySILC <- function(x, country = "Austria"){
   if(country == "Austria"){
     owncountry <- "AT"
     EU <- c("BE","BG","CY","CZ", "DE", "DK","EE","EL","ES","FI","FR","GR","HU","IE",
-            "IT","LT","LU","LV","MT","NL","PL","PT","RO","SI","SE","SK","UK") 
+            "IT","LT","LU","LV","MT","NL","PL","PT","RO","SI","SE","SK","UK")
   }
   other <- c("CAN","CH","CSA","HR","IS","ME","MK","NAF","NME","NO",
              "OAF","OAS","OCE","OEU","OT","OTH","TR","USA","WAF")
   x$pb220a <- factor(x$pb220a)
-  x$pb220a <- getCitizenship(data=x, owncountry=owncountry, 
+  x$pb220a <- getCitizenship(data=x, owncountry=owncountry,
                              EU=EU, other=other)
-  
+
   ## Recoding of Occupation to 1-digit version
   x$pl051 <- as.numeric(as.character(x$pl051))
   x$pl051 <- as.factor(trunc(x$pl051/10))
   x$pl051 <- revalue(x$pl051, c("0"="0-1", "1"="0-1" ))
-  
+
   if(country %in% c("France", "Austria")){
     ## Recoding of NACE code - this may be country-specific.
     levels(x$pl111)[which(levels(x$pl111) %in% c("1","2","3"))] <- "a"
@@ -282,7 +282,7 @@ modifySILC <- function(x, country = "Austria"){
     levels(x$pl111)[which(levels(x$pl111)=="85")] <- "p"
     levels(x$pl111)[which(levels(x$pl111) %in% c("86","87","88"))] <- "q"
     levels(x$pl111)[which(levels(x$pl111) %in% c("90","91","92","93","94",
-                                                 "95","96","97","98","99"))] <- "r-u" 
+                                                 "95","96","97","98","99"))] <- "r-u"
   }
   if(country == "Germany"){
     # Code for German recoding:
@@ -298,35 +298,35 @@ modifySILC <- function(x, country = "Austria"){
     levels(x$pl111)[which(levels(x$pl111)=="16")] <- "o"
     levels(x$pl111)[which(levels(x$pl111)=="17")] <- "p"
     levels(x$pl111)[which(levels(x$pl111)=="18")] <- "q"
-    levels(x$pl111)[which(levels(x$pl111) %in% c("19","20","21", "22","23"))] <- "r-u"                                
+    levels(x$pl111)[which(levels(x$pl111) %in% c("19","20","21", "22","23"))] <- "r-u"
   }
-  
+
   x$pgrossIncome <- rowSums(x[, c("py010g","py021g","py050g","py080g",
                                   "py090g","py100g", "py110g","py120g", "py130g","py140g")], na.rm = TRUE)
   x$hgrossIncome <- rowSums(x[, c("hy040g","hy050g","hy060g",
                                   "hy070g", "hy080g", "hy090g", "hy110g")], na.rm = TRUE)
   x$hgrossminus <- rowSums(x[, c("hy120g","hy130g","hy140g")], na.rm = TRUE)
-  
-  breaks <- getBreaks(x$pgrossIncome, x$rb050, 
+
+  breaks <- getBreaks(x$pgrossIncome, x$rb050,
                       upper = Inf, equidist = FALSE, zeros = TRUE)
   x$pgrossIncomeCat <- getCat(x$pgrossIncome, breaks)
-  breakshh <- getBreaks(x$hgrossIncome, x$rb050, 
+  breakshh <- getBreaks(x$hgrossIncome, x$rb050,
                         upper = Inf, equidist = FALSE, zeros = TRUE)
   x$hgrossIncomeCat <- getCat(x$hgrossIncome, breakshh)
-  breakshhm <- getBreaks(x$hgrossminus, x$rb050, 
+  breakshhm <- getBreaks(x$hgrossminus, x$rb050,
                          upper = Inf, equidist = FALSE, zeros = TRUE)
   x$hgrossminusCat <- getCat(x$hgrossminus, breakshhm)
-  
+
   x$country <- factor(rep(country, nrow(x)))
-  
+
   breaks <- c(min(x$age, na.rm = TRUE), seq(15, 65, 15), max(x$age, na.rm=TRUE))
-  x$ageCat <- cut(x$age, 
+  x$ageCat <- cut(x$age,
                   breaks=breaks, include.lowest=TRUE)
-  
+
   if(country == "France"){
     x$db040[which(x$db030 %in% c(9382,11461))] <- "FR82"
     x$db040 <- droplevels(x$db040)
   }
-  
+
   return(x)
 }

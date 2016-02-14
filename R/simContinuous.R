@@ -118,7 +118,7 @@ generateValues_lm <- function(dataSample, dataPop, params) {
   # be predicted from the model
   if ( excludeLevels ) {
     exclude <- mapply(function(pop, new) pop %in% new,
-      pop=grid[, hasNewLevels, drop=FALSE], new=newLevels[hasNewLevels]
+        pop=grid[, hasNewLevels, drop=FALSE], new=newLevels[hasNewLevels]
     )
     if ( is.null(dim(exclude)) ) {
       exclude <- which(any(exclude))
@@ -175,6 +175,94 @@ generateValues_lm <- function(dataSample, dataPop, params) {
   }
 }
 
+generateValues_poisson <- function(dataSample, dataPop, params) {
+  if ( !nrow(dataSample) ) {
+    return(rep(0,nrow(dataPop)))
+  }
+  coef <- params$coef
+  excludeLevels <- params$excludeLevels
+  hasNewLevels <- params$hasNewLevels
+  newLevels <- params$newLevels
+  command <- params$command
+  predNames <- params$predNames
+  additional <- params$additional
+  const <- params$const
+  formula <- params$formula
+  levels <- params$levels
+  residuals <- params$residuals
+  log <- params$log
+
+  # fix: for each predictor, the level set must be equal in dataSample and dataPop
+  for ( i in predNames ) {
+    both <- intersect(levels(dataSample[[i]]), levels(dataPop[[i]]))
+    a <- as.character(dataSample[[i]])
+    a[!a%in%both] <- NA
+    b <- as.character(dataPop[[i]])
+    b[!b %in%both] <- NA
+    dataSample[[i]] <- factor(a, levels=both)
+    dataPop[[i]] <- factor(b, levels=both)
+  }
+  # unique combinations in the stratum of the population need to be computed for prediction
+  indGrid <- split(1:nrow(dataPop), dataPop, drop=TRUE)
+  grid <- dataPop[sapply(indGrid, function(i) i[1]), , drop=FALSE]
+  grid <- as.data.frame(grid)
+
+  # in sample, observations with NAs have been removed to fit the
+  # model, hence population can have additional levels
+  # these need to be removed since those probabilities cannot
+  # be predicted from the model
+  if ( excludeLevels ) {
+    exclude <- mapply(function(pop, new) pop %in% new,
+        pop=grid[, hasNewLevels, drop=FALSE], new=newLevels[hasNewLevels]
+    )
+    if ( is.null(dim(exclude)) ) {
+      exclude <- which(any(exclude))
+    } else {
+      exclude <- which(apply(exclude, 1, any))
+    }
+    if ( length(exclude) > 0 ) {
+      grid <- grid[-exclude, , drop=FALSE]
+    }
+    for ( j in predNames[hasNewLevels] ) {
+      # drop new factor levels
+      grid[, j] <- factor(as.character(grid[, j]), levels=levels(dataSample[[j]]))
+    }
+  } else {
+    exclude <- integer()
+  }
+  # fit linear model
+  mod <- eval(parse(text=command))
+  # add coefficients from auxiliary model if necessary
+  #tmp <- coef
+  #coef[names(coef(mod))] <- coef(mod)
+  #mod$coefficients <- coef
+  # prediction
+  # add 0 variable to combinations for use of 'model.matrix'
+  newdata <- cbind(grid, 0)
+  names(newdata) <- c(predNames, additional[1])
+
+  if ( length(exclude) == 0 ) {
+    pred <- round(predict(mod, newdata=newdata,type="response"))
+  } else {
+    pred <- as.list(rep.int(NA, length(indGrid)))
+    pred[-exclude] <- round(predict(mod, newdata=newdata,type="response"))
+  }
+  pred <- unsplit(pred, dataPop, drop=TRUE)
+  # add error terms
+# addition of an error term, not implemented for Poisson Regression yet
+#  if ( residuals ) {
+#    error <- sample(residuals(mod), size=nrow(dataPop), replace=TRUE)
+#  } else {
+#    mu <- median(residuals(mod))
+#    sigma <- mad(residuals(mod))
+#    error <- rnorm(nrow(dataPop), mean=mu, sd=sigma)
+#  }
+  # return realizations
+  return(pred)
+  sim <- pred #+ error
+  #return(sim)
+}
+
 generateValues_binary <- function(dataSample, dataPop, params) {
   excludeLevels <- params$excludeLevels
   hasNewLevels <- params$hasNewLevels
@@ -188,7 +276,10 @@ generateValues_binary <- function(dataSample, dataPop, params) {
   if ( !nrow(dataSample) ) {
     return(numeric())
   }
-
+  # if all y values are the same return the same value for everybody
+  if(length(unique(dataSample[[name]]))==1){
+    return(rep(dataSample[[name]][1],nrow(dataPop)))
+  }
   # unique combinations in the stratum of the population need to be computed for prediction
   indGrid <- split(1:nrow(dataPop), dataPop, drop=TRUE)
   grid <- dataPop[sapply(indGrid, function(i) i[1]), , drop=FALSE]
@@ -273,17 +364,17 @@ genVals <- function(dataSample, dataPop, params, typ) {
     dataPop[[i]] <- cleanFactor(dataPop[[i]])
   }
 
-  if ( !typ %in% c("multinom","lm","binary") ) {
+  if ( !typ %in% c("multinom","lm","binary","poisson") ) {
     stop("unsupported value for argument 'type' in genVals()\n")
   }
   if ( typ=="binary") {
     res <- generateValues_binary(dataSample, dataPop, params)
-  }
-  if ( typ=="lm") {
+  }else if ( typ=="lm") {
     res <- generateValues_lm(dataSample, dataPop, params)
-  }
-  if ( typ=="multinom" ) {
+  }else if ( typ=="multinom" ) {
     res <- generateValues_multinom(dataSample, dataPop, params)
+  }else if ( typ=="poisson") {
+    res <- generateValues_poisson(dataSample, dataPop, params)
   }
   res
 }
@@ -321,6 +412,9 @@ runModel <- function(dataS, dataP, params, typ) {
     }
   } else {
     valuesCat <- lapply(levels(dataS[[strata]]), function(x) {
+       if(params$verbose){
+         cat("Current by group for the binary model:",x,"\n")
+       }
       genVals(
         dataSample=dataS[dataS[[strata]] == x,c(predNames, additional), with=F],
         dataPop=dataP[indStrata[[x]], predNames, with=F],
@@ -342,8 +436,8 @@ runModel <- function(dataS, dataP, params, typ) {
   if ( typ=="binary" ) {
     valuesCat <- unsplit(valuesCat, dataP[[strata]], drop=FALSE)
   }
-  if ( typ=="lm" ) {
-    valuesCat <- unlist(valuesCat, dataP[[strata]])
+  if ( typ%in%c("poisson","lm") ) {
+    valuesCat <- unsplit(valuesCat, dataP[[strata]], drop=FALSE)
   }
   return(valuesCat)
 }
@@ -401,8 +495,8 @@ runModel <- function(dataS, dataP, params, typ) {
 #' @param method a character string specifying the method to be used for
 #' simulating the continuous variable. Accepted values are \code{"multinom"},
 #' for using multinomial log-linear models combined with random draws from the
-#' resulting categories, and \code{"lm"}, for using (two-step) regression
-#' models combined with random error terms.
+#' resulting categories, \code{"lm"}, for using (two-step) regression
+#' models combined with random error terms and \code{"poisson"} for using Poisson regression for count variables.
 #' @param zeros a logical indicating whether the variable specified by
 #' \code{additional} is semi-continuous, i.e., contains a considerable amount
 #' of zeros. If \code{TRUE} and \code{method} is \code{"multinom"}, a separate
@@ -510,6 +604,8 @@ runModel <- function(dataS, dataP, params, typ) {
 #' @param seed optional; an integer value to be used as the seed of the random
 #' number generator, or an integer vector containing the state of the random
 #' number generator to be restored.
+#' @param verbose (logical) if \code{TRUE}, additional output is written to the promt
+#' @param by defining which variable to use as split up variable of the estimation. Defaults to the strata variable.
 #' @return An object of class \code{\linkS4class{simPopObj}} containing survey
 #' data as well as the simulated population data including the continuous
 #' variable specified by \code{additional} and possibly simulated categories
@@ -546,7 +642,7 @@ runModel <- function(dataS, dataP, params, typ) {
 #' }
 #'
 simContinuous <- function(simPopObj, additional = "netIncome",
-  method = c("multinom", "lm"), zeros = TRUE,
+  method = c("multinom", "lm","poisson"), zeros = TRUE,
   breaks = NULL, lower = NULL, upper = NULL,
   equidist = TRUE, probs = NULL, gpd = TRUE,
   threshold = NULL, est = "moments", limit = NULL,
@@ -554,9 +650,10 @@ simContinuous <- function(simPopObj, additional = "netIncome",
   alpha = 0.01, residuals = TRUE, keep = TRUE,
   maxit = 500, MaxNWts = 1500,
   tol = .Machine$double.eps^0.5,
-  nr_cpus=NULL, eps = NULL, regModel="basic", byHousehold=NULL, imputeMissings=FALSE, seed) {
+  nr_cpus=NULL, eps = NULL, regModel="basic", byHousehold=NULL,
+  imputeMissings=FALSE, seed, verbose=FALSE,by="strata") {
 
-  x <- hhid <- vals <- id <- V1 <- NULL
+  x <- hhid <- vals <- id <- V1 <- randId <- NULL
 
   if ( !is.null(byHousehold) ) {
     if ( !byHousehold %in% c("mean","sum","random") ) {
@@ -567,7 +664,11 @@ simContinuous <- function(simPopObj, additional = "netIncome",
   samp <- simPopObj@sample
   pop <- simPopObj@pop
   basic <- simPopObj@basicHHvars
-  strata <- samp@strata
+  if(by=="strata"){
+    strata <- samp@strata
+  }else if(!is.null(by)){
+    strata <- by
+  }
   weight <- samp@weight
 
   dataS <- samp@data
@@ -594,12 +695,22 @@ simContinuous <- function(simPopObj, additional = "netIncome",
   estimationModel <- regInput[[1]]$formula
 
   varNames <- unique(c(predNames, weight, additional, strata))
+  if(!strata%in%colnames(dataS)){
+    stop(strata," is defined as by variable, but not in the sample data set.")
+  }
   dataS <- dataS[,varNames, with=F]
 
   method <- match.arg(method)
   zeros <- isTRUE(zeros)
   log <- isTRUE(log)
-
+  if(log&&method=="poisson"){
+    log <- FALSE
+    warning("For Poisson regression the log=TRUE parameter is ignored and the numeric variable is not transformed.")
+  }
+  if(!is.null(alpha)&&method=="poisson"){
+    alpha <- NULL
+    warning("For Poisson regression the alpha!=NULL is not yet implemented and therefore set to NULL.")
+  }
   if ( is.numeric(alpha) && length(alpha) > 0 ) {
     alpha <- rep(alpha, length.out=2)
     if ( !all(is.finite(alpha)) || any(alpha < 0) || sum(alpha) >= 1 ) {
@@ -618,7 +729,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
 
   # temporarily impute (using hotdeck) / or check (if imputeMissings=FALSE)
   # missing values in additional variables in the sample
-  if ( is.null(samp@strata) ) {
+  if ( is.null(strata) ) {
     modelVars <- setdiff(predNames, c(weight,basic,pop@hhsize))
   } else {
     modelVars <- setdiff(predNames, c(strata,weight,basic,pop@hhsize))
@@ -626,7 +737,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
 
   if ( length(modelVars) > 0 & imputeMissings ) {
     dataS_orig <- dataS[,modelVars,with=F]
-    dataS <- hotdeck(dataS, variable=modelVars, domain_var=sample@strata, imp_var=FALSE)
+    dataS <- hotdeck(dataS, variable=modelVars, domain_var=strata, imp_var=FALSE)
   }
 
   # check for NAs and warn user
@@ -653,8 +764,11 @@ simContinuous <- function(simPopObj, additional = "netIncome",
   }
 
   # variables are coerced to factors
-  select <- unique(c(predNames, samp@strata)) # strata always included
+  select <- unique(c(predNames, strata)) # strata always included
   dataS <- checkFactor(dataS, select)
+  if(!strata%in%colnames(dataP)){
+    stop(strata," is defined as by variable, but not in the population data set.")
+  }
   dataP <- checkFactor(dataP, select)
 
   # sample data of variable to be simulated
@@ -666,6 +780,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     useMultinom <- TRUE
     useLogit <- FALSE
     useLm <- FALSE
+    usePoisson <- FALSE
     # define break points (if missing)
     if ( haveBreaks ) {
       checkBreaks(breaks)
@@ -678,7 +793,14 @@ simContinuous <- function(simPopObj, additional = "netIncome",
       breaks <- getBreaks(additionalS, dataS[[weight]], zeros, lower, upper, equidist, probs)
     }
   } else {
-    useLm <- TRUE
+    if(method=="lm"){
+      useLm <- TRUE
+      usePoisson <- FALSE
+    }else if(method=="poisson"){
+      useLm <- FALSE
+      usePoisson <- TRUE
+    }
+
     if ( log ) {
       if ( is.null(const) ) {
         ## use log-transformation
@@ -784,8 +906,9 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     params$indStrata <- indStrata
     params$predNames <- predNames
     params$additional <- c(additional, weight)
-    cat("running multinom with the following model:\n")
-    cat(gsub("))",")",gsub("suppressWarnings[(]","",params$command)),"\n")
+    params$verbose <- verbose
+    if(verbose) cat("running multinom with the following model:\n")
+    if(verbose) cat(gsub("))",")",gsub("suppressWarnings[(]","",params$command)),"\n")
 
     # run in parallel if possible
     valuesCat <- runModel(dataS, dataP, params, typ="multinom")
@@ -864,6 +987,9 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     estimationModel <- as.formula(estimationModel)  # formula for model
     # auxiliary model for all strata (used in case of empty combinations)
     useAux <- !is.null(tol)
+    if(method=="poisson"){
+      useAux <- FALSE
+    }
     if ( useAux ) {
       if ( length(tol) != 1 || tol <= 0 ) {
         stop("'tol' must be a single small positive value!\n")
@@ -900,26 +1026,26 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     params$additional <- additional
     params$par <- par
     params$command <- estimationModel
+    params$verbose <- verbose
     # run in parallel if possible
 
     valuesCat <- runModel(dataS, dataP, params, typ="binary")
   }
 
-  if ( useLm ) {
+  if ( useLm || usePoisson ) {
     ## some preparations
     if ( useMultinom ) {
       catLm <- names(tcat)[ncat]  # category for positive values
       dataS <- dataS[response == catLm, , drop=FALSE]
       indP <- valuesCat == catLm
     } else if( useLogit ) {
-      dataS <- dataS[indS, , drop=FALSE]  # select only non-zeros
+      dataS <- dataS[indS]  # select only non-zeros
       indP <- valuesCat == 1  # indicates non-zeros in population
     }
     if ( useMultinom || useLogit ) {
       # adjust population data
-      ii <- which(indP)
-      if ( length(ii) > 0 ) {
-        dataPop <- dataP[which(indP), , drop=FALSE]
+      if ( any(indP) ) {
+        dataPop <- dataP[indP]
       } else {
         dataPop <- dataP
       }
@@ -963,13 +1089,23 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     formula <- as.formula(fstring)
     # auxiliary model for all strata (used in case of empty combinations)
     weights <- dataSample[[weight]]
-    mod <- lm(formula, weights=weights, data=dataSample)
-    coef <- coef(mod)
+    if(useLm){
+      mod <- lm(formula, weights=weights, data=dataSample)
+      coef <- coef(mod)
+    }else if(usePoisson){
+      mod <- glm(formula, weights=weights, data=dataSample,family=poisson())
+      coef <- coef(mod)
+    }
+
 
     # simulate values
     params <- list()
     params$coef <- coef
-    params$command <- paste("lm(", fstring,", weights=", weight, ", data=dataSample)", sep="")
+    if(useLm){
+      params$command <- paste("lm(", fstring,", weights=", weight, ", data=dataSample)", sep="")
+    }else if(usePoisson){
+      params$command <- paste("glm(", fstring,", weights=", weight, ", data=dataSample,family=poisson())", sep="")
+    }
     #params$name <- fname
     params$name <- additional
     params$excludeLevels <- excludeLevels
@@ -985,8 +1121,13 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     params$nr_cpus <- nr_cpus
     params$indStrata <- indStrata
     params$predNames <- predNames
+    params$verbose <- verbose
+    if(useLm){
+      valuesTmp <- runModel(dataSample, dataPop, params, typ="lm")
+    }else if(usePoisson){
+      valuesTmp <- runModel(dataSample, dataPop, params, typ="poisson")
+    }
 
-    valuesTmp <- runModel(dataS, dataP, params, typ="lm")
     ## put simulated values together
     if ( useMultinom ) {
       values[which(indP == 1)] <- valuesTmp
@@ -995,12 +1136,11 @@ simContinuous <- function(simPopObj, additional = "netIncome",
         if ( log && is.null(const) && haveNeg ) {
           # only one category for non-positive values (two breakpoints, one of them is 0)
           values <- rep.int(NA, N)
-          nonpos <- which(indP == 0)
-          values[nonpos] <- runif(length(nonpos), breaks[1], breaks[2])
+          values[indP] <- runif(sum(indP), breaks[1], breaks[2])
         } else {
           values <- ifelse(is.na(indP), NA, 0) # only zeros
         }
-        values[which(indP == 1)] <- valuesTmp
+        values[indP] <- valuesTmp
       } else {
         values <- valuesTmp
       }

@@ -46,7 +46,8 @@ simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), 
       It must be an object of class 'dataObj' that can be created using function specifyInput()!\n")
   }
   if ( dataS@ispopulation ) {
-    stop("dataS must contain sample information!\n")
+    cat("the structure is created from a population! \n")
+    #stop("dataS must contain sample information!\n")
   }
 
   if ( is.null(basicHHvars) ) {
@@ -73,7 +74,12 @@ simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), 
 
   # extract variables
   hid <- dataS@data[[dataS@hhid]]
-  w <- dataS@data[[dataS@weight]]
+  if ( dataS@ispopulation ) {
+    w <- rep(1,length(hid))
+  }else{
+    w <- dataS@data[[dataS@weight]]  
+  }
+  
   hsize <- dataS@data[[dataS@hhsize]]
   if ( !is.null(dataS@strata) ) {
     strata <- factor(dataS@data[[dataS@strata]])

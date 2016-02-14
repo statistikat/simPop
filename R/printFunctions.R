@@ -30,7 +30,12 @@ setMethod("show", "simPopObj", function(object){
     dd <- dim(popData(object))
     cat(dname, " of size \n", dd[1], "x", dd[2], "\n")
     cat("\n")
-    cat("build from a sample of size \n")
+    if(sampleData(object)[,all(object@sample@weight==1),with=TRUE]){
+      cat("build from a population of size \n")
+    }else{
+      cat("build from a sample of size \n")  
+    }  
+    
     dd <- dim(sampleData(object))
     cat(dd[1],"x",dd[2])
     cat("\n")
