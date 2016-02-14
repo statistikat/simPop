@@ -177,7 +177,7 @@ generateValues_lm <- function(dataSample, dataPop, params) {
 
 generateValues_poisson <- function(dataSample, dataPop, params) {
   if ( !nrow(dataSample) ) {
-    return(numeric())
+    return(rep(0,nrow(dataPop)))
   }
   coef <- params$coef
   excludeLevels <- params$excludeLevels
@@ -436,8 +436,8 @@ runModel <- function(dataS, dataP, params, typ) {
   if ( typ=="binary" ) {
     valuesCat <- unsplit(valuesCat, dataP[[strata]], drop=FALSE)
   }
-  if ( typ=="lm" ) {
-    valuesCat <- unlist(valuesCat, dataP[[strata]])
+  if ( typ%in%c("poisson","lm") ) {
+    valuesCat <- unsplit(valuesCat, dataP[[strata]], drop=FALSE)
   }
   return(valuesCat)
 }
@@ -1032,21 +1032,20 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     valuesCat <- runModel(dataS, dataP, params, typ="binary")
   }
 
-  if ( useLm || usePoisson) {
+  if ( useLm || usePoisson ) {
     ## some preparations
     if ( useMultinom ) {
       catLm <- names(tcat)[ncat]  # category for positive values
       dataS <- dataS[response == catLm, , drop=FALSE]
       indP <- valuesCat == catLm
     } else if( useLogit ) {
-      dataS <- dataS[indS, , drop=FALSE]  # select only non-zeros
+      dataS <- dataS[indS]  # select only non-zeros
       indP <- valuesCat == 1  # indicates non-zeros in population
     }
     if ( useMultinom || useLogit ) {
       # adjust population data
-      ii <- which(indP)
-      if ( length(ii) > 0 ) {
-        dataPop <- dataP[which(indP), , drop=FALSE]
+      if ( any(indP) ) {
+        dataPop <- dataP[indP]
       } else {
         dataPop <- dataP
       }
@@ -1124,9 +1123,9 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     params$predNames <- predNames
     params$verbose <- verbose
     if(useLm){
-      valuesTmp <- runModel(dataS, dataP, params, typ="lm")
+      valuesTmp <- runModel(dataSample, dataPop, params, typ="lm")
     }else if(usePoisson){
-      valuesTmp <- runModel(dataS, dataP, params, typ="poisson")
+      valuesTmp <- runModel(dataSample, dataPop, params, typ="poisson")
     }
 
     ## put simulated values together
@@ -1137,12 +1136,11 @@ simContinuous <- function(simPopObj, additional = "netIncome",
         if ( log && is.null(const) && haveNeg ) {
           # only one category for non-positive values (two breakpoints, one of them is 0)
           values <- rep.int(NA, N)
-          nonpos <- which(indP == 0)
-          values[nonpos] <- runif(length(nonpos), breaks[1], breaks[2])
+          values[indP] <- runif(sum(indP), breaks[1], breaks[2])
         } else {
           values <- ifelse(is.na(indP), NA, 0) # only zeros
         }
-        values[indP] <- unlist(valuesTmp)
+        values[indP] <- valuesTmp
       } else {
         values <- valuesTmp
       }
