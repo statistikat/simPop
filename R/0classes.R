@@ -283,7 +283,12 @@ setMethod("samp", "simPopObj", function(obj, var=NULL) {
     ww <- paste0(ww, paste(var[is.na(varI)], collapse=" | "))
     warning(ww)
   }
-  return(sampData[,var,with=F])
+  
+  if ( length(var)==1 ) {
+    return(sampData[[var]])
+  } else {
+    return(sampData[,var,with=F])
+  }
 })
 
 #' @export
@@ -329,7 +334,11 @@ setMethod("pop", "simPopObj", function(obj, var=NULL) {
     ww <- paste0(ww, paste(var[is.na(varI)], collapse=" | "))
     warning(ww)
   }
-  return(popData[,var,with=F])
+  if ( length(var)==1 ) {
+    return(popData[[var]])
+  } else {
+    return(popData[,var,with=F])
+  }
 })
 
 #' @export
