@@ -26,8 +26,8 @@ setClassUnion('listOrNULL', c('list', 'NULL'))
 #' @importFrom utils read.csv2 tail
 #' @importFrom stats median model.matrix optim plogis ppoints predict rnorm runif uniroot var weighted.mean
 # removed  stats quantilerexp
-#' @importFrom("stats", "glm", "poisson")
-#' @importFrom("utils", "head")
+#' @importFrom stats glm poisson 
+#' @importFrom utils head
 #' @importFrom plyr revalue
 NULL
 
