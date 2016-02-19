@@ -77,6 +77,8 @@ extracted from the input object \code{inp}.
 
 set.seed(1234)  # for reproducibility
 data(eusilcS)   # load sample data
+\dontrun{
+## approx. 20 seconds computation time
 inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize",
   strata="db040", weight="db090")
 simPop <- simStructure(data=inp, method="direct",
@@ -91,6 +93,7 @@ class(eusilcM)
 # plot results
 spBwplot(eusilcM, x="netIncome", cond=NULL)
 spBwplot(eusilcM, x="netIncome", cond="rb090", layout=c(1,2))
+}
 
 }
 \author{

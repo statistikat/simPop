@@ -25,6 +25,8 @@
 #' @examples
 #' data(eusilcS)
 #' data(eusilcP)
+#' \dontrun{
+#' ## approx. 20 seconds computation time
 #' inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
 #' inp <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090"))
 #' inp <- simCategorical(inp, additional=c("pl030", "pb220a"), method="multinom",nr_cpus=1)
@@ -34,6 +36,7 @@
 #' colnames(margins) <- c("db040", "rb090", "pb220a", "freq")
 #' inp <- addKnownMargins(inp, margins)
 #' str(inp)
+#' }
 addKnownMargins <- function(inp, margins) {
   dataP <- inp@pop@data
   margins <- as.data.frame(margins)

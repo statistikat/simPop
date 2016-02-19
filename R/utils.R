@@ -67,22 +67,22 @@ dropLevels <- function(x, select = names(x)) {
   x
 }
 
-# create factor that includes NA
-factorNA <- function(x, always = FALSE) {
-  always <- isTRUE(always)
-  if(is.factor(x)) {
-    l <- levels(x)
-    if(NA %in% l || !(always || any(is.na(x)))) x
-    else {
-      l <- c(l, NA)
-      factor(x, levels=c(levels(x), NA), exclude=c())
-    }
-  } else {
-    if(always) {
-      factor(c(NA, x), exclude=c())[-1]  # little trick
-    } else factor(x, exclude=c())
-  }
-}
+# # create factor that includes NA
+# factorNA <- function(x, always = FALSE) {
+#   always <- isTRUE(always)
+#   if(is.factor(x)) {
+#     l <- levels(x)
+#     if(NA %in% l || !(always || any(is.na(x)))) x
+#     else {
+#       l <- c(l, NA)
+#       factor(x, levels=c(levels(x), NA), exclude=c())
+#     }
+#   } else {
+#     if(always) {
+#       factor(c(NA, x), exclude=c())[-1]  # little trick
+#     } else factor(x, exclude=c())
+#   }
+# }
 
 
 ## get which observations contain NAs (and need to be excluded)

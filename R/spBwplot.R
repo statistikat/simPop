@@ -46,6 +46,8 @@
 #'
 #' set.seed(1234)  # for reproducibility
 #' data(eusilcS)   # load sample data
+#' \dontrun{
+#' ## approx. 20 seconds computation time
 #' inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize",
 #'   strata="db040", weight="db090")
 #' simPop <- simStructure(data=inp, method="direct",
@@ -60,6 +62,7 @@
 #' # plot results
 #' spBwplot(eusilcM, x="netIncome", cond=NULL)
 #' spBwplot(eusilcM, x="netIncome", cond="rb090", layout=c(1,2))
+#' }
 #'
 spBwplot <- function(inp, x, cond = NULL, horizontal = TRUE,
                      coef = 1.5, zeros = TRUE, minRatio = NULL,

@@ -23,7 +23,7 @@ getHsize(data, hhid)
 
 restructureHHid(data, hhid)
 
-factorNA(x, always = FALSE)
+factorNA(x, always = FALSE, newval = NA)
 }
 \arguments{
 \item{birth}{year of birth}

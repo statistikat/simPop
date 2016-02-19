@@ -41,6 +41,8 @@
 #' @keywords datagen
 #' @examples
 #' data(eusilcS)
+#' \dontrun{
+#' ## approx. 20 seconds computation time
 #' inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize",
 #'   strata="db040", weight="db090")
 #' simPopObj <- simStructure(data=inp, method="direct",
@@ -66,6 +68,7 @@
 #'   conditional = c("netIncomeCat", "pl030"), replaceEmpty = "sequential", seed=1 )
 #'
 #' class(simPopObj)
+#' }
 simComponents <- function(simPopObj, total="netIncome",
   components = c("py010n", "py050n", "py090n", "py100n", "py110n", "py120n", "py130n", "py140n"),
   conditional=c(getCatName(total), "pl030"), replaceEmpty=c("sequential", "min"), seed) {

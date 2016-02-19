@@ -115,6 +115,8 @@ calcFinalWeights <- function(data0, totals0, params) {
 #' @examples
 #' data(eusilcS) # load sample data
 #' data(eusilcP) # population data
+#' \dontrun{
+#' ## approx. 20 seconds computation time
 #' inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
 #' simPop <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090"))
 #' simPop <- simCategorical(simPop, additional=c("pl030", "pb220a"), method="multinom", nr_cpus=1)
@@ -124,6 +126,7 @@ calcFinalWeights <- function(data0, totals0, params) {
 #'   xtabs(rep(1, nrow(eusilcP)) ~ eusilcP$region + eusilcP$gender + eusilcP$citizenship))
 #' colnames(margins) <- c("db040", "rb090", "pb220a", "freq")
 #' simPop <- addKnownMargins(simPop, margins)
+#' }
 #'
 #' # apply simulated annealing
 #' \dontrun{

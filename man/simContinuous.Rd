@@ -219,6 +219,8 @@ need to be simulated beforehand with the functions
 \examples{
 
 data(eusilcS)
+\dontrun{
+## approx. 20 seconds computation time
 inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
 simPop <- simStructure(data=inp, method="direct",
   basicHHvars=c("age", "rb090", "hsize", "pl030", "pb220a"))
@@ -230,6 +232,7 @@ eusilcM <- simContinuous(simPop, additional="netIncome",
               regModel = regModel,
               upper=200000, equidist=FALSE, nr_cpus=1)
 class(eusilcM)
+}
 
 \dontrun{
 # two-step regression

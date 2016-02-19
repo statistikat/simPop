@@ -56,6 +56,8 @@ the functions \code{\link{simStructure}}, \code{\link{simCategorical}} and
 }
 \examples{
 data(eusilcS)
+\dontrun{
+## approx. 20 seconds computation time
 inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize",
   strata="db040", weight="db090")
 simPopObj <- simStructure(data=inp, method="direct",
@@ -81,6 +83,7 @@ simPopObj <- simComponents(simPopObj=simPopObj, total="netIncome",
   conditional = c("netIncomeCat", "pl030"), replaceEmpty = "sequential", seed=1 )
 
 class(simPopObj)
+}
 }
 \author{
 Stefan Kraft and Andreas Alfons and Bernhard Meindl

@@ -6,9 +6,10 @@
 \alias{univariate.dis}
 \title{Simple generation of new variables}
 \usage{
-univariate.dis(puf, data, additional, weights, value = "data")
+univariate.dis(puf, data, additional, weights, value = "data", fNA = NA)
 
-conditional.dis(puf, data, additional, conditional, weights, value = "data")
+conditional.dis(puf, data, additional, conditional, weights, value = "data",
+  fNA = NA)
 }
 \arguments{
 \item{puf}{data for which one additional column specified by function argument \sQuote{additional} is simulated}
@@ -21,6 +22,8 @@ conditional.dis(puf, data, additional, conditional, weights, value = "data")
 
 \item{value}{if \dQuote{data} then the puf including the additional variable is returned, otherwise only
 the simulated vector.}
+
+\item{fNA}{only used with missing values if another code as NA should be used}
 
 \item{conditional}{conditioning variable}
 }

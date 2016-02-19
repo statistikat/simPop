@@ -10,6 +10,7 @@
 #' @param weights sampling weights from data
 #' @param value if \dQuote{data} then the puf including the additional variable is returned, otherwise only
 #' the simulated vector.
+#' @param fNA only used with missing values if another code as NA should be used
 #' @details Function uni.distribution: random draws from the weighted univariate distribution of
 #' the original data
 #'
@@ -33,14 +34,14 @@ NULL
 #' table(v1)
 #' table(eusilc13puf$db040)
 #' @export
-univariate.dis <- function(puf, data, additional, weights, value = "data"){
+univariate.dis <- function(puf, data, additional, weights, value = "data", fNA = NA){
   if(!(additional %in% colnames(data))) stop(paste("variable", additional, "not in data"))
   if(length(additional) != 1 | !is.character(additional)) stop("additional must be a string (vector of lenght 1)")
   if(length(weights) != 1 | !is.character(weights)) stop("weights must be a string (vector of lenght 1)")
   if(is.null(dim(data))) stop("data must be a matrix or data.frame")
   if(is.null(dim(puf))) stop("puf must be a matrix or data.frame")
   if(sum(is.na(data[, additional])) > 0 & sum(is.na(data[, additional])) != dim(data)[1]) {
-    var <- factorNA(data[,additional], always=TRUE)
+    var <- factorNA(data[,additional], always=TRUE, newval = fNA)
   } else if (sum(is.na(data[, additional])) == dim(data)[1]) {
     var <- factor(c(NA, data[, additional]), exclude=c())[-1]
   } else {
@@ -69,7 +70,7 @@ univariate.dis <- function(puf, data, additional, weights, value = "data"){
 #' ##table(v1) / sum(table(v1))
 #' ##table(eusilc13puf$pb190) / sum(table(eusilc13puf$pb190))
 #' @export
-conditional.dis <- function(puf, data, additional, conditional, weights, value = "data"){
+conditional.dis <- function(puf, data, additional, conditional, weights, value = "data", fNA = NA){
   if(!(additional %in% colnames(data))) stop(paste("variable", additional, "not in data"))
   if(!(conditional %in% colnames(data))) stop(paste("variable", conditional, "not present in data"))
   if(!(conditional %in% colnames(data))) stop(paste("variable", conditional, "not present in puf"))
@@ -79,7 +80,7 @@ conditional.dis <- function(puf, data, additional, conditional, weights, value =
   if(is.null(dim(data))) stop("data must be a matrix or data.frame")
   if(is.null(dim(puf))) stop("puf must be a matrix or data.frame")
   if (sum(is.na(data[,additional])) > 0 & sum(is.na(data[, additional])) != dim(data)[1]) {
-    var <- factorNA(data[,additional],always=TRUE)
+    var <- factorNA(data[,additional],always=TRUE, newval = fNA)
   } else if (sum(is.na(data[,additional])) == dim(data)[1]) {
     var <- factor(c(NA, data[,additional]), exclude=c())[-1]
   } else {
@@ -99,11 +100,11 @@ conditional.dis <- function(puf, data, additional, conditional, weights, value =
 
   for (i in lev){
     group <- cond == i
-    sgpuf <- sum(condpuf == i)
+    sgpuf <- sum(condpuf == i, na.rm = TRUE)
     tab <- tableWt(var[group], weights = weights[group])
     p <- as.numeric(tab / sum(tab))
     s <- sample(levadd[levadd %in% names(tab)],
-                size = max(sum(group), sgpuf),
+                size = max(sum(group), sgpuf, na.rm = TRUE),
                 prob = p,
                 replace = TRUE)[1:sgpuf]
     simvar[condpuf == i] <- s
