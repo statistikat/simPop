@@ -428,7 +428,7 @@ simCategorical <- function(simPopObj, additional,
 
     # variables are coerced to factors
     sampWork <- checkFactor(sampWork, unique(c(curStrata, predNames, additional)))
-    data_pop <- checkFactor(data_pop, unique(c(curStrata, predNames)))
+    data_pop <- checkFactor(data_pop_o, unique(c(curStrata, predNames)))
 
     # components of multinomial model are specified
     levelsResponse <- levels(sampWork[[i]])
