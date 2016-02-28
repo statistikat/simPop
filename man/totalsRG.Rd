@@ -14,10 +14,10 @@ variables.  \describe{ \item{list("rb090")}{gender; a factor with levels
 totalsRGtab: a two-dimensional table holding the same information}
 \source{
 StatCube - statistical data base,
-\url{http://www.statistik.at/web_de/services/statcube/}
+\url{http://www.statistik.at}
 
 StatCube - statistical data base,
-\url{http://www.statistik.at/web_de/services/datenbank_superstar/}
+\url{http://www.statistik.at/}
 }
 \description{
 Population characteristics Region times Gender from Austria.

@@ -14,7 +14,7 @@
 #' \code{Vorarlberg}} \item{list("Freq")}{totals; a numeric vector} }
 #' totalsRGtab: a two-dimensional table holding the same information
 #' @source StatCube - statistical data base,
-#' \url{http://www.statistik.at/web_de/services/statcube/}
+#' \url{http://www.statistik.at}
 #' @keywords datasets
 #' @examples
 #'
@@ -382,7 +382,7 @@ NULL
 #' \code{Vorarlberg}} \item{list("Freq")}{totals; a numeric vector} }
 #' totalsRGtab: a two-dimensional table holding the same information
 #' @source StatCube - statistical data base,
-#' \url{http://www.statistik.at/web_de/services/datenbank_superstar/}
+#' \url{http://www.statistik.at/}
 #' @keywords datasets
 #' @examples
 #'

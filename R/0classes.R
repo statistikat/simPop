@@ -16,6 +16,8 @@ setClassUnion('listOrNULL', c('list', 'NULL'))
 #' @import methods
 #' @import Rcpp
 #' @import party
+#' @import EnvStats
+#' @import fitdistrplus
 #' @importFrom lattice bwplot panel.bwplot packet.number panel.points panel.refline panel.xyplot
 #' @importFrom laeken calibVars
 #' @importFrom MASS ginv
@@ -27,6 +29,8 @@ setClassUnion('listOrNULL', c('list', 'NULL'))
 #' @importFrom stats median model.matrix optim plogis ppoints predict rnorm runif uniroot var weighted.mean glm poisson
 # removed  stats quantilerexp
 #' @importFrom plyr revalue
+#' @importFrom EnvStats rlnormTrunc
+#' @importFrom fitdistrplus fitdist
 NULL
 
 
