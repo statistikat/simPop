@@ -13,26 +13,52 @@ correctHeap(x, method = "lnorm")
 also available.}
 }
 \description{
-Correct fo age heaping using truncated (log-)normal distributions
+Correct for age heaping using truncated (log-)normal distributions
 }
 \details{
-for method lnorm, a truncated log-normal is fit to the whole age distribution. Then
-for each age heaps (0,5,10,15, ...) random numbers of truncated log-normal is drawn in the 
-interval +- 2 of the age heap for a certain ratio of values at an age heap. 
-This ratio is taken from the mean of +- 1 of age regarding to the value at the age heap.
+Age heaping can cause substantial bias
+in important measures and thus age heaping should be corrected. 
+
+For method \dQuote{lnorm}, a truncated log-normal is fit to the whole age distribution. 
+Then for each age heap (at 0, 5, 10, 15, ...) random numbers of a truncated 
+log-normal (with lower and upper bound) is drawn in the 
+interval +- 2 around the heap (rounding of degree 2) 
+using the inverse transformation method. A ratio of randomly 
+chosen observations on an age heap are replaced 
+by these random draws. For the ratio the age distribution is chosen, whereas 
+on an age heap (e.g. 5)
+the arithmetic means of the two neighboring ages are calculated 
+(average counts on age 4 and age 6 for age heap equals 5, for example).
+The ratio on, e.g. age equals 5 is then given by the count on age 5 divided by this mean
+This is done for any age heap at (0, 5, 10, 15, ...). 
+
+Method \dQuote{norm} replace the draws from truncated log-normals to draws from 
+truncated normals. It depends on the age distrubution (if right-skewed or not) if method
+\dQuote{lnorm} or \dQuote{norm} should be used. Many distributions with heaping problems
+are right-skewed.
+
+Method \dQuote{unif} draws the mentioned ratio of observations on truncated uniform distributions
+around the age heaps.
+
+Repeated calls of this function mimics multiple imputation, i.e. repeating this 
+procedure m times provides m imputed datasets that properly reflect the 
+uncertainty from imputation.
 }
 \examples{
 ## test with toy data (to see which methods works better)
 ## meanlog and sdlog estimated from real data.
+## age distribution without heaping problems:
 y <- rlnorm(10000, meanlog = 2.466869, sdlog = 1.652772)
 y <- round(y[y < 90])
 plot(table(y))
+## artificially introduce age heaping:
 w <- y \%in\% seq(0,100, by=5)
 z <- c(y, y[w])
 z <- sample(z)
-## same size as y
+## same size as y:
 z <- z[1:length(y)]
 plot(table(z))
+## correct age heaping:
 a1 <- correctHeap(z)
 a2 <- correctHeap(z, method = "norm")
 a3 <- correctHeap(z, method = "unif")
