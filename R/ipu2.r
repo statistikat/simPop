@@ -90,7 +90,8 @@ kishFactor <- function(w){
 #' inp[,hhinc:=sum(income),by=list(hhid)]
 #' 
 #' # constraints on person level
-#' conP1 <- array(c(239741,601386,360193,480699,1199962,718892,560069,1399490,840041,320257,799359,479911),c(3,4))
+#' conP1 <- array(c(239741,601386,360193,480699,1199962,718892,
+#'   560069,1399490,840041,320257,799359,479911),c(3,4))
 #' dimnames(conP1) <- list(region=c("1", "2", "3"),agegroup=c("1", "2", "3", "4"))
 #' 
 #' conP2 <- array(c(800171,1999596,1198754,800595,2000601,1200283),c(3,2))
@@ -118,16 +119,21 @@ kishFactor <- function(w){
 #' inp[,baseWeight:=regPop/regSamp]
 #' inp[,xx:=NULL]
 #' 
-#' res1 <- ipu2(dat=inp, hid="hhid", w=NULL, conP=list(conP1, conP2, income=conP3), conH=list(hhinc=conH1, conH2), 
-#'      epsP=0.09, epsH=0.05, verbose=TRUE, bound=NULL, maxIter=200, meanHH=TRUE)
+#' res1 <- ipu2(dat=inp, hid="hhid", w=NULL, conP=list(conP1, conP2, income=conP3),
+#'   conH=list(hhinc=conH1, conH2), 
+#'   epsP=0.09, epsH=0.05, verbose=TRUE, bound=NULL, maxIter=200, meanHH=TRUE)
 #' 
 #' # with array epsP1
-#' res2 <- ipu2(dat=inp, hid="hhid", w=NULL, conP=list(conP1, conP2, income=conP3), conH=list(hhinc=conH1, conH2), 
-#'             epsP=list(epsP1,0.07,0.07), epsH=0.05, verbose=TRUE, bound=NULL, maxIter=200, meanHH=TRUE)
+#' res2 <- ipu2(dat=inp, hid="hhid", w=NULL, conP=list(conP1, conP2, income=conP3),
+#'   conH=list(hhinc=conH1, conH2), 
+#'   epsP=list(epsP1,0.07,0.07), epsH=0.05, verbose=TRUE, bound=NULL,
+#'   maxIter=200, meanHH=TRUE)
 #' 
 #' # with base weights and bound
-#' res3 <- ipu2(dat=inp, hid="hhid", w="baseWeight", conP=list(conP1, conP2), conH=list(hhinc=conH1, conH2), 
-#'              epsP=list(epsP1,0.05), epsH=1e-2, verbose=TRUE, bound=4, maxIter=200, meanHH=TRUE)
+#' res3 <- ipu2(dat=inp, hid="hhid", w="baseWeight", conP=list(conP1, conP2),
+#'   conH=list(hhinc=conH1, conH2), 
+#'   epsP=list(epsP1,0.05), epsH=1e-2, verbose=TRUE, bound=4, maxIter=200,
+#'   meanHH=TRUE)
 
 ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FALSE,
                  w=NULL,bound=4,maxIter=200,meanHH=TRUE){
