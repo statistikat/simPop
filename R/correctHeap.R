@@ -1,4 +1,4 @@
-#' Correct 5-year age heaping
+#' Correct  age heaping
 #' 
 #' Correct for age heaping using truncated (log-)normal distributions
 #' 
@@ -30,84 +30,248 @@
 #' procedure m times provides m imputed datasets that properly reflect the 
 #' uncertainty from imputation.
 #' @param x numeric vector
-#' @param method default is log-normal (\dQuote{lnorm}). Method \dQuote{norm} and \dQuote{unif} are
-#' also available.
-#' @author Matthias Templ
-#' @export
+#' @param heaps
+#' \itemize{
+#' \item \code{5year}: heaps are assumed to be every 5 years (0,5,10,...)
+#' \item \code{10year}: heaps are assumed to be every 10 years (0,10,20,...)
+#' }
+#' @param method a character specifying the algorithm used to correct the age
+#' heaps. Allowed values are
+#' \itemize{
+#' \item \code{lnorm}: drawing from a truncated log-normal distribution. The
+#' required parameters are estimated using original input data.
+#' \item \code{norm}: drawing from a truncated normal distribution. The
+#' required parameters are estimated using original input data.
+#' \item \code{unif}: random sampling from a (truncated) uniform distribution
+#' }
+#' 
+#' @author Matthias Templ, Bernhard Meindl 
 #' @examples 
-#' ## test with toy data (to see which methods works better)
-#' ## meanlog and sdlog estimated from real data.
-#' ## age distribution without heaping problems:
-#' y <- rlnorm(10000, meanlog = 2.466869, sdlog = 1.652772)
-#' y <- round(y[y < 90])
-#' plot(table(y))
-#' ## artificially introduce age heaping:
-#' w <- y %in% seq(0,100, by=5)
-#' z <- c(y, y[w])
-#' z <- sample(z)
-#' ## same size as y:
-#' z <- z[1:length(y)]
-#' plot(table(z))
-#' ## correct age heaping:
-#' a1 <- correctHeap(z)
-#' a2 <- correctHeap(z, method = "norm")
-#' a3 <- correctHeap(z, method = "unif")
-#' plot(table(a1))
-#' plot(table(a2))
-#' plot(table(a3))
-#' sum(abs(table(a1) - table(y)))
-#' sum(abs(table(a2) - table(y)))
-#' sum(abs(table(a3) - table(y)))
-correctHeap <- function(x, method = "lnorm"){
-  s <- seq(0, 95, 5) 
-  w <- x %in% s
+#' ## create some artificial data
+#' age <- rlnorm(10000, meanlog=2.466869, sdlog=1.652772)
+#' age <- round(age[age < 93])
+#' barplot(table(age))
+#'
+#' ## artificially introduce age heaping and correct it:
+#' # heaps every 5 years
+#' year5 <- seq(0, max(age), 5)
+#' age5 <- sample(c(age, age[age %in% year5]))
+#' cc5 <- rep("darkgrey", length(unique(age)))
+#' cc5[year5+1] <- "yellow"
+#' barplot(table(age5), col=cc5)
+#' barplot(table(correctHeaps(age5, heaps="5year", method="lnorm")), col=cc5)
+#'
+#' # heaps every 10 years
+#' year10 <- seq(0, max(age), 10)
+#' age10 <- sample(c(age, age[age %in% year10]))
+#' cc10 <- rep("darkgrey", length(unique(age)))
+#' cc10[year10+1] <- "yellow"
+#' barplot(table(age10), col=cc10)
+#' barplot(table(correctHeaps(age10, heaps="10year", method="lnorm")), col=cc10)
+#'
+
+#' @return a numeric vector without age heaps
+#' @export
+correctHeaps <- function(x, heaps="10year", method="lnorm") {
+  if ( !method %in% c("lnorm","norm","unif")) {
+    stop("unsupported value in argument 'method'!\n")
+  }
+  if ( !heaps %in% c("5year","10year") ) {
+    stop("unsupported value in argument 'heaps'!\n")
+  }
+  
+  if ( heaps=="10year" ) {
+    s <- seq(0, max(x), by=10)
+  }
+  if ( heaps=="5year" ) {
+    s <- seq(0, max(x), by=5)
+  }
+  
   tab <- table(x)
-  keep <- sapply(s + 1, function(x) mean(c(tab[x-1], tab[x+1])))
-  ratio <- tab[s + 1] / keep
-  if( method == "lnorm"){
+  keep <- sapply(s+1, function(x) mean(c(tab[x-1], tab[x+1])))
+  ratio <- tab[s+1] / keep
+  
+  if ( method=="lnorm" ) {
     age0 <- as.numeric(x)
     age0[age0 == 0] <- 0.01
     logn <- fitdistrplus::fitdist(age0, "lnorm")
-    j <- 0
-    for(i in s[-length(s)]){
-      j <- j + 1
-      index <- which(x == i)
-      if(!is.na(ratio[j])){
-        r <- sample(index, size = max(c(1, length(index) - length(index) / ratio[j])))
-        x[r] <- round(EnvStats::rlnormTrunc(length(r), 
-                                  meanlog = logn$estimate[1], 
-                                  sdlog = as.numeric(logn$estimate[2]), 
-                                  min = max(i-2, 0), max = i+2))
+  }
+  
+  for ( j in 1:length(s) ) {
+    i <- s[j]
+    index <- which(x == i)
+    if ( is.na(ratio[j]) ) {
+      ssize <- 0
+    } else {
+      ssize <- ceiling(length(index) - length(index) / ratio[j])
+    }
+    if ( ssize>0 ) {
+      # we need to take care of odd-years between leaps
+      # thus we need to sample twice
+      if ( heaps=="10year" ) {
+        size1 <- ceiling(ssize/2)
+        r1 <- sample(index, size=size1)
+        llow <- max(c(i-4,0))
+        lup <- min((i+4),max(x))
+        if ( method=="lnorm") {
+          x[r1] <- round(EnvStats::rlnormTrunc(length(r1),
+                  meanlog=logn$estimate[1],
+                  sdlog=as.numeric(logn$estimate[2]),
+                  min=llow, max=lup))
+        }
+        if ( method=="norm") {
+          x[r1] <- round(EnvStats::rnormTrunc(length(r1),
+                  mean=i, sd=1, min=llow, max=lup))
+        }
+        if ( method=="unif") {
+          x[r1] <- sample(llow:lup, length(r1), replace=TRUE)
+        }
+        
+        # sample 2:
+        size2 <- ssize-size1
+        r2 <- sample(setdiff(index,r1), size=size2)
+        llow <- max(c(i-5,0))
+        lup <- min((i+5),max(x))
+        if ( method=="lnorm") {
+          x[r2] <- round(EnvStats::rlnormTrunc(length(r2),
+                  meanlog=logn$estimate[1],
+                  sdlog=as.numeric(logn$estimate[2]),
+                  min=llow, max=lup))
+        }
+        if ( method=="norm") {
+          x[r2] <- round(EnvStats::rnormTrunc(length(r2),
+                  mean=i, sd=1, min=llow, max=lup))
+        }
+        if ( method=="unif") {
+          x[r2] <- sample(llow:lup, length(r2), replace=TRUE)
+        }
+      }
+      if ( heaps=="5year" ) {
+        r <- sample(index, size=ssize)
+        llow <- max(c(i-2,0))
+        lup <- min((i+2),max(x))
+        if ( method=="lnorm" ) {
+          x[r] <- round(EnvStats::rlnormTrunc(length(r),
+                  meanlog=logn$estimate[1],
+                  sdlog=as.numeric(logn$estimate[2]),
+                  min=llow, max=lup))
+        }
+        if ( method=="norm" ) {
+          x[r] <- round(EnvStats::rnormTrunc(length(r),
+                  mean=i, sd=1, min=llow, max=lup))
+        }
+        if ( method=="unif" ) {
+          x[r] <- sample(llow:lup, length(r), replace=TRUE)
+        }
       }
     }
   }
-  if( method == "norm"){
-    j <- 0
-    for(i in s[-length(s)]){
-      j <- j + 1
-      index <- which(x == i)
-      if(!is.na(ratio[j])){
-        r <- sample(index, size = max(c(1, length(index) - length(index) / ratio[j])))
-        x[r] <- round(EnvStats::rnormTrunc(length(r), 
-                                 mean = i, 
-                                 sd = 1, 
-                                 min = max(i-2, 0), max = i+2))
-      }
-    }    
-  }
-  if( method == "unif"){
-    j <- 0
-    for(i in s[-length(s)]){
-      j <- j + 1
-      index <- which(x == i)
-      if(!is.na(ratio[j])){
-        r <- sample(index, size = max(c(1, length(index) - length(index) / ratio[j])))
-        x[r] <- sample(max(c(i-2,0)):(i+2), length(r), replace = TRUE)
-      }
-    }      
-  }
-  x
+  return(x)
 }
 
-
-
+#' correctSingleHeap
+#'
+#' Correct a specific age heap in a vector containing age in years
+#'
+#' @param x numeric vector representing age in years (integers)
+#' @param heap numeric or integer vector of length 1 specifying the year
+#' for which a heap should be corrected
+#' @param before numeric or integer vector of length 1 specifying the number
+#' of years before the heap that may be used to correct the heap. This input will
+#' be rounded!
+#' @param after numeric or integer vector of length 1 specifying the number
+#' of years after the heap that may be used to correct the heap. This input will
+#' be rounded!
+#' \itemize{
+#' \item \code{5year}: heaps are assumed to be every 5 years (0,5,10,...)
+#' \item \code{10year}: heaps are assumed to be every 10 years (0,10,20,...)
+#' }
+#' @param method a character specifying the algorithm used to correct the age
+#' heaps. Allowed values are
+#' \itemize{
+#' \item \code{lnorm}: drawing from a truncated log-normal distribution. The
+#' required parameters are estimated using original input data.
+#' \item \code{norm}: drawing from a truncated normal distribution. The
+#' required parameters are estimated using original input data.
+#' \item \code{unif}: random sampling from a (truncated) uniform distribution
+#' }
+#'
+#' @return a numeric vector without age heaps
+#' @export
+#' @examples
+#' ## create some artificial data
+#' age <- rlnorm(10000, meanlog=2.466869, sdlog=1.652772)
+#' age <- round(age[age < 93])
+#' barplot(table(age))
+#'
+#' ## artificially introduce an age heap for a specific year
+#' ## and correct it
+#' age23 <- c(age, rep(23, length=sum(age==23)))
+#' cc23 <- rep("darkgrey", length(unique(age)))
+#' cc23[24] <- "yellow"
+#' barplot(table(age23), col=cc23)
+#' barplot(table(correctSingleHeap(age23, heap=23, before=2, after=3, method="lnorm")), col=cc23)
+#' barplot(table(correctSingleHeap(age23, heap=23, before=5, after=5, method="lnorm")), col=cc23)
+correctSingleHeap <- function(x, heap, before=2, after=2, method="lnorm") {
+  if ( !method %in% c("lnorm","norm","unif")) {
+    i
+    stop("unsupported value in argument 'method'!\n")
+  }
+  if ( !heap %in% unique(x) ) {
+    stop("specified heap is not available in 'x'.\n")
+  }
+  if ( length(heap)!=1 ) {
+    stop("you can specify only one heap!\n")
+  }
+  if ( !is.numeric(before) | !is.numeric(after) ) {
+    stop("arguments 'before' and 'after' must be numeric!")
+  }
+  if ( length(before)!=1 | length(after)!=1 ) {
+    stop("arguments 'before' and 'after' must be vectors with one element each!\n")
+  }
+  if ( before<0 | after < 0 ) {
+    stop("arguments 'before' and 'after' must be positive numbers!\n")
+  }
+  before <- round(before)
+  after <- round(after)
+  
+  llow <- heap-before
+  lup <- heap+after
+  if ( llow < 0 | lup > max(x) ) {
+    stop("paramters 'before' or 'after' are too large!\n")
+  }
+  
+  tab <- table(x)
+  keep <- sapply(heap+1, function(x) mean(c(tab[x-1], tab[x+1])))
+  ratio <- tab[heap+1] / keep
+  
+  if ( method=="lnorm" ) {
+    age0 <- as.numeric(x)
+    age0[age0 == 0] <- 0.01
+    logn <- fitdistrplus::fitdist(age0, "lnorm")
+  }
+  
+  index <- which(x == heap)
+  if ( is.na(ratio) ) {
+    ssize <- 0
+  } else {
+    ssize <- ceiling(length(index) - length(index) / ratio)
+  }
+  if ( ssize>0 ) {
+    r <- sample(index, size=ssize)
+    if ( method=="lnorm" ) {
+      x[r] <- round(EnvStats::rlnormTrunc(length(r),
+              meanlog=logn$estimate[1],
+              sdlog=as.numeric(logn$estimate[2]),
+              min=llow, max=lup))
+    }
+    if ( method=="norm" ) {
+      x[r] <- round(EnvStats::rnormTrunc(length(r),
+              mean=heap, sd=1, min=llow, max=lup))
+    }
+    if ( method=="unif" ) {
+      x[r] <- sample(llow:lup, length(r), replace=TRUE)
+    }
+  }
+  return(x)
+}
