@@ -6,8 +6,10 @@
 #' @param w a numeric vector with weights
 #' @return The function will return the the kish factor 
 #' @author Alexander Kowarik
+#' @export
 #' @examples
-
+#' kishFactor(rep(1,10))
+#' kishFactor(rlnorm(10))
 kishFactor <- function(w){
   if(!is.numeric(w)){
     stop("The input must be a numeric vector")
@@ -68,8 +70,6 @@ kishFactor <- function(w){
 #' @export
 #' @author Alexander Kowarik
 #' @examples
-#' 
-#' 
 #' nrowInp <- 1000
 #' inp <- as.data.table(matrix(0, nrow=nrowInp, ncol=6))
 #' colnames(inp) <- c("pid","hhid","income","agegroup","gender","region")
