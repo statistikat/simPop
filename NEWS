@@ -1,3 +1,10 @@
+Changes in simPop version 0.3.0
+  * new function ipu2 (more flexible variant for ipu, still in development)
+  * new function kishFactor (computation of the Kish factor for sample weights)
+  * new functions correctHeaps and correctSimpleHeap for dealing with age heaping
+Changes in simPop version 0.3.0
+  * new methods for simContinous and simCateogrical
+  * simStructure can now deal with populations as input
 Changes in simPop version 0.2.15
   * Improvements in samp() and pop(). If argument 'var' is NULL (default), the complete dataset is returned.
 
