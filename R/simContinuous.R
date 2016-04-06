@@ -238,7 +238,7 @@ generateValues_poisson <- function(dataSample, dataPop, params) {
   #mod$coefficients <- coef
   # prediction
   # add 0 variable to combinations for use of 'model.matrix'
-  if("try-error"%in%class(mod)){
+  if(!"try-error"%in%class(mod)){
     newdata <- cbind(grid, 0)
     names(newdata) <- c(predNames, additional[1])
     
