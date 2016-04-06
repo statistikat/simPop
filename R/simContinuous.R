@@ -231,23 +231,28 @@ generateValues_poisson <- function(dataSample, dataPop, params) {
     exclude <- integer()
   }
   # fit linear model
-  mod <- eval(parse(text=command))
+  mod <- try(eval(parse(text=command)))
   # add coefficients from auxiliary model if necessary
   #tmp <- coef
   #coef[names(coef(mod))] <- coef(mod)
   #mod$coefficients <- coef
   # prediction
   # add 0 variable to combinations for use of 'model.matrix'
-  newdata <- cbind(grid, 0)
-  names(newdata) <- c(predNames, additional[1])
-
-  if ( length(exclude) == 0 ) {
-    pred <- round(predict(mod, newdata=newdata,type="response"))
-  } else {
-    pred <- as.list(rep.int(NA, length(indGrid)))
-    pred[-exclude] <- round(predict(mod, newdata=newdata,type="response"))
+  if("try-error"%in%class(mod)){
+    newdata <- cbind(grid, 0)
+    names(newdata) <- c(predNames, additional[1])
+    
+    if ( length(exclude) == 0 ) {
+      pred <- round(predict(mod, newdata=newdata,type="response"))
+    } else {
+      pred <- as.list(rep.int(NA, length(indGrid)))
+      pred[-exclude] <- round(predict(mod, newdata=newdata,type="response"))
+    }
+    pred <- unsplit(pred, dataPop, drop=TRUE)  
+  }else{
+    pred <- rep(0,nrow(dataPop))
   }
-  pred <- unsplit(pred, dataPop, drop=TRUE)
+  
   # add error terms
 # addition of an error term, not implemented for Poisson Regression yet
 #  if ( residuals ) {
@@ -278,6 +283,9 @@ generateValues_binary <- function(dataSample, dataPop, params) {
   }
   # if all y values are the same return the same value for everybody
   if(length(unique(dataSample[[name]]))==1){
+    if(params$verbose){
+      cat("All values in the training data set are the same!\n")
+    }
     return(rep(dataSample[[name]][1],nrow(dataPop)))
   }
   # unique combinations in the stratum of the population need to be computed for prediction
@@ -354,6 +362,10 @@ generateValues_binary <- function(dataSample, dataPop, params) {
     })
   }
   # return realizations
+  if(params$verbose){
+    cat("Summary of the predicted probabilites:")
+    print(summary(unsplit(sim, dataPop, drop=TRUE)))
+  }
   unsplit(sim, dataPop, drop=TRUE)
 }
 
@@ -411,6 +423,10 @@ runModel <- function(dataS, dataP, params, typ) {
       },mc.cores=pp$nr_cores)
     }
   } else {
+    if(params$verbose){
+      cat("All values of the by group:","\n")
+      print(levels(dataS[[strata]]))
+    }
     valuesCat <- lapply(levels(dataS[[strata]]), function(x) {
        if(params$verbose){
          cat("Current by group for the binary model:",x,"\n")
@@ -1058,7 +1074,6 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     } else {
       dataPop <- dataP
     }
-
     ## trim data (if specified)
     if ( !is.null(alpha) ) {
       additional <- additional[1]
