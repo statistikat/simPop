@@ -358,8 +358,8 @@ simCategorical <- function(simPopObj, additional,
     if ( length(exclude) > 0 ) {
       data_sample <- data_sample[-exclude,]
     }
-    data_sample <- checkFactor(data_sample, c(curStrata, predNames, additional))
-    data_pop <- checkFactor(data_pop, c(curStrata, predNames))
+    data_sample <- checkFactor(data_sample, c(curStrata, additional))
+    data_pop <- checkFactor(data_pop, c(curStrata))
 
     params <- list()
     params$grid <- expand.grid(lapply(data_sample[,additional, with=F], levels))
@@ -430,9 +430,8 @@ simCategorical <- function(simPopObj, additional,
     }
 
     # variables are coerced to factors
-    sampWork <- checkFactor(sampWork, unique(c(curStrata, predNames, additional)))
-    data_pop <- checkFactor(data_pop_o, unique(c(curStrata, predNames)))
-
+    sampWork <- checkFactor(sampWork, unique(c(curStrata, additional)))
+    data_pop <- checkFactor(data_pop_o, unique(c(curStrata)))
     # components of multinomial model are specified
     levelsResponse <- levels(sampWork[[i]])
 
@@ -515,7 +514,6 @@ simCategorical <- function(simPopObj, additional,
                 dataPop=data_pop[indStrata[[x]], predNames, with=F], params
             )
           })
-#      print(str(values))
     }
     values <- factor(unsplit(values, data_pop[[curStrata]]), levels=levelsResponse)
     ## add new categorical variable to data set
