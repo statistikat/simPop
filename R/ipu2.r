@@ -64,6 +64,7 @@ kishFactor <- function(w){
 #' that should be performed.
 #' @param meanHH if TRUE, every person in a household is assigned the mean of
 #' the person weights corresponding to the household.
+#' @param returnNA if TRUE, the calibrated weight will be set to NA in case of no convergence.
 #' @return The function will return the input data \code{dat} with the
 #' calibrated weights \code{calibWeight} as an additional column.
 #' @seealso \code{\link{ipu}}
@@ -136,7 +137,7 @@ kishFactor <- function(w){
 #'   meanHH=TRUE)
 
 ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FALSE,
-                 w=NULL,bound=4,maxIter=200,meanHH=TRUE){
+                 w=NULL,bound=4,maxIter=200,meanHH=TRUE,returnNA=TRUE){
   dat <- copy(dat)
   nrowOriginal <- nrow(dat)
   ## originalsorting is fucked up without this
@@ -364,7 +365,7 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
   dat[,OriginalSortingVariable:=NULL]
   
   ## Return missings in calibWeight variable if no convergence was reached
-  if(maxIter<calIter){
+  if(maxIter<calIter&returnNA){
     invisible(dat[,calibWeight:=NA])  
   }else{
     invisible(dat)  
