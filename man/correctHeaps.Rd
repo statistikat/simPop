@@ -4,7 +4,7 @@
 \alias{correctHeaps}
 \title{Correct  age heaping}
 \usage{
-correctHeaps(x, heaps = "10year", method = "lnorm")
+correctHeaps(x, heaps = "10year", method = "lnorm", start = 0)
 }
 \arguments{
 \item{x}{numeric vector}
@@ -23,6 +23,7 @@ required parameters are estimated using original input data.
 required parameters are estimated using original input data.
 \item \code{unif}: random sampling from a (truncated) uniform distribution
 }}
+\item{start}{a numeric value for the starting of the 5 or 10 year sequences (e.g. 0, 5 or 10)}
 }
 \value{
 a numeric vector without age heaps

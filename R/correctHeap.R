@@ -44,6 +44,8 @@
 #' required parameters are estimated using original input data.
 #' \item \code{unif}: random sampling from a (truncated) uniform distribution
 #' }
+#' @param start a numeric value for the starting of the 5 or 10 year sequences
+#' (e.g. 0, 5 or 10)
 #' 
 #' @author Matthias Templ, Bernhard Meindl 
 #' @examples 
@@ -72,19 +74,21 @@
 
 #' @return a numeric vector without age heaps
 #' @export
-correctHeaps <- function(x, heaps="10year", method="lnorm") {
+correctHeaps <- function(x, heaps="10year", method="lnorm",start=0) {
   if ( !method %in% c("lnorm","norm","unif")) {
     stop("unsupported value in argument 'method'!\n")
   }
   if ( !heaps %in% c("5year","10year") ) {
     stop("unsupported value in argument 'heaps'!\n")
   }
-  
+  if(start>max(x)){
+    stop("Starting Ageyear is greater than the maximum age in the data.")
+  }
   if ( heaps=="10year" ) {
-    s <- seq(0, max(x), by=10)
+    s <- seq(start, max(x), by=10)
   }
   if ( heaps=="5year" ) {
-    s <- seq(0, max(x), by=5)
+    s <- seq(start, max(x), by=5)
   }
   
   tab <- table(x)
