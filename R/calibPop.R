@@ -15,7 +15,7 @@ calcFinalWeights <- function(data0, totals0, params) {
 
     out <- matrix(NA, nrow=nrow(totals0), ncol=nrow(data0))
     totals0 <- as.data.frame(totals0)
-    totals0[,parameter] <- apply(totals0[,parameter], 2, myfun)
+    totals0[,parameter] <- apply(totals0[,parameter,drop=FALSE], 2, myfun)
     for ( x in parameter ) {
       data0[[x]] <- myfun(data0[[x]])
     }
@@ -183,12 +183,20 @@ calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
 
   # generate donors
   data2 <- sampHH(data, sizefactor=2, hid=hid, strata=split, hsize=hhsize)
-  data2[[params$weight]] <- 0
-  data2 <- data2[, which(!grepl(hid, colnames(data2))), with=FALSE]
+  data2[,params$weight:=list(0),with=FALSE]
+  setnames(data2,hid,"temporaryhid")
+  if(is.numeric(data2[[hid]])){
+    data2[,hid:=list(data[,sapply(.SD,max),.SDcols=hid]+temporaryhid)]
+  }else{
+    data2[,hid:=list(paste0("9999_",temporaryhid))]
+  }
+  setnames(data2,"temporaryhid",hid)
+#  data2 <- data2[, which(!grepl(hid, colnames(data2))), with=FALSE]
   cn <- colnames(data2)
-  cn[length(cn)] <- hid
-  setnames(data2, cn)
-  data2 <- data2[,match(colnames(data), cn), with=FALSE]
+#  cn[length(cn)] <- hid
+#  setnames(data2, cn)
+  data2 <- data2[,colnames(data), with=FALSE]
+  #data2 <- data2[,match(colnames(data), cn), with=FALSE]
   data <- rbind(data, data2)
 
   # parameters for parallel computing
