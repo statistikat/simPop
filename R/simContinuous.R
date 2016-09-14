@@ -379,6 +379,10 @@ genVals <- function(dataSample, dataPop, params, typ) {
   if ( !typ %in% c("multinom","lm","binary","poisson") ) {
     stop("unsupported value for argument 'type' in genVals()\n")
   }
+  # Check wheter all response values are the same
+  if(length(unique(params$response))==1){
+	  return(rep(unique(params$response),nrow(dataPop)))
+  }
   if ( typ=="binary") {
     res <- generateValues_binary(dataSample, dataPop, params)
   }else if ( typ=="lm") {
