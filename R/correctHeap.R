@@ -217,6 +217,7 @@ correctHeaps <- function(x, heaps="10year", method="lnorm",start=0) {
 #' barplot(table(correctSingleHeap(age23, heap=23, before=2, after=3, method="lnorm")), col=cc23)
 #' barplot(table(correctSingleHeap(age23, heap=23, before=5, after=5, method="lnorm")), col=cc23)
 correctSingleHeap <- function(x, heap, before=2, after=2, method="lnorm") {
+  i <- NULL
   if ( !method %in% c("lnorm","norm","unif")) {
     i
     stop("unsupported value in argument 'method'!\n")
