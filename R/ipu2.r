@@ -138,6 +138,8 @@ kishFactor <- function(w){
 
 ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FALSE,
                  w=NULL,bound=4,maxIter=200,meanHH=TRUE,returnNA=TRUE){
+  OriginalSortingVariable <- V1 <- baseWeight <- calibWeight <- epsvalue <- f <- NULL
+  temporary_hid <- temporary_hvar <- tmpVarForMultiplication <- value <- wValue <- wvst<- NULL
   dat <- copy(dat)
   nrowOriginal <- nrow(dat)
   ## originalsorting is fucked up without this
