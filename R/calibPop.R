@@ -145,7 +145,7 @@ calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
     warning("only first variable will be used to divide the population into strata")
   }
 
-  x <- NULL
+  temporaryhid <- x <- NULL
   data <- popData(inp)
   hid <- popObj(inp)@hhid
   pid <- popObj(inp)@pid
