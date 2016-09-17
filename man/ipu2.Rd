@@ -59,7 +59,9 @@ that should be performed.}
 
 \item{meanHH}{if TRUE, every person in a household is assigned the mean of
 the person weights corresponding to the household.}
+\item{returnNA}{if TRUE, the calibrated weight will be set to NA in case of no convergence.}
 }
+
 \value{
 The function will return the input data \code{dat} with the
 calibrated weights \code{calibWeight} as an additional column.
