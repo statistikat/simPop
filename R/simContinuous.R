@@ -369,7 +369,7 @@ generateValues_binary <- function(dataSample, dataPop, params) {
   unsplit(sim, dataPop, drop=TRUE)
 }
 
-genVals <- function(dataSample, dataPop, params, typ) {
+genVals <- function(dataSample, dataPop, params, typ, response) {
   # unify level-set of predictors
   for ( i in params$predNames ) {
     dataSample[[i]] <- cleanFactor(dataSample[[i]])
@@ -380,8 +380,9 @@ genVals <- function(dataSample, dataPop, params, typ) {
     stop("unsupported value for argument 'type' in genVals()\n")
   }
   # Check wheter all response values are the same
-  if(length(unique(params$response))==1){
-	  return(rep(unique(params$response),nrow(dataPop)))
+  if(length(unique(response))==1){
+	  res <- rep(unique(response),nrow(dataPop))
+	  return(res)
   }
   if ( typ=="binary") {
     res <- generateValues_binary(dataSample, dataPop, params)
@@ -410,8 +411,8 @@ runModel <- function(dataS, dataP, params, typ) {
       valuesCat <- foreach(x=levels(dataS[[strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
         genVals(
           dataSample=dataS[dataS[[strata]] == x,],
-          dataPop=dataP[indStrata[[x]], predNames, with=F],
-          params,
+          dataPop=dataP[indStrata[[x]], predNames, with=FALSE],
+          params,response=dataS[dataS[[strata]] == x,eval(parse(text=params$name))],
           typ=typ)
       }
       stopCluster(cl)
@@ -421,8 +422,8 @@ runModel <- function(dataS, dataP, params, typ) {
       valuesCat <- mclapply(levels(dataS[[strata]]), function(x) {
         genVals(
           dataSample=dataS[dataS[[strata]] == x,],
-          dataPop=dataP[indStrata[[x]], predNames, with=F],
-          params=params,
+          dataPop=dataP[indStrata[[x]], predNames, with=FALSE],
+		  params,response=dataS[dataS[[strata]] == x,eval(parse(text=params$name))],
           typ=typ)
       },mc.cores=pp$nr_cores)
     }
@@ -436,9 +437,9 @@ runModel <- function(dataS, dataP, params, typ) {
          cat("Current by group for the binary model:",x,"\n")
        }
       genVals(
-        dataSample=dataS[dataS[[strata]] == x,c(predNames, additional), with=F],
+        dataSample=dataS[dataS[[strata]] == x,c(predNames, additional), with=FALSE],
         dataPop=dataP[indStrata[[x]], predNames, with=F],
-        params=params,
+		params,response=dataS[dataS[[strata]] == x,eval(parse(text=params$name))],
         typ=typ)
     })
   }
@@ -448,7 +449,6 @@ runModel <- function(dataS, dataP, params, typ) {
   if ( any(res=="try-error") ) {
     stop(paste0("Error in estimating the linear model. Try to specify a more simple model!\n"))
   }
-
   if ( typ=="multinom" ) {
     response <- dataS[[params$name]]
     valuesCat <- factor(unsplit(valuesCat, dataP[[strata]]), levels=levels(response))
