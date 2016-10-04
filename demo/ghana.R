@@ -4,7 +4,7 @@
 # -----------------------
 
 ## initializations
-library("simPopulation")
+library("simPop")
 data("ghanaS")
 seed <- 1234
 

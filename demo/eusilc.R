@@ -4,7 +4,7 @@
 # -----------------------
 
 ## initializations
-library("simPopulation")
+library("simPop")
 data("eusilcS")
 seed <- 1234
 
