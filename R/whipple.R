@@ -25,6 +25,7 @@
 #' @name whipple
 #' @param x numeric vector holding the age of persons
 #' @param method \dQuote{standard} or \dQuote{modified} Whipple index.
+#' @param weight numeric vector holding the weights of each person
 #' @return The original or modified Whipple index.
 #' @author Matthias Templ, Alexander Kowarik
 #' @seealso \code{\link{sprague}}
@@ -49,13 +50,25 @@
 #' whipple(age10)
 #' whipple(age10,method="modified")
 #' 
-whipple <- function(x, method="standard"){
+whipple <- function(x, method="standard",weight=NULL){
   if(method == "standard"){
-	x <- x[x >= 23 & x <= 62]
-    xm <- x %% 5
-    return((length(xm[xm==0])/length(x))*500)
+	if(is.null(weight)){
+	  x <- x[x >= 23 & x <= 62]
+      xm <- x %% 5
+      return((length(xm[xm==0])/length(x))*500)
+    }else{
+	  weight <- weight[x >= 23 & x <= 62]
+	  x <- x[x >= 23 & x <= 62]
+	  xm <- x %% 5
+	  return((sum(weight[xm==0])/sum(weight))*500)
+	}
   }else if(method == "modified"){
-    tab <- table(x)
+    
+	if(is.null(weight)){
+		tab <- table(x)	
+	}else{
+		tab <- wtd.table(x,weight)[[2]]
+	}
     W <- numeric(10)
 	for(i in 1:10){
 		W[i] <- sum(tab[as.numeric(names(tab))%in%seq(i-10,200,by=10)]) / (length(x)/10)	
