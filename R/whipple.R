@@ -26,7 +26,7 @@
 #' @param x numeric vector holding the age of persons
 #' @param method \dQuote{standard} or \dQuote{modified} Whipple index.
 #' @return The original or modified Whipple index.
-#' @author Matthias Templ
+#' @author Matthias Templ, Alexander Kowarik
 #' @seealso \code{\link{sprague}}
 #' @references Henry S. Shryock and Jacob S. Siegel, Methods and Materials of
 #' Demography (New York: Academic Press, 1976)

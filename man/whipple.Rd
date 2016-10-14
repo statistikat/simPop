@@ -55,7 +55,7 @@ whipple(age10)
 whipple(age10,method="modified")
 }
 \author{
-Matthias Templ
+Matthias Templ, Alexander Kowarik
 }
 \references{
 Henry S. Shryock and Jacob S. Siegel, Methods and Materials of
