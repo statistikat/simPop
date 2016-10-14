@@ -9,7 +9,7 @@ whipple(x, method = "standard")
 \arguments{
 \item{x}{numeric vector holding the age of persons}
 
-\item{method}{\dQuote{original} or \dQuote{modified} Whipple index.}
+\item{method}{\dQuote{standard} or \dQuote{modified} Whipple index.}
 }
 \value{
 The original or modified Whipple index.

@@ -22,7 +22,7 @@
 #' 
 #' @name whipple
 #' @param x numeric vector holding the age of persons
-#' @param method \dQuote{original} or \dQuote{modified} Whipple index.
+#' @param method \dQuote{standard} or \dQuote{modified} Whipple index.
 #' @return The original or modified Whipple index.
 #' @author Matthias Templ
 #' @seealso \code{\link{sprague}}
