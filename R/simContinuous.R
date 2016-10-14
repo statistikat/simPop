@@ -99,13 +99,18 @@ generateValues_lm <- function(dataSample, dataPop, params) {
 
   # fix: for each predictor, the level set must be equal in dataSample and dataPop
   for ( i in predNames ) {
-    both <- intersect(levels(dataSample[[i]]), levels(dataPop[[i]]))
-    a <- as.character(dataSample[[i]])
-    a[!a%in%both] <- NA
-    b <- as.character(dataPop[[i]])
-    b[!b %in%both] <- NA
-    dataSample[[i]] <- factor(a, levels=both)
-    dataPop[[i]] <- factor(b, levels=both)
+	if(is.factor(dataSample[[i]])){	  
+      both <- intersect(levels(dataSample[[i]]), levels(dataPop[[i]]))
+      a <- as.character(dataSample[[i]])
+      a[!a%in%both] <- NA
+      b <- as.character(dataPop[[i]])
+      b[!b %in%both] <- NA
+      dataSample[[i]] <- factor(a, levels=both)
+      dataPop[[i]] <- factor(b, levels=both)
+    }
+	if((is.factor(dataSample[[i]])&!is.factor(dataPop[[i]]))|(is.factor(dataPop[[i]])&!is.factor(dataSample[[i]]))){
+		stop("Variable",i,"is a factor only in one of the sample and population data sets.")
+	}
   }
   # unique combinations in the stratum of the population need to be computed for prediction
   indGrid <- split(1:nrow(dataPop), dataPop, drop=TRUE)
@@ -194,13 +199,18 @@ generateValues_poisson <- function(dataSample, dataPop, params) {
 
   # fix: for each predictor, the level set must be equal in dataSample and dataPop
   for ( i in predNames ) {
-    both <- intersect(levels(dataSample[[i]]), levels(dataPop[[i]]))
-    a <- as.character(dataSample[[i]])
-    a[!a%in%both] <- NA
-    b <- as.character(dataPop[[i]])
-    b[!b %in%both] <- NA
-    dataSample[[i]] <- factor(a, levels=both)
-    dataPop[[i]] <- factor(b, levels=both)
+	if(is.factor(dataSample[[i]])){
+      both <- intersect(levels(dataSample[[i]]), levels(dataPop[[i]]))
+      a <- as.character(dataSample[[i]])
+      a[!a%in%both] <- NA
+      b <- as.character(dataPop[[i]])
+      b[!b %in%both] <- NA
+      dataSample[[i]] <- factor(a, levels=both)
+      dataPop[[i]] <- factor(b, levels=both)
+	}
+	if((is.factor(dataSample[[i]])&!is.factor(dataPop[[i]]))|(is.factor(dataPop[[i]])&!is.factor(dataSample[[i]]))){
+		stop("Variable",i,"is a factor only in one of the sample and population data sets.")
+	}
   }
   # unique combinations in the stratum of the population need to be computed for prediction
   indGrid <- split(1:nrow(dataPop), dataPop, drop=TRUE)
@@ -788,11 +798,11 @@ simContinuous <- function(simPopObj, additional = "netIncome",
 
   # variables are coerced to factors
   select <- unique(c(predNames, strata)) # strata always included
-  dataS <- checkFactor(dataS, select)
+#  dataS <- checkFactor(dataS, select)
   if(!strata%in%colnames(dataP)){
     stop(strata," is defined as by variable, but not in the population data set.")
   }
-  dataP <- checkFactor(dataP, select)
+#  dataP <- checkFactor(dataP, select)
 
   # sample data of variable to be simulated
   additionalS <- dataS[[additional]]
