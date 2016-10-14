@@ -18,7 +18,9 @@
 #' For the modified Whipple index, age heaping is calculated for all ten digits
 #' (0-9). For each digit, the degree of preference or avoidance can be
 #' determined for certain ranges of ages, and the modified Whipple index then
-#' is given by the absolute sum of these (indices - 1).
+#' is given by the absolute sum of these (indices - 1). The index is scaled between
+#' 0 and 1, therefore it is 1 if all age values end with the same digit and 0 it is
+#' distributed perfectly equally.
 #' 
 #' @name whipple
 #' @param x numeric vector holding the age of persons
@@ -32,29 +34,35 @@
 #' @export
 #' @examples
 #' 
+#' #Equally distributed
 #' age <- sample(1:100, 5000, replace=TRUE)
 #' whipple(age)
+#' whipple(age,method="modified")
+#' 
+#' # Only 5 and 10
+#' age5 <- sample(seq(0,100,by=5), 5000, replace=TRUE)
+#' whipple(age5)
+#' whipple(age5,method="modified")
+#' 
+#' #Only 10
+#' age10 <- sample(seq(0,100,by=10), 5000, replace=TRUE)
+#' whipple(age10)
+#' whipple(age10,method="modified")
 #' 
 whipple <- function(x, method="standard"){
-  x <- x[x >= 23 & x <= 62]
   if(method == "standard"){
+	x <- x[x >= 23 & x <= 62]
     xm <- x %% 5
-    whipple <- (length(xm[xm==0])/length(x))*500
-  }
-  if(method == "modified"){
+    return((length(xm[xm==0])/length(x))*500)
+  }else if(method == "modified"){
     tab <- table(x)
-    sp <- function(p) seq(p,p+30,10)
-    W <- numeric(9)
-    W[1] <- 5*sum(sp(31)) / sum(5*sp(29)) 
-    W[2] <- 5*sum(sp(32)) / sum(5*sp(30)) 
-    W[3] <- 5*sum(sp(23)) / sum(5*sp(21))
-    W[4] <- 5*sum(sp(24)) / sum(5*sp(22))
-    W[6] <- 5*sum(sp(26)) / sum(5*sp(24))
-    W[7] <- 5*sum(sp(27)) / sum(5*sp(25))
-    W[8] <- 5*sum(sp(28)) / sum(5*sp(26))
-    W[9] <- 5*sum(sp(29)) / sum(5*sp(27))
-    whipple <- sum(abs(W-1), na.rm=TRUE)
+    W <- numeric(10)
+	for(i in 1:10){
+		W[i] <- sum(tab[as.numeric(names(tab))%in%seq(i-10,200,by=10)]) / (length(x)/10)	
+	}
+    return(sum(abs(W-1), na.rm=TRUE)/18)
+  }else{
+    stop(paste("Supplied mehtod",method,"is not implemented"))
   }
-  return(whipple)
 }
 
