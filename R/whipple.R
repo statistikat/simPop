@@ -71,7 +71,7 @@ whipple <- function(x, method="standard",weight=NULL){
 	}
     W <- numeric(10)
 	for(i in 1:10){
-		W[i] <- sum(tab[as.numeric(names(tab))%in%seq(i-10,200,by=10)]) / (length(x)/10)	
+		W[i] <- sum(tab[as.numeric(names(tab))%in%seq(i-10,200,by=10)]) / (sum(tab)/10)	
 	}
     return(sum(abs(W-1), na.rm=TRUE)/18)
   }else{
