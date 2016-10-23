@@ -281,7 +281,7 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
       }
       if(verbose&&(curEps>epsPcur)&&calIter%%10==0){
         if(calIter%%100==0)
-          print(dat[abs(1/f-1)>epsPcur][,.(mean(f),.N),by=eval(pColNames[[i]])])
+          print(dat[abs(1/f-1)>epsPcur][,list(mean(f),.N),by=eval(pColNames[[i]])])
         cat(calIter, ":Not yet converged for P-Constraint",i,"\n")
       }
     }

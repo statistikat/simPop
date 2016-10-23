@@ -643,7 +643,7 @@ runModel <- function(dataS, dataP, params, typ) {
 #' @note The basic household structure and any other categorical predictors
 #' need to be simulated beforehand with the functions
 #' \code{\link{simStructure}} and \code{\link{simCategorical}}, respectively.
-#' @author Bernhard Meindl and Andreas Alfons (based on code by Stefan Kraft)
+#' @author Bernhard Meindl, Andreas Alfons, Alexander Kowarik (based on code by Stefan Kraft)
 #' @seealso \code{\link{simStructure}}, \code{\link{simCategorical}},
 #' \code{\link{simComponents}}, \code{\link{simEUSILC}}
 #' @keywords datagen

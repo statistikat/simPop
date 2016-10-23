@@ -98,7 +98,7 @@ correctHeaps <- function(x, heaps="10year", method="lnorm",start=0) {
   if ( method=="lnorm" ) {
     age0 <- as.numeric(x)
     age0[age0 == 0] <- 0.01
-    logn <- fitdistrplus::fitdist(age0, "lnorm")
+    logn <- fitdist(age0, "lnorm")
   }
   
   for ( j in 1:length(s) ) {
@@ -118,13 +118,13 @@ correctHeaps <- function(x, heaps="10year", method="lnorm",start=0) {
         llow <- max(c(i-4,0))
         lup <- min((i+4),max(x))
         if ( method=="lnorm") {
-          x[r1] <- round(EnvStats::rlnormTrunc(length(r1),
+          x[r1] <- round(rlnormTrunc(length(r1),
                   meanlog=logn$estimate[1],
                   sdlog=as.numeric(logn$estimate[2]),
                   min=llow, max=lup))
         }
         if ( method=="norm") {
-          x[r1] <- round(EnvStats::rnormTrunc(length(r1),
+          x[r1] <- round(rnormTrunc(length(r1),
                   mean=i, sd=1, min=llow, max=lup))
         }
         if ( method=="unif") {
@@ -137,13 +137,13 @@ correctHeaps <- function(x, heaps="10year", method="lnorm",start=0) {
         llow <- max(c(i-5,0))
         lup <- min((i+5),max(x))
         if ( method=="lnorm") {
-          x[r2] <- round(EnvStats::rlnormTrunc(length(r2),
+          x[r2] <- round(rlnormTrunc(length(r2),
                   meanlog=logn$estimate[1],
                   sdlog=as.numeric(logn$estimate[2]),
                   min=llow, max=lup))
         }
         if ( method=="norm") {
-          x[r2] <- round(EnvStats::rnormTrunc(length(r2),
+          x[r2] <- round(rnormTrunc(length(r2),
                   mean=i, sd=1, min=llow, max=lup))
         }
         if ( method=="unif") {
@@ -155,13 +155,13 @@ correctHeaps <- function(x, heaps="10year", method="lnorm",start=0) {
         llow <- max(c(i-2,0))
         lup <- min((i+2),max(x))
         if ( method=="lnorm" ) {
-          x[r] <- round(EnvStats::rlnormTrunc(length(r),
+          x[r] <- round(rlnormTrunc(length(r),
                   meanlog=logn$estimate[1],
                   sdlog=as.numeric(logn$estimate[2]),
                   min=llow, max=lup))
         }
         if ( method=="norm" ) {
-          x[r] <- round(EnvStats::rnormTrunc(length(r),
+          x[r] <- round(rnormTrunc(length(r),
                   mean=i, sd=1, min=llow, max=lup))
         }
         if ( method=="unif" ) {
@@ -253,7 +253,7 @@ correctSingleHeap <- function(x, heap, before=2, after=2, method="lnorm") {
   if ( method=="lnorm" ) {
     age0 <- as.numeric(x)
     age0[age0 == 0] <- 0.01
-    logn <- fitdistrplus::fitdist(age0, "lnorm")
+    logn <- fitdist(age0, "lnorm")
   }
   
   index <- which(x == heap)
@@ -265,13 +265,13 @@ correctSingleHeap <- function(x, heap, before=2, after=2, method="lnorm") {
   if ( ssize>0 ) {
     r <- sample(index, size=ssize)
     if ( method=="lnorm" ) {
-      x[r] <- round(EnvStats::rlnormTrunc(length(r),
+      x[r] <- round(rlnormTrunc(length(r),
               meanlog=logn$estimate[1],
               sdlog=as.numeric(logn$estimate[2]),
               min=llow, max=lup))
     }
     if ( method=="norm" ) {
-      x[r] <- round(EnvStats::rnormTrunc(length(r),
+      x[r] <- round(rnormTrunc(length(r),
               mean=heap, sd=1, min=llow, max=lup))
     }
     if ( method=="unif" ) {

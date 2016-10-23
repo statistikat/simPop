@@ -5,7 +5,7 @@
 \title{Simulate categorical variables of population data}
 \usage{
 simCategorical(simPopObj, additional, method = c("multinom", "distribution",
-  "ctree", "cforest"), limit = NULL, censor = NULL, maxit = 500,
+  "ctree", "cforest","ranger"), limit = NULL, censor = NULL, maxit = 500,
   MaxNWts = 1500, eps = NULL, nr_cpus = NULL, regModel = NULL,
   seed = 1, verbose = FALSE, by = "strata")
 }
@@ -24,7 +24,8 @@ multinomial log-linear models and random draws from the resulting
 distributions) or \code{"distribution"} (random draws from the observed
 conditional distributions of their multivariate realizations).
 \code{"ctree"}  for using Classification trees
-\code{"cforest"}  for using random forest}
+\code{"cforest"}  for using random forest (implementation in package party)
+\code{"ranger"}  for using random forest (implementation in package ranger)}
 
 \item{limit}{if \code{method} is \code{"multinom"}, this can be used to
 account for structural zeros. If only one additional variable is requested,
@@ -116,7 +117,7 @@ simPop
 }
 }
 \author{
-Bernhard Meindl and Andreas Alfons and Stefan Kraft
+Bernhard Meindl, Andreas Alfons, Stefan Kraft, Alexander Kowarik
 }
 \seealso{
 \code{\link{simStructure}}, \code{\link{simRelation}},

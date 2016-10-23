@@ -1,7 +1,7 @@
-library("simPop")
+library(simPop)
 
-data(eusilcS)
-data(eusilcP)
+data(eusilcS,package="simPop")
+data(eusilcP,package="simPop")
 ## approx. 20 seconds computation time
 inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
 inp <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090"))

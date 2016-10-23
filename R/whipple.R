@@ -67,7 +67,7 @@ whipple <- function(x, method="standard",weight=NULL){
 	if(is.null(weight)){
 		tab <- table(x)	
 	}else{
-		tab <- wtd.table(x,weight)[[2]]
+		tab <- tableWt(x,weight)
 	}
     W <- numeric(10)
 	for(i in 1:10){

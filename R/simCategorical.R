@@ -65,7 +65,17 @@ generateValues <- function(dataSample, dataPop, params) {
     }else if ( meth %in% c("ctree","cforest") ) {
       probs <- predict(mod, newdata=data.table(newdata), type="prob")
       probs <- do.call("rbind",probs)
-    }
+    }else if ( meth %in% c("ranger") ) {
+	  probs <- t(apply(predict(mod,data=newdata,type="response",predict.all=TRUE)$predictions,1,function(x)prop.table(table(factor(x,levels=1:2)))))
+	  if(ncol(probs)!=length(mod$forest$levels)){ # Levels with no occurence in the predictions
+		  missingCV <- mod$forest$class.values[!mod$forest$class.values%in%as.numeric(colnames(probs))]
+		  zeroProbs <- matrix(0,ncol=length(missingCV),nrow=nrow(probs))
+		  colnames(zeroProbs) <- as.character(missingCV)
+		  probs <- cbind(probs,zeroProbs)
+	  }
+	  colnames(probs) <- mod$forest$levels[match(as.numeric(colnames(probs)),mod$forest$class.values)]
+	  probs <- probs[,mod$forest$levels]
+	}
     #if ( meth %in% "naivebayes" ) {
     #  probs <- predict(mod, newdata=newdata, type="raw")
     #}
@@ -178,7 +188,8 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
 #' distributions) or \code{"distribution"} (random draws from the observed
 #' conditional distributions of their multivariate realizations).
 #' \code{"ctree"}  for using Classification trees
-#' \code{"cforest"}  for using random forest
+#' \code{"cforest"}  for using random forest (implementation in package party)
+#' \code{"ranger"}  for using random forest (implementation in package ranger)
 #' @param limit if \code{method} is \code{"multinom"}, this can be used to
 #' account for structural zeros. If only one additional variable is requested,
 #' a named list of lists should be supplied. The names of the list components
@@ -233,7 +244,7 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
 #' variables specified by argument \code{additional}.
 #' @note The basic household structure needs to be simulated beforehand with
 #' the function \code{\link{simStructure}}.
-#' @author Bernhard Meindl and Andreas Alfons and Stefan Kraft
+#' @author Bernhard Meindl, Andreas Alfons, Stefan Kraft, Alexander Kowarik
 #' @seealso \code{\link{simStructure}}, \code{\link{simRelation}},
 #' \code{\link{simContinuous}}, \code{\link{simComponents}}
 #' @export
@@ -249,7 +260,7 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
 #' simPop
 #' }
 simCategorical <- function(simPopObj, additional,
-    method=c("multinom", "distribution","ctree","cforest"),
+    method=c("multinom", "distribution","ctree","cforest","ranger"),
     limit=NULL, censor=NULL, maxit=500, MaxNWts=1500,
     eps=NULL, nr_cpus=NULL, regModel=NULL, seed=1,
     verbose=FALSE,by="strata") {
@@ -450,12 +461,18 @@ simCategorical <- function(simPopObj, additional,
       if(verbose) cat("we are running recursive partitioning:\n")
       if(verbose) cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
     }else if ( method == "cforest" ) {
-      # simulation via recursive partitioning and regression trees
+      # simulation via random forest
       formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
       formula.cmd <- paste("suppressWarnings(cforest(", formula.cmd, ", weights=as.integer(dataSample$", dataS@weight, "), data=dataSample))", sep="")
-      if(verbose) cat("we are running recursive partitioning:\n")
+      if(verbose) cat("we are running random forest classification (cforest):\n")
       if(verbose) cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
-    }
+    }else if ( method == "ranger" ) {
+		# simulation via random forest
+		formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
+		formula.cmd <- paste("suppressWarnings(ranger(", formula.cmd, ", case.weights=dataSample$", dataS@weight, ", data=dataSample))", sep="")
+		if(verbose) cat("we are running random forest (ranger):\n")
+		if(verbose) cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
+	}
     #if ( method == "naivebayes" ) {
     #  formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
     #  formula.cmd <- paste("naiveBayes(", formula.cmd, ", data=dataSample, usekernel=TRUE)", sep="")
@@ -492,7 +509,7 @@ simCategorical <- function(simPopObj, additional,
         registerDoParallel(cl,cores=nr_cores)
         values <- foreach(x=levels(data_sample[[curStrata]]), .options.snow=list(preschedule=FALSE)) %dopar% {
           generateValues(
-              dataSample=sampWork[sampWork[[curStrata]] == x,],
+              dataSample=sampWork[sampWork[[curStrata]] == x,c(params$cur.var,predNames),with=FALSE],
               dataPop=data_pop[indStrata[[x]], predNames, with=F], params
           )
         }
@@ -502,7 +519,7 @@ simCategorical <- function(simPopObj, additional,
       if ( !have_win) {
         values <- mclapply(levels(data_sample[[curStrata]]), function(x) {
               generateValues(
-                  dataSample=sampWork[sampWork[[curStrata]] == x,],
+                  dataSample=sampWork[sampWork[[curStrata]] == x,c(params$cur.var,predNames),with=FALSE],
                   dataPop=data_pop[indStrata[[x]], predNames, with=F], params
               )
             }, mc.cores=nr_cores)
@@ -510,7 +527,7 @@ simCategorical <- function(simPopObj, additional,
     } else {
       values <- lapply(levels(data_sample[[curStrata]]), function(x) {
             generateValues(
-                dataSample=sampWork[sampWork[[curStrata]] == x,],
+                dataSample=sampWork[sampWork[[curStrata]] == x,c(params$cur.var,predNames),with=FALSE],
                 dataPop=data_pop[indStrata[[x]], predNames, with=F], params
             )
           })
