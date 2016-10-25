@@ -509,7 +509,7 @@ simCategorical <- function(simPopObj, additional,
         registerDoParallel(cl,cores=nr_cores)
         values <- foreach(x=levels(data_sample[[curStrata]]), .options.snow=list(preschedule=FALSE)) %dopar% {
           generateValues(
-              dataSample=sampWork[sampWork[[curStrata]] == x,c(params$cur.var,predNames),with=FALSE],
+              dataSample=sampWork[sampWork[[curStrata]] == x,c(params$cur.var,predNames,params$w),with=FALSE],
               dataPop=data_pop[indStrata[[x]], predNames, with=F], params
           )
         }
@@ -519,7 +519,7 @@ simCategorical <- function(simPopObj, additional,
       if ( !have_win) {
         values <- mclapply(levels(data_sample[[curStrata]]), function(x) {
               generateValues(
-                  dataSample=sampWork[sampWork[[curStrata]] == x,c(params$cur.var,predNames),with=FALSE],
+                  dataSample=sampWork[sampWork[[curStrata]] == x,c(params$cur.var,predNames,params$w),with=FALSE],
                   dataPop=data_pop[indStrata[[x]], predNames, with=F], params
               )
             }, mc.cores=nr_cores)
@@ -527,7 +527,7 @@ simCategorical <- function(simPopObj, additional,
     } else {
       values <- lapply(levels(data_sample[[curStrata]]), function(x) {
             generateValues(
-                dataSample=sampWork[sampWork[[curStrata]] == x,c(params$cur.var,predNames),with=FALSE],
+                dataSample=sampWork[sampWork[[curStrata]] == x,c(params$cur.var,predNames,params$w),with=FALSE],
                 dataPop=data_pop[indStrata[[x]], predNames, with=F], params
             )
           })
