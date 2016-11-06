@@ -100,9 +100,9 @@ generateValues <- function(dataSample, dataPop, params) {
     # account for structural zeros
     if ( (!is.null(limit) || !is.null(censor)) && !is.null(dim(probs)) ) {
       if(length(exclude) == 0) {
-        probs <- adjustProbs(probs, grid, names(indGrid), limit[[i]], censor[[i]])
+        probs <- adjustProbs(probs, grid, names(indGrid), limit, censor)
       } else {
-        probs <- adjustProbs(probs, grid[-exclude, , drop=FALSE], names(indGrid)[-exclude], limit[[i]], censor[[i]])
+        probs <- adjustProbs(probs, grid[-exclude, , drop=FALSE], names(indGrid)[-exclude], limit, censor)
       }
     }
     # local function for sampling from probabilities

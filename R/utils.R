@@ -118,7 +118,7 @@ adjustProbs <- function(probs, grid, pNames, limit = NULL, censor = NULL) {
     # loop over predictors for which to censor probabilities
     for(i in seq_along(limit)) {
       predNameI <- names(limit)[i]
-      predI <- grid[, predNameI]
+      predI <- grid[, predNameI,with=FALSE]
       limitI <- limit[[i]]
       # loop over supplied outcomes of current predictor to
       # find probabilities to be set to zero
@@ -144,7 +144,7 @@ adjustProbs <- function(probs, grid, pNames, limit = NULL, censor = NULL) {
           # probabilities to be set to zero
           for(j in seq_along(censorI)) {
             predNameJ <- names(censorI)[j]
-            predJ <- grid[, predNameJ]
+            predJ <- grid[, predNameJ,with=FALSE]
             set0[predJ %in% censorI[[j]], censorNameI] <- TRUE
           }
         } else {
@@ -332,7 +332,7 @@ regressionInput <- function(obj, additional, regModel) {
   for ( i in seq_along(additional) ) {
     if ( class(regModel[[i]]) == "formula" ) {
       # check the formula
-      fmt <- format(regModel[[i]])
+      fmt <- paste0(as.character(regModel[[i]]),collapse="")
       if ( substr(fmt,1,1)=="~" ) {
         regModel[[i]] <- as.formula(paste0(additional[i], fmt))
       }
@@ -350,7 +350,7 @@ regressionInput <- function(obj, additional, regModel) {
         stop(paste0("Some variables (", paste0(regvars[!ii], collapse=", "), ") required for the regression model are not available in the sample!\n"))
       }
       regInput[[i]]$predNames <- regvars
-      regInput[[i]]$formula <- format(regModel[[i]])
+      regInput[[i]]$formula <- paste0(as.character(regModel[[i]]),collapse="")
     } else {
       if ( !regModel[i] %in% c("basic","available") ) {
         stop("regModel[",i,"] is neither a formula nor 'basic' or 'available'!\n")
