@@ -334,9 +334,10 @@ regressionInput <- function(obj, additional, regModel) {
       # check the formula
       fmt <- paste0(as.character(regModel[[i]]),collapse="")
       if ( substr(fmt,1,1)=="~" ) {
-        regModel[[i]] <- as.formula(paste0(additional[i], fmt))
+        regModel[[i]] <- paste0(additional[i], fmt)
+        regf <- as.formula(regModel[[i]])
       }
-      regvars <- all.vars(regModel[[i]])
+      regvars <- all.vars(regf)
       if ( regvars[1] != additional[i] ) {
         stop("dependent variable in model-formula does not match with variable name specified in 'additional'!\n")
       }
@@ -350,7 +351,7 @@ regressionInput <- function(obj, additional, regModel) {
         stop(paste0("Some variables (", paste0(regvars[!ii], collapse=", "), ") required for the regression model are not available in the sample!\n"))
       }
       regInput[[i]]$predNames <- regvars
-      regInput[[i]]$formula <- paste0(as.character(regModel[[i]]),collapse="")
+      regInput[[i]]$formula <- regModel[[i]]
     } else {
       if ( !regModel[i] %in% c("basic","available") ) {
         stop("regModel[",i,"] is neither a formula nor 'basic' or 'available'!\n")
