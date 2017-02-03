@@ -65,6 +65,10 @@ kishFactor <- function(w){
 #' @param meanHH if TRUE, every person in a household is assigned the mean of
 #' the person weights corresponding to the household.
 #' @param returnNA if TRUE, the calibrated weight will be set to NA in case of no convergence.
+#' @param looseH if FALSE, the actual constraints \code{conH} are used for calibrating all the hh weights. 
+#' If TRUE, only the weights for which the lower and upper thresholds defined by \code{conH} and \code{epsH} are exceeded
+#' are calibrated. They are however not calibrated against the actual constraints \code{conH} but against
+#' these lower and upper thresholds, i.e. \code{conH}-\code{conH}*\code{epsH} and \code{conH}+\code{conH}*\code{epsH}.
 #' @return The function will return the input data \code{dat} with the
 #' calibrated weights \code{calibWeight} as an additional column.
 #' @seealso \code{\link{ipu}}
@@ -135,9 +139,27 @@ kishFactor <- function(w){
 #'   conH=list(hhinc=conH1, conH2), 
 #'   epsP=list(epsP1,0.05), epsH=1e-2, verbose=TRUE, bound=4, maxIter=200,
 #'   meanHH=TRUE)
-
+boundsFak <- function(g1,g0,f,bound=4){ # Berechnet die neuen Gewichte (innerhalb 4, .25 Veraenderungsraten)
+  g1 <- g1 * f
+  TF <- (g1/g0)>bound
+  TF[is.na(TF)] <- FALSE
+  g1[TF] <- bound*g0[TF]
+  TF <- (g1/g0)<(1/bound)
+  TF[is.na(TF)] <- FALSE
+  g1[TF] <- (1/bound)*g0[TF]
+  return(g1)
+}
+boundsFakHH <- function(g1,g0,eps,orig,p,bound=4){ # Berechnet die neuen Gewichte fuer Unter- und Obergrenze (innerhalb 4, .25 Veraenderungsraten)
+  u <- orig*(1-eps)
+  o <- orig*(1+eps)
+  g1[p>o] <- g1[p>o] * o[p>o]/p[p>o]
+  g1[p<u] <- g1[p<u] * u[p<u]/p[p<u]
+  g1[(g1/g0)>bound] <- bound*g0[(g1/g0)>bound]
+  g1[(g1/g0)<(1/bound)] <- (1/bound)*g0[(g1/g0)<(1/bound)]
+  return(g1)
+}
 ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FALSE,
-                 w=NULL,bound=4,maxIter=200,meanHH=TRUE,returnNA=TRUE){
+                 w=NULL,bound=4,maxIter=200,meanHH=TRUE,returnNA=TRUE,looseH=FALSE){
   OriginalSortingVariable <- V1 <- baseWeight <- calibWeight <- epsvalue <- f <- NULL
   temporary_hid <- temporary_hvar <- tmpVarForMultiplication <- value <- wValue <- wvst<- NULL
   dat <- copy(dat)
@@ -156,7 +178,7 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
   ###Housekeeping of the varNames used
   usedVarNames <- c(valueP,valueH,"value","baseWeight","wvst","wValue")
   renameVars <- NULL
-
+  
   if(any(names(dat)%in%usedVarNames)){
     renameVars <- names(dat)[names(dat)%in%usedVarNames]
     setnames(dat,renameVars,paste0(renameVars,"_safekeeping"))
@@ -174,18 +196,6 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
     setnames(dat,hid,"temporary_hid")
     dat[,wvst:=as.numeric(!duplicated(temporary_hid))]
     setnames(dat,"temporary_hid",hid)
-  }
-  
-  
-  boundsFak <- function(g1,g0,f,bound=4){ # Berechnet die neuen Gewichte (innerhalb 4, .25 Veraenderungsraten)
-    g1 <- g1 * f
-    TF <- (g1/g0)>bound
-    TF[is.na(TF)] <- FALSE
-    g1[TF] <- bound*g0[TF]
-    TF <- (g1/g0)<(1/bound)
-    TF[is.na(TF)] <- FALSE
-    g1[TF] <- (1/bound)*g0[TF]
-    return(g1)
   }
   mconP <- lapply(conP,melt)##convert tables to long form
   mconH <- lapply(conH,melt)
@@ -302,33 +312,42 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
         setnames(dat,names(conH)[i],"tmpVarForMultiplication")
         dat[,wValue:=sum(calibWeight*wvst*tmpVarForMultiplication),by=eval(hColNames[[i]])]
         setnames(dat,"tmpVarForMultiplication",names(conH)[i])
-        }else{
-          # categorical variable to be calibrated
-          dat[,wValue:=sum(calibWeight*wvst),by=eval(hColNames[[i]])]
-        }
+      }else{
+        # categorical variable to be calibrated
+        dat[,wValue:=sum(calibWeight*wvst),by=eval(hColNames[[i]])]
+      }
       
       setnames(dat,valueH[i],"value")
       dat[,f:= value/wValue,by=eval(hColNames[[i]])]
       
       if(is.array(epsHcur)){
         dat <- merge(dat,melt(epsHcur,value.name="epsvalue"),by=hColNames[[i]])
-        curEps <- abs(dat[,1/f-1])
+        curEps <- dat[,abs(1/f-1)]
         epsHcur <- dat[,epsvalue]
-        dat[,epsvalue:=NULL]
       }else{
         curEps <- dat[,max(abs(1/f-1))]
       }
-      
+      # if(is.array(epsHcur)){## was soll das?
+      #   dat[,epsvalue:=NULL]
+      # }
       if(any(curEps>epsHcur)){    
         if(!is.null(bound)){
-          dat[,calibWeight:=boundsFak(calibWeight,baseWeight,f,bound=bound),by=eval(hColNames[[i]])]  
+          if(!looseH){
+            dat[,calibWeight:=boundsFak(g1=calibWeight,g0=baseWeight,f=f,bound=bound)]#,by=eval(hColNames[[i]])]    
+          }else{
+            dat[,calibWeight:=boundsFakHH(g1=calibWeight,g0=baseWeight,eps=epsvalue,orig=value,p=wValue,bound=bound)]  
+          }
         }else{
           dat[,calibWeight:=f*calibWeight,by=eval(hColNames[[i]])]
         }
       }
-      setnames(dat,"value",valueH[i])
+      if("epsvalue"%in%colnames(dat)){
+        dat[,epsvalue:=NULL]  
+      }
       
+      setnames(dat,"value",valueH[i])
       if(any(curEps>epsHcur)){ 
+        error <- TRUE
       }
       if(verbose&&(curEps>epsHcur)&&calIter%%10==0){
         cat(calIter, ":Not yet converged for H-Constraint",i,"\n")
@@ -350,18 +369,18 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
   ###Housekeeping of the varNames used
   delVars <- c(delVars,"wvst","wValue","f")
   if(any(valueP%in%names(dat)))
-  delVars <- c(delVars,valueP)
+    delVars <- c(delVars,valueP)
   if(any(valueH%in%names(dat)))
-  delVars <- c(delVars,valueH)
+    delVars <- c(delVars,valueH)
   dat[,eval(delVars):=NULL]
   if(!is.null(renameVars)){
     setnames(dat,paste0(renameVars,"_safekeeping"),renameVars)
   }
-# loeschen; da macht man doch das umbenennen wieder rueckgaengig und das will man nicht!  
-#   if(any(names(dat)%in%usedVarNames)){
-#     renameVars <- names(dat)[names(dat)%in%usedVarNames]
-#     setnames(dat,renameVars,paste0(renameVars,"_safekeeping"))
-#   }
+  # loeschen; da macht man doch das umbenennen wieder rueckgaengig und das will man nicht!  
+  #   if(any(names(dat)%in%usedVarNames)){
+  #     renameVars <- names(dat)[names(dat)%in%usedVarNames]
+  #     setnames(dat,renameVars,paste0(renameVars,"_safekeeping"))
+  #   }
   ## originalsorting is fucked up without this
   setkey(dat,OriginalSortingVariable)
   dat[,OriginalSortingVariable:=NULL]
