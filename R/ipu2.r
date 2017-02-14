@@ -17,6 +17,25 @@ kishFactor <- function(w){
   n <- length(w)
   sqrt(n*sum(w^2)/sum(w)^2)  
 }
+boundsFak <- function(g1,g0,f,bound=4){ # Berechnet die neuen Gewichte (innerhalb 4, .25 Veraenderungsraten)
+  g1 <- g1 * f
+  TF <- (g1/g0)>bound
+  TF[is.na(TF)] <- FALSE
+  g1[TF] <- bound*g0[TF]
+  TF <- (g1/g0)<(1/bound)
+  TF[is.na(TF)] <- FALSE
+  g1[TF] <- (1/bound)*g0[TF]
+  return(g1)
+}
+boundsFakHH <- function(g1,g0,eps,orig,p,bound=4){ # Berechnet die neuen Gewichte fuer Unter- und Obergrenze (innerhalb 4, .25 Veraenderungsraten)
+  u <- orig*(1-eps)
+  o <- orig*(1+eps)
+  g1[p>o] <- g1[p>o] * o[p>o]/p[p>o]
+  g1[p<u] <- g1[p<u] * u[p<u]/p[p<u]
+  g1[(g1/g0)>bound] <- bound*g0[(g1/g0)>bound]
+  g1[(g1/g0)<(1/bound)] <- (1/bound)*g0[(g1/g0)<(1/bound)]
+  return(g1)
+}
 #' Iterative Proportional Updating
 #' 
 #' Adjust sampling weights to given totals based on household-level and/or
@@ -75,89 +94,58 @@ kishFactor <- function(w){
 #' @export
 #' @author Alexander Kowarik
 #' @examples
-#' nrowInp <- 1000
-#' inp <- as.data.table(matrix(0, nrow=nrowInp, ncol=6))
-#' colnames(inp) <- c("pid","hhid","income","agegroup","gender","region")
-#' inp[,pid:=.I]
-#' inp$hhid <- round(seq(from=1, to=round(nrowInp/3), length.out=nrowInp))
-#' set.seed(223344)
-#' # 4 age groups
-#' inp$agegroup <- sample(c(1:4),nrowInp,replace=TRUE, prob=c(0.15,0.3,0.35,0.2))
-#' # 2 gender groups
-#' inp$gender <- sample(c(1,2),nrowInp,replace=TRUE)
-#' # 3 regions
-#' inp$region <- sample(c(1:3),nrowInp,replace=TRUE, prob=c(0.2,0.5,0.3))
-#' inp[,region:=region[1], by=hhid]
-#' # income
-#' inp$income <- round(rpareto(nrowInp, 1000, 3))
-#' inp[agegroup==1,income:=0]    
-#' # hhincome
-#' inp[,hhinc:=sum(income),by=list(hhid)]
+#' data(eusilcS)
+#' setDT(eusilcS)
+#' eusilcS <- eusilcS[, list(db030,hsize,db040,age,rb090,netIncome,db090,rb050)]
 #' 
-#' # constraints on person level
-#' conP1 <- array(c(239741,601386,360193,480699,1199962,718892,
-#'   560069,1399490,840041,320257,799359,479911),c(3,4))
-#' dimnames(conP1) <- list(region=c("1", "2", "3"),agegroup=c("1", "2", "3", "4"))
+#' ## some recoding
+#' # generate age groups
+#' eusilcS[age<0, age:=0]
+#' eusilcS[,agegroup:=floor(age/10)]
+#' # some recoding of netIncome for reasons of simplicity
+#' eusilcS[is.na(netIncome), netIncome:=0] 
+#' eusilcS[netIncome<0, netIncome:=0] 
+#' # set hsize to 1,...,5+
+#' eusilcS[hsize>=5, hsize:=5] 
 #' 
-#' conP2 <- array(c(800171,1999596,1198754,800595,2000601,1200283),c(3,2))
-#' dimnames(conP2) <- list(region=c("1", "2", "3"),gender=c("1", "2"))
+#' ## example for base weights assuming a simple random sample of households stratified per region
+#' eusilcS[, regSamp:=.N, by=db040]
+#' eusilcS[, regPop:=sum(rb050), by=db040]
+#' eusilcS[, baseWeight:=regPop/regSamp]
 #' 
-#' conP3 <- array(c(1020162500,2549062073,1528896458,1021294346,2551562798,1530314970),c(3,2))
-#' dimnames(conP3) <- list(region=c("1", "2", "3"),gender=c("1", "2"))
+#' ## constraints on person level
+#' # age 
+#' conP1 <- xtabs(V1 ~ agegroup, data=eusilcS[,sum(rb050),by=agegroup])
+#' # gender by region
+#' conP2 <- xtabs(V1 ~ rb090+db040, data=eusilcS[,sum(rb050),by=list(rb090,db040)])
+#' # personal net income by gender
+#' conP3 <- xtabs(V1 ~ rb090, data=eusilcS[,sum(rb050*netIncome),by=rb090])
+#' ## constraints on household level
+#' conH1 <- xtabs(V1 ~ hsize+db040, data=eusilcS[!duplicated(db030),sum(rb050),list(hsize,db040)])
 #' 
-#' # constraints on household level
-#' conH1 <- array(c(2041271296,5104297066,3055724783),3)
-#' dimnames(conH1) <- list(region=c("1", "2", "3"))
+#' # array of convergence limits for conH1
+#' epsH1 <- conH1
+#' epsH1[as.character(1:4),] <- 0.005
+#' epsH1["5",] <- 0.2
 #' 
-#' conH2 <- array(c(533267,1333931,799469),3)
-#' dimnames(conH2) <- list(region=c("1", "2", "3"))
+#' # without array epsP1
+#' calibweights1 <- ipu2(eusilcS, hid = "db030", 
+#'                       conP = list(conP1,conP2,netIncome=conP3), 
+#'                       conH = list(conH1), 
+#'                       epsP = list(1e-06,1e-06,1e-03),
+#'                       epsH = 0.01,  
+#'                       bound = NULL, verbose=TRUE,  maxIter = 200)
 #' 
-#' # array of convergence limits for conP1 
-#' epsP1 <- array(rep(c(0.9,rep(0.7,2)),4),c(3,4))
-#' dimnames(epsP1) <- dimnames(conP1)
-#' 
-#' # example for base weights assuming a simple random sample of households stratified per region
-#' inp[,xx:=1]
-#' inp[, regSamp:=sum(xx),by=region]
-#' reg <- cbind(region=1:3,regPop=addmargins(conP2,2)[1:3,"Sum"])
-#' inp <- merge(inp,reg,by="region",sort=FALSE)
-#' inp[,baseWeight:=regPop/regSamp]
-#' inp[,xx:=NULL]
-#' 
-#' res1 <- ipu2(dat=inp, hid="hhid", w=NULL, conP=list(conP1, conP2, income=conP3),
-#'   conH=list(hhinc=conH1, conH2), 
-#'   epsP=0.09, epsH=0.05, verbose=TRUE, bound=NULL, maxIter=200, meanHH=TRUE)
-#' 
-#' # with array epsP1
-#' res2 <- ipu2(dat=inp, hid="hhid", w=NULL, conP=list(conP1, conP2, income=conP3),
-#'   conH=list(hhinc=conH1, conH2), 
-#'   epsP=list(epsP1,0.07,0.07), epsH=0.05, verbose=TRUE, bound=NULL,
-#'   maxIter=200, meanHH=TRUE)
-#' 
-#' # with base weights and bound
-#' res3 <- ipu2(dat=inp, hid="hhid", w="baseWeight", conP=list(conP1, conP2),
-#'   conH=list(hhinc=conH1, conH2), 
-#'   epsP=list(epsP1,0.05), epsH=1e-2, verbose=TRUE, bound=4, maxIter=200,
-#'   meanHH=TRUE)
-boundsFak <- function(g1,g0,f,bound=4){ # Berechnet die neuen Gewichte (innerhalb 4, .25 Veraenderungsraten)
-  g1 <- g1 * f
-  TF <- (g1/g0)>bound
-  TF[is.na(TF)] <- FALSE
-  g1[TF] <- bound*g0[TF]
-  TF <- (g1/g0)<(1/bound)
-  TF[is.na(TF)] <- FALSE
-  g1[TF] <- (1/bound)*g0[TF]
-  return(g1)
-}
-boundsFakHH <- function(g1,g0,eps,orig,p,bound=4){ # Berechnet die neuen Gewichte fuer Unter- und Obergrenze (innerhalb 4, .25 Veraenderungsraten)
-  u <- orig*(1-eps)
-  o <- orig*(1+eps)
-  g1[p>o] <- g1[p>o] * o[p>o]/p[p>o]
-  g1[p<u] <- g1[p<u] * u[p<u]/p[p<u]
-  g1[(g1/g0)>bound] <- bound*g0[(g1/g0)>bound]
-  g1[(g1/g0)<(1/bound)] <- (1/bound)*g0[(g1/g0)<(1/bound)]
-  return(g1)
-}
+#' # with array epsP1, base weights and bound
+#' calibweights2 <- ipu2(eusilcS, hid = "db030", 
+#'                       conP = list(conP1,conP2), 
+#'                       conH = list(conH1), 
+#'                       epsP = 1e-06,
+#'                       epsH = epsH1,  
+#'                       w="baseWeight",
+#'                       bound = 4, verbose=TRUE,  maxIter = 200)
+
+
 ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FALSE,
                  w=NULL,bound=4,maxIter=200,meanHH=TRUE,returnNA=TRUE,looseH=FALSE){
   OriginalSortingVariable <- V1 <- baseWeight <- calibWeight <- epsvalue <- f <- NULL
@@ -201,7 +189,7 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
   mconH <- lapply(conH,melt)
   
   for(i in seq_along(conP)){
-    dat <- merge(dat,mconP[[i]],by=colnames(mconP[[i]])[-ncol(mconP[[i]])])#,all.x=TRUE,all.y=FALSE)	
+    dat <- merge(dat,mconP[[i]],by=colnames(mconP[[i]])[-ncol(mconP[[i]])],all.x=TRUE,all.y=FALSE)	
     setnames(dat,"value",valueP[i])
   }
   for(i in seq_along(conH)){
@@ -242,6 +230,11 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
   error <- TRUE
   calIter <- 1
   
+  # if(any(is.na(dat[,valueP,with=FALSE]))){
+  #   
+  #   cat("\nNot all observations in the data could be merged with a constraint.\n")#oder warning()
+  # }
+  
   while(error&&calIter<=maxIter){
     error <- FALSE
     
@@ -270,28 +263,31 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
       
       if(is.array(epsPcur)){
         dat <- merge(dat,melt(epsPcur,value.name="epsvalue"),by=pColNames[[i]])
-        curEps <- abs(dat[,1/f-1])
+        curEps <- abs(dat[,1/na.omit(f)-1])
         epsPcur <- dat[,epsvalue]
         dat[,epsvalue:=NULL]
       }else{
-        curEps <- dat[,max(abs(1/f-1))]
+        curEps <- dat[,max(abs(1/na.omit(f)-1))]
       }
       
       if(any(curEps>epsPcur)){## sicherheitshalber abs(epsPcur)? Aber es wird schon niemand negative eps Werte uebergeben??
+
         if(!is.null(bound)){
-          dat[,calibWeight:=boundsFak(calibWeight,baseWeight,f,bound=bound)]#,by=eval(pColNames[[i]])]  
+          dat[!is.na(f),calibWeight:=boundsFak(calibWeight,baseWeight,f,bound=bound)]#,by=eval(pColNames[[i]])]  
         }else{
-          dat[,calibWeight:=f*calibWeight,by=eval(pColNames[[i]])]
+          dat[!is.na(f),calibWeight:=f*calibWeight,by=eval(pColNames[[i]])]
         }
-      }
+        error <- TRUE
+        }
       setnames(dat,"value",valueP[i])
       
-      if(any(curEps>epsPcur)){ ## kann man doch eigentlich auch gleich zu oberer if-Abfrage dazugeben
-        error <- TRUE
-      }
+      # if(any(curEps>epsPcur)){ ##  gleich zu oberer if-Abfrage dazugegeben
+      #   error <- TRUE
+      # }
+      
       if(verbose&&(curEps>epsPcur)&&calIter%%10==0){
         if(calIter%%100==0)
-          print(dat[abs(1/f-1)>epsPcur][,list(mean(f),.N),by=eval(pColNames[[i]])])
+          print(dat[abs(1/na.omit(f)-1)>epsPcur][,list(mean(na.omit(f)),.N),by=eval(pColNames[[i]])])
         cat(calIter, ":Not yet converged for P-Constraint",i,"\n")
       }
     }
