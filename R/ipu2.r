@@ -210,14 +210,38 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
     dat[,wvst:=as.numeric(!duplicated(temporary_hid))]
     setnames(dat,"temporary_hid",hid)
   }
-  mconP <- lapply(conP,melt)##convert tables to long form
-  mconH <- lapply(conH,melt)
+  mconP <- lapply(conP,melt,as.is=TRUE)##convert tables to long form
+  mconH <- lapply(conH,melt,as.is=TRUE)
   
   for(i in seq_along(conP)){
-    dat <- merge(dat,mconP[[i]],by=colnames(mconP[[i]])[-ncol(mconP[[i]])],all.x=TRUE,all.y=FALSE)	
+    # Harmonize the class of columns coming from the constraints
+    # the result from melt is taken as character and then the class is set
+    cn <- colnames(mconP[[i]])[-ncol(mconP[[i]])]
+    for(j in seq_along(cn)){
+      cl <- class(dat[[cn[j]]])
+      if("factor"%in%cl){
+        mconP[[i]][[cn[j]]] <- factor(mconP[[i]][[cn[j]]],levels=levels(dat[[cn[j]]]))
+      }else if("numeric"%in%cl){
+        mconP[[i]][[cn[j]]] <- as.numeric(mconP[[i]][[cn[j]]])
+      }else if("integer"%in%cl){
+        mconP[[i]][[cn[j]]] <- integer(mconP[[i]][[cn[j]]])
+      }
+    }
+    dat <- merge(dat,mconP[[i]],by=colnames(mconP[[i]])[-ncol(mconP[[i]])],all.x=TRUE,all.y=FALSE)
     setnames(dat,"value",valueP[i])
   }
   for(i in seq_along(conH)){
+    cn <- colnames(mconH[[i]])[-ncol(mconH[[i]])]
+    for(j in seq_along(cn)){
+      cl <- class(dat[[cn[j]]])
+      if("factor"%in%cl){
+        mconH[[i]][[cn[j]]] <- factor(mconH[[i]][[cn[j]]],levels=levels(dat[[cn[j]]]))
+      }else if("numeric"%in%cl){
+        mconH[[i]][[cn[j]]] <- as.numeric(mconH[[i]][[cn[j]]])
+      }else if("integer"%in%cl){
+        mconH[[i]][[cn[j]]] <- integer(mconH[[i]][[cn[j]]])
+      }
+    }
     dat <- merge(dat,mconH[[i]],by=colnames(mconH[[i]])[-ncol(mconH[[i]])],all.x=TRUE,all.y=FALSE)
     setnames(dat,"value",valueH[i])
   }
@@ -254,7 +278,6 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
   ###Calib
   error <- TRUE
   calIter <- 1
-  
   while(error&&calIter<=maxIter){
     error <- FALSE
     
