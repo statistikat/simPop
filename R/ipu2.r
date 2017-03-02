@@ -36,6 +36,7 @@ boundsFakHH <- function(g1,g0,eps,orig,p,bound=4){ # Berechnet die neuen Gewicht
   g1[(g1/g0)<(1/bound)] <- (1/bound)*g0[(g1/g0)<(1/bound)]
   return(g1)
 }
+
 #' Iterative Proportional Updating
 #' 
 #' Adjust sampling weights to given totals based on household-level and/or
@@ -89,6 +90,7 @@ boundsFakHH <- function(g1,g0,eps,orig,p,bound=4){ # Berechnet die neuen Gewicht
 #' If TRUE, only the weights for which the lower and upper thresholds defined by \code{conH} and \code{epsH} are exceeded
 #' are calibrated. They are however not calibrated against the actual constraints \code{conH} but against
 #' these lower and upper thresholds, i.e. \code{conH}-\code{conH}*\code{epsH} and \code{conH}+\code{conH}*\code{epsH}.
+#' @param numericalWeighting ...
 #' @param curValue the current value of the group total
 #' @param Value the target group total
 #' @param numericVar vector with the values of the numeric variable
@@ -157,20 +159,6 @@ boundsFakHH <- function(g1,g0,eps,orig,p,bound=4){ # Berechnet die neuen Gewicht
 #    (sum(f*var*w)-v)^2+(sum(f*w)-sum(w))^2
 #  }
 #  coef <- optim(c(1,1),fn)$par
-computeLinear <- function(curValue,Value,numericVar,weightVec,boundLinear=10){#current summed up value, correct summed up value, numeric variable, current weight
-  h <- sum(weightVec*numericVar)
-  j <- sum(weightVec*numericVar^2)
-  N <- sum(weightVec)
-  b <- (Value-N*j/h)/((-N*j/h)+h)
-  a <- (N-b*N)/h
-  f <- a*numericVar+b
-  f[f<(1/boundLinear)] <- 1/boundLinear
-  f[f>boundLinear] <- boundLinear
-  return(f)
-}
-computeFrac <- function(curValue,Value,numericVar,weightVec){
-  Value/curValue
-}
 ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FALSE,
     w=NULL,bound=4,maxIter=200,meanHH=TRUE,returnNA=TRUE,looseH=FALSE,numericalWeighting=computeFrac){
   OriginalSortingVariable <- V1 <- baseWeight <- calibWeight <- epsvalue <- f <- NULL
@@ -440,4 +428,18 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
   }else{
     invisible(dat)  
   }  
+}
+computeLinear <- function(curValue,Value,numericVar,weightVec,boundLinear=10){#current summed up value, correct summed up value, numeric variable, current weight
+  h <- sum(weightVec*numericVar)
+  j <- sum(weightVec*numericVar^2)
+  N <- sum(weightVec)
+  b <- (Value-N*j/h)/((-N*j/h)+h)
+  a <- (N-b*N)/h
+  f <- a*numericVar+b
+  f[f<(1/boundLinear)] <- 1/boundLinear
+  f[f>boundLinear] <- boundLinear
+  return(f)
+}
+computeFrac <- function(curValue,Value,numericVar,weightVec){
+  Value/curValue
 }
