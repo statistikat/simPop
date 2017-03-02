@@ -144,10 +144,23 @@ boundsFakHH <- function(g1,g0,eps,orig,p,bound=4){ # Berechnet die neuen Gewicht
 #'                       epsH = epsH1,  
 #'                       w="baseWeight",
 #'                       bound = 4, verbose=TRUE,  maxIter = 200)
-
-
+computeLinear <- function(curV,v,var,w){#current summed up value, correct summed up value, numeric variable, current weight
+  h <- sum(w*var)
+  j <- sum(w*var^2)
+  N <- sum(w)
+  (v-N*j/h)/((-N*j/h)+h)
+  fn <- function(a){
+    f <- a[1]*var+a[2]
+    (sum(f*var*w)-v)^2+(sum(f*w)-sum(w))^2
+  }
+  coef <- optim(c(1,1),fn)$par
+  return(coef[1]*var+coef[2])
+}
+computeFrac <- function(curV,v,var,w){
+  v/curV
+}
 ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FALSE,
-                 w=NULL,bound=4,maxIter=200,meanHH=TRUE,returnNA=TRUE,looseH=FALSE){
+    w=NULL,bound=4,maxIter=200,meanHH=TRUE,returnNA=TRUE,looseH=FALSE,numericalWeighting=computeFrac){
   OriginalSortingVariable <- V1 <- baseWeight <- calibWeight <- epsvalue <- f <- NULL
   temporary_hid <- temporary_hvar <- tmpVarForMultiplication <- value <- wValue <- wvst<- NULL
   dat <- copy(dat)
@@ -189,11 +202,11 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
   mconH <- lapply(conH,melt)
   
   for(i in seq_along(conP)){
-    dat <- merge(dat,mconP[[i]],by=colnames(mconP[[i]])[-ncol(mconP[[i]])])#,all.x=TRUE,all.y=FALSE)	
+    dat <- merge(dat,mconP[[i]],by=colnames(mconP[[i]])[-ncol(mconP[[i]])],all.x=TRUE,all.y=FALSE)	
     setnames(dat,"value",valueP[i])
   }
   for(i in seq_along(conH)){
-    dat <- merge(dat,mconH[[i]],by=colnames(mconH[[i]])[-ncol(mconH[[i]])])	
+    dat <- merge(dat,mconH[[i]],by=colnames(mconH[[i]])[-ncol(mconH[[i]])],all.x=TRUE,all.y=FALSE)
     setnames(dat,"value",valueH[i])
   }
   if(nrow(dat)!=nrowOriginal){
@@ -245,17 +258,17 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
         ## numerical variable to be calibrated
         ## use name of conP list element to define numerical variable
         setnames(dat,names(conP)[i],"tmpVarForMultiplication")
-        dat[,wValue:=sum(calibWeight*tmpVarForMultiplication),by=eval(pColNames[[i]])]    
+        dat[,wValue:=sum(calibWeight*tmpVarForMultiplication),by=eval(pColNames[[i]])]
+        setnames(dat,valueP[i],"value")
+        # try to divide the weight between units with larger/smaller value in the numerical variable linear
+        dat[,f:=numericalWeighting(head(wValue,1),head(value,1),tmpVarForMultiplication,calibWeight),by=eval(pColNames[[i]])]
         setnames(dat,"tmpVarForMultiplication",names(conP)[i])
       }else{
         # categorical variable to be calibrated
-        dat[,wValue:=sum(calibWeight),by=eval(pColNames[[i]])] 
+        dat[,wValue:=sum(calibWeight),by=eval(pColNames[[i]])]
+        setnames(dat,valueP[i],"value")
+        dat[,f:= value/wValue,by=eval(pColNames[[i]])]
       }
-      
-      setnames(dat,valueP[i],"value")
-      
-      dat[,f:= value/wValue,by=eval(pColNames[[i]])] 
-      
       if(is.array(epsPcur)){
         dat <- merge(dat,melt(epsPcur,value.name="epsvalue"),by=pColNames[[i]])
         curEps <- abs(dat[!is.na(f),1/f-1])
