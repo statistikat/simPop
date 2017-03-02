@@ -224,7 +224,7 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
       }else if("numeric"%in%cl){
         mconP[[i]][[cn[j]]] <- as.numeric(mconP[[i]][[cn[j]]])
       }else if("integer"%in%cl){
-        mconP[[i]][[cn[j]]] <- integer(mconP[[i]][[cn[j]]])
+        mconP[[i]][[cn[j]]] <- as.integer(mconP[[i]][[cn[j]]])
       }
     }
     dat <- merge(dat,mconP[[i]],by=colnames(mconP[[i]])[-ncol(mconP[[i]])],all.x=TRUE,all.y=FALSE)
@@ -239,7 +239,7 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
       }else if("numeric"%in%cl){
         mconH[[i]][[cn[j]]] <- as.numeric(mconH[[i]][[cn[j]]])
       }else if("integer"%in%cl){
-        mconH[[i]][[cn[j]]] <- integer(mconH[[i]][[cn[j]]])
+        mconH[[i]][[cn[j]]] <- as.integer(mconH[[i]][[cn[j]]])
       }
     }
     dat <- merge(dat,mconH[[i]],by=colnames(mconH[[i]])[-ncol(mconH[[i]])],all.x=TRUE,all.y=FALSE)
