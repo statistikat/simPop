@@ -189,11 +189,7 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
   mconH <- lapply(conH,melt)
   
   for(i in seq_along(conP)){
-<<<<<<< HEAD
-    dat <- merge(dat,mconP[[i]],by=colnames(mconP[[i]])[-ncol(mconP[[i]])],all.x=TRUE,all.y=FALSE)	
-=======
     dat <- merge(dat,mconP[[i]],by=colnames(mconP[[i]])[-ncol(mconP[[i]])])#,all.x=TRUE,all.y=FALSE)	
->>>>>>> 08c427fa878dd39bec73858f67e0b42e7a1743ce
     setnames(dat,"value",valueP[i])
   }
   for(i in seq_along(conH)){
@@ -234,23 +230,11 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
   error <- TRUE
   calIter <- 1
   
-<<<<<<< HEAD
-  # if(any(is.na(dat[,valueP,with=FALSE]))){
-  #   
-  #   cat("\nNot all observations in the data could be merged with a constraint. Might be intentional however.\n")#oder warning()
-  # }
-  
-=======
->>>>>>> 08c427fa878dd39bec73858f67e0b42e7a1743ce
   while(error&&calIter<=maxIter){
     error <- FALSE
     
     ### Person calib
     for(i in seq_along(conP)){
-<<<<<<< HEAD
-      
-=======
->>>>>>> 08c427fa878dd39bec73858f67e0b42e7a1743ce
       if(is.list(epsP)){
         epsPcur <- epsP[[i]]
       }else{
@@ -274,7 +258,6 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
       
       if(is.array(epsPcur)){
         dat <- merge(dat,melt(epsPcur,value.name="epsvalue"),by=pColNames[[i]])
-<<<<<<< HEAD
         curEps <- abs(dat[!is.na(f),1/f-1])
         epsPcur <- dat[,epsvalue]
         dat[,epsvalue:=NULL]
@@ -305,32 +288,6 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
         cat(calIter, ":Not yet converged for P-Constraint",i,"\n")
       }
     
-=======
-        curEps <- abs(dat[,1/f-1])
-        epsPcur <- dat[,epsvalue]
-        dat[,epsvalue:=NULL]
-      }else{
-        curEps <- dat[,max(abs(1/f-1))]
-      }
-      
-      if(any(curEps>epsPcur)){## sicherheitshalber abs(epsPcur)? Aber es wird schon niemand negative eps Werte uebergeben??
-        if(!is.null(bound)){
-          dat[,calibWeight:=boundsFak(calibWeight,baseWeight,f,bound=bound)]#,by=eval(pColNames[[i]])]  
-        }else{
-          dat[,calibWeight:=f*calibWeight,by=eval(pColNames[[i]])]
-        }
-      }
-      setnames(dat,"value",valueP[i])
-      
-      if(any(curEps>epsPcur)){ ## kann man doch eigentlich auch gleich zu oberer if-Abfrage dazugeben
-        error <- TRUE
-      }
-      if(verbose&&(curEps>epsPcur)&&calIter%%10==0){
-        if(calIter%%100==0)
-          print(dat[abs(1/f-1)>epsPcur][,list(mean(f),.N),by=eval(pColNames[[i]])])
-        cat(calIter, ":Not yet converged for P-Constraint",i,"\n")
-      }
->>>>>>> 08c427fa878dd39bec73858f67e0b42e7a1743ce
     }
     if(meanHH){
       dat[,calibWeight:=mean(calibWeight),by=eval(hid)] ## das machen wir bei MZ-HR-Paper vor der hh-Kalibrierung. Hier wird nur erstes hh-member kalibriert.
