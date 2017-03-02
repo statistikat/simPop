@@ -2,8 +2,8 @@ Package: simPop
 Type: Package
 Title: Simulation of Synthetic Populations for Survey Data Considering Auxiliary
     Information
-Version: 0.6.0
-Date: 2017-01-23
+Version: 0.6.1
+Date: 2017-02-16
 Author: Bernhard Meindl, Matthias Templ, Andreas Alfons, Alexander Kowarik, and
     with contributions from Mathieu Ribatet
 Maintainer: Matthias Templ <matthias.templ@gmail.com>
@@ -25,12 +25,16 @@ Imports:
     colorspace,
     VIM,
     methods,party,EnvStats,fitdistrplus,ranger
-Suggests: haven, microbenchmark, stringr
+Suggests:
+    haven,
+    microbenchmark,
+    stringr
 LinkingTo: Rcpp
 Description: Tools and methods to simulate populations for surveys based
     on auxiliary data. The tools include model-based methods, calibration and
     combinatorial optimization algorithms. The package was developed with support of
-    the International Household Survey Network, DFID Trust Fund TF011722 and funds from the World bank.
+    the International Household Survey Network, DFID Trust Fund TF011722 and funds
+    from the World bank.
 License: GPL (>= 2)
 LazyLoad: yes
 Collate:
@@ -79,4 +83,4 @@ Collate:
     'whipple.R'
     'dataSets.R'
     'zzz.R'
-RoxygenNote: 6.0.1
+RoxygenNote: 5.0.1

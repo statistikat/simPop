@@ -43,6 +43,7 @@ boundsFakHH <- function(g1,g0,eps,orig,p,bound=4){ # Berechnet die neuen Gewicht
 #' 
 #'
 #' @name ipu2 
+#' @aliases ipu2 computeLinear computeFrac 
 #' @param dat a \code{data.table} containing household ids (optionally), base
 #' weights (optionally), household and/or personal level variables (numerical
 #' or categorical) that should be fitted.
@@ -88,10 +89,17 @@ boundsFakHH <- function(g1,g0,eps,orig,p,bound=4){ # Berechnet die neuen Gewicht
 #' If TRUE, only the weights for which the lower and upper thresholds defined by \code{conH} and \code{epsH} are exceeded
 #' are calibrated. They are however not calibrated against the actual constraints \code{conH} but against
 #' these lower and upper thresholds, i.e. \code{conH}-\code{conH}*\code{epsH} and \code{conH}+\code{conH}*\code{epsH}.
+#' @param curValue the current value of the group total
+#' @param Value the target group total
+#' @param numericVar vector with the values of the numeric variable
+#' @param weightVec vector with the current weights
+#' @param boundLinear the result of computeLinear will be bound by \code{1/boundLinear} and \code{boundLinear}
 #' @return The function will return the input data \code{dat} with the
 #' calibrated weights \code{calibWeight} as an additional column.
 #' @seealso \code{\link{ipu}}
-#' @export
+#' @export ipu2
+#' @export computeLinear
+#' @export computeFrac
 #' @author Alexander Kowarik
 #' @examples
 #' data(eusilcS)
@@ -144,20 +152,24 @@ boundsFakHH <- function(g1,g0,eps,orig,p,bound=4){ # Berechnet die neuen Gewicht
 #'                       epsH = epsH1,  
 #'                       w="baseWeight",
 #'                       bound = 4, verbose=TRUE,  maxIter = 200)
-computeLinear <- function(curV,v,var,w){#current summed up value, correct summed up value, numeric variable, current weight
-  h <- sum(w*var)
-  j <- sum(w*var^2)
-  N <- sum(w)
-  (v-N*j/h)/((-N*j/h)+h)
-  fn <- function(a){
-    f <- a[1]*var+a[2]
-    (sum(f*var*w)-v)^2+(sum(f*w)-sum(w))^2
-  }
-  coef <- optim(c(1,1),fn)$par
-  return(coef[1]*var+coef[2])
+#   fn <- function(a){
+#    f <- a[1]*var+a[2]
+#    (sum(f*var*w)-v)^2+(sum(f*w)-sum(w))^2
+#  }
+#  coef <- optim(c(1,1),fn)$par
+computeLinear <- function(curValue,Value,numericVar,weightVec,boundLinear=10){#current summed up value, correct summed up value, numeric variable, current weight
+  h <- sum(weightVec*numericVar)
+  j <- sum(weightVec*numericVar^2)
+  N <- sum(weightVec)
+  b <- (Value-N*j/h)/((-N*j/h)+h)
+  a <- (N-b*N)/h
+  f <- a*numericVar+b
+  f[f<(1/boundLinear)] <- 1/boundLinear
+  f[f>boundLinear] <- boundLinear
+  return(f)
 }
-computeFrac <- function(curV,v,var,w){
-  v/curV
+computeFrac <- function(curValue,Value,numericVar,weightVec){
+  Value/curValue
 }
 ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FALSE,
     w=NULL,bound=4,maxIter=200,meanHH=TRUE,returnNA=TRUE,looseH=FALSE,numericalWeighting=computeFrac){
@@ -263,19 +275,26 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
         # try to divide the weight between units with larger/smaller value in the numerical variable linear
         dat[,f:=numericalWeighting(head(wValue,1),head(value,1),tmpVarForMultiplication,calibWeight),by=eval(pColNames[[i]])]
         setnames(dat,"tmpVarForMultiplication",names(conP)[i])
+        if(is.array(epsPcur)){## for numeric variables not the factor f is used but the abs relative deviation is computed per class
+          curEps <- abs(dat[!is.na(f),1/(value/wValue)-1]) ## curEps is computed for all observations to compare it with the right epsValue
+        }else{
+          curEps <- dat[!is.na(f),max(abs(1/(value/wValue)-1))]  ## only the max curEps is needed because it is the same for all classed of the current variable
+        }
       }else{
         # categorical variable to be calibrated
         dat[,wValue:=sum(calibWeight),by=eval(pColNames[[i]])]
         setnames(dat,valueP[i],"value")
         dat[,f:= value/wValue,by=eval(pColNames[[i]])]
+        if(is.array(epsPcur)){
+          curEps <- abs(dat[!is.na(f),1/f-1]) ## curEps is computed for all observations to compare it with the right epsValue
+        }else{
+          curEps <- dat[!is.na(f),max(abs(1/f-1))]  ## only the max curEps is needed because it is the same for all classed of the current variable
+        }
       }
       if(is.array(epsPcur)){
         dat <- merge(dat,melt(epsPcur,value.name="epsvalue"),by=pColNames[[i]])
-        curEps <- abs(dat[!is.na(f),1/f-1])
         epsPcur <- dat[,epsvalue]
         dat[,epsvalue:=NULL]
-      }else{
-        curEps <- dat[!is.na(f),max(abs(1/f-1))]
       }
       
       if(any(curEps>epsPcur)){## sicherheitshalber abs(epsPcur)? Aber es wird schon niemand negative eps Werte uebergeben??
@@ -286,7 +305,7 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
           dat[!is.na(f),calibWeight:=f*calibWeight,by=eval(pColNames[[i]])]
         }
         error <- TRUE
-        }
+      }
       setnames(dat,"value",valueP[i])
       
       # if(any(curEps>epsPcur)){ ##  gleich zu oberer if-Abfrage dazugegeben
