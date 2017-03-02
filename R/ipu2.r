@@ -232,7 +232,7 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
   
   # if(any(is.na(dat[,valueP,with=FALSE]))){
   #   
-  #   cat("\nNot all observations in the data could be merged with a constraint.\n")#oder warning()
+  #   cat("\nNot all observations in the data could be merged with a constraint. Might be intentional however.\n")#oder warning()
   # }
   
   while(error&&calIter<=maxIter){
@@ -240,6 +240,7 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
     
     ### Person calib
     for(i in seq_along(conP)){
+      
       if(is.list(epsP)){
         epsPcur <- epsP[[i]]
       }else{
@@ -263,11 +264,11 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
       
       if(is.array(epsPcur)){
         dat <- merge(dat,melt(epsPcur,value.name="epsvalue"),by=pColNames[[i]])
-        curEps <- abs(dat[,1/na.omit(f)-1])
+        curEps <- abs(dat[!is.na(f),1/f-1])
         epsPcur <- dat[,epsvalue]
         dat[,epsvalue:=NULL]
       }else{
-        curEps <- dat[,max(abs(1/na.omit(f)-1))]
+        curEps <- dat[!is.na(f),max(abs(1/f-1))]
       }
       
       if(any(curEps>epsPcur)){## sicherheitshalber abs(epsPcur)? Aber es wird schon niemand negative eps Werte uebergeben??
@@ -287,9 +288,12 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
       
       if(verbose&&(curEps>epsPcur)&&calIter%%10==0){
         if(calIter%%100==0)
-          print(dat[abs(1/na.omit(f)-1)>epsPcur][,list(mean(na.omit(f)),.N),by=eval(pColNames[[i]])])
+          
+          print(dat[abs(1/f-1)>epsPcur][,list(mean(f),.N),by=eval(pColNames[[i]])])
+        
         cat(calIter, ":Not yet converged for P-Constraint",i,"\n")
       }
+    
     }
     if(meanHH){
       dat[,calibWeight:=mean(calibWeight),by=eval(hid)] ## das machen wir bei MZ-HR-Paper vor der hh-Kalibrierung. Hier wird nur erstes hh-member kalibriert.
