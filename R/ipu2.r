@@ -36,6 +36,12 @@ boundsFakHH <- function(g1,g0,eps,orig,p,bound=4){ # Berechnet die neuen Gewicht
   g1[(g1/g0)<(1/bound)] <- (1/bound)*g0[(g1/g0)<(1/bound)]
   return(g1)
 }
+meltepsfun <- function(x){
+  if(is.array(x)){
+    x <- melt(x,as.is=TRUE,value.name="epsvalue")
+  }
+  return(x)
+}
 
 #' Iterative Proportional Updating
 #' 
@@ -151,7 +157,7 @@ boundsFakHH <- function(g1,g0,eps,orig,p,bound=4){ # Berechnet die neuen Gewicht
 #'                       conP = list(conP1,conP2), 
 #'                       conH = list(conH1), 
 #'                       epsP = 1e-06,
-#'                       epsH = epsH1,  
+#'                       epsH = list(epsH1),  
 #'                       w="baseWeight",
 #'                       bound = 4, verbose=TRUE,  maxIter = 200)
 #   fn <- function(a){
@@ -160,7 +166,8 @@ boundsFakHH <- function(g1,g0,eps,orig,p,bound=4){ # Berechnet die neuen Gewicht
 #  }
 #  coef <- optim(c(1,1),fn)$par
 ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FALSE,
-    w=NULL,bound=4,maxIter=200,meanHH=TRUE,returnNA=TRUE,looseH=FALSE,numericalWeighting=computeFrac){
+                 w=NULL,bound=4,maxIter=200,meanHH=TRUE,returnNA=TRUE,looseH=FALSE,numericalWeighting=computeFrac){
+  
   OriginalSortingVariable <- V1 <- baseWeight <- calibWeight <- epsvalue <- f <- NULL
   temporary_hid <- temporary_hvar <- tmpVarForMultiplication <- value <- wValue <- wvst<- NULL
   dat <- copy(dat)
@@ -233,6 +240,7 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
     dat <- merge(dat,mconH[[i]],by=colnames(mconH[[i]])[-ncol(mconH[[i]])],all.x=TRUE,all.y=FALSE)
     setnames(dat,"value",valueH[i])
   }
+  
   if(nrow(dat)!=nrowOriginal){
     stop("There were problems merging the constraints to the data!\n")
   }
@@ -263,9 +271,50 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
     }
     setnames(dat,"temporary_hid",hid)
   }
+  
+  if(is.list(epsP)){
+    #mepsP <- lapply(epsP,melt,as.is=TRUE,value.name="epsvalue")##convert tables to long form
+    mepsP <- lapply(epsP,meltepsfun)
+    for(i in seq_along(epsP)){
+      if(is.array(epsP[[i]])){
+        cn <- colnames(mepsP[[i]])[-ncol(mepsP[[i]])]
+        for(j in seq_along(cn)){
+          cl <- class(dat[[cn[j]]])
+          if("factor"%in%cl){
+            mepsP[[i]][[cn[j]]] <- factor(mepsP[[i]][[cn[j]]],levels=levels(dat[[cn[j]]]))
+          }else if("numeric"%in%cl){
+            mepsP[[i]][[cn[j]]] <- as.numeric(mepsP[[i]][[cn[j]]])
+          }else if("integer"%in%cl){
+            mepsP[[i]][[cn[j]]] <- as.integer(mepsP[[i]][[cn[j]]])
+          }
+        }
+      }
+    }
+  }
+  if(is.list(epsH)){
+    #mepsH <- lapply(epsH,melt,as.is=TRUE,value.name="epsvalue")##convert tables to long form
+    mepsH <- lapply(epsH,meltepsfun)
+    for(i in seq_along(epsH)){
+      if(is.array(epsH[[i]])){
+        cn <- colnames(mepsH[[i]])[-ncol(mepsH[[i]])]
+        for(j in seq_along(cn)){
+          cl <- class(dat[[cn[j]]])
+          if("factor"%in%cl){
+            mepsH[[i]][[cn[j]]] <- factor(mepsH[[i]][[cn[j]]],levels=levels(dat[[cn[j]]]))
+          }else if("numeric"%in%cl){
+            mepsH[[i]][[cn[j]]] <- as.numeric(mepsH[[i]][[cn[j]]])
+          }else if("integer"%in%cl){
+            mepsH[[i]][[cn[j]]] <- as.integer(mepsH[[i]][[cn[j]]])
+          }
+        }
+      }
+    }
+  }
+  
   ###Calib
   error <- TRUE
   calIter <- 1
+  
   while(error&&calIter<=maxIter){
     error <- FALSE
     
@@ -273,8 +322,10 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
     for(i in seq_along(conP)){
       if(is.list(epsP)){
         epsPcur <- epsP[[i]]
+        mepsPcur <- mepsP[[i]]
       }else{
         epsPcur <- epsP
+        # mepsPcur <- mepsP
       }
       
       if(isTRUE(names(conP)[i]!="")){
@@ -303,13 +354,13 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
         }
       }
       if(is.array(epsPcur)){
-        dat <- merge(dat,melt(epsPcur,value.name="epsvalue"),by=pColNames[[i]])
-        epsPcur <- dat[,epsvalue]
+        dat <- merge(dat,mepsPcur,by=pColNames[[i]],all.x=TRUE,all.y=FALSE)
+        epsPcur <-dat[!is.na(f),epsvalue]
         dat[,epsvalue:=NULL]
       }
       
       if(any(curEps>epsPcur)){## sicherheitshalber abs(epsPcur)? Aber es wird schon niemand negative eps Werte uebergeben??
-
+        
         if(!is.null(bound)){
           dat[!is.na(f),calibWeight:=boundsFak(calibWeight,baseWeight,f,bound=bound)]#,by=eval(pColNames[[i]])]  
         }else{
@@ -323,14 +374,13 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
       #   error <- TRUE
       # }
       
-      if(verbose&&(curEps>epsPcur)&&calIter%%10==0){
+      if(verbose&&any(curEps>epsPcur)&&calIter%%10==0){
         if(calIter%%100==0)
-          
-          print(dat[abs(1/f-1)>epsPcur][,list(mean(f),.N),by=eval(pColNames[[i]])])
-        
+          print(subset(dat,!is.na(f))[abs(1/f-1)>epsPcur][,list(mean(f),.N),by=eval(pColNames[[i]])])
+          #print(dat[abs(1/f-1)>epsPcur][,list(mean(f),.N),by=eval(pColNames[[i]])])
         cat(calIter, ":Not yet converged for P-Constraint",i,"\n")
       }
-    
+      
     }
     if(meanHH){
       dat[,calibWeight:=mean(calibWeight),by=eval(hid)] ## das machen wir bei MZ-HR-Paper vor der hh-Kalibrierung. Hier wird nur erstes hh-member kalibriert.
@@ -339,8 +389,10 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
     for(i in seq_along(conH)){
       if(is.list(epsH)){
         epsHcur <- epsH[[i]]
+        mepsHcur <- mepsH[[i]]
       }else{
         epsHcur <- epsH
+        #mepsHcur <- mepsH
       }
       
       if(isTRUE(names(conH)[i]!="")){
@@ -358,9 +410,10 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
       dat[,f:= value/wValue,by=eval(hColNames[[i]])]
       
       if(is.array(epsHcur)){
-        dat <- merge(dat,melt(epsHcur,value.name="epsvalue"),by=hColNames[[i]])
+        dat <- merge(dat,mepsHcur,by=hColNames[[i]],all.x=TRUE,all.y=FALSE)
         curEps <- dat[,abs(1/f-1)]
         epsHcur <- dat[,epsvalue]
+        dat[,epsvalue:=NULL]
       }else{
         curEps <- dat[,max(abs(1/f-1))]
       }
@@ -378,15 +431,15 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
           dat[,calibWeight:=f*calibWeight,by=eval(hColNames[[i]])]
         }
       }
-      if("epsvalue"%in%colnames(dat)){
-        dat[,epsvalue:=NULL]  
-      }
+      # if("epsvalue"%in%colnames(dat)){
+      #   dat[,epsvalue:=NULL]  
+      # }
       
       setnames(dat,"value",valueH[i])
       if(any(curEps>epsHcur)){ 
         error <- TRUE
       }
-      if(verbose&&(curEps>epsHcur)&&calIter%%10==0){
+      if(verbose&&any(curEps>epsHcur)&&calIter%%10==0){
         cat(calIter, ":Not yet converged for H-Constraint",i,"\n")
       }
     }

@@ -2,11 +2,14 @@
 % Please edit documentation in R/ipu2.r
 \name{ipu2}
 \alias{ipu2}
+\alias{computeLinear}
+\alias{computeFrac}
 \title{Iterative Proportional Updating}
 \usage{
 ipu2(dat, hid = NULL, conP = NULL, conH = NULL, epsP = 1e-06,
   epsH = 0.01, verbose = FALSE, w = NULL, bound = 4, maxIter = 200,
-  meanHH = TRUE, returnNA = TRUE, looseH = FALSE)
+  meanHH = TRUE, returnNA = TRUE, looseH = FALSE,
+  numericalWeighting = computeFrac)
 }
 \arguments{
 \item{dat}{a \code{data.table} containing household ids (optionally), base
@@ -66,6 +69,18 @@ the person weights corresponding to the household.}
 If TRUE, only the weights for which the lower and upper thresholds defined by \code{conH} and \code{epsH} are exceeded
 are calibrated. They are however not calibrated against the actual constraints \code{conH} but against
 these lower and upper thresholds, i.e. \code{conH}-\code{conH}*\code{epsH} and \code{conH}+\code{conH}*\code{epsH}.}
+
+\item{numericalWeighting}{...}
+
+\item{curValue}{the current value of the group total}
+
+\item{Value}{the target group total}
+
+\item{numericVar}{vector with the values of the numeric variable}
+
+\item{weightVec}{vector with the current weights}
+
+\item{boundLinear}{the result of computeLinear will be bound by \code{1/boundLinear} and \code{boundLinear}}
 }
 \value{
 The function will return the input data \code{dat} with the
@@ -123,7 +138,7 @@ calibweights2 <- ipu2(eusilcS, hid = "db030",
                       conP = list(conP1,conP2), 
                       conH = list(conH1), 
                       epsP = 1e-06,
-                      epsH = epsH1,  
+                      epsH = list(epsH1),  
                       w="baseWeight",
                       bound = 4, verbose=TRUE,  maxIter = 200)
 }
