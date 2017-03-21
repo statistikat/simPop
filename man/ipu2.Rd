@@ -9,7 +9,7 @@
 ipu2(dat, hid = NULL, conP = NULL, conH = NULL, epsP = 1e-06,
   epsH = 0.01, verbose = FALSE, w = NULL, bound = 4, maxIter = 200,
   meanHH = TRUE, returnNA = TRUE, looseH = FALSE,
-  numericalWeighting = computeFrac)
+  numericalWeighting = computeLinear)
 }
 \arguments{
 \item{dat}{a \code{data.table} containing household ids (optionally), base

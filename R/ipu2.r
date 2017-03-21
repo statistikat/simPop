@@ -214,7 +214,7 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
     # Harmonize the class of columns coming from the constraints
     # the result from melt is taken as character and then the class is set
     # melt does not make any sense for one dimensional numerical constraints however
-    if(!(dim(conP[[i]])==1 & identical(colnames(mconP[[i]]),c("Var1", "value")))){
+    if(!(dim(conP[[i]])==1 && identical(colnames(mconP[[i]]),c("Var1", "value")))){
       cn <- colnames(mconP[[i]])[-ncol(mconP[[i]])]
       for(j in seq_along(cn)){
         cl <- class(dat[[cn[j]]])
@@ -235,7 +235,7 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
     }
   }
   for(i in seq_along(conH)){
-    if(!(dim(conH[[i]])==1 & identical(colnames(mconH[[i]]),c("Var1", "value")))){
+    if(!(dim(conH[[i]])==1 && identical(colnames(mconH[[i]]),c("Var1", "value")))){
       cn <- colnames(mconH[[i]])[-ncol(mconH[[i]])]
       for(j in seq_along(cn)){
         cl <- class(dat[[cn[j]]])
@@ -251,7 +251,7 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
       setnames(dat,"value",valueH[i])
     }else{
       dat[,value:=conH[[i]]]
-      setnames(dat,"value",valueP[i])
+      setnames(dat,"value",valueH[i])
     }
   }
   
