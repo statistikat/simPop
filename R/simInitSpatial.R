@@ -161,7 +161,7 @@ simInitSpatial <- function(simPopObj, additional, region, tspatial) {
   values <- lapply(levels(data_sample[[region]]), function(x) {
     generateValues_spatial(
       dataTable=subset(tab, tab[,region]==x),
-      dataPop=data_pop[indStrata[[x]], predNames, with=F], params)
+      dataPop=data_pop[indStrata[[x]], predNames, with=FALSE], params)
   })
   
   ## add new categorical variables to data set and return

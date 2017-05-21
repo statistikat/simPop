@@ -17,7 +17,7 @@ generateValues <- function(dataSample, dataPop, params) {
     invisible(unlist(head(dataSample[,cur.var,with=FALSE],1)))
   }else{
     # temporarily recode response vector
-    dataSample[,cur.var:=cleanFactor(.SD),.SDcols=cur.var,with=FALSE]
+    dataSample[,(cur.var):=cleanFactor(.SD),.SDcols=cur.var]
     levelsResponse <- levels(unlist(dataSample[,cur.var,with=FALSE]))
 
     #indices for unique occurence
@@ -56,7 +56,7 @@ generateValues <- function(dataSample, dataPop, params) {
     ind <- match(colnames(newdata), colnames(dataSample))
     for ( i in 1:length(ind) ) {
       if (is.factor(unlist(newdata[,i,with=FALSE]))) {
-        newdata[,colnames(newdata)[i]:=factor(as.character(unlist(newdata[,colnames(newdata)[i],with=FALSE])),levels(dataSample[[ind[i]]])),with=FALSE]
+        newdata[,colnames(newdata)[i]:=factor(as.character(unlist(newdata[,colnames(newdata)[i],with=FALSE])),levels(dataSample[[ind[i]]]))]
       }
     }
 
@@ -141,14 +141,14 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
   }
 
   # population data
-  splitS <- split(1:nrow(dataSample), dataSample[, basic, with=F], drop=TRUE)
+  splitS <- split(1:nrow(dataSample), dataSample[, basic, with=FALSE], drop=TRUE)
   pSplit <- lapply(splitS, function(i) {
-        tmp <- tableWt(dataSample[i, additional, with=F], dataSample[[w]][i])
+        tmp <- tableWt(dataSample[i, additional, with=FALSE], dataSample[[w]][i])
         tmp <- as.data.frame(tmp)
         p <- ncol(tmp)
         tmp[, p]/sum(tmp[, p])
       })
-  splitP <- split(1:nrow(dataPop), dataPop[, basic, with=F])
+  splitP <- split(1:nrow(dataPop), dataPop[, basic, with=FALSE])
   NSplit <- sapply(splitP, length)
   # in sample, observations with NAs have been removed to fit the
   # model, hence population can have additional levels
@@ -156,7 +156,7 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
   # generate realizations for each combination
   sim <- as.list(rep.int(NA, length(splitP)))
   sim[whichP] <- mapply(spSample, NSplit[whichP], pSplit, SIMPLIFY=FALSE)
-  sim <- unsplit(sim, dataPop[, basic, with=F])
+  sim <- unsplit(sim, dataPop[, basic, with=FALSE])
   sim <- grid[sim,,drop=FALSE]
   rownames(sim) <- rownames(dataPop)
   sim

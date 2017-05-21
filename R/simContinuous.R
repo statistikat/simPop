@@ -448,7 +448,7 @@ runModel <- function(dataS, dataP, params, typ) {
        }
       genVals(
         dataSample=dataS[dataS[[strata]] == x,c(predNames, additional), with=FALSE],
-        dataPop=dataP[indStrata[[x]], predNames, with=F],
+        dataPop=dataP[indStrata[[x]], predNames, with=FALSE],
 		params,response=dataS[dataS[[strata]] == x,eval(parse(text=params$name))],
         typ=typ)
     })
@@ -731,7 +731,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
   if(!strata%in%colnames(dataS)){
     stop(strata," is defined as by variable, but not in the sample data set.")
   }
-  dataS <- dataS[,varNames, with=F]
+  dataS <- dataS[,varNames, with=FALSE]
 
   method <- match.arg(method)
   zeros <- isTRUE(zeros)
@@ -769,7 +769,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
   }
 
   if ( length(modelVars) > 0 & imputeMissings ) {
-    dataS_orig <- dataS[,modelVars,with=F]
+    dataS_orig <- dataS[,modelVars,with=FALSE]
     dataS <- hotdeck(dataS, variable=modelVars, domain_var=strata, imp_var=FALSE)
   }
 

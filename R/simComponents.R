@@ -94,7 +94,7 @@ simComponents <- function(simPopObj, total="netIncome",
 
   # check data
   if ( all(varNames %in% colnames(dataS)) ) {
-    dataS <- dataS[, varNames, with=F]
+    dataS <- dataS[, varNames, with=FALSE]
   } else {
     stop("undefined variables in the sample data!\n")
   }
