@@ -25,7 +25,7 @@ calcFinalWeights <- function(data0, totals0, params) {
         if ( k > 1 ) {
           ex <- paste(ex, "&", sep="")
         }
-        ex <- paste(ex, 'data0[,"',parameter[k],'", with=F] =="',totals0[i, parameter[k]],'"', sep="")
+        ex <- paste(ex, 'data0[,"',parameter[k],'", with=FALSE] =="',totals0[i, parameter[k]],'"', sep="")
       }
       ex <- paste(ex, ")", sep="")
       eval(parse(text=ex))
@@ -107,6 +107,7 @@ calcFinalWeights <- function(data0, totals0, params) {
 #' @param verbose boolean variable; if TRUE some additional verbose output is
 #' provided, however only if \code{split} is NULL. Otherwise the computation is
 #' performed in parallel and no useful output can be provided.
+#' @param sizefactor the factor for inflating the population before applying 0/1 weights
 #' @return Returns an object of class \code{\linkS4class{simPopObj}} with an
 #' updated population listed in slot 'pop'.
 #' @author Bernhard Meindl, Johannes Gussenbauer and Matthias Templ
@@ -134,7 +135,7 @@ calcFinalWeights <- function(data0, totals0, params) {
 #' simPop_adj <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1)
 #' }
 calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
-  temp.cooldown = 0.9, factor.cooldown = 0.85, min.temp = 10^-3, nr_cpus=NULL, verbose=FALSE) {
+  temp.cooldown = 0.9, factor.cooldown = 0.85, min.temp = 10^-3, nr_cpus=NULL, sizefactor=2 ,verbose=FALSE) {
 
   if ( class(inp) != "simPopObj" ) {
     stop("argument 'inp' must be of class 'simPopObj'!\n")
@@ -182,8 +183,8 @@ calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
   params$hhsize <- hhsize
 
   # generate donors
-  data2 <- sampHH(data, sizefactor=2, hid=hid, strata=split, hsize=hhsize)
-  data2[,params$weight:=list(0),with=FALSE]
+  data2 <- sampHH(data, sizefactor=sizefactor, hid=hid, strata=split, hsize=hhsize)
+  data2[,(params$weight):=list(0)]
   setnames(data2,hid,"temporaryhid")
   if(is.numeric(data2[[hid]])){
     data2[,hid:=list(data[,sapply(.SD,max),.SDcols=hid]+temporaryhid)]
@@ -213,7 +214,7 @@ calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
   ## split problem by "split"-factor
   setkeyv(data, split)
   setkeyv(totals, split)
-  split.number <- unique(data[,split,with=F])
+  split.number <- unique(data[,split,with=FALSE])
 
   if ( parallel ) {
     # windows
@@ -223,7 +224,7 @@ calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
       final_weights <- foreach(x=1:nrow(split.number), .options.snow=list(preschedule=TRUE)) %dopar% {
         calcFinalWeights(
           data0=data[split.number[x]],
-          totals0=totals[which(totals[,split,with=F]==as.character(split.number[x][[split]])),],
+          totals0=totals[which(totals[,split,with=FALSE]==as.character(split.number[x][[split]])),],
           params=params
         )
       }
@@ -232,7 +233,7 @@ calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
       final_weights <- mclapply(1:nrow(split.number), function(x) {
         calcFinalWeights(
           data0=data[split.number[x]],
-          totals0=totals[which(totals[,split,with=F]==as.character(split.number[x][[split]])),],
+          totals0=totals[which(totals[,split,with=FALSE]==as.character(split.number[x][[split]])),],
           params=params)
       },mc.cores=nr_cores)
     }
@@ -240,7 +241,7 @@ calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
     final_weights <- lapply(1:nrow(split.number), function(x) {
       calcFinalWeights(
         data0=data[split.number[x]],
-        totals0=totals[which(totals[,split,with=F]==as.character(split.number[x][[split]])),],
+        totals0=totals[which(totals[,split,with=FALSE]==as.character(split.number[x][[split]])),],
         params=params)
     })
   }
