@@ -73,10 +73,11 @@ getBreaks(eusilcS$netIncome, weights=eusilcS$rb050,
     equidist = FALSE)
 
 }
-\seealso{
-\code{\link{getCat}}, \code{\link{quantileWt}}
-}
 \author{
 Andreas Alfons and Bernhard Meindl
 }
+\seealso{
+\code{\link{getCat}}, \code{\link{quantileWt}}
+}
 \keyword{manip}
+

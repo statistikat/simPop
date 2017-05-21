@@ -34,10 +34,11 @@ head(aux)
 aux <- calibVars(eusilcS[, c("db040", "rb090")])
 head(aux)
 }
-\seealso{
-\code{\link{calibSample}}
-}
 \author{
 Bernhard Meindl and Andreas Alfons
 }
+\seealso{
+\code{\link{calibSample}}
+}
 \keyword{survey}
+

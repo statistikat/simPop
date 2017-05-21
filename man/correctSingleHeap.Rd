@@ -55,3 +55,4 @@ barplot(table(age23), col=cc23)
 barplot(table(correctSingleHeap(age23, heap=23, before=2, after=3, method="lnorm")), col=cc23)
 barplot(table(correctSingleHeap(age23, heap=23, before=5, after=5, method="lnorm")), col=cc23)
 }
+

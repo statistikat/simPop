@@ -36,7 +36,6 @@ argument 'inp'. If argument 'total' is a table (e.g. created with function
 \code{\link{tableWt}}, it must be made sure that the dimnames match the
 variable names (and levels) of the specified input data set.  } }
 }
-
 \examples{
 data(eusilcS)
 eusilcS$agecut <- cut(eusilcS$age, 7)
@@ -78,6 +77,9 @@ weights4.df <- calibSample(inp, totals4.df)
 identical(weights4, weights4.df)
 }
 }
+\author{
+Andreas Alfons and Bernhard Meindl
+}
 \references{
 Deville, J.-C. and Saerndal, C.-E. (1992)
 Calibration estimators in survey sampling. \emph{Journal of the American
@@ -86,8 +88,6 @@ Saerndal, C.-E. and Sautory, O. (1993) Generalized raking
 procedures in survey sampling. \emph{Journal of the American Statistical
 Association}, \bold{88}(423), 1013--1020.
 }
-\author{
-Andreas Alfons and Bernhard Meindl
-}
 \keyword{methods}
 \keyword{survey}
+

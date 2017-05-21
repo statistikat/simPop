@@ -89,3 +89,4 @@ barplot(table(correctHeaps(age10, heaps="10year", method="lnorm")), col=cc10)
 \author{
 Matthias Templ, Bernhard Meindl
 }
+

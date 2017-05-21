@@ -44,11 +44,12 @@ cdfS <- spCdf(eusilcS$netIncome, weights = eusilcS$rb050)
 plot(cdfS, type="s")
 
 }
+\author{
+Andreas Alfons and Stefan Kraft
+}
 \seealso{
 \code{\link{spCdfplot}}, \code{\link[stats]{ecdf}},
 \code{\link[stats:approxfun]{approx}}
 }
-\author{
-Andreas Alfons and Stefan Kraft
-}
 \keyword{dplot}
+

@@ -58,6 +58,9 @@ whipple(age10)
 whipple(age10,method="modified")
 
 }
+\author{
+Matthias Templ, Alexander Kowarik
+}
 \references{
 Henry S. Shryock and Jacob S. Siegel, Methods and Materials of
 Demography (New York: Academic Press, 1976)
@@ -65,7 +68,5 @@ Demography (New York: Academic Press, 1976)
 \seealso{
 \code{\link{sprague}}
 }
-\author{
-Matthias Templ, Alexander Kowarik
-}
 \keyword{arith}
+

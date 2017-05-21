@@ -5,7 +5,9 @@
 \title{Generation of smaller regions given an existing spatial variable and a
 table.}
 \usage{
-simInitSpatial(simPopObj, additional, region, tspatial)
+simInitSpatial(simPopObj, additional, region, tspatialP = NULL,
+  tspatialHH = NULL, eps = 0.05, maxIter = 100, nr_cpus = NULL,
+  verbose = FALSE)
 }
 \arguments{
 \item{simPopObj}{an object of class \code{\linkS4class{simPopObj}}.}
@@ -19,11 +21,27 @@ the broader region. This variable must be available in the input
 \code{tspatial} as well as in the sample and population slots of input
 \code{simPopObj}.}
 
-\item{tspatial}{a data.frame containing three columns. The broader region
+\item{tspatialP}{a  data.frame (or data.table) containing three columns. The broader region
 (with the variable name being the same as in input \code{region}, the
 smaller geographical units (with the variable name being the same as in
-input \code{additional} and a third column containing a numeric vector
-holding counts.))}
+input \code{additional}) and a third column containing a numeric vector
+holding counts of persons. This argument or tspatialHH has to be provided.}
+
+\item{tspatialHH}{a  data.frame (or data.table) containing three columns. The broader region
+(with the variable name being the same as in input \code{region}, the
+smaller geographical units (with the variable name being the same as in
+input \code{additional}) and a third column containing a numeric vector
+holding counts of households. This argument or tspatialP has to be provided.}
+
+\item{eps}{relative deviation of person counts if person and household counts are provided}
+
+\item{maxIter}{maximum number of iteration for adjustment
+if person and household counts are provided}
+
+\item{nr_cpus}{if specified, an integer number defining the number of cpus
+that should be used for parallel processing.}
+
+\item{verbose}{TRUE/FALSE if some information should be shown during the process}
 }
 \value{
 An object of class \code{\linkS4class{simPopObj}} with an additional
@@ -66,23 +84,38 @@ simulate_districts <- function(inp) {
   invisible(out)
 }
 
-eusilcP <- simulate_districts(eusilcP)
-table(eusilcP$district)
-
-# we generate a synthetic population
-inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
-simPopObj <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090"))
-
+eusilcP <- data.table(simulate_districts(eusilcP))
 # we generate the input table using the broad region (variable 'region')
 # and the districts, we have generated before.
-# we
-tab <- as.data.frame(xtabs(rep(1, nrow(eusilcP)) ~ eusilcP$region + eusilcP$district))
-colnames(tab) <- c("db040", "district", "Freq")
+#Generate table with household counts by district
+tabHH <- eusilcP[!duplicated(hid),.(Freq=.N),by=.(db040=region,district)]
+setkey(tabHH,db040,district)
+#Generate table with person counts by district
+tabP <- eusilcP[,.(Freq=.N),by=.(db040=region,district)]
+setkey(tabP,db040,district)
 
-simPopObj <- simInitSpatial(simPopObj, additional="district", region="db040", tspatial=tab)
+# we generate a synthetic population
+setnames(eusilcP,"region","db040")
+setnames(eusilcP,"hid","db030")
+inp <- specifyInput(data=eusilcP, hhid="db030", hhsize="hsize", strata="db040",population=TRUE)
+simPopObj <- simStructure(data=inp, method="direct", basicHHvars=c("age", "gender"))
+
+# use only HH counts
+simPopObj1 <- simInitSpatial(simPopObj, additional="district", region="db040", tspatialHH=tabHH,
+tspatialP=NULL)
+
+# use only P counts
+simPopObj2 <- simInitSpatial(simPopObj, additional="district", region="db040", tspatialHH=NULL,
+tspatialP=tabP)
+
+# use P and HH counts
+simPopObj3 <- simInitSpatial(simPopObj, additional="district", region="db040", tspatialHH=tabHH,
+tspatialP=tabP)
+
 
 }
 \author{
-Bernhard Meindl
+Bernhard Meindl and Alexander Kowarik
 }
 \keyword{manip}
+

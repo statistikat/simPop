@@ -54,3 +54,4 @@ system.time(y2 <- sampHH(pop, strata=NULL, hsize=NULL))
 Bernhard Meindl, Matthias Templ and Johannes Gussenbauer
 }
 \keyword{manip}
+

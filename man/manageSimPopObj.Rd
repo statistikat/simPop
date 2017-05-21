@@ -47,3 +47,4 @@ simPopObj <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090
 Bernhard Meindl and Matthias Templ
 }
 \keyword{manip}
+

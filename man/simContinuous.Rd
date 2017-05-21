@@ -243,11 +243,12 @@ class(eusilcT)
 }
 
 }
+\author{
+Bernhard Meindl, Andreas Alfons, Alexander Kowarik (based on code by Stefan Kraft)
+}
 \seealso{
 \code{\link{simStructure}}, \code{\link{simCategorical}},
 \code{\link{simComponents}}, \code{\link{simEUSILC}}
 }
-\author{
-Bernhard Meindl, Andreas Alfons, Alexander Kowarik (based on code by Stefan Kraft)
-}
 \keyword{datagen}
+

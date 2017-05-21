@@ -52,11 +52,12 @@ class(eusilcP)
 eusilcP
 
 }
+\author{
+Bernhard Meindl and Andreas Alfons
+}
 \seealso{
 \code{\link{simCategorical}}, \code{\link{simContinuous}},
 \code{\link{simComponents}}, \code{\link{simEUSILC}}
 }
-\author{
-Bernhard Meindl and Andreas Alfons
-}
 \keyword{datagen}
+

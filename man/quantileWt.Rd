@@ -53,13 +53,14 @@ inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", 
 (quantileWt(inp, vars="netIncome"))
 
 }
-\seealso{
-\code{\link[stats]{quantile}}
-}
 \author{
 Stefan Kraft and Bernhard Meindl
 
 A basic version of this function was provided by Cedric Beguin and Beat
 Hulliger.
 }
+\seealso{
+\code{\link[stats]{quantile}}
+}
 \keyword{univar}
+

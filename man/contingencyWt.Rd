@@ -50,6 +50,9 @@ contingencyWt(eusilcS$pl030, eusilcS$pb220a, weights = eusilcS$rb050)
 basic <- c("age", "rb090", "hsize", "pl030", "pb220a")
 contingencyWt(eusilcS[, basic], weights = eusilcS$rb050)
 }
+\author{
+Andreas Alfons and Stefan Kraft
+}
 \references{
 Kendall, M.G. and Stuart, A. (1967) \emph{The Advanced Theory of
 Statistics, Volume 2: Inference and Relationship}. Charles Griffin & Co Ltd,
@@ -58,8 +61,6 @@ London, 2nd edition.
 \seealso{
 \code{\link{tableWt}}
 }
-\author{
-Andreas Alfons and Stefan Kraft
-}
 \keyword{category}
 \keyword{methods}
+

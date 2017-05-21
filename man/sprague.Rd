@@ -40,6 +40,9 @@ s
 all.equal(sum(s), sum(x[,2]))
 
 }
+\author{
+Matthias Templ
+}
 \references{
 G. Calot and J.-P. Sardon.  Methodology for the calculation of
 Eurostat's demographic indicators.  Detailed report by the European
@@ -50,7 +53,5 @@ Demographic Observatory
 \seealso{
 \code{\link{whipple}}
 }
-\author{
-Matthias Templ
-}
 \keyword{arith}
+

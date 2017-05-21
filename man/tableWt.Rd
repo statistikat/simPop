@@ -35,10 +35,11 @@ tableWt(eusilcS[, c("rb090", "pb220a")], weights = eusilcS$rb050,
     useNA = "ifany")
 
 }
-\seealso{
-\code{\link{table}}, \code{\link{contingencyWt}}
-}
 \author{
 Andreas Alfons and Stefan Kraft
 }
+\seealso{
+\code{\link{table}}, \code{\link{contingencyWt}}
+}
 \keyword{category}
+

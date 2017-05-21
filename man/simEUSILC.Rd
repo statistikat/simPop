@@ -167,11 +167,12 @@ summary(eusilcT)
 }
 
 }
+\author{
+Andreas Alfons and Stefan Kraft and Bernhard Meindl
+}
 \seealso{
 \code{\link{simStructure}}, \code{\link{simCategorical}},
 \code{\link{simContinuous}}, \code{\link{simComponents}}
 }
-\author{
-Andreas Alfons and Stefan Kraft and Bernhard Meindl
-}
 \keyword{datagen}
+

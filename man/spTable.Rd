@@ -41,10 +41,11 @@ res <- spTable(eusilcP, select = c("age", "rb090"))
 class(res)
 res
 }
-\seealso{
-\code{\link{spMosaic}}, \code{\link{tableWt}}
-}
 \author{
 Andreas Alfons and Bernhard Meindl
 }
+\seealso{
+\code{\link{spMosaic}}, \code{\link{tableWt}}
+}
 \keyword{dplot}
+

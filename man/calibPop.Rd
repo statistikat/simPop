@@ -7,7 +7,7 @@
 \usage{
 calibPop(inp, split, temp = 1, eps.factor = 0.05, maxiter = 200,
   temp.cooldown = 0.9, factor.cooldown = 0.85, min.temp = 10^-3,
-  nr_cpus = NULL, verbose = FALSE)
+  nr_cpus = NULL, sizefactor = 2, verbose = FALSE)
 }
 \arguments{
 \item{inp}{an object of class \code{\linkS4class{simPopObj}} with slot
@@ -38,6 +38,8 @@ reduced in each step.}
 
 \item{nr_cpus}{if specified, an integer number defining the number of cpus
 that should be used for parallel processing.}
+
+\item{sizefactor}{the factor for inflating the population before applying 0/1 weights}
 
 \item{verbose}{boolean variable; if TRUE some additional verbose output is
 provided, however only if \code{split} is NULL. Otherwise the computation is
@@ -102,3 +104,4 @@ simPop_adj <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1)
 Bernhard Meindl, Johannes Gussenbauer and Matthias Templ
 }
 \keyword{datasets}
+

@@ -2,8 +2,8 @@
 % Please edit documentation in R/0classes.R
 \docType{class}
 \name{simPopObj-class}
-\alias{simPopObj-class}
 \alias{show,simPopObj-method}
+\alias{simPopObj-class}
 \title{Class \code{"simPopObj"}}
 \description{
 An object that is used throughout the package containing information on the
@@ -14,7 +14,6 @@ optionally some margins in form of a table (slot \code{table}).
  Objects are automatically created in
 function \code{\link{simStructure}}.
 }
-
 \examples{
 
 showClass("simPopObj")
@@ -28,10 +27,11 @@ class(eusilcP)
 eusilcP
 
 }
-\seealso{
-\code{\linkS4class{dataObj}}
-}
 \author{
 Bernhard Meindl and Matthias Templ
 }
+\seealso{
+\code{\linkS4class{dataObj}}
+}
 \keyword{classes}
+

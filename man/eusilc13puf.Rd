@@ -107,11 +107,12 @@ data, but have been derived from other variables for convenience.
 data(eusilc13puf)
 str(eusilc13puf)
 }
+\author{
+Matthias Templ
+}
 \references{
 Eurostat (2013) Description of target variables: Cross-sectional
 and longitudinal.
 }
-\author{
-Matthias Templ
-}
 \keyword{datasets}
+

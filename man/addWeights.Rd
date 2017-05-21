@@ -2,8 +2,8 @@
 % Please edit documentation in R/addWeights.r
 \docType{methods}
 \name{addWeights<-}
-\alias{addWeights<-}
 \alias{addWeights}
+\alias{addWeights<-}
 \alias{addWeights<-,dataObj-method}
 \alias{addWeights<-,simPopObj-method}
 \title{Methods for function \code{addWeights}}
@@ -33,3 +33,4 @@ inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", 
 addWeights(inp) <- calibSample(inp, totalsRG)
 }
 }
+

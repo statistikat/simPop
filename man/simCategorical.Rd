@@ -116,11 +116,12 @@ simPop <- simCategorical(simPop, additional=c("pl030", "pb220a"), method="multin
 simPop
 }
 }
+\author{
+Bernhard Meindl, Andreas Alfons, Stefan Kraft, Alexander Kowarik
+}
 \seealso{
 \code{\link{simStructure}}, \code{\link{simRelation}},
 \code{\link{simContinuous}}, \code{\link{simComponents}}
 }
-\author{
-Bernhard Meindl, Andreas Alfons, Stefan Kraft, Alexander Kowarik
-}
 \keyword{datagen}
+

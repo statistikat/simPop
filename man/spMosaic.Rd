@@ -48,11 +48,12 @@ spMosaic(tab, method = "color",
   labeling=labeling_border(abbreviate=c(db040=TRUE)))
 
 }
+\author{
+Andreas Alfons and Bernhard Meindl
+}
 \seealso{
 \code{\link{spTable}}, \code{\link[vcd]{cotabplot}},
 \code{\link[vcd]{strucplot}}
 }
-\author{
-Andreas Alfons and Bernhard Meindl
-}
 \keyword{hplot}
+

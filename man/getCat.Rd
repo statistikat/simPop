@@ -44,10 +44,11 @@ netIncomeCat <- getCat(eusilcS$netIncome, breaks)
 summary(netIncomeCat)
 
 }
-\seealso{
-\code{\link{getBreaks}}, \code{\link{cut}}
-}
 \author{
 Andreas Alfons
 }
+\seealso{
+\code{\link{getBreaks}}, \code{\link{cut}}
+}
 \keyword{manip}
+

@@ -2,9 +2,8 @@
 % Please edit documentation in R/utility.R
 \name{utility}
 \alias{utility}
-\alias{utility}
-\alias{utilityModal}
 \alias{utilityIndicator}
+\alias{utilityModal}
 \title{Utility measures}
 \usage{
 utility(x, y, type = c("all", "compareColumns", "compareRows",
@@ -48,7 +47,6 @@ Various utility measues that basically compares two data sets
 
 \item \code{utilityIndicator}: difference between two values
 }}
-
 \examples{
 data(eusilcS)
 data(eusilcP)
@@ -68,3 +66,4 @@ utilityIndicator(m1, m2)
 \author{
 Matthias Templ, Maxime Bergeaut
 }
+
