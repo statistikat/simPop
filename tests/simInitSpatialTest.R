@@ -44,7 +44,6 @@ setnames(eusilcP,"region","db040")
 setnames(eusilcP,"hid","db030")
 inp <- specifyInput(data=eusilcP, hhid="db030", hhsize="hsize", strata="db040",population=TRUE)
 simPopObj <- simStructure(data=inp, method="direct", basicHHvars=c("age", "gender"))
-\dontrun{
 # use only HH counts
   simPopObj1 <- simInitSpatial(simPopObj, additional="district", region="db040", tspatialHH=tabHH,
       tspatialP=NULL)
