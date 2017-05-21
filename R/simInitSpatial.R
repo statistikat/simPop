@@ -115,41 +115,65 @@ simInitSpatial <- function(simPopObj, additional, region, tspatialP=NULL,tspatia
       return(dataPop[["subregion"]])
     
     }else if(!"freqH"%in%colnames(dataTable)){#Case2: only P counts provided
-      availableSubregions <- dataTable[[additional]]
       setnames(dataTable,colnames(dataTable)[2],"subregion")
-      #TODO: Replace for loop with something more efficient?!
-      for(hh in sample(unique(dataPop[["hhidtmp"]]))){
-        dataPop[hhidtmp==hh,subregion:=sample(availableSubregions,1)]
-        dataTable <- merge(dataTable,dataPop[hhidtmp==hh,.(subregion=head(subregion,1),newpop=.N)],
-            by="subregion",all.x=TRUE)
-        dataTable[!is.na(newpop),freqP:=freqP-newpop]
-        dataTable[,newpop:=NULL]
-        availableSubregions <- dataTable[freqP>0][["subregion"]]
+      dataPop[,subregion:=sample(dataTable[["subregion"]],size=1,prob=dataTable[["freqP"]],
+              replace=TRUE),by=hhidtmp]
+      dataPop[,.N,by=subregion]
+      dataPop[,hsize:=.N,by=hhidtmp]
+      meanHH <- dataPop[,mean(hsize)]
+      curTab <- merge(dataTable[,.(freqP,subregion)],
+          dataPop[,.(nP=.N),by=subregion],by="subregion")
+      curTab[,diff:=nP-freqP]
+      curTab[,diffp:=diff/freqP]
+      setkey(curTab,diffp)
+      if(any(abs(curTab[["diffp"]]>eps))){
+        dataPop[,firstP:=!duplicated(hhidtmp)]
+        for(i in 1:maxIter){
+          s <- curTab[nrow(curTab),abs(round(diff/meanHH))]
+          x1 <- sample(dataPop[subregion==curTab[nrow(curTab),subregion]&firstP,hhidtmp],size=s)
+          tmp <- data.table(hhidtmp=x1,subregionNeu=
+                  sample(curTab[diff<0,subregion],size=length(x1),prob=curTab[diff<0,-diff],replace=TRUE))
+          dataPop <- merge(dataPop,tmp,by="hhidtmp",all.x=TRUE)
+          dataPop[!is.na(subregionNeu),subregion:=subregionNeu]
+          dataPop[,subregionNeu:=NULL]
+          curTab <- merge(dataTable[,.(freqP,subregion)],
+              dataPop[,.(nP=.N),by=subregion],by="subregion")
+          curTab[,diff:=nP-freqP]
+          curTab[,diffp:=diff/freqP]
+          setkey(curTab,diffp)
+          if(!any(abs(curTab[["diffp"]]>eps))){
+            break;#End for loop if we are close enough
+          }
+        }  
       }
+      
       return(dataPop[["subregion"]])
     }else{#Case3: P and HH counts are provided
       #Initialize the subregion based on the HH counts
       setnames(dataTable,colnames(dataTable)[2],"subregion")
       dataPop[,hsize:=.N,by=hhidtmp]
+      meanHH <- dataPop[,mean(hsize)]
       subregion <- sample(rep(dataTable[,subregion],times=dataTable[,ceiling(freqPopHH*freqH/sum(freqH))])
       )[1:sum(!duplicated(dataPop[[1]]))]
       dataPop[!duplicated(hhidtmp),subregion:=subregion]
       dataPop[,subregion:=head(subregion,1),by=hhidtmp]
       #current table
       curTab <- merge(dataTable[,.(freqH,freqP,subregion)],
-          dataPop[,.(nP=.N,nHH=sum(!duplicated(hhidtmp)),meanHH=mean(hsize)),by=subregion],by="subregion")
+          dataPop[,.(nP=.N),by=subregion],by="subregion")
       curTab[,diff:=nP-freqP]
       curTab[,diffp:=diff/freqP]
       setkey(curTab,diffp)
+      
       if(any(abs(curTab[["diffp"]]>eps))){
+        dataPop[,firstP:=!duplicated(hhidtmp)]
         for(i in 1:maxIter){
           s <- curTab[1,abs(round(diff/meanHH))]
-          x1 <- sample(dataPop[subregion==curTab[1,subregion],hhidtmp],size=s,prob=1/dataPop[subregion==curTab[1,subregion],hsize])
-          x2 <- sample(dataPop[subregion==curTab[nrow(curTab),subregion],hhidtmp],size=s,prob=dataPop[subregion==curTab[nrow(curTab),subregion],hsize])
+          x1 <- sample(dataPop[subregion==curTab[1,subregion]&firstP,hhidtmp],size=s,prob=1/dataPop[subregion==curTab[1,subregion]&firstP,hsize])
+          x2 <- sample(dataPop[subregion==curTab[nrow(curTab),subregion]&firstP,hhidtmp],size=s,prob=dataPop[subregion==curTab[nrow(curTab),subregion]&firstP,hsize])
           dataPop[hhidtmp%in%x2,subregion:=curTab[1,subregion]]
           dataPop[hhidtmp%in%x1,subregion:=curTab[nrow(curTab),subregion]]
           curTab <- merge(dataTable[,.(freqH,freqP,subregion)],
-              dataPop[,.(nP=.N,nHH=sum(!duplicated(hhidtmp)),meanHH=mean(hsize)),by=subregion],by="subregion")
+              dataPop[,.(nP=.N),by=subregion],by="subregion")
           curTab[,diff:=nP-freqP]
           curTab[,diffp:=diff/freqP]
           setkey(curTab,diffp)
@@ -169,6 +193,8 @@ simInitSpatial <- function(simPopObj, additional, region, tspatialP=NULL,tspatia
   data_sample <- dataS@data
   basic <- simPopObj@basicHHvars
 
+  
+  
   if ( length(additional) != 1 ) {
     stop("currently exactly one additional spatial variable can be generated!\n")
   }
@@ -226,6 +252,10 @@ simInitSpatial <- function(simPopObj, additional, region, tspatialP=NULL,tspatia
   if(any(is.na(rowSums(tab[,na.omit(match(c("freqP","freqH","freqPopP","freqPopHH"),colnames(tab))),with=FALSE])))){
     stop("The table with household counts and person counts does not merge with the population\n without empty cells.")
   }
+  # TODO: fix the input (relative?!) if the numbers are not exactly the same
+  # to the current synthetic population
+  
+
 
   # list indStrata contains the indices of dataP split by region
   N <- nrow(data_pop)
@@ -272,10 +302,10 @@ simInitSpatial <- function(simPopObj, additional, region, tspatialP=NULL,tspatia
               dataPop=data_pop[indStrata[[x]], predNames, with=FALSE], params)
         })  
   }
-  
+  names(values) <- levels(data_sample[[region]])
   
   ## add new categorical variables to data set and return
-  data_pop[[additional]] <- unlist(values)
+  data_pop[,c(additional):=values[head(eval(parse(text=region)),1)],by=c(region)]
   
   # check
   simPopObj@pop@data <- data_pop
