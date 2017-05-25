@@ -65,6 +65,7 @@ simPopObj <- simStructure(data=inp, method="direct", basicHHvars=c("age", "gende
   }
   
   simPopObj <- simStructure(data=inp, method="direct", basicHHvars=c("age", "gender"))
+  simPopObj <- simCategorical(simPopObj,additional = "citizenship",method="ranger",nr_cpus=1)
 # use P and HH counts
   simPopObj3 <- simInitSpatial(simPopObj, additional="district", region="db040", tspatialHH=tabHH,
       tspatialP=tabP,nr_cpus = 1)
@@ -75,3 +76,8 @@ test3[abs(Freq-np)/Freq>0.05,.N]
 if(!test3[abs(Freq-np)/Freq>0.05,.N]<10){
   stop("Test should result in good distribution of the persons")
 }
+
+margins <- eusilcP[,.(freq=.N),by=.(district,gender,citizenship)]
+marginsSynth <- simPopObj3@pop@data[,.(freqS=.N),by=.(district,gender,citizenship)]
+simPopObj3 <- addKnownMargins(simPopObj3,margins)
+#simPop_adj <- calibPop(simPopObj3, split="district", temp=10, eps.factor=0.1)
