@@ -333,7 +333,6 @@ simCategorical <- function(simPopObj, additional,
     stop(curStrata," is defined as by variable, but not in the population data set.")
   }
   nr_strata <- length(levels(data_sample[[curStrata]]))
-  data_sample[,curStrata,with=FALSE]
   pp <- parallelParameters(nr_cpus=nr_cpus, nr_strata=nr_strata)
   parallel <- pp$parallel
   nr_cores <- pp$nr_cores
@@ -436,7 +435,7 @@ simCategorical <- function(simPopObj, additional,
     predNames <- setdiff(regInput[[1]]$predNames, c(dataS@hhsize, curStrata))
 
     # observations with missings are excluded from simulation
-    exclude <- getExclude(data_sample[,c(additional,predNames),with=F])
+    exclude <- getExclude(data_sample[,c(additional,predNames),with=FALSE])
     if ( length(exclude) > 0 ) {
       sampWork <- data_sample[-exclude,]
     } else {
@@ -452,29 +451,46 @@ simCategorical <- function(simPopObj, additional,
     # simulation of variables using a sequence of multinomial models
     if ( method == "multinom" ) {
       formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
-      formula.cmd <- paste0("suppressWarnings(multinom(", formula.cmd,
-          ", weights=", dataS@weight, ", data=dataSample, trace=FALSE",
-          ", maxit=",maxit, ", MaxNWts=", MaxNWts,"))")
+      formula.cmd <- paste0("suppressWarnings(multinom(", formula.cmd)
+      if(!dataS@ispopulation){
+        formula.cmd <- paste0(formula.cmd,", weights=", dataS@weight)
+      }
+      formula.cmd <- paste0(formula.cmd,", data=dataSample, trace=FALSE",
+                            ", maxit=",maxit, ", MaxNWts=", MaxNWts,"))")
+      
       if(verbose) cat("we are running the following multinom-model:\n")
       if(verbose) cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
     }else if ( method == "ctree" ) {
       # simulation via recursive partitioning and regression trees
       formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
-      formula.cmd <- paste("suppressWarnings(ctree(", formula.cmd, ", weights=as.integer(dataSample$", dataS@weight, "), data=dataSample))", sep="")
+      formula.cmd <- paste("suppressWarnings(ctree(", formula.cmd)
+      if(!dataS@ispopulation){
+        formula.cmd <- paste0(formula.cmd,", weights=as.integer(dataSample$", dataS@weight,")")
+      }
+      formula.cmd <- paste0(formula.cmd,
+                           ", data=dataSample))")
       if(verbose) cat("we are running recursive partitioning:\n")
       if(verbose) cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
     }else if ( method == "cforest" ) {
       # simulation via random forest
       formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
-      formula.cmd <- paste("suppressWarnings(cforest(", formula.cmd, ", weights=as.integer(dataSample$", dataS@weight, "), data=dataSample))", sep="")
+      formula.cmd <- paste("suppressWarnings(cforest(", formula.cmd)
+      if(!dataS@ispopulation){
+        formula.cmd <- paste0(formula.cmd,", weights=as.integer(dataSample$", dataS@weight,")")
+      }
+      formula.cmd <- paste0(formula.cmd,", data=dataSample))")
       if(verbose) cat("we are running random forest classification (cforest):\n")
       if(verbose) cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
     }else if ( method == "ranger" ) {
 		# simulation via random forest
-		formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
-		formula.cmd <- paste("suppressWarnings(ranger(", formula.cmd, ", case.weights=dataSample$", dataS@weight, ", data=dataSample))", sep="")
-		if(verbose) cat("we are running random forest (ranger):\n")
-		if(verbose) cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
+		  formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
+		  formula.cmd <- paste("suppressWarnings(ranger(", formula.cmd)
+		  if(!dataS@ispopulation){
+  		  formula.cmd <- paste0(formula.cmd,", case.weights=dataSample$", dataS@weight)
+	  	}
+  		formula.cmd <- paste0(formula.cmd, ", data=dataSample))", sep="")
+	  	if(verbose) cat("we are running random forest (ranger):\n")
+		  if(verbose) cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
 	}
     #if ( method == "naivebayes" ) {
     #  formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
