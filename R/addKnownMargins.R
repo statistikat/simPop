@@ -46,7 +46,7 @@ addKnownMargins <- function(inp, margins) {
   if ( any(duplicated(margins)) ) {
     stop("'margins' must not contain duplicated rows!\n")
   }
-  if ( !class(margins[,ncol(margins)]) == "numeric" ) {
+  if ( !class(margins[,ncol(margins)])[1] %in% c("integer","numeric") ) {
     stop("last column of input 'margins' must contain the numbers (must be numeric)!\n")
   } else {
     vals <- margins[,ncol(margins)]
