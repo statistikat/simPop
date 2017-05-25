@@ -6,7 +6,7 @@
 #' @param w a numeric vector with weights
 #' @return The function will return the the kish factor 
 #' @author Alexander Kowarik
-#' @export
+#' @export kishFactor
 #' @examples
 #' kishFactor(rep(1,10))
 #' kishFactor(rlnorm(10))
@@ -106,8 +106,6 @@ meltepsfun <- function(x){
 #' calibrated weights \code{calibWeight} as an additional column.
 #' @seealso \code{\link{ipu}}
 #' @export ipu2
-#' @export computeLinear
-#' @export computeFrac
 #' @author Alexander Kowarik
 #' @examples
 #' data(eusilcS)
@@ -496,6 +494,8 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
     invisible(dat)  
   }  
 }
+#' @rdname ipu2
+#' @export computeLinear
 computeLinear <- function(curValue,Value,numericVar,weightVec,boundLinear=10){#current summed up value, correct summed up value, numeric variable, current weight
   h <- sum(weightVec*numericVar)
   j <- sum(weightVec*numericVar^2)
@@ -507,6 +507,8 @@ computeLinear <- function(curValue,Value,numericVar,weightVec,boundLinear=10){#c
   f[f>boundLinear] <- boundLinear
   return(f)
 }
+#' @rdname ipu2
+#' @export computeFrac
 computeFrac <- function(curValue,Value,numericVar,weightVec){
   Value/curValue
 }

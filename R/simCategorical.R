@@ -341,7 +341,7 @@ simCategorical <- function(simPopObj, additional,
 
   ##### initializations
   if ( !missing(seed) ) {
-    set.seed(seed)  # set seed of random number generator
+    set.seed(seed,"L'Ecuyer")  # set seed of random number generator
   }
 
 

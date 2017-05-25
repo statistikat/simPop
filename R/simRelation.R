@@ -315,7 +315,7 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
 
   # set seed of random number generator
   if ( !missing(seed) ) {
-    set.seed(seed)
+    set.seed(seed,"L'Ecuyer")  # set seed of random number generator
   }
 
   sample <- simPopObj@sample

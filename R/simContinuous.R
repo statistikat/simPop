@@ -713,7 +713,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
 
   ## initializations
   if ( !missing(seed) ) {
-    set.seed(seed)
+    set.seed(seed,"L'Ecuyer")  # set seed of random number generator
   }
 
   if ( length(additional) != 1 ) {

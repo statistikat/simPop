@@ -36,6 +36,9 @@
 #' if person and household counts are provided 
 #' @param nr_cpus if specified, an integer number defining the number of cpus
 #' that should be used for parallel processing.
+#' @param seed optional; an integer value to be used as the seed of the random
+#' number generator, or an integer vector containing the state of the random
+#' number generator to be restored.
 #' @param verbose TRUE/FALSE if some information should be shown during the process
 #' @return An object of class \code{\linkS4class{simPopObj}} with an additional
 #' variable in the synthetic population slot.
@@ -98,7 +101,7 @@
 #' }
 #' 
 simInitSpatial <- function(simPopObj, additional, region, tspatialP=NULL,tspatialHH=NULL, 
-    eps=0.05, maxIter=100, nr_cpus= NULL, verbose = FALSE) {
+    eps=0.05, maxIter=100, nr_cpus= NULL, seed=1, verbose = FALSE) {
   # simplified version of generateValues_distribution
   generateValues_spatial <- function(dataTable, dataPop, params) {
     # if there is only one subregion in the region
@@ -121,8 +124,8 @@ simInitSpatial <- function(simPopObj, additional, region, tspatialP=NULL,tspatia
       dataPop[,.N,by=subregion]
       dataPop[,hsize:=.N,by=hhidtmp]
       meanHH <- dataPop[,mean(hsize)]
-      curTab <- merge(dataTable[,.(freqP,subregion)],
-          dataPop[,.(nP=.N),by=subregion],by="subregion")
+      curTab <- merge(dataTable[,list(freqP,subregion)],
+          dataPop[,list(nP=.N),by=subregion],by="subregion")
       curTab[,diff:=nP-freqP]
       curTab[,diffp:=diff/freqP]
       setkey(curTab,diffp)
@@ -136,8 +139,8 @@ simInitSpatial <- function(simPopObj, additional, region, tspatialP=NULL,tspatia
           dataPop <- merge(dataPop,tmp,by="hhidtmp",all.x=TRUE)
           dataPop[!is.na(subregionNeu),subregion:=subregionNeu]
           dataPop[,subregionNeu:=NULL]
-          curTab <- merge(dataTable[,.(freqP,subregion)],
-              dataPop[,.(nP=.N),by=subregion],by="subregion")
+          curTab <- merge(dataTable[,list(freqP,subregion)],
+              dataPop[,list(nP=.N),by=subregion],by="subregion")
           curTab[,diff:=nP-freqP]
           curTab[,diffp:=diff/freqP]
           setkey(curTab,diffp)
@@ -158,8 +161,8 @@ simInitSpatial <- function(simPopObj, additional, region, tspatialP=NULL,tspatia
       dataPop[!duplicated(hhidtmp),subregion:=subregion]
       dataPop[,subregion:=head(subregion,1),by=hhidtmp]
       #current table
-      curTab <- merge(dataTable[,.(freqH,freqP,subregion)],
-          dataPop[,.(nP=.N),by=subregion],by="subregion")
+      curTab <- merge(dataTable[,list(freqH,freqP,subregion)],
+          dataPop[,list(nP=.N),by=subregion],by="subregion")
       curTab[,diff:=nP-freqP]
       curTab[,diffp:=diff/freqP]
       setkey(curTab,diffp)
@@ -172,8 +175,8 @@ simInitSpatial <- function(simPopObj, additional, region, tspatialP=NULL,tspatia
           x2 <- sample(dataPop[subregion==curTab[nrow(curTab),subregion]&firstP,hhidtmp],size=s,prob=dataPop[subregion==curTab[nrow(curTab),subregion]&firstP,hsize])
           dataPop[hhidtmp%in%x2,subregion:=curTab[1,subregion]]
           dataPop[hhidtmp%in%x1,subregion:=curTab[nrow(curTab),subregion]]
-          curTab <- merge(dataTable[,.(freqH,freqP,subregion)],
-              dataPop[,.(nP=.N),by=subregion],by="subregion")
+          curTab <- merge(dataTable[,list(freqH,freqP,subregion)],
+              dataPop[,list(nP=.N),by=subregion],by="subregion")
           curTab[,diff:=nP-freqP]
           curTab[,diffp:=diff/freqP]
           setkey(curTab,diffp)
@@ -187,6 +190,8 @@ simInitSpatial <- function(simPopObj, additional, region, tspatialP=NULL,tspatia
   }
   
   x <- NULL
+  diffp <- firstP <- freqH <- freqP <- freqPopHH <- NULL
+  hhidtmp <- hsize <- nP <- t <- subregionNeu <- NULL
   dataP <- simPopObj@pop
   dataS <- simPopObj@sample
   data_pop <- dataP@data
@@ -247,7 +252,7 @@ simInitSpatial <- function(simPopObj, additional, region, tspatialP=NULL,tspatia
     print(tab)
   }
 
-  tab <- merge(tab,data_pop[,.(freqPopP=.N,freqPopHH=sum(!duplicated(eval(parse(text=dataP@hhid))))),by=c(region)],by=region,all=TRUE)
+  tab <- merge(tab,data_pop[,list(freqPopP=.N,freqPopHH=sum(!duplicated(eval(parse(text=dataP@hhid))))),by=c(region)],by=region,all=TRUE)
   # Check if the input table match to the synthetic population
   if(any(is.na(rowSums(tab[,na.omit(match(c("freqP","freqH","freqPopP","freqPopHH"),colnames(tab))),with=FALSE])))){
     stop("The table with household counts and person counts does not merge with the population\n without empty cells.")
@@ -274,6 +279,10 @@ simInitSpatial <- function(simPopObj, additional, region, tspatialP=NULL,tspatia
   parallel <- pp$parallel
   nr_cores <- pp$nr_cores
   have_win <- pp$have_win; rm(pp)
+  
+  if ( !missing(seed) ) {
+    set.seed(seed,"L'Ecuyer")  # set seed of random number generator
+  }
   
   if ( parallel ) {
     # windows

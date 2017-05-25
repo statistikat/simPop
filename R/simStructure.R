@@ -60,7 +60,7 @@ simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), 
 
   ##### initializations
   if ( !missing(seed) ) {
-    set.seed(seed)
+    set.seed(seed,"L'Ecuyer")  # set seed of random number generator
   }
 
   method <- match.arg(method)

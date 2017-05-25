@@ -75,7 +75,7 @@ simComponents <- function(simPopObj, total="netIncome",
 
   ##### initializations
   if ( !missing(seed) ) {
-    set.seed(seed)
+    set.seed(seed,"L'Ecuyer")  # set seed of random number generator
   }
 
   dataP <- simPopObj@pop@data

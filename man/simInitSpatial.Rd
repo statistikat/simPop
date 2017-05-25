@@ -7,7 +7,7 @@ table.}
 \usage{
 simInitSpatial(simPopObj, additional, region, tspatialP = NULL,
   tspatialHH = NULL, eps = 0.05, maxIter = 100, nr_cpus = NULL,
-  verbose = FALSE)
+  seed = 1, verbose = FALSE)
 }
 \arguments{
 \item{simPopObj}{an object of class \code{\linkS4class{simPopObj}}.}
@@ -40,6 +40,10 @@ if person and household counts are provided}
 
 \item{nr_cpus}{if specified, an integer number defining the number of cpus
 that should be used for parallel processing.}
+
+\item{seed}{optional; an integer value to be used as the seed of the random
+number generator, or an integer vector containing the state of the random
+number generator to be restored.}
 
 \item{verbose}{TRUE/FALSE if some information should be shown during the process}
 }

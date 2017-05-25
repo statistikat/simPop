@@ -1,6 +1,12 @@
 #include <R.h>
 #include <cmath>
 #include <Rcpp.h>
+
+void R_init_simPop(DllInfo* info) {
+  R_registerRoutines(info, NULL, NULL, NULL, NULL);
+  R_useDynamicSymbols(info, TRUE);
+}
+
 using namespace Rcpp;
 
 NumericVector ipu_work(NumericMatrix inp, NumericVector con, NumericVector w, double eps, IntegerVector verbose) {
