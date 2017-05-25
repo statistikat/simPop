@@ -31,6 +31,7 @@ setClassUnion('listOrNULL', c('list', 'NULL'))
 #' @importFrom plyr revalue
 #' @importFrom EnvStats rlnormTrunc
 #' @importFrom fitdistrplus fitdist
+#' @importFrom ranger ranger
 NULL
 
 
