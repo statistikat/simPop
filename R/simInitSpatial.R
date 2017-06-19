@@ -171,8 +171,8 @@ simInitSpatial <- function(simPopObj, additional, region, tspatialP=NULL,tspatia
         dataPop[,firstP:=!duplicated(hhidtmp)]
         for(i in 1:maxIter){
           s <- curTab[1,abs(round(diff/meanHH))]
-          x1 <- sample(dataPop[subregion==curTab[1,subregion]&firstP,hhidtmp],size=s,prob=1/dataPop[subregion==curTab[1,subregion]&firstP,hsize])
-          x2 <- sample(dataPop[subregion==curTab[nrow(curTab),subregion]&firstP,hhidtmp],size=s,prob=dataPop[subregion==curTab[nrow(curTab),subregion]&firstP,hsize])
+          x1 <- sample(dataPop[subregion==curTab[1,subregion]&firstP,hhidtmp],size=s,prob=1/dataPop[subregion==curTab[1,subregion]&firstP,hsize],replace=TRUE)
+          x2 <- sample(dataPop[subregion==curTab[nrow(curTab),subregion]&firstP,hhidtmp],size=s,prob=dataPop[subregion==curTab[nrow(curTab),subregion]&firstP,hsize],replace=TRUE)
           dataPop[hhidtmp%in%x2,subregion:=curTab[1,subregion]]
           dataPop[hhidtmp%in%x1,subregion:=curTab[nrow(curTab),subregion]]
           curTab <- merge(dataTable[,list(freqH,freqP,subregion)],
@@ -192,6 +192,7 @@ simInitSpatial <- function(simPopObj, additional, region, tspatialP=NULL,tspatia
   x <- NULL
   diffp <- firstP <- freqH <- freqP <- freqPopHH <- NULL
   hhidtmp <- hsize <- nP <- t <- subregionNeu <- NULL
+  Ns <- Nt <- fak <- NULL
   dataP <- simPopObj@pop
   dataS <- simPopObj@sample
   data_pop <- dataP@data
@@ -221,6 +222,7 @@ simInitSpatial <- function(simPopObj, additional, region, tspatialP=NULL,tspatia
     if(!is.numeric(tspatialHH[[3]])){
       stop("the last and third column of input table tspatialHH must contain numeric values!\n")
     }
+    
   }
   if(!is.null(tspatialP)){
     tspatialP <- data.table(tspatialP)
@@ -236,6 +238,13 @@ simInitSpatial <- function(simPopObj, additional, region, tspatialP=NULL,tspatia
   if(!is.null(tspatialHH)){
     tab <- tspatialHH
     colnames(tab) <- c(region,additional,"freqH")
+    #Adjust input table to the number in the synth. population
+    NsynthHH <- data_pop[!duplicated(data_pop[[simPopObj@pop@hhid]]),list(Ns=.N),by=c(region)]
+    tab[,Nt:=sum(freqH),by=c(region)]
+    tab <- merge(NsynthHH,tab,by=region)
+    tab[,fak:=Ns/Nt]
+    tab[,freqH:=freqH*fak]
+    tab <- tab[,c(region,additional,"freqH"), with = FALSE]
     if(!is.null(tspatialP)){
       tab <- merge(tab,tspatialP,by=c(region,additional),all=TRUE)
       colnames(tab) <- c(region, additional, "freqH","freqP")
@@ -246,6 +255,15 @@ simInitSpatial <- function(simPopObj, additional, region, tspatialP=NULL,tspatia
   }else{
     tab <- tspatialP
     colnames(tab) <- c(region,additional,"freqP")
+  }
+  if(!is.null(tspatialP)){
+    cn <- colnames(tab)
+    tab[,Nt:=sum(freqP),by=c(region)]
+    NsynthP <- data_pop[,list(Ns=.N),by=c(region)]
+    tab <- merge(tab,NsynthP,by=region)
+    tab[,fak:=Ns/Nt]
+    tab[,freqP:=freqP*fak]
+    tab <- tab[,c(cn),with=FALSE]
   }
   if(verbose){
     cat("The table used for generating the new variable has",nrow(tab),"rows:\n")
