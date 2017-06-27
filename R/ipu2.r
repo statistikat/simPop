@@ -441,15 +441,16 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
         }else{
           dat[,calibWeight:=f*calibWeight,by=eval(hColNames[[i]])]
         }
+        error <- TRUE
       }
       if("epsvalue"%in%colnames(dat)){
         dat[,epsvalue:=NULL]
       }
       
       setnames(dat,"value",valueH[i])
-      if(any(curEps>epsHcur)){ 
-        error <- TRUE
-      }
+      # if(any(curEps>epsHcur)){ 
+      #   error <- TRUE
+      # }
       if(verbose&&any(curEps>epsHcur)&&calIter%%10==0){
         if(calIter%%100==0)
         print(subset(dat,!is.na(f))[abs(1/f-1)>epsHcur][,list(mean(f),.N),by=eval(hColNames[[i]])])
