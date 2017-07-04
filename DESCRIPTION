@@ -38,6 +38,7 @@ Description: Tools and methods to simulate populations for surveys based
     from the World bank.
 License: GPL (>= 2)
 LazyLoad: yes
+ByteCompile: TRUE
 Collate:
     '0classes.R'
     'addKnownMargins.R'
