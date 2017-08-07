@@ -13,6 +13,7 @@ Objects of this class contain information on a population or survey.
 \code{new("dataObj", ...)} but are usually automatically created when using
 \code{\link{simStructure}}.
 }
+
 \examples{
 showClass("dataObj")
 
@@ -23,11 +24,10 @@ inp <- specifyInput(data=eusilcS, hhid="db030", weight="rb050", strata="db040")
 inp
 
 }
-\author{
-Bernhard Meindl and Matthias Templ
-}
 \seealso{
 \code{\linkS4class{simPopObj}}
 }
+\author{
+Bernhard Meindl and Matthias Templ
+}
 \keyword{classes}
-

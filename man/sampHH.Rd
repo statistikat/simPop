@@ -50,8 +50,11 @@ system.time(y1 <- sampHH(pop, strata="region", hsize=NULL))
 system.time(y2 <- sampHH(pop, strata=NULL, hsize=NULL))
 }
 }
+\references{
+M. Templ, B. Meindl, A. Kowarik, A. Alfons, O. Dupriez (2017) Simulation of Synthetic Populations for Survey Data Considering Auxiliary
+Information. \emph{Journal of Statistical Survey}, \strong{79} (10), 1--38. doi: 10.18637/jss.v079.i10
+}
 \author{
 Bernhard Meindl, Matthias Templ and Johannes Gussenbauer
 }
 \keyword{manip}
-

@@ -43,8 +43,11 @@ inp <- specifyInput(data=eusilcS, hhid="db030", weight="rb050", strata="db040")
 class(inp)
 inp
 }
+\references{
+M. Templ, B. Meindl, A. Kowarik, A. Alfons, O. Dupriez (2017) Simulation of Synthetic Populations for Survey Data Considering Auxiliary
+Information. \emph{Journal of Statistical Survey}, \strong{79} (10), 1--38. doi: 10.18637/jss.v079.i10
+}
 \author{
 Bernhard Meindl
 }
 \keyword{method}
-

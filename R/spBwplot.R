@@ -36,6 +36,8 @@
 #' @return An object of class \code{"trellis"}, as returned by
 #' \code{\link[lattice:xyplot]{bwplot}}.
 #' @author Andreas Alfons and Bernhard Meindl
+#' @references 
+#' A. Alfons, M. Templ (2011) Simulation of close-to-reality population data for household surveys with application to EU-SILC. \emph{Statistical Methods & Applications}, \strong{20} (3), 383--407. doi: 10.1007/s10260-011-0163-2
 #' @seealso \code{\link{spBwplotStats}}, \code{\link[lattice:xyplot]{bwplot}}
 #' @keywords hplot
 #' @export

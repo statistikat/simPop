@@ -86,7 +86,10 @@ barplot(table(age10), col=cc10)
 barplot(table(correctHeaps(age10, heaps="10year", method="lnorm")), col=cc10)
 
 }
+\references{
+M. Templ, B. Meindl, A. Kowarik, A. Alfons, O. Dupriez (2017) Simulation of Synthetic Populations for Survey Data Considering Auxiliary
+Information. \emph{Journal of Statistical Survey}, \strong{79} (10), 1--38. doi: 10.18637/jss.v079.i10
+}
 \author{
 Matthias Templ, Bernhard Meindl
 }
-

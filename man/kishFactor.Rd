@@ -22,4 +22,3 @@ kishFactor(rlnorm(10))
 \author{
 Alexander Kowarik
 }
-

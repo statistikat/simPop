@@ -85,12 +85,11 @@ simPopObj <- simComponents(simPopObj=simPopObj, total="netIncome",
 class(simPopObj)
 }
 }
-\author{
-Stefan Kraft and Andreas Alfons and Bernhard Meindl
-}
 \seealso{
 \code{\link{simStructure}}, \code{\link{simCategorical}},
 \code{\link{simContinuous}}, \code{\link{simEUSILC}}
 }
+\author{
+Stefan Kraft and Andreas Alfons and Bernhard Meindl
+}
 \keyword{datagen}
-

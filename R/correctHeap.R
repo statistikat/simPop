@@ -48,6 +48,9 @@
 #' (e.g. 0, 5 or 10)
 #' 
 #' @author Matthias Templ, Bernhard Meindl 
+#' @references 
+#' M. Templ, B. Meindl, A. Kowarik, A. Alfons, O. Dupriez (2017) Simulation of Synthetic Populations for Survey Data Considering Auxiliary
+#' Information. \emph{Journal of Statistical Survey}, \strong{79} (10), 1--38. doi: 10.18637/jss.v079.i10
 #' @examples 
 #' ## create some artificial data
 #' age <- rlnorm(10000, meanlog=2.466869, sdlog=1.652772)

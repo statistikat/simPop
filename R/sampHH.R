@@ -18,6 +18,9 @@
 #' @return the data frame of new households.
 #' @export
 #' @author Bernhard Meindl, Matthias Templ and Johannes Gussenbauer
+#' @references 
+#' M. Templ, B. Meindl, A. Kowarik, A. Alfons, O. Dupriez (2017) Simulation of Synthetic Populations for Survey Data Considering Auxiliary
+#' Information. \emph{Journal of Statistical Survey}, \strong{79} (10), 1--38. doi: 10.18637/jss.v079.i10
 #' @keywords manip
 #' @examples
 #' data(eusilcP)
