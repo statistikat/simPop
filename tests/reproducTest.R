@@ -33,7 +33,9 @@ simPop <- simStructure(data=inp,
 simPop <- simCategorical(simPop, additional=c("pl030", "pb220a"),
                          method="multinom", nr_cpus=2,seed=10)
 x2 <- simPop@pop@data
-
-if(!identical(x1,x2)){
-  stop("setting seed in parallel mode does not work!\n")
+# mclapply can handle parallel seeds, but does not work under Windows.
+if(Sys.info()["sysname"] != "Windows"){
+  if(!identical(x1,x2)){
+    stop("setting seed in parallel mode does not work!\n")
+  }
 }
