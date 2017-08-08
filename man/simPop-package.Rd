@@ -88,16 +88,16 @@ class(eusilcM)
 }
 \references{
 M. Templ, B. Meindl, A. Kowarik, A. Alfons, O. Dupriez (2017) Simulation of Synthetic Populations for Survey Data Considering Auxiliary
-Information. \emph{Journal of Statistical Survey}, \strong{79} (10), 1--38. doi: 10.18637/jss.v079.i10
+Information. \emph{Journal of Statistical Survey}, \strong{79} (10), 1--38. \doi{10.18637/jss.v079.i10}
 
 A. Alfons, M. Templ (2011) Simulation of close-to-reality population data for household surveys with application to EU-SILC. \emph{Statistical Methods & Applications}, \strong{20} (3), 383--407. doi: 10.1007/s10260-011-0163-2
 
 M. Templ, P. Filzmoser (2014) Simulation and quality of a synthetic close-to-reality employer-employee population. 
-Journal of Applied Statistics, \strong{41} (5), 1053--1072. doi: 10.1080/02664763.2013.859237 
+Journal of Applied Statistics, \strong{41} (5), 1053--1072. \doi{10.1080/02664763.2013.859237} 
 
 M. Templ, A. Alfons (2012) Disclosure Risk of Synthetic Population Data 
 with Application in the Case of EU-SILC. In J Domingo-Ferrer, E Magkos (eds.), 
-\emph{Privacy in Statistical Databases}, \strong{6344} of Lecture Notes in Computer Science, 174--186. Springer Verlag, Heidelberg. doi: 10.1007/978-3-642-15838-4\_16
+\emph{Privacy in Statistical Databases}, \strong{6344} of Lecture Notes in Computer Science, 174--186. Springer Verlag, Heidelberg. \doi{10.1007/978-3-642-15838-4_16}
 }
 \author{
 Bernhard Meindl, Matthias Templ, Andreas Alfons, Alexander Kowarik,
