@@ -1,18 +1,27 @@
-package <- "simPop"
-citHeader(paste("To cite package '", package, "' in publications use:", sep=""))
+bibentry(bibtype = "Article",
+  title        = "Simulation of Synthetic Complex Data: The {R} Package {simPop}",
+  author       = c(person(given = "Matthias",
+                          family = "Templ",
+                          email = "matthias.templ@gmail.com"),
+                   person(given = "Bernhard",
+                          family = "Meindl"),
+                   person(given = "Alexander",
+                          family = "Kowarik"),
+                   person(given = "Olivier",
+                          family = "Dupriez",
+                          email = "odupriez@worldbank.org")),
+  journal      = "Journal of Statistical Software",
+  year         = "2017",
+  volume       = "79",
+  number       = "10",
+  pages        = "1--38",
+  doi          = "10.18637/jss.v079.i10",
 
-if(!exists("meta") || is.null(meta)) {
-  meta <- packageDescription(package)
-}
-title <- paste(package, meta$Title, sep=": ")
-vers <- paste("R package version", meta$Version)
-year <- sub(".*(2[[:digit:]]{3})-.*", "\\1", meta$Date)
-author <- meta$Author
-authorList <- unlist(strsplit(author, "(, and |, | and )"))
-authorList <- do.call(personList, lapply(authorList, as.person))
-url <- paste("https://CRAN.R-project.org/package=simPop")
-textVersion <- paste(author, " (", year, "). ", 
-    title, ". ", vers, ". URL ", url, ".", sep="")
+  header       = "To cite simPop in publications use:",
+  textVersion  =
+  paste("Matthias Templ, Bernhard Meindl, Alexander Kowarik, Olivier Dupriez (2017).",
+        "Simulation of Synthetic Complex Data: The R Package simPop.",
+        "Journal of Statistical Software, 79(10), 1-38.",
+        "doi:10.18637/jss.v079.i10")
+)
 
-citEntry(entry="Manual", title = title, author = authorList, 
-    year = year, note = vers, url = url, textVersion = textVersion)
