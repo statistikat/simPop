@@ -42,6 +42,7 @@ meltepsfun <- function(x){
   }
   return(x)
 }
+gm_mean <- function(x){prod(x)^(1/length(x))}
 
 #' Iterative Proportional Updating
 #' 
@@ -331,6 +332,12 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
     error <- FALSE
     
     ### Person calib
+    #random order of constraint sequence
+    # spcon <- sample(1:3,3)
+    # conP <- conP[spcon]
+    # #falls epsP Liste
+    # epsP <- epsP[spcon]
+    # mepsP <- mepsP[spcon]
     for(i in seq_along(conP)){
       if(is.list(epsP)){
         epsPcur <- epsP[[i]]
@@ -348,6 +355,14 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
         setnames(dat,valueP[i],"value")
         # try to divide the weight between units with larger/smaller value in the numerical variable linear
         dat[,f:=numericalWeighting(head(wValue,1),head(value,1),tmpVarForMultiplication,calibWeight),by=eval(pColNames[[i]])]
+        
+        if(meanHH){
+          # Apply person-level adjustments in a multilicative way per http://www.scag.ca.gov/Documents/PopulationSynthesizerPaper_TRB.pdf
+          # dat[duplicated(subset(dat, select = c(hid, eval(pColNames[[i]])))),f:= 1]
+          # dat[,f:=prod(f),by=eval(hid)] 
+          dat[,f:=gm_mean(f),by=eval(hid)] 
+        }
+        
         setnames(dat,"tmpVarForMultiplication",names(conP)[i])
         if(is.array(epsPcur)){## for numeric variables not the factor f is used but the abs relative deviation is computed per class
           curEps <- abs(dat[!is.na(f),1/(value/wValue)-1]) ## curEps is computed for all observations to compare it with the right epsValue
@@ -359,6 +374,14 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
         dat[,wValue:=sum(calibWeight),by=eval(pColNames[[i]])]
         setnames(dat,valueP[i],"value")
         dat[,f:= value/wValue,by=eval(pColNames[[i]])]
+        
+        if(meanHH){
+          # Apply person-level adjustments in a multilicative way per http://www.scag.ca.gov/Documents/PopulationSynthesizerPaper_TRB.pdf
+          # dat[duplicated(subset(dat, select = c(hid, eval(pColNames[[i]])))),f:= 1]
+          # dat[,f:=prod(f),by=eval(hid)] 
+          dat[,f:=gm_mean(f),by=eval(hid)] 
+        }
+        
         if(is.array(epsPcur)){
           curEps <- abs(dat[!is.na(f),1/f-1]) ## curEps is computed for all observations to compare it with the right epsValue
         }else{
@@ -394,9 +417,11 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
       }
       
     }
+    
     if(meanHH){
       dat[,calibWeight:=mean(calibWeight),by=eval(hid)] ## das machen wir bei MZ-HR-Paper vor der hh-Kalibrierung. Hier wird nur erstes hh-member kalibriert.
     }
+    
     ### Household calib
     for(i in seq_along(conH)){
       if(is.list(epsH)){
@@ -457,6 +482,8 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
         cat(calIter, ":Not yet converged for H-Constraint",i,"\n")
       }
     }
+    
+    
     if(verbose&&!error){
       cat("Convergence reached in ",calIter," steps \n")
     }else if(verbose&&maxIter==calIter){
