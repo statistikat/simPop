@@ -42,7 +42,14 @@ meltepsfun <- function(x){
   }
   return(x)
 }
-gm_mean <- function(x){prod(x)^(1/length(x))}
+# From package robCompositions
+gm_mean <- function(x){
+  if (!is.numeric(x)) 
+    stop("x has to be a vector of class numeric")
+  if (any(na.omit(x == 0))) 
+    0
+  else exp(mean(log(unclass(x)[is.finite(x) & x > 0])))
+}
 
 #' Iterative Proportional Updating
 #' 
