@@ -24,6 +24,9 @@
 #' numeric vector containing the \eqn{y}-coordinates.} \item{approx}{a logical
 #' indicating whether the coordinates represent an approximation.}
 #' @author Andreas Alfons and Stefan Kraft
+#' @references 
+#' A. Alfons, M. Templ (2011) Simulation of close-to-reality population data for household surveys with application to EU-SILC. 
+#' \emph{Statistical Methods & Applications}, \strong{20} (3), 383--407. \doi{10.1007/s10260-011-0163-2}
 #' @seealso \code{\link{spCdfplot}}, \code{\link[stats]{ecdf}},
 #' \code{\link[stats:approxfun]{approx}}
 #' @keywords dplot

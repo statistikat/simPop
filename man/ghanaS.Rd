@@ -75,4 +75,3 @@ Ghana Statistical Service (2008) Ghana Living Standards Survey:
 Report of the fifth round.
 }
 \keyword{datasets}
-

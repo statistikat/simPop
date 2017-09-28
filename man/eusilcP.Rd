@@ -82,4 +82,3 @@ Eurostat (2004) Description of target variables: Cross-sectional
 and longitudinal. \emph{EU-SILC 065/04}, Eurostat.
 }
 \keyword{datasets}
-

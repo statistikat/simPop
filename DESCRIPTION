@@ -2,8 +2,8 @@ Package: simPop
 Type: Package
 Title: Simulation of Synthetic Populations for Survey Data Considering Auxiliary
     Information
-Version: 0.7.0
-Date: 2017-06-19
+Version: 1.0.0
+Date: 2017-08-07
 Author: Bernhard Meindl, Matthias Templ, Andreas Alfons, Alexander Kowarik, and
     with contributions from Mathieu Ribatet
 Maintainer: Matthias Templ <matthias.templ@gmail.com>
@@ -38,6 +38,7 @@ Description: Tools and methods to simulate populations for surveys based
     from the World bank.
 License: GPL (>= 2)
 LazyLoad: yes
+ByteCompile: TRUE
 Collate:
     '0classes.R'
     'addKnownMargins.R'
@@ -65,7 +66,7 @@ Collate:
     'simGPD.R'
     'simInitSpatial.R'
     'simple_dis.R'
-    'simPop-package-package.R'
+    'simPop-package.R'
     'simRelation.R'
     'simStructure.R'
     'spBwplot.R'
@@ -84,4 +85,4 @@ Collate:
     'whipple.R'
     'dataSets.R'
     'zzz.R'
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1

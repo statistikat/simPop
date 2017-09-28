@@ -95,4 +95,3 @@ data.frame(required=unlist(con), is=is)
 Bernhard Meindl
 }
 \keyword{method}
-

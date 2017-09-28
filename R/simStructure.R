@@ -28,6 +28,9 @@
 #' incompatible with those from < 2.2.0 and produces a warning the first time
 #' this happens in a session.
 #' @author Bernhard Meindl and Andreas Alfons
+#' @references 
+#' M. Templ, B. Meindl, A. Kowarik, A. Alfons, O. Dupriez (2017) Simulation of Synthetic Populations for Survey Data Considering Auxiliary
+#' Information. \emph{Journal of Statistical Survey}, \strong{79} (10), 1--38. \doi{10.18637/jss.v079.i10}
 #' @seealso \code{\link{simCategorical}}, \code{\link{simContinuous}},
 #' \code{\link{simComponents}}, \code{\link{simEUSILC}}
 #' @keywords datagen

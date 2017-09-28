@@ -4,6 +4,8 @@
 \name{totalsRG}
 \alias{totalsRG}
 \alias{totalsRGtab}
+\alias{totalsRG}
+\alias{totalsRGtab}
 \title{Population totals Region times Gender for Austria 2006}
 \format{totalsRG: A data frame with 18 observations on the following 3
 variables.  \describe{ \item{list("rb090")}{gender; a factor with levels
@@ -49,4 +51,3 @@ totalsRGtab
 
 }
 \keyword{datasets}
-

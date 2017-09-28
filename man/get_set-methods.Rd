@@ -4,24 +4,24 @@
 \name{get_set-methods}
 \alias{get_set-methods}
 \alias{pop}
-\alias{pop,simPopObj-method}
 \alias{pop<-}
+\alias{pop,simPopObj-method}
 \alias{pop<-,simPopObj-method}
+\alias{samp}
+\alias{samp<-}
+\alias{samp,simPopObj-method}
+\alias{samp<-,simPopObj-method}
 \alias{popData}
 \alias{popData,simPopObj-method}
+\alias{sampleData,simPopObj-method}
 \alias{popObj}
-\alias{popObj,simPopObj-method}
 \alias{popObj<-}
 \alias{popObj<-,simPopObj,dataObj-method}
-\alias{samp}
-\alias{samp,simPopObj-method}
-\alias{samp<-}
-\alias{samp<-,simPopObj-method}
+\alias{popObj,simPopObj-method}
 \alias{sampleData}
-\alias{sampleData,simPopObj-method}
 \alias{sampleObj}
-\alias{sampleObj,simPopObj-method}
 \alias{sampleObj<-}
+\alias{sampleObj,simPopObj-method}
 \alias{sampleObj<-,simPopObj,dataObj-method}
 \alias{tableObj}
 \alias{tableObj,simPopObj-method}
@@ -77,13 +77,12 @@ head(pop(simPopObj, var="newvar"))
 head(pop(simPopObj, var=c("db030","db040")))
 
 }
-\author{
-Bernhard Meindl
-}
 \seealso{
 \code{\link{simPopObj-class}},\code{\link{pop}},
 \code{\link{pop<-}}, \code{\link{samp<-}}, \code{\link{manageSimPopObj}}
 }
+\author{
+Bernhard Meindl
+}
 \keyword{manip}
 \keyword{methods}
-

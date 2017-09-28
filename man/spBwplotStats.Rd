@@ -57,9 +57,6 @@ spBwplotStats(eusilcS$netIncome,
     weights=eusilcS$rb050, do.out = FALSE)
 
 }
-\author{
-Stefan Kraft and Andreas Alfons
-}
 \seealso{
 \code{\link{spBwplot}}, for producing (weighted) box plots of
 continuous or semi-continuous variables.
@@ -69,5 +66,7 @@ continuous or semi-continuous variables.
 \code{\link[grDevices]{boxplot.stats}} for the unweighted statistics for box
 plots (not considering semi-continuous variables).
 }
+\author{
+Stefan Kraft and Andreas Alfons
+}
 \keyword{dplot}
-

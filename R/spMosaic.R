@@ -19,6 +19,12 @@
 #' passed to \code{\link[vcd]{cotabplot}}.  If \code{method} is \code{"color"},
 #' further arguments to be passed to \code{\link[vcd]{strucplot}}
 #' @author Andreas Alfons and Bernhard Meindl
+#' @references 
+#' M. Templ, B. Meindl, A. Kowarik, A. Alfons, O. Dupriez (2017) Simulation of Synthetic Populations for Survey Data Considering Auxiliary
+#' Information. \emph{Journal of Statistical Survey}, \strong{79} (10), 1--38. \doi{10.18637/jss.v079.i10}
+#' 
+#' A. Alfons, M. Templ (2011) Simulation of close-to-reality population data for household surveys with application to EU-SILC. 
+#' \emph{Statistical Methods & Applications}, \strong{20} (3), 383--407. \doi{10.1080/02664763.2013.859237}
 #' @seealso \code{\link{spTable}}, \code{\link[vcd]{cotabplot}},
 #' \code{\link[vcd]{strucplot}}
 #' @keywords hplot

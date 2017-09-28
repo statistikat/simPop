@@ -116,12 +116,17 @@ simPop <- simCategorical(simPop, additional=c("pl030", "pb220a"), method="multin
 simPop
 }
 }
-\author{
-Bernhard Meindl, Andreas Alfons, Stefan Kraft, Alexander Kowarik
+\references{
+B. Meindl, M. Templ, A. Kowarik, O. Dupriez (2017) Simulation of Synthetic Populations for Survey Data Considering Auxiliary
+Information. \emph{Journal of Statistical Survey}, \strong{79} (10), 1--38. doi: 10.18637/jss.v079.i10
+
+A. Alfons, M. Templ (2011) Simulation of close-to-reality population data for household surveys with application to EU-SILC. \emph{Statistical Methods & Applications}, \strong{20} (3), 383--407.
 }
 \seealso{
 \code{\link{simStructure}}, \code{\link{simRelation}},
 \code{\link{simContinuous}}, \code{\link{simComponents}}
 }
+\author{
+Bernhard Meindl, Andreas Alfons, Stefan Kraft, Alexander Kowarik, Matthias Templ
+}
 \keyword{datagen}
-

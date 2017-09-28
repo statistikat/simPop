@@ -111,12 +111,11 @@ str(ghanaP)
 }
 
 }
-\author{
-Andreas Alfons and Bernhard Meindl
-}
 \seealso{
 \code{\link{simStructure}}, \code{\link{simCategorical}},
 \code{\link{simContinuous}}, \code{\link{simComponents}}
 }
+\author{
+Andreas Alfons and Bernhard Meindl
+}
 \keyword{datagen}
-
