@@ -10,7 +10,7 @@
 \usage{
 ipu2(dat, hid = NULL, conP = NULL, conH = NULL, epsP = 1e-06,
   epsH = 0.01, verbose = FALSE, w = NULL, bound = 4, maxIter = 200,
-  meanHH = TRUE, returnNA = TRUE, looseH = FALSE,
+  meanHH = TRUE, returnNA = TRUE, looseH = FALSE, allPthenH = TRUE,
   numericalWeighting = computeLinear)
 
 computeLinear(curValue, Value, numericVar, weightVec, boundLinear = 10)
@@ -75,6 +75,10 @@ the person weights corresponding to the household.}
 If TRUE, only the weights for which the lower and upper thresholds defined by \code{conH} and \code{epsH} are exceeded
 are calibrated. They are however not calibrated against the actual constraints \code{conH} but against
 these lower and upper thresholds, i.e. \code{conH}-\code{conH}*\code{epsH} and \code{conH}+\code{conH}*\code{epsH}.}
+
+\item{allPthenH}{if TRUE, all the person level calibration steps are performed before the houshold level calibration steps (and \code{meanHH}, if specified). 
+If FALSE, the houshold level calibration steps (and \code{meanHH}, if specified) are performed after everey person level calibration step.
+This can lead to better convergence properties in certain cases but also means that the total number of calibration steps is increased.}
 
 \item{numericalWeighting}{...}
 

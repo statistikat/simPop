@@ -1,5 +1,6 @@
 #Test for reproducibility
 library(simPop)
+test_that("Reproduc test",{
 data(eusilcS)
 inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
 ## in the following, nr_cpus are selected automatically
@@ -35,7 +36,6 @@ simPop <- simCategorical(simPop, additional=c("pl030", "pb220a"),
 x2 <- simPop@pop@data
 # mclapply can handle parallel seeds, but does not work under Windows.
 if(Sys.info()["sysname"] != "Windows"){
-  if(!identical(x1,x2)){
-    stop("setting seed in parallel mode does not work!\n")
-  }
+  expect_identical(x1,x2,info="setting seed in parallel mode does not work!")
 }
+})

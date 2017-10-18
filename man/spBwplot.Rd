@@ -101,7 +101,8 @@ spBwplot(eusilcM, x="netIncome", cond="rb090", layout=c(1,2))
 
 }
 \references{
-A. Alfons, M. Templ (2011) Simulation of close-to-reality population data for household surveys with application to EU-SILC. \emph{Statistical Methods & Applications}, \strong{20} (3), 383--407. doi: 10.1007/s10260-011-0163-2
+A. Alfons, M. Templ (2011) Simulation of close-to-reality population data for household surveys with application to EU-SILC. 
+\emph{Statistical Methods & Applications}, \strong{20} (3), 383--407. \doi{10.1007/s10260-011-0163-2}
 }
 \seealso{
 \code{\link{spBwplotStats}}, \code{\link[lattice:xyplot]{bwplot}}
