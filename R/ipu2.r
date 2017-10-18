@@ -44,7 +44,8 @@ meltepsfun <- function(x){
 }
 
 calibP <- function(i,conP, epsP, mepsP, dat, valueP, pColNames, bound, verbose, calIter, numericalWeighting){  
-
+  OriginalSortingVariable <- V1 <- baseWeight <- calibWeight <- epsvalue <- f <- NULL
+  temporary_hid <- temporary_hvar <- tmpVarForMultiplication <- value <- wValue <- wvst<- NULL
   if(is.list(epsP)){
     epsPcur <- epsP[[i]]
     mepsPcur <- mepsP[[i]]
@@ -121,7 +122,8 @@ calibP <- function(i,conP, epsP, mepsP, dat, valueP, pColNames, bound, verbose, 
   return(dat)
 }
 calibH <- function(i,conH, epsH, mepsH, dat, valueH, hColNames, bound, verbose, calIter, looseH){  
-  
+  OriginalSortingVariable <- V1 <- baseWeight <- calibWeight <- epsvalue <- f <- NULL
+  temporary_hid <- temporary_hvar <- tmpVarForMultiplication <- value <- wValue <- wvst<- NULL
   if(is.list(epsH)){
     epsHcur <- epsH[[i]]
     mepsHcur <- mepsH[[i]]
