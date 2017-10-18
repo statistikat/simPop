@@ -42,9 +42,8 @@ meltepsfun <- function(x){
   }
   return(x)
 }
-
-calibP <- function(i,conP, epsP, mepsP, dat, valueP, pColNames, bound, verbose, calIter, numericalWeighting){  
-
+calibP <- function(i,conP, epsP, mepsP, dat, error, valueP, pColNames, bound, verbose, calIter, numericalWeighting){  
+  
   if(is.list(epsP)){
     epsPcur <- epsP[[i]]
     mepsPcur <- mepsP[[i]]
@@ -118,9 +117,9 @@ calibP <- function(i,conP, epsP, mepsP, dat, valueP, pColNames, bound, verbose, 
     cat(calIter, ":Not yet converged for P-Constraint",i,"\n")
   }
   
-  return(dat)
+  return(list(dat=dat,error=error))
 }
-calibH <- function(i,conH, epsH, mepsH, dat, valueH, hColNames, bound, verbose, calIter, looseH){  
+calibH <- function(i,conH, epsH, mepsH, dat, error, valueH, hColNames, bound, verbose, calIter, looseH){  
   
   if(is.list(epsH)){
     epsHcur <- epsH[[i]]
@@ -179,7 +178,7 @@ calibH <- function(i,conH, epsH, mepsH, dat, valueH, hColNames, bound, verbose, 
       print(subset(dat,!is.na(f))[abs(1/f-1)>epsHcur][,list(mean(f),.N),by=eval(hColNames[[i]])])
     cat(calIter, ":Not yet converged for H-Constraint",i,"\n")
   }
-  return(dat)
+  return(list(dat=dat,error=error))
 }
 # From package robCompositions
 # gm_mean <- function(x){
@@ -314,7 +313,7 @@ calibH <- function(i,conH, epsH, mepsH, dat, valueH, hColNames, bound, verbose, 
 #  }
 #  coef <- optim(c(1,1),fn)$par
 ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FALSE,
-                 w=NULL,bound=4,maxIter=200,meanHH=TRUE,returnNA=TRUE,looseH=FALSE,allPthenH=TRUE,numericalWeighting=computeLinear){
+                 w=NULL,bound=4,maxIter=200,meanHH=TRUE,allPthenH=TRUE,returnNA=TRUE,looseH=FALSE,numericalWeighting=computeLinear){
   
   OriginalSortingVariable <- V1 <- baseWeight <- calibWeight <- epsvalue <- f <- NULL
   temporary_hid <- temporary_hvar <- tmpVarForMultiplication <- value <- wValue <- wvst<- NULL
@@ -481,41 +480,48 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
     error <- FALSE
     
     if(allPthenH){
-    ### Person calib
-     for(i in seq_along(conP)){
-      
-      dat <- calibP(i=i, conP=conP, epsP=epsP, mepsP=if(exists("mepsP")){mepsP=mepsP}else{mepsP=NULL}, dat=dat, 
-                     valueP=valueP, pColNames=pColNames,bound=bound, verbose=verbose, calIter=calIter, numericalWeighting=numericalWeighting)
-      
-
-    }
-    if(meanHH){
-      dat[,calibWeight:=mean(calibWeight),by=eval(hid)] ## das machen wir bei MZ-HR-Paper vor der hh-Kalibrierung. Hier wird nur erstes hh-member kalibriert.
-    }
-    ### Household calib
-    for(i in seq_along(conH)){
-      dat <- calibH(i=i, conH=conH, epsH=epsH, mepsH=if(exists("mepsH")){mepsH=mepsH}else{mepsH=NULL}, dat=dat, 
-                    valueH=valueH, hColNames=hColNames,bound=bound, verbose=verbose, calIter=calIter, looseH=looseH)
-      
-    }
-    }else{
       ### Person calib
       for(i in seq_along(conP)){
         
-        dat <- calibP(i=i, conP=conP, epsP=epsP, mepsP=if(exists("mepsP")){mepsP=mepsP}else{mepsP=NULL}, dat=dat, 
+        res <- calibP(i=i, conP=conP, epsP=epsP, mepsP=if(exists("mepsP")){mepsP=mepsP}else{mepsP=NULL}, dat=dat, error=error,
                       valueP=valueP, pColNames=pColNames,bound=bound, verbose=verbose, calIter=calIter, numericalWeighting=numericalWeighting)
         
-        
-      
+        dat <- res[["dat"]]
+        error <- res[["error"]]
+        rm(res)
+      }
       if(meanHH){
         dat[,calibWeight:=mean(calibWeight),by=eval(hid)] ## das machen wir bei MZ-HR-Paper vor der hh-Kalibrierung. Hier wird nur erstes hh-member kalibriert.
       }
       ### Household calib
       for(i in seq_along(conH)){
-        dat <- calibH(i=i, conH=conH, epsH=epsH, mepsH=if(exists("mepsH")){mepsH=mepsH}else{mepsH=NULL}, dat=dat, 
+        res <- calibH(i=i, conH=conH, epsH=epsH, mepsH=if(exists("mepsH")){mepsH=mepsH}else{mepsH=NULL}, dat=dat, error=error,
                       valueH=valueH, hColNames=hColNames,bound=bound, verbose=verbose, calIter=calIter, looseH=looseH)
-        
+        dat <- res[["dat"]]
+        error <- res[["error"]]
+        rm(res)
       }
+    }else{
+      ### Person calib
+      for(i in seq_along(conP)){
+        
+        res <- calibP(i=i, conP=conP, epsP=epsP, mepsP=if(exists("mepsP")){mepsP=mepsP}else{mepsP=NULL}, dat=dat, error=error,
+                      valueP=valueP, pColNames=pColNames,bound=bound, verbose=verbose, calIter=calIter, numericalWeighting=numericalWeighting)
+        dat <- res[["dat"]]
+        error <- res[["error"]]
+        rm(res)
+        
+        if(meanHH){
+          dat[,calibWeight:=mean(calibWeight),by=eval(hid)] ## das machen wir bei MZ-HR-Paper vor der hh-Kalibrierung. Hier wird nur erstes hh-member kalibriert.
+        }
+        ### Household calib
+        for(i in seq_along(conH)){
+          res <- calibH(i=i, conH=conH, epsH=epsH, mepsH=if(exists("mepsH")){mepsH=mepsH}else{mepsH=NULL}, dat=dat, error=error,
+                        valueH=valueH, hColNames=hColNames,bound=bound, verbose=verbose, calIter=calIter, looseH=looseH)
+          dat <- res[["dat"]]
+          error <- res[["error"]]
+          rm(res)
+        }
       }
     }
     
