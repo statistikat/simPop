@@ -42,8 +42,15 @@ meltepsfun <- function(x){
   }
   return(x)
 }
+<<<<<<< HEAD
 calibP <- function(i,conP, epsP, mepsP, dat, error, valueP, pColNames, bound, verbose, calIter, numericalWeighting){  
   
+=======
+
+calibP <- function(i,conP, epsP, mepsP, dat, valueP, pColNames, bound, verbose, calIter, numericalWeighting){  
+  OriginalSortingVariable <- V1 <- baseWeight <- calibWeight <- epsvalue <- f <- NULL
+  temporary_hid <- temporary_hvar <- tmpVarForMultiplication <- value <- wValue <- wvst<- NULL
+>>>>>>> ef14107e12b641c2fda63cb7b81dbaa4da3da12b
   if(is.list(epsP)){
     epsPcur <- epsP[[i]]
     mepsPcur <- mepsP[[i]]
@@ -119,8 +126,14 @@ calibP <- function(i,conP, epsP, mepsP, dat, error, valueP, pColNames, bound, ve
   
   return(list(dat=dat,error=error))
 }
+<<<<<<< HEAD
 calibH <- function(i,conH, epsH, mepsH, dat, error, valueH, hColNames, bound, verbose, calIter, looseH){  
   
+=======
+calibH <- function(i,conH, epsH, mepsH, dat, valueH, hColNames, bound, verbose, calIter, looseH){  
+  OriginalSortingVariable <- V1 <- baseWeight <- calibWeight <- epsvalue <- f <- NULL
+  temporary_hid <- temporary_hvar <- tmpVarForMultiplication <- value <- wValue <- wvst<- NULL
+>>>>>>> ef14107e12b641c2fda63cb7b81dbaa4da3da12b
   if(is.list(epsH)){
     epsHcur <- epsH[[i]]
     mepsHcur <- mepsH[[i]]
