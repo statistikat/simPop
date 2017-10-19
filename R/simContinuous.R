@@ -1106,7 +1106,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
       # contained in sample after trimming
       # if not, trimming is not applied and a warning message is generated
       check <- unlist(sapply(predNames, function(i) {
-        table(dataS[[i]]) > 0 & table(dataSample[[i]]) == 0
+        table(dataS[[i]]) > 0 & table(dataS[[i]]) == 0
       }))
       if ( any(check) ) {
         dataSample <- dataS
@@ -1239,3 +1239,4 @@ simContinuous <- function(simPopObj, additional = "netIncome",
   simPopObj@pop@data <- dataP
   invisible(simPopObj)
 }
+
