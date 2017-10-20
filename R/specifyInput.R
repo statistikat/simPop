@@ -33,7 +33,8 @@
 #' inp <- specifyInput(data=eusilcS, hhid="db030", weight="rb050", strata="db040")
 #' class(inp)
 #' inp
-specifyInput <- function(data, hhid, hhsize=NULL, pid=NULL, weight=NULL, strata=NULL, population=FALSE) {
+specifyInput <- function(data, hhid, hhsize=NULL, pid=NULL, weight=NULL,
+                         strata=NULL, population=FALSE) {
   if ( !class(hhid)=="character" | length(hhid) != 1 | is.na(match(hhid, colnames(data)))) {
     stop("hhid must be a character defining the variable holding household ids and must be of length 1!\n")
   }
@@ -49,6 +50,9 @@ specifyInput <- function(data, hhid, hhsize=NULL, pid=NULL, weight=NULL, strata=
   if ( !is.null(strata) ) {
     if ( !class(strata)=="character" | length(strata) != 1 | is.na(match(strata, colnames(data)))) {
       stop("strata must be a character defining the variable holding information on stratas and must be of length 1!\n")
+    }
+    if(!"factor"%in%class(data[[strata]])){
+      stop(strata,"is not a factor variable as needed for a strata variable.")
     }
   }
 
