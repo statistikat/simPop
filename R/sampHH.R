@@ -83,7 +83,7 @@ sampHH <- function(pop, sizefactor=1, hid="hid", strata="region", hsize=NULL) {
   }
 
   # recode hsize-variable to numeric
-  out[[hsize.ind]] <- as.numeric(out[[tmphsize]])
+  out[[hsize.ind]] <- as.numeric(as.character(out[[tmphsize]]))
   setkeyv(out, hid)
 
   # nicht optimal, geht sicher einfacher
