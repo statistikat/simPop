@@ -51,8 +51,6 @@ calcFinalWeights <- function(data0, totals0, params) {
   invisible(w)
 }
 
-
-
 #' Calibration of 0/1 weights by Simulated Annealing
 #'
 #' A Simulated Annealing Algorithm for calibration of synthetic population data
@@ -108,6 +106,7 @@ calcFinalWeights <- function(data0, totals0, params) {
 #' provided, however only if \code{split} is NULL. Otherwise the computation is
 #' performed in parallel and no useful output can be provided.
 #' @param sizefactor the factor for inflating the population before applying 0/1 weights
+#' @param memory if TRUE simulated annealing is applied in slower but less memory intensive way. Is especially usefull if factor or population is large.
 #' @return Returns an object of class \code{\linkS4class{simPopObj}} with an
 #' updated population listed in slot 'pop'.
 #' @author Bernhard Meindl, Johannes Gussenbauer and Matthias Templ
@@ -138,7 +137,7 @@ calcFinalWeights <- function(data0, totals0, params) {
 #' simPop_adj <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1)
 #' }
 calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
-  temp.cooldown = 0.9, factor.cooldown = 0.85, min.temp = 10^-3, nr_cpus=NULL, sizefactor=2 ,verbose=FALSE) {
+  temp.cooldown = 0.9, factor.cooldown = 0.85, min.temp = 10^-3, nr_cpus=NULL, sizefactor=2, memory=FALSE ,verbose=FALSE) {
 
   if ( class(inp) != "simPopObj" ) {
     stop("argument 'inp' must be of class 'simPopObj'!\n")
@@ -184,24 +183,27 @@ calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
   params$hhid <- hid
   params$pid <- pid
   params$hhsize <- hhsize
-
-  # generate donors
-  data2 <- sampHH(data, sizefactor=sizefactor, hid=hid, strata=split, hsize=hhsize)
-  data2[,(params$weight):=list(0)]
-  setnames(data2,hid,"temporaryhid")
-  if(is.numeric(data2[[hid]])){
-    data2[,hid:=list(data[,sapply(.SD,max),.SDcols=hid]+temporaryhid)]
-  }else{
-    data2[,hid:=list(paste0("9999_",temporaryhid))]
+  
+  if(!memory){
+    # generate donors
+    data2 <- sampHH(data, sizefactor=sizefactor, hid=hid, strata=split, hsize=hhsize)
+    data2[,(params$weight):=list(0)]
+    setnames(data2,hid,"temporaryhid")
+    if(is.numeric(data2[[hid]])){
+      data2[,hid:=list(data[,sapply(.SD,max),.SDcols=hid]+temporaryhid)]
+    }else{
+      data2[,hid:=list(paste0("9999_",temporaryhid))]
+    }
+    setnames(data2,"temporaryhid",hid)
+    #  data2 <- data2[, which(!grepl(hid, colnames(data2))), with=FALSE]
+    cn <- colnames(data2)
+    #  cn[length(cn)] <- hid
+    #  setnames(data2, cn)
+    data2 <- data2[,colnames(data), with=FALSE]
+    #data2 <- data2[,match(colnames(data), cn), with=FALSE]
+    data <- rbind(data, data2)
   }
-  setnames(data2,"temporaryhid",hid)
-#  data2 <- data2[, which(!grepl(hid, colnames(data2))), with=FALSE]
-  cn <- colnames(data2)
-#  cn[length(cn)] <- hid
-#  setnames(data2, cn)
-  data2 <- data2[,colnames(data), with=FALSE]
-  #data2 <- data2[,match(colnames(data), cn), with=FALSE]
-  data <- rbind(data, data2)
+
 
   # parameters for parallel computing
   nr_strata <- length(unique(data[[split]]))
@@ -224,35 +226,76 @@ calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
     if ( have_win ) {
       cl <- makePSOCKcluster(nr_cores)
       registerDoParallel(cl,cores=nr_cores)
-      final_weights <- foreach(x=1:nrow(split.number), .options.snow=list(preschedule=TRUE)) %dopar% {
-        calcFinalWeights(
-          data0=data[split.number[x]],
-          totals0=totals[which(totals[,split,with=FALSE]==as.character(split.number[x][[split]])),],
-          params=params
-        )
+      if(memory){
+        final_weights <- foreach(x=1:nrow(split.number), .options.snow=list(preschedule=TRUE)) %dopar% {
+          simAnnealingDT(
+            data0=data[split.number[x]],
+            totals0=totals[which(totals[,split,with=FALSE]==as.character(split.number[x][[split]])),],
+            params=params,sizefactor=sizefactor)
+        }
+      }else{
+        final_weights <- foreach(x=1:nrow(split.number), .options.snow=list(preschedule=TRUE)) %dopar% {
+          calcFinalWeights(
+            data0=data[split.number[x]],
+            totals0=totals[which(totals[,split,with=FALSE]==as.character(split.number[x][[split]])),],
+            params=params
+          )
+        }
       }
       stopCluster(cl)
     }else if ( !have_win ) {# linux/mac
-      final_weights <- mclapply(1:nrow(split.number), function(x) {
+      if(memory){
+        final_weights <- mclapply(1:nrow(split.number), function(x) {
+          simAnnealingDT(
+            data0=data[split.number[x]],
+            totals0=totals[which(totals[,split,with=FALSE]==as.character(split.number[x][[split]])),],
+            params=params,sizefactor=sizefactor)
+        },mc.cores=nr_cores)
+      }else{
+        final_weights <- mclapply(1:nrow(split.number), function(x) {
+          calcFinalWeights(
+            data0=data[split.number[x]],
+            totals0=totals[which(totals[,split,with=FALSE]==as.character(split.number[x][[split]])),],
+            params=params)
+        },mc.cores=nr_cores)
+      }
+    }
+  } else {
+    if(memory){
+      # use memory efficient but slower method
+      final_weights <- lapply(1:nrow(split.number), function(x) {
+        simAnnealingDT(
+          data0=data[split.number[x]],
+          totals0=totals[which(totals[,split,with=FALSE]==as.character(split.number[x][[split]])),],
+          params=params,sizefactor=sizefactor)
+      })
+    }else{
+      # use c++ implementation - can be quite memory intensive
+      final_weights <- lapply(1:nrow(split.number), function(x) {
         calcFinalWeights(
           data0=data[split.number[x]],
           totals0=totals[which(totals[,split,with=FALSE]==as.character(split.number[x][[split]])),],
           params=params)
-      },mc.cores=nr_cores)
+      })
     }
-  } else {
-    final_weights <- lapply(1:nrow(split.number), function(x) {
-      calcFinalWeights(
-        data0=data[split.number[x]],
-        totals0=totals[which(totals[,split,with=FALSE]==as.character(split.number[x][[split]])),],
-        params=params)
-    })
   }
+
   # return dataset with new weights
-  data$new.weights <- as.integer(unlist(final_weights))
-  data <- data[data$new.weights==1,]
-  data[[inp@pop@weight]] <- data$new.weights
-  data$new.weights <- NULL
+  data[,new.weights:=as.integer(unlist(final_weights))]
+  if(memory){
+    data <- data[new.weights>0,]
+    data <- rbind(data[new.weights==1],data[new.weights>1,.SD[rep(1:.N,new.weights)]])
+    data[,doub:=1:.N,by=c(params[["pid"]],params[["hhid"]])]
+    data[,hid_help:=paste(get(params[["hhid"]]),doub,sep="_")]
+    data[,c(params[["hhid"]]):=.GRP,by=hid_help]
+    data[,c(params[["pid"]]):=paste(get(params[["hhid"]]),gsub("^[[:digit:]]*.","",get(params[["pid"]])),sep=".")]
+    data[,c("new.weights","doub","hid_help"):=NULL]
+  }else{
+    data <- data[data$new.weights==1,]
+    data[[inp@pop@weight]] <- data$new.weights
+    data$new.weights <- NULL
+  }
+
   inp@pop@data <- data
   invisible(inp)
 }
