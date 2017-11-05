@@ -59,6 +59,7 @@ Collate:
     'sampHH.R'
     'silcTools.R'
     'silcTools2.R'
+    'simAnnealingDT.R'
     'simCategorical.R'
     'simComponents.R'
     'simContinuous.R'

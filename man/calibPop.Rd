@@ -7,7 +7,7 @@
 \usage{
 calibPop(inp, split, temp = 1, eps.factor = 0.05, maxiter = 200,
   temp.cooldown = 0.9, factor.cooldown = 0.85, min.temp = 10^-3,
-  nr_cpus = NULL, sizefactor = 2, verbose = FALSE)
+  nr_cpus = NULL, sizefactor = 2, memory = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{inp}{an object of class \code{\linkS4class{simPopObj}} with slot
@@ -40,6 +40,8 @@ reduced in each step.}
 that should be used for parallel processing.}
 
 \item{sizefactor}{the factor for inflating the population before applying 0/1 weights}
+
+\item{memory}{if TRUE simulated annealing is applied in slower but less memory intensive way. Is especially usefull if factor or population is large.}
 
 \item{verbose}{boolean variable; if TRUE some additional verbose output is
 provided, however only if \code{split} is NULL. Otherwise the computation is
@@ -102,7 +104,7 @@ simPop_adj <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1)
 }
 \references{
 M. Templ, B. Meindl, A. Kowarik, A. Alfons, O. Dupriez (2017) Simulation of Synthetic Populations for Survey Data Considering Auxiliary
-Information. \emph{Journal of Statistical Survey}, \strong{79} (10), 1--38. doi: 10.18637/jss.v079.i10
+Information. \emph{Journal of Statistical Survey}, \strong{79} (10), 1--38. \doi{10.18637/jss.v079.i10}
 }
 \author{
 Bernhard Meindl, Johannes Gussenbauer and Matthias Templ

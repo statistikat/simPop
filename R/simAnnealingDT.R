@@ -26,17 +26,17 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2){
   max_n <- size_all* nd
   med_hh <- dteval("data0[!duplicated(",hhid,"),median(as.numeric(as.character(",hhsize,")))]")
   init_n <- round(totals0[,sum(N)/med_hh])
-  choose_hh <- matrix(0,nrow= nd,ncol=size_all)
+  choose_hh <- matrix(0L,nrow= nd,ncol=size_all)
   redraw <- ceiling(med_hh/5 *init_n)
   cooldown <- 0 
 
   ######################################
   # initialize weights
-  init_weight <- sample(c(rep(1,init_n),rep(0,max_n-init_n)))
+  init_weight <- sample(c(rep(1L,init_n),rep(0L,max_n-init_n)))
   init_weight <- matrix(init_weight,nrow=nd,ncol=size_all)
   
   # adjust choose_hh and select all householdmembers
-  dteval("choose_hh[data0[,",hhid,"%in%data0[init_weight[,",1:size_all,"]>0,",hhid,"]],",1:size_all,"] <- 1")
+  dteval("choose_hh[data0[,",hhid,"%in%data0[init_weight[,",1:size_all,"]>0,",hhid,"]],",1:size_all,"] <- 1L")
   data0[,weight_choose:=rowSums(choose_hh)]
   
   ######################################

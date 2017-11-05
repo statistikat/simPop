@@ -137,8 +137,11 @@ calcFinalWeights <- function(data0, totals0, params) {
 #' simPop_adj <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1)
 #' }
 calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
-  temp.cooldown = 0.9, factor.cooldown = 0.85, min.temp = 10^-3, nr_cpus=NULL, sizefactor=2, memory=FALSE ,verbose=FALSE) {
-
+  temp.cooldown = 0.9, factor.cooldown = 0.85, min.temp = 10^-3,
+  nr_cpus=NULL, sizefactor=2, memory=FALSE ,verbose=FALSE) {
+  if(verbose){
+    t0 <- Sys.time()
+  }
   if ( class(inp) != "simPopObj" ) {
     stop("argument 'inp' must be of class 'simPopObj'!\n")
   }
@@ -297,6 +300,9 @@ calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
   }
 
   inp@pop@data <- data
+  if(verbose){
+    Sys.time()-t0
+  }
   invisible(inp)
 }
 NULL
