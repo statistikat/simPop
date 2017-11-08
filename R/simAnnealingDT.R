@@ -126,7 +126,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,sample.prob=FALSE,c
         # calculate objective
         totals_diff <- merge(data0[,sum(weight_choose_new),by=c(parameter)],totals0,by=parameter)
         totals_diff[,diff:=V1-N]
-        totals_diff[,sum(abs(diff))]
+        # totals_diff[,sum(abs(diff))]
         objective.new <- totals_diff[,sum(abs(diff))]
         
         ######################################
