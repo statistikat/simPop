@@ -5,7 +5,7 @@ dteval <- function(...,envir=parent.frame()){
   eval(parse(text=paste0(...)), envir=envir)
 }
 
-simAnnealingDT <- function(data0,totals0,params,sizefactor=2,prob=FALSE){
+simAnnealingDT <- function(data0,totals0,params,sizefactor=2,prob=FALSE,choose.temp=TRUE){
   
   ######################################
   ## define variables from param
@@ -45,6 +45,12 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,prob=FALSE){
   totals_diff[,diff:=V1-N]
   
   objective <- totals_diff[,sum(abs(diff))]
+  
+  # choose starting temperatur as percentage of objective function
+  if(choose.temp){
+    temp <- max(temp,objective)
+    min_temp <- temp*temp_cooldown^50
+  }
   
   ######################################
   # apply simulated annealing
