@@ -29,7 +29,12 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,prob=FALSE,choose.t
   choose_hh <- matrix(0L,nrow= nd,ncol=size_all)
   redraw <- ceiling(med_hh/5 *init_n)
   cooldown <- 0 
-
+  # choose starting temperatur as percentage of objective function
+  if(choose.temp){
+    temp <- max(temp,eps)
+    min_temp <- temp*temp_cooldown^50
+  }
+  
   ######################################
   # initialize weights
   init_weight <- sample(c(rep(1L,init_n),rep(0L,max_n-init_n)))
@@ -45,12 +50,6 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,prob=FALSE,choose.t
   totals_diff[,diff:=V1-N]
   
   objective <- totals_diff[,sum(abs(diff))]
-  
-  # choose starting temperatur as percentage of objective function
-  if(choose.temp){
-    temp <- max(temp,objective)
-    min_temp <- temp*temp_cooldown^50
-  }
   
   ######################################
   # apply simulated annealing
