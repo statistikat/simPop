@@ -5,7 +5,7 @@ dteval <- function(...,envir=parent.frame()){
   eval(parse(text=paste0(...)), envir=envir)
 }
 
-simAnnealingDT <- function(data0,totals0,params,sizefactor=2){
+simAnnealingDT <- function(data0,totals0,params,sizefactor=2,prob=FALSE){
   
   ######################################
   ## define variables from param
@@ -59,35 +59,42 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2){
       while( n<maxiter ) {
         
         init_weight <- as.vector(choose_hh)
-        # get weights for resampling
-        prob_sample <- rep(totals_diff[data0[,mget(parameter)],diff,on=c(parameter)],size_all)
-        total_remove <- totals_diff[,diff]
-        total_add <- total_remove*-1
-        
-        # sample households with probabilites derived by differences to marginals
-        # should speed up convergence
-        neg_add <- sum(abs(total_add[total_add<0]))^-1
-        neg_remove <- sum(abs(total_remove[total_remove<0]))^-1
-        total_add[total_add<0] <- neg_add
-        total_remove[total_remove<0] <- neg_remove
-        
-        prob_remove <- prob_sample[init_weight==1]
-        prob_remove[prob_remove<0] <- neg_remove
-        prob_add <- prob_sample[init_weight==0]*-1
-        prob_add[prob_add<0] <- neg_add
-        
-        prob_remove <- prob_remove/sum(total_remove)
-        prob_add <- prob_add/sum(total_add)
-        
+        if(prob){
+          # get weights for resampling
+          prob_sample <- rep(totals_diff[data0[,mget(parameter)],diff,on=c(parameter)],size_all)
+          total_remove <- totals_diff[,diff]
+          total_add <- total_remove*-1
+          
+          # sample households with probabilites derived by differences to marginals
+          # should speed up convergence
+          neg_add <- sum(abs(total_add[total_add<0]))^-1
+          neg_remove <- sum(abs(total_remove[total_remove<0]))^-1
+          total_add[total_add<0] <- neg_add
+          total_remove[total_remove<0] <- neg_remove
+          
+          prob_remove <- prob_sample[init_weight==1]
+          prob_remove[prob_remove<0] <- neg_remove
+          prob_add <- prob_sample[init_weight==0]*-1
+          prob_add[prob_add<0] <- neg_add
+          
+          prob_remove <- prob_remove/sum(total_remove)
+          prob_add <- prob_add/sum(total_add)
+          
+          if(all(prob_add==0)){
+            prob_add <- NULL
+          }
+          if(all(prob_remove==0)){
+            prob_remove <- NULL
+          }
+        }else{
+          prob_remove <- prob_add <- NULL
+        }
+
         ######################################
         # resample
-        if(all(prob_add==0)){
-          prob_add <- NULL
-        }
+
         add_hh <- sample(which(init_weight==0),redraw,prob=prob_add)
-        if(all(prob_remove==0)){
-          prob_remove <- NULL
-        }
+
         remove_hh <- sample(which(init_weight==1),redraw,prob=prob_remove)
         
         init_weight <- matrix(init_weight,nrow=nd,ncol=size_all)
@@ -112,8 +119,9 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2){
         data0[ ,weight_choose_new:=rowSums(init_weight)]
         ######################################
         # calculate objective
-        totals_diff <- merge(data0[,sum(weight_choose),by=c(parameter)],totals0,by=parameter)
+        totals_diff <- merge(data0[,sum(weight_choose_new),by=c(parameter)],totals0,by=parameter)
         totals_diff[,diff:=V1-N]
+        totals_diff[,sum(abs(diff))]
         objective.new <- totals_diff[,sum(abs(diff))]
         
         ######################################
