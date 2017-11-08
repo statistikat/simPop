@@ -5,7 +5,7 @@ dteval <- function(...,envir=parent.frame()){
   eval(parse(text=paste0(...)), envir=envir)
 }
 
-simAnnealingDT <- function(data0,totals0,params,sizefactor=2,prob=FALSE,choose.temp=TRUE){
+simAnnealingDT <- function(data0,totals0,params,sizefactor=2,sample.prob=FALSE,choose.temp=TRUE){
   
   ######################################
   ## define variables from param
@@ -64,7 +64,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,prob=FALSE,choose.t
       while( n<maxiter ) {
         
         init_weight <- as.vector(choose_hh)
-        if(prob){
+        if(sample.prob){
           # get weights for resampling
           prob_sample <- rep(totals_diff[data0[,mget(parameter)],diff,on=c(parameter)],size_all)
           total_remove <- totals_diff[,diff]
