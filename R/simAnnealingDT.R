@@ -21,6 +21,11 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,sample.prob=FALSE,c
   hhsize <- params[["hhsize"]]
   parameter <- params[["parameter"]]
   
+  # parameters used für c++ code
+  id <- dteval("data0[order(hhid),.(",hhid,",",hhsize,")]")
+  size <- dteval("as.numeric(as.character(id[,",hhsize,"]))")
+  id <- dteval("id[,",hhid,"]")
+  
   ## initialize other parameter
   size_all <- sizefactor+1
   max_n <- size_all* nd
@@ -105,7 +110,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,sample.prob=FALSE,c
         init_weight <- matrix(init_weight,nrow=nd,ncol=size_all)
         ######################################
         # remove households
-        remove_col <- floor((remove_hh-1)/nd)+1
+        remove_col <- floor(remove_hh/(nd+1))+1
         remove_row <- remove_hh%%nd
         remove_row[remove_row==0] <- nd
         remove_col_e <- unique(remove_col)
@@ -114,7 +119,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,sample.prob=FALSE,c
         dteval("init_weight[data0[",hhid,"%in%data0[c(",remove_row_e,"),",hhid,"],which=TRUE],",remove_col_e,"] <- 0")
         
         # add households
-        add_col <- floor((add_hh-1)/nd)+1
+        add_col <- floor(add_hh/(nd+1))+1
         add_row <- add_hh%%nd
         add_row[add_row==0] <- nd
         add_col_e <- unique(add_col)
