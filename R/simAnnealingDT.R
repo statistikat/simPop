@@ -111,7 +111,8 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,sample.prob=FALSE,c
         remove_col_e <- unique(remove_col)
         remove_row_e <- unlist(lapply(remove_col_e,function(z){paste(remove_row[remove_col==z],collapse=",")}))
         remove_row <- unique(remove_row)
-        dteval("init_weight[data0[,",hhid,"%in%data0[c(",remove_row_e,"),",hhid,"]],",remove_col_e,"] <- 0")
+        dteval("init_weight[data0[",hhid,"%in%data0[c(",remove_row_e,"),",hhid,"],which=TRUE],",remove_col_e,"] <- 0")
+        
         # add households
         add_col <- floor((add_hh-1)/nd)+1
         add_row <- add_hh%%nd
@@ -119,7 +120,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,sample.prob=FALSE,c
         add_col_e <- unique(add_col)
         add_row_e <- unlist(lapply(add_col_e,function(z){paste(add_row[add_col==z],collapse=",")}))
         add_row <- unique(add_row)
-        dteval("init_weight[data0[,",hhid,"%in%data0[c(",add_row_e,"),",hhid,"]],",add_col_e,"] <- 1")
+        dteval("init_weight[data0[",hhid,"%in%data0[c(",add_row_e,"),",hhid,"],which=TRUE],",add_col_e,"] <- 1")
         
         data0[ ,weight_choose_new:=rowSums(init_weight)]
         ######################################
