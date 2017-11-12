@@ -35,3 +35,44 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// updateVecC
+IntegerVector updateVecC(IntegerVector init_weight, IntegerVector add_index, IntegerVector remove_index, IntegerVector hhsize, IntegerVector hhid, int sizefactor);
+RcppExport SEXP _simPop_updateVecC(SEXP init_weightSEXP, SEXP add_indexSEXP, SEXP remove_indexSEXP, SEXP hhsizeSEXP, SEXP hhidSEXP, SEXP sizefactorSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type init_weight(init_weightSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type add_index(add_indexSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type remove_index(remove_indexSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type hhsize(hhsizeSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type hhid(hhidSEXP);
+    Rcpp::traits::input_parameter< int >::type sizefactor(sizefactorSEXP);
+    rcpp_result_gen = Rcpp::wrap(updateVecC(init_weight, add_index, remove_index, hhsize, hhid, sizefactor));
+    return rcpp_result_gen;
+END_RCPP
+}
+// sumVec
+IntegerVector sumVec(IntegerVector init_weight, int sizefactor);
+RcppExport SEXP _simPop_sumVec(SEXP init_weightSEXP, SEXP sizefactorSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type init_weight(init_weightSEXP);
+    Rcpp::traits::input_parameter< int >::type sizefactor(sizefactorSEXP);
+    rcpp_result_gen = Rcpp::wrap(sumVec(init_weight, sizefactor));
+    return rcpp_result_gen;
+END_RCPP
+}
+// select_equal
+List select_equal(IntegerVector x, int val1, int val2);
+RcppExport SEXP _simPop_select_equal(SEXP xSEXP, SEXP val1SEXP, SEXP val2SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< int >::type val1(val1SEXP);
+    Rcpp::traits::input_parameter< int >::type val2(val2SEXP);
+    rcpp_result_gen = Rcpp::wrap(select_equal(x, val1, val2));
+    return rcpp_result_gen;
+END_RCPP
+}

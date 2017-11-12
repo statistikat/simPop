@@ -5,7 +5,7 @@ dteval <- function(...,envir=parent.frame()){
   eval(parse(text=paste0(...)), envir=envir)
 }
 
-simAnnealingDT <- function(data0,totals0,params,sizefactor=2,sample.prob=FALSE,choose.temp=TRUE){
+simAnnealingDT <- function(data0,totals0,params,sizefactor=2,sample.prob=TRUE,choose.temp=FALSE){
   
   ######################################
   ## define variables from param
@@ -22,36 +22,43 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,sample.prob=FALSE,c
   parameter <- params[["parameter"]]
   
   # parameters used für c++ code
-  id <- dteval("data0[order(hhid),.(",hhid,",",hhsize,")]")
-  size <- dteval("as.numeric(as.character(id[,",hhsize,"]))")
-  id <- dteval("id[,",hhid,"]")
+  # set index for original order
+  data0[,sim_ID:=.I]
+  setkeyv(data0,hhid)
+  size <- dteval("as.numeric(as.character(data0[,",hhsize,"]))")
+  id <- dteval("data0[,",hhid,"]")
   
   ## initialize other parameter
   size_all <- sizefactor+1
   max_n <- size_all* nd
   med_hh <- dteval("data0[!duplicated(",hhid,"),median(as.numeric(as.character(",hhsize,")))]")
   init_n <- round(totals0[,sum(N)/med_hh])
-  choose_hh <- matrix(0L,nrow= nd,ncol=size_all)
   redraw <- ceiling(med_hh/5 *init_n)
   cooldown <- 0 
+  totals0[,ID_GRP:=.GRP,by=c(parameter)]
+  data0[,ID_GRP:=.GRP,by=c(parameter)]
+  if(sample.prob==TRUE){
+    init_group <- rep(data0[,ID_GRP],size_all)# used for internal loop
+  }
+  
   # choose starting temperatur as percentage of objective function
   if(choose.temp){
     temp <- max(temp,eps)
-    min_temp <- temp*temp_cooldown^50
+    #min_temp <- temp*temp_cooldown^50
   }
   
   ######################################
   # initialize weights
   init_weight <- sample(c(rep(1L,init_n),rep(0L,max_n-init_n)))
-  init_weight <- matrix(init_weight,nrow=nd,ncol=size_all)
+  choose_hh <- matrix(init_weight,nrow=nd,ncol=size_all)
   
   # adjust choose_hh and select all householdmembers
-  dteval("choose_hh[data0[,",hhid,"%in%data0[init_weight[,",1:size_all,"]>0,",hhid,"]],",1:size_all,"] <- 1L")
+  dteval("choose_hh[data0[,",hhid,"%in%data0[choose_hh[,",1:size_all,"]>0,",hhid,"]],",1:size_all,"] <- 1L")
   data0[,weight_choose:=rowSums(choose_hh)]
   
   ######################################
   # evaluate objective
-  totals_diff <- merge(data0[,sum(weight_choose),by=c(parameter)],totals0,by=parameter)
+  totals_diff <- merge(data0[,sum(weight_choose),by=ID_GRP],totals0,by="ID_GRP")
   totals_diff[,diff:=V1-N]
   
   objective <- totals_diff[,sum(abs(diff))]
@@ -67,92 +74,57 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,sample.prob=FALSE,c
     while( temp > min_temp ) {      
       n <- 1
       while( n<maxiter ) {
-        
-        init_weight <- as.vector(choose_hh)
         if(sample.prob){
           # get weights for resampling
-          prob_sample <- rep(totals_diff[data0[,mget(parameter)],diff,on=c(parameter)],size_all)
-          total_remove <- totals_diff[,diff]
-          total_add <- total_remove*-1
+          totals_diff[,prob_add:=diff*-1]
+          totals_diff[prob_add<=0,prob_add:=exp(sum(prob_add))]
+          totals_diff[,prob_remove:=diff]
+          totals_diff[prob_remove<=0,prob_remove:=exp(sum(prob_remove))]
           
-          # sample households with probabilites derived by differences to marginals
-          # should speed up convergence
-          neg_add <- sum(abs(total_add[total_add<0]))^-1
-          neg_remove <- sum(abs(total_remove[total_remove<0]))^-1
-          total_add[total_add<0] <- neg_add
-          total_remove[total_remove<0] <- neg_remove
+          #sample_add <- sample(totals_diff[,ID_GRP],redraw,prob=totals_diff[,prob_add],replace=TRUE)
+          #sample_remove <- sample(totals_diff[,ID_GRP],redraw,prob=totals_diff[,prob_remove],replace=TRUE)
           
-          prob_remove <- prob_sample[init_weight==1]
-          prob_remove[prob_remove<0] <- neg_remove
-          prob_add <- prob_sample[init_weight==0]*-1
-          prob_add[prob_add<0] <- neg_add
+          #####################################
+          # resample
+          select_01 <- select_equal(x=init_weight,val1=0,val2=1)
+          select_add <- select_01[[1]]+1
+          select_remove <- select_01[[2]]+1
+          prob_add <- totals_diff[init_group[select_add],prob_add]
+          prob_remove <- totals_diff[init_group[select_remove],prob_remove]
           
-          prob_remove <- prob_remove/sum(total_remove)
-          prob_add <- prob_add/sum(total_add)
+          add_hh <- select_add[sample_int_expj(length(select_add),redraw,prob=prob_add)]-1
+          remove_hh <- select_remove[sample_int_expj(length(select_remove),redraw,prob=prob_remove)]-1
           
-          if(all(prob_add==0)){
-            prob_add <- NULL
-          }
-          if(all(prob_remove==0)){
-            prob_remove <- NULL
-          }
         }else{
           prob_remove <- prob_add <- NULL
-        }
-
-        ######################################
-        # resample
-        if(is.null(prob_add)){
-          add_hh <- sample(which(init_weight==0),redraw,prob=prob_add)  
-        }else{
-          indSample <- which(init_weight==0)
-          add_hh <- indSample[sample_int_expj(length(indSample),redraw,prob=prob_add)]
-          rm(indSample)
+          
+          ######################################
+          # resample
+          select_01 <- select_equal(x=init_weight,val1=0,val2=1)
+          
+          add_hh <- sample(select_01[[1]],redraw,prob=prob_add)
+          remove_hh <- sample(select_01[[2]],redraw,prob=prob_remove)
         }
         
-        if(is.null(prob_remove)){
-          remove_hh <- sample(which(init_weight==1),redraw,prob=prob_remove)
-        }else{
-          indSample <- which(init_weight==1)
-          remove_hh <- indSample[sample_int_expj(length(indSample),redraw,prob=prob_remove)]
-          rm(indSample)
-        }
+        ####################################
+        ## create new composition
+        init_weight_new <- copy(init_weight)
+        init_weight_new <-  updateVecC(init_weight_new,add_index=add_hh, remove_index=remove_hh, hhsize=size, hhid=id, sizefactor=size_all)
         
-        
-        init_weight <- matrix(init_weight,nrow=nd,ncol=size_all)
-        ######################################
-        # remove households
-        remove_col <- floor(remove_hh/(nd+1))+1
-        remove_row <- remove_hh%%nd
-        remove_row[remove_row==0] <- nd
-        remove_col_e <- unique(remove_col)
-        remove_row_e <- unlist(lapply(remove_col_e,function(z){paste(remove_row[remove_col==z],collapse=",")}))
-        remove_row <- unique(remove_row)
-        dteval("init_weight[data0[",hhid,"%in%data0[c(",remove_row_e,"),",hhid,"],which=TRUE],",remove_col_e,"] <- 0")
-        
-        # add households
-        add_col <- floor(add_hh/(nd+1))+1
-        add_row <- add_hh%%nd
-        add_row[add_row==0] <- nd
-        add_col_e <- unique(add_col)
-        add_row_e <- unlist(lapply(add_col_e,function(z){paste(add_row[add_col==z],collapse=",")}))
-        add_row <- unique(add_row)
-        dteval("init_weight[data0[",hhid,"%in%data0[c(",add_row_e,"),",hhid,"],which=TRUE],",add_col_e,"] <- 1")
-        
-        data0[ ,weight_choose_new:=rowSums(init_weight)]
+        data0[ ,weight_choose_new:=sumVec(init_weight_new,size_all)]
         ######################################
         # calculate objective
-        totals_diff <- merge(data0[,sum(weight_choose_new),by=c(parameter)],totals0,by=parameter)
-        totals_diff[,diff:=V1-N]
-        # totals_diff[,sum(abs(diff))]
-        objective.new <- totals_diff[,sum(abs(diff))]
+        totals_diff_new <- merge(data0[,sum(weight_choose_new),by=c(parameter)],totals0,by=parameter)
+        totals_diff_new[,diff:=V1-N]
+        objective.new <- totals_diff_new[,sum(abs(diff))]
         
         ######################################
         ## if new sample fullfils marginals -> terminate
         if ( objective.new <= eps ) {
           objective <- objective.new
-          data0[ ,weight_choose:=weight_choose_new]
-          choose_hh <- init_weight
+          data0[,weight_choose:=weight_choose_new]
+          totals_diff <- copy(totals_diff_new)
+          init_weight <- init_weight_new
           break
         }
         
@@ -160,8 +132,9 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,sample.prob=FALSE,c
         ## choose wether to accepts the resample
         if ( objective.new <= objective ) { 
           objective <- objective.new
-          data0[ ,weight_choose:=weight_choose_new]
-          choose_weight <- init_weight
+          data0[,weight_choose:=weight_choose_new]
+          totals_diff <- copy(totals_diff_new)
+          init_weight <- init_weight_new
         }
         
         ######################################
@@ -172,11 +145,12 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,sample.prob=FALSE,c
           
           if ( x == 1 ) { 
             objective <- objective.new
-            data0[ ,weight_choose:=weight_choose_new]
-            choose_hh <- init_weight
+            data0[,weight_choose:=weight_choose_new]
+            totals_diff <- copy(totals_diff_new)
+            init_weight <- init_weight_new
           }
         }    
-        n <- n+1        
+        n <- n+1
       }
       ## decrease temp and decrease factor accordingly
       ## decrease temp by a const fraction (simple method used for testing only)
@@ -190,7 +164,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,sample.prob=FALSE,c
         break
       }  
     }
-    
+    setkeyv(data0,"sim_ID")
     out <- data0[,weight_choose]  
   }  
   return(out)

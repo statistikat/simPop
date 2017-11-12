@@ -9,3 +9,15 @@ updateMatC <- function(M, add_row, add_col, remove_row, remove_col, hhsize, hhid
     .Call('_simPop_updateMatC', PACKAGE = 'simPop', M, add_row, add_col, remove_row, remove_col, hhsize, hhid)
 }
 
+updateVecC <- function(init_weight, add_index, remove_index, hhsize, hhid, sizefactor) {
+    .Call('_simPop_updateVecC', PACKAGE = 'simPop', init_weight, add_index, remove_index, hhsize, hhid, sizefactor)
+}
+
+sumVec <- function(init_weight, sizefactor) {
+    .Call('_simPop_sumVec', PACKAGE = 'simPop', init_weight, sizefactor)
+}
+
+select_equal <- function(x, val1, val2) {
+    .Call('_simPop_select_equal', PACKAGE = 'simPop', x, val1, val2)
+}
+
