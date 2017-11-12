@@ -92,8 +92,12 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,sample.prob=TRUE,ch
           prob_add <- totals_diff[init_group[select_add],prob_add]
           prob_remove <- totals_diff[init_group[select_remove],prob_remove]
           
-          add_hh <- select_add[sample_int_expj(length(select_add),redraw,prob=prob_add)]-1
-          remove_hh <- select_remove[sample_int_expj(length(select_remove),redraw,prob=prob_remove)]-1
+          add_hh <- select_add[sample_int_expj(length(select_add),
+                                               min(c(redraw,length(select_add))),
+                                               prob=prob_add)]-1
+          remove_hh <- select_remove[sample_int_expj(length(select_remove),
+                                                     min(c(redraw,length(select_remove))),
+                                                     prob=prob_remove)]-1
           
         }else{
           prob_remove <- prob_add <- NULL
