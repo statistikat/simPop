@@ -57,6 +57,7 @@ Collate:
     'printFunctions.R'
     'quantileWt.R'
     'sampHH.R'
+    'RcppExports.R'
     'silcTools.R'
     'silcTools2.R'
     'simAnnealingDT.R'
