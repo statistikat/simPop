@@ -79,10 +79,10 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,sample.prob=TRUE,ch
       while( n<maxiter ) {
         
         # scale redraw for add and remove to keep synthetic totals stable
-        synth_tot <- totals_diff[,sum(V1)/sum(N)]
+        synth_tot <- totals_diff[,c(sum(V1)-sum(N))/sum(N)]*.5
         
-        redraw_add <- round(redraw/synth_tot)
-        redraw_remove <- round(redraw*synth_tot)
+        redraw_add <- round(redraw/(1+synth_tot))
+        redraw_remove <- round(redraw*(1+synth_tot))
         
         if(sample.prob){
           # get weights for resampling
@@ -102,13 +102,17 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,sample.prob=TRUE,ch
           prob_add <- totals_diff[init_group[select_add],prob_add]
           prob_remove <- totals_diff[init_group[select_remove],prob_remove]
           
+          select_add <- select_add[prob_add>0]
+          select_remove <- select_remove[prob_remove>0]
+          
           add_hh <- select_add[sample_int_crank(length(select_add),
                                                min(c(redraw_add,length(select_add))),
-                                               prob=prob_add)]-1
+                                               prob=prob_add[prob_add>0])]-1
           remove_hh <- select_remove[sample_int_crank(length(select_remove),
                                                      min(c(redraw_remove,length(select_remove))),
-                                                     prob=prob_remove)]-1
-          
+                                                     prob=prob_remove[prob_remove>0])]-1
+          #add_hh <- sample(select_add,redraw_add)-1
+          #remove_hh <- sample(select_remove,redraw_remove)-1
         }else{
           prob_remove <- prob_add <- NULL
           
@@ -174,7 +178,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,sample.prob=TRUE,ch
         redraw <- 1
       }
       cooldown <- cooldown + 1
-      if ( objective.new <= eps | cooldown == 500 ) {
+      if ( objective.new <= eps | cooldown == 500 | redraw<5) {
         break
       }  
     }

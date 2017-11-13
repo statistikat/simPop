@@ -20,7 +20,7 @@ IntegerVector updateVecC(IntegerVector init_weight,IntegerVector add_index, Inte
 
   // transform
   IntegerVector add_id(n_add);
-  IntegerVector remove_id(n_add);
+  IntegerVector remove_id(n_remove);
   
   // transform index_add values and index_remove values
   // define row for removal and adding
