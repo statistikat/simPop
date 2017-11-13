@@ -234,7 +234,7 @@ calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
           simAnnealingDT(
             data0=data[split.number[x]],
             totals0=totals[which(totals[,split,with=FALSE]==as.character(split.number[x][[split]])),],
-            params=params,sizefactor=sizefactor,choose.temp=FALSE)
+            params=params,sizefactor=sizefactor,choose.temp=TRUE)
         }
       }else{
         final_weights <- foreach(x=1:nrow(split.number), .options.snow=list(preschedule=TRUE)) %dopar% {
@@ -252,7 +252,7 @@ calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
           simAnnealingDT(
             data0=data[split.number[x]],
             totals0=totals[which(totals[,split,with=FALSE]==as.character(split.number[x][[split]])),],
-            params=params,sizefactor=sizefactor,choose.temp=FALSE)
+            params=params,sizefactor=sizefactor,choose.temp=TRUE)
         },mc.cores=nr_cores)
       }else{
         final_weights <- mclapply(1:nrow(split.number), function(x) {
@@ -267,10 +267,12 @@ calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
     if(memory){
       # use memory efficient but slower method
       final_weights <- lapply(1:nrow(split.number), function(x) {
-        simAnnealingDT(
+        out <- simAnnealingDT(
           data0=data[split.number[x]],
           totals0=totals[which(totals[,split,with=FALSE]==as.character(split.number[x][[split]])),],
-          params=params,sizefactor=sizefactor,choose.temp=FALSE)
+          params=params,sizefactor=sizefactor,choose.temp=TRUE)
+        save(out,file=paste0("~/Worldbank/nepalpop/",paste0(split.number[x,district]),".RData"))
+        return(out)
       })
     }else{
       # use c++ implementation - can be quite memory intensive
