@@ -43,7 +43,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,sample.prob=TRUE,ch
   
   # choose starting temperatur as percentage of objective function
   if(choose.temp){
-    temp <- max(temp,eps)
+    temp <- max(temp,eps*.5)
     #min_temp <- temp*temp_cooldown^50
   }
   
@@ -63,6 +63,9 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,sample.prob=TRUE,ch
   
   objective <- totals_diff[,sum(abs(diff))]
   
+  # define redraw with initial objective value
+  redraw <- ceiling(objective*.1)
+  
   ######################################
   # apply simulated annealing
   if ( objective <= eps ) { 
@@ -74,6 +77,13 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,sample.prob=TRUE,ch
     while( temp > min_temp ) {      
       n <- 1
       while( n<maxiter ) {
+        
+        # scale redraw for add and remove to keep synthetic totals stable
+        synth_tot <- totals_diff[,sum(V1)/sum(N)]
+        
+        redraw_add <- round(redraw/synth_tot)
+        redraw_remove <- round(redraw*synth_tot)
+        
         if(sample.prob){
           # get weights for resampling
           totals_diff[,prob_add:=diff*-1]
@@ -93,10 +103,10 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,sample.prob=TRUE,ch
           prob_remove <- totals_diff[init_group[select_remove],prob_remove]
           
           add_hh <- select_add[sample_int_crank(length(select_add),
-                                               min(c(redraw,length(select_add))),
+                                               min(c(redraw_add,length(select_add))),
                                                prob=prob_add)]-1
           remove_hh <- select_remove[sample_int_crank(length(select_remove),
-                                                     min(c(redraw,length(select_remove))),
+                                                     min(c(redraw_remove,length(select_remove))),
                                                      prob=prob_remove)]-1
           
         }else{
@@ -106,8 +116,8 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,sample.prob=TRUE,ch
           # resample
           select_01 <- select_equal(x=init_weight,val1=0,val2=1)
           
-          add_hh <- sample(select_01[[1]],redraw,prob=prob_add)
-          remove_hh <- sample(select_01[[2]],redraw,prob=prob_remove)
+          add_hh <- sample(select_01[[1]],redraw_add,prob=prob_add)
+          remove_hh <- sample(select_01[[2]],redraw_remove,prob=prob_remove)
         }
         
         ####################################
