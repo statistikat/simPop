@@ -1,3 +1,4 @@
+library(simPop)
 # set.seed(1234)
 # test <- rep(FALSE,500)
 # 
