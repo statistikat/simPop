@@ -267,10 +267,13 @@ calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
     if(memory){
       # use memory efficient but slower method
       final_weights <- lapply(1:nrow(split.number), function(x) {
-        simAnnealingDT(
+        out <- simAnnealingDT(
           data0=data[split.number[x]],
           totals0=totals[which(totals[,split,with=FALSE]==as.character(split.number[x][[split]])),],
-          params=params,sizefactor=sizefactor,choose.temp=FALSE)
+          params=params,sizefactor=sizefactor,choose.temp=TRUE,
+          split.level=paste0(unlist(split.number[x])))
+        save(out,file=paste0(split.number[x,district],".RData"))
+        return(out)
       })
     }else{
       # use c++ implementation - can be quite memory intensive

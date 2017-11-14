@@ -5,7 +5,8 @@ dteval <- function(...,envir=parent.frame()){
   eval(parse(text=paste0(...)), envir=envir)
 }
 
-simAnnealingDT <- function(data0,totals0,params,sizefactor=2,sample.prob=TRUE,choose.temp=FALSE){
+simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
+                           sample.prob=TRUE,choose.temp=FALSE,split.level=NULL){
   
   ######################################
   ## define variables from param
@@ -43,7 +44,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,sample.prob=TRUE,ch
   
   # choose starting temperatur as percentage of objective function
   if(choose.temp){
-    temp <- max(temp,eps*.5)
+    temp <- max(temp,eps*.1)
     #min_temp <- temp*temp_cooldown^50
   }
   
@@ -69,7 +70,8 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,sample.prob=TRUE,ch
   ######################################
   # apply simulated annealing
   if ( objective <= eps ) { 
-    out <- rowSums(choose_hh) 
+    out <- rowSums(choose_hh)
+    cat(paste0("Convergence successfull for ",split.level),"\n")
   } else {
     
     ## if objective not fullfilled continue with simannealing
@@ -178,9 +180,14 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,sample.prob=TRUE,ch
         redraw <- 1
       }
       cooldown <- cooldown + 1
-      if ( objective.new <= eps | cooldown == 500 | redraw<5) {
-        break
+      if ( objective.new <= eps | cooldown == 500 | redraw<2) {
+          break
       }  
+    }
+    if(objective>eps){
+      cat(paste0("Convergence NOT successfull for ",split.level),"\n")
+    }else{
+      cat(paste0("Convergence successfull for ",split.level),"\n")
     }
     setkeyv(data0,"sim_ID")
     out <- data0[,weight_choose]  
