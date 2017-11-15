@@ -44,7 +44,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   
   # choose starting temperatur as percentage of objective function
   if(choose.temp){
-    temp <- max(temp,eps*.1)
+    temp <- max(temp,eps*.01)
     #min_temp <- temp*temp_cooldown^50
   }
   
@@ -65,8 +65,9 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   objective <- totals_diff[,sum(abs(diff))]
   
   # define redraw with initial objective value
-  redraw <- ceiling(objective*.1)
+  redraw <- ceiling(objective/med_hh*2/3)
   
+  cat(paste0("Starting simulated Annealing for ",split.level,"\n"))
   ######################################
   # apply simulated annealing
   if ( objective <= eps ) { 
@@ -180,6 +181,9 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
         redraw <- 1
       }
       cooldown <- cooldown + 1
+      if(cooldown%%10==0){
+        cat(paste0("Cooldown number ",cooldown,"\n"))
+      }
       if ( objective.new <= eps | cooldown == 500 | redraw<2) {
           break
       }  
