@@ -68,6 +68,12 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   # define redraw with initial objective value
   redraw <- ceiling(objective/med_hh*2/3)
   
+  # observe updating of objective function
+  # if solution does not improve -> terminate
+  observe.times <- 50
+  observe.count <- 1
+  observe.obj <- rep(objective,observe.times)
+  
   cat(paste0("Starting simulated Annealing for ",split.level,"\n"))
   ######################################
   # apply simulated annealing
@@ -157,6 +163,19 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
           data0[,weight_choose:=weight_choose_new]
           totals_diff <- copy(totals_diff_new)
           init_weight <- init_weight_new
+          
+          # update observe variables
+          observe.count <- observe.count +1
+          if(observe.count>observe.times){
+            if(sd(observe.obj)/mean(observe.obj)<.05){
+              break # if objective doesnt move anymore break up loop
+            }else{
+              observe.count <- 1
+              observe.obj[observe.count] <- objective
+            }
+          }else{
+            observe.obj[observe.count] <- objective
+          }
         }
         
         ######################################
@@ -170,6 +189,19 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
             data0[,weight_choose:=weight_choose_new]
             totals_diff <- copy(totals_diff_new)
             init_weight <- init_weight_new
+            
+            # update observe variables
+            observe.count <- observe.count +1
+            if(observe.count>observe.times){
+              if(sd(observe.obj)/mean(observe.obj)<.05){
+                break # if objective doesnt move anymore break up loop
+              }else{
+                observe.count <- 1
+                observe.obj[observe.count] <- objective
+              }
+            }else{
+              observe.obj[observe.count] <- objective
+            }
           }
         }    
         n <- n+1

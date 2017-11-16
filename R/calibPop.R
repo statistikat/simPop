@@ -234,7 +234,7 @@ calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
           simAnnealingDT(
             data0=data[split.number[x]],
             totals0=totals[which(totals[,split,with=FALSE]==as.character(split.number[x][[split]])),],
-            params=params,sizefactor=sizefactor,choose.temp=FALSE)
+            params=params,sizefactor=sizefactor,choose.temp=TRUE)
         }
       }else{
         final_weights <- foreach(x=1:nrow(split.number), .options.snow=list(preschedule=TRUE)) %dopar% {
@@ -252,7 +252,7 @@ calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
           simAnnealingDT(
             data0=data[split.number[x]],
             totals0=totals[which(totals[,split,with=FALSE]==as.character(split.number[x][[split]])),],
-            params=params,sizefactor=sizefactor,choose.temp=FALSE)
+            params=params,sizefactor=sizefactor,choose.temp=TRUE)
         },mc.cores=nr_cores)
       }else{
         final_weights <- mclapply(1:nrow(split.number), function(x) {
@@ -275,6 +275,8 @@ calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
         save(out,file=paste0(split.number[x,district],".RData"))
         return(out)
       })
+      names(final_weights) <- split.number[,district]
+      save(final_weights,file="Synth01vec.RData")
     }else{
       # use c++ implementation - can be quite memory intensive
       final_weights <- lapply(1:nrow(split.number), function(x) {
