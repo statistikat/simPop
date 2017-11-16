@@ -50,7 +50,8 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   
   ######################################
   # initialize weights
-  init_weight <- sample(c(rep(1L,init_n),rep(0L,max_n-init_n)))
+  init_weight <- c(rep(1L,nd),rep(0L,max_n-nd))
+  # init_weight <- sample(c(rep(1L,init_n),rep(0L,max_n-init_n)))
   choose_hh <- matrix(init_weight,nrow=nd,ncol=size_all)
   
   # adjust choose_hh and select all householdmembers
