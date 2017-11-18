@@ -37,7 +37,8 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   redraw <- ceiling(med_hh/5 *init_n)
   cooldown <- 0 
   totals0[,ID_GRP:=.GRP,by=c(parameter)]
-  data0[,ID_GRP:=.GRP,by=c(parameter)]
+  data0 <- merge(data0,unique(subset(totals0,select=c("ID_GRP",parameter))),by=c(parameter),all.x=TRUE)
+  
   if(sample.prob==TRUE){
     init_group <- rep(data0[,ID_GRP],size_all)# used for internal loop
   }
@@ -142,7 +143,8 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
         data0[ ,weight_choose_new:=sumVec(init_weight_new,size_all)]
         ######################################
         # calculate objective
-        totals_diff_new <- merge(data0[,sum(weight_choose_new),by=c(parameter)],totals0,by=parameter)
+        totals_diff_new <- merge(totals0,data0[,sum(weight_choose_new),by="ID_GRP"],by="ID_GRP",all.x=TRUE)
+        totals_diff_new[is.na(V1),V1:=0]
         totals_diff_new[,diff:=V1-N]
         objective.new <- totals_diff_new[,sum(abs(diff))]
         
