@@ -61,7 +61,8 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   
   ######################################
   # evaluate objective
-  totals_diff <- merge(data0[,sum(weight_choose),by=ID_GRP],totals0,by="ID_GRP")
+  totals_diff <- merge(totals0,data0[,sum(weight_choose),by=ID_GRP],by="ID_GRP")
+  totals_diff[is.na(V1),V1:=NA]
   totals_diff[,diff:=V1-N]
   
   objective <- totals_diff[,sum(abs(diff))]
@@ -110,19 +111,29 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
           select_01 <- select_equal(x=init_weight,val1=0,val2=1)
           select_add <- select_01[[1]]+1
           select_remove <- select_01[[2]]+1
-          prob_add <- totals_diff[init_group[select_add],prob_add]
-          prob_remove <- totals_diff[init_group[select_remove],prob_remove]
+          prob_add <- totals_diff[.(init_group[select_add]),prob_add]
+          prob_remove <- totals_diff[.(init_group[select_remove]),prob_remove]
           
           select_add <- select_add[prob_add>0]
           select_remove <- select_remove[prob_remove>0]
-          
-          add_hh <- select_add[sample_int_crank(length(select_add),
-                                               min(c(redraw_add,length(select_add))),
-                                               prob=prob_add[prob_add>0])]-1
-          remove_hh <- select_remove[sample_int_crank(length(select_remove),
-                                                     min(c(redraw_remove,length(select_remove))),
-                                                     prob=prob_remove[prob_remove>0])]-1
-          #add_hh <- sample(select_add,redraw_add)-1
+          n_add <- length(select_add)
+          n_remove <- length(select_remove)
+          if(n_add>0){
+            add_hh <- select_add[sample_int_crank(n_add,
+                                                  min(c(redraw_add,n_add)),
+                                                  prob=prob_add[prob_add>0])]-1
+          }else{
+            add_hh <- sample(select_01[[1]],redraw_add)
+    
+          }
+          if(n_remove>0){
+            remove_hh <- select_remove[sample_int_crank(n_remove,
+                                                        min(c(redraw_remove,n_remove)),
+                                                        prob=prob_remove[prob_remove>0])]-1
+          }else{
+            remove_hh <- sample(select_01[[2]],redraw_remove)
+          }
+         #add_hh <- sample(select_add,redraw_add)-1
           #remove_hh <- sample(select_remove,redraw_remove)-1
         }else{
           prob_remove <- prob_add <- NULL
