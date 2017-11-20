@@ -1128,10 +1128,10 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     # auxiliary model for all strata (used in case of empty combinations)
     weights <- dataSample[[weight]]
     if(useLm){
-      mod <- lm(formula, weights=weights, data=dataSample)
+      mod <- lm(formula, weights=weights, data=dataSample,x=FALSE,y=FALSE,model=FALSE)
       coef <- coef(mod)
     }else if(usePoisson){
-      mod <- glm(formula, weights=weights, data=dataSample,family=poisson())
+      mod <- glm(formula, weights=weights, data=dataSample,family=poisson(),model=FALSE,x=FALSE,y=FALSE)
       coef <- coef(mod)
     }
 
@@ -1140,9 +1140,9 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     params <- list()
     params$coef <- coef
     if(useLm){
-      params$command <- paste("lm(", fstring,", weights=", weight, ", data=dataSample)", sep="")
+      params$command <- paste("lm(", fstring,", weights=", weight, ", data=dataSample,x=FALSE,y=FALSE,model=FALSE)", sep="")
     }else if(usePoisson){
-      params$command <- paste("glm(", fstring,", weights=", weight, ", data=dataSample,family=poisson())", sep="")
+      params$command <- paste("glm(", fstring,", weights=", weight, ", data=dataSample,family=poisson(),model=FALSE,x=FALSE,y=FALSE)", sep="")
     }
     #params$name <- fname
     params$name <- additional
