@@ -254,6 +254,8 @@ calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
             totals0=totals[which(totals[,split,with=FALSE]==as.character(split.number[x][[split]])),],
             params=params,sizefactor=sizefactor,choose.temp=TRUE)
         },mc.cores=nr_cores)
+        names(final_weights) <- split.number[,district]
+        save(final_weights,file="Synth01vec.RData")
       }else{
         final_weights <- mclapply(1:nrow(split.number), function(x) {
           calcFinalWeights(
@@ -272,7 +274,7 @@ calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
           totals0=totals[which(totals[,split,with=FALSE]==as.character(split.number[x][[split]])),],
           params=params,sizefactor=sizefactor,choose.temp=TRUE,
           split.level=paste0(unlist(split.number[x])))
-        save(out,file=paste0(split.number[x,district],".RData"))
+        #save(out,file=paste0(split.number[x,district],".RData"))
         return(out)
       })
       names(final_weights) <- split.number[,district]
