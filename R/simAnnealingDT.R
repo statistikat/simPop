@@ -92,9 +92,15 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
         
         # scale redraw for add and remove to keep synthetic totals stable
         synth_tot <- totals_diff[,c(sum(V1)-sum(N))/sum(N)]*.5
+        redraw_gap <- redraw*synth_tot
         
-        redraw_add <- round(redraw/(1+synth_tot))
-        redraw_remove <- round(redraw*(1+synth_tot))
+        if(abs(redraw_gap)<redraw){
+          redraw_add <- ceiling(redraw-redraw_gap)
+          redraw_remove <- ceiling(redraw+redraw_gap)
+        }else{
+          redraw_add <- redraw_remove <- redraw
+        }
+
         
         if(sample.prob){
           # get weights for resampling
