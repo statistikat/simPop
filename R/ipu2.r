@@ -131,19 +131,24 @@ calibH <- function(i,conH, epsH, mepsH, dat, error, valueH, hColNames, bound, ve
     #mepsHcur <- mepsH
   }
   
+  setnames(dat,valueH[i],"value")
+  combined_factors <- dat[[paste0("combined_factors_h_", i)]]
+  
   if(isTRUE(names(conH)[i]!="")){
     ## numerical variable to be calibrated
     ## use name of conH list element to define numerical variable
     setnames(dat,names(conH)[i],"tmpVarForMultiplication")
-    dat[,wValue:=sum(calibWeight*wvst*tmpVarForMultiplication),by=eval(hColNames[[i]])]
+    
+    dat[, f := ipu_step_f(dat$calibWeight*dat$wvst*dat$tmpVarForMultiplication, 
+                          combined_factors, conH[[i]])]
+    dat[, wValue := f*value]
+    
     setnames(dat,"tmpVarForMultiplication",names(conH)[i])
   }else{
     # categorical variable to be calibrated
-    dat[,wValue:=sum(calibWeight*wvst),by=eval(hColNames[[i]])]
+    dat[, f := ipu_step_f(dat$calibWeight*dat$wvst, combined_factors, conH[[i]])]
+    dat[, wValue := f*value]
   }
-  
-  setnames(dat,valueH[i],"value")
-  dat[,f:= value/wValue,by=eval(hColNames[[i]])]
   
   if(is.array(epsHcur)){
     dat <- merge(dat,mepsHcur,by=hColNames[[i]],all.x=TRUE,all.y=FALSE)
@@ -396,6 +401,10 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
     }
   }
   for(i in seq_along(conH)){
+    colnames <- hColNames[[i]]
+    dat[, (colnames) := lapply(.SD, as.factor), .SDcols = colnames]
+    dat[, paste0("combined_factors_h_", i) := combine_factors(dat, hColNames[[i]])]
+    
     if(!(dim(conH[[i]])==1 && identical(colnames(mconH[[i]]),c("Var1", "value")))){
       cn <- colnames(mconH[[i]])[-ncol(mconH[[i]])]
       for(j in seq_along(cn)){
