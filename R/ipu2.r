@@ -77,9 +77,9 @@ calibP <- function(i,conP, epsP, mepsP, dat, error, valueP, pColNames, bound, ve
     }
   }else{
     # categorical variable to be calibrated
-    dat[,wValue:=sum(calibWeight),by=eval(pColNames[[i]])]
     setnames(dat,valueP[i],"value")
-    dat[,f:= value/wValue,by=eval(pColNames[[i]])]
+    combined_factors <- dat[[paste0("combined_factors_", i)]]
+    dat[, f := ipu_step_f(dat$calibWeight, combined_factors, conP[[i]])]
     
     # if(meanHH){
     #   # Apply person-level adjustments in a multilicative way per http://www.scag.ca.gov/Documents/PopulationSynthesizerPaper_TRB.pdf
@@ -319,6 +319,7 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
   
   OriginalSortingVariable <- V1 <- baseWeight <- calibWeight <- epsvalue <- f <- NULL
   temporary_hid <- temporary_hvar <- tmpVarForMultiplication <- value <- wValue <- wvst<- NULL
+  dat_original <- dat
   dat <- copy(dat)
   nrowOriginal <- nrow(dat)
   ## originalsorting is fucked up without this
@@ -362,8 +363,15 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
   mconP <- lapply(conP,melt,as.is=TRUE)##convert tables to long form
   mconH <- lapply(conH,melt,as.is=TRUE) 
   
+  ## Names of the calibration variables for Person and household dimension
+  pColNames <- lapply(conP,function(x)names(dimnames(x)))
+  hColNames <- lapply(conH,function(x)names(dimnames(x)))
   
   for(i in seq_along(conP)){
+    colnames <- pColNames[[i]]
+    dat[, (colnames) := lapply(.SD, as.factor), .SDcols = colnames]
+    dat[, paste0("combined_factors_", i) := combine_factors(dat, pColNames[[i]])]
+    
     # Harmonize the class of columns coming from the constraints
     # the result from melt is taken as character and then the class is set
     # melt does not make any sense for one dimensional numerical constraints however
@@ -423,9 +431,7 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
     dat[,calibWeight:=dat[,w,with=FALSE]]
     setnames(dat,w,"baseWeight")
   }
-  ## Names of the calibration variables for Person and household dimension
-  pColNames <- lapply(conP,function(x)names(dimnames(x)))
-  hColNames <- lapply(conH,function(x)names(dimnames(x)))
+  
   ## Check for non-unqiue values inside of a household for variabels used in Household constraints
   for(hh in hColNames){
     setnames(dat,hid,"temporary_hid")
@@ -567,9 +573,9 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
   
   ## Return missings in calibWeight variable if no convergence was reached
   if(maxIter<calIter&returnNA){
-    invisible(dat[,calibWeight:=NA])  
+    invisible(dat_original)  
   }else{
-    invisible(dat)  
+    invisible(copy(dat_original)[,calibWeight := dat$calibWeight])  
   }  
 }
 #' @rdname ipu2

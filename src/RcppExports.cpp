@@ -6,6 +6,19 @@
 
 using namespace Rcpp;
 
+// combine_factors
+IntegerVector combine_factors(DataFrame& dat, CharacterVector factor_columns, bool asfactor);
+RcppExport SEXP _simPop_combine_factors(SEXP datSEXP, SEXP factor_columnsSEXP, SEXP asfactorSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< DataFrame& >::type dat(datSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type factor_columns(factor_columnsSEXP);
+    Rcpp::traits::input_parameter< bool >::type asfactor(asfactorSEXP);
+    rcpp_result_gen = Rcpp::wrap(combine_factors(dat, factor_columns, asfactor));
+    return rcpp_result_gen;
+END_RCPP
+}
 // geometric_mean_reference
 void geometric_mean_reference(NumericVector w, const IntegerVector classes);
 RcppExport SEXP _simPop_geometric_mean_reference(SEXP wSEXP, SEXP classesSEXP) {
@@ -26,6 +39,44 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const NumericVector >::type w(wSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type classes(classesSEXP);
     rcpp_result_gen = Rcpp::wrap(geometric_mean(w, classes));
+    return rcpp_result_gen;
+END_RCPP
+}
+// ipu_step_ref
+void ipu_step_ref(NumericVector w, IntegerVector classes, NumericVector targets);
+RcppExport SEXP _simPop_ipu_step_ref(SEXP wSEXP, SEXP classesSEXP, SEXP targetsSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type w(wSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type classes(classesSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type targets(targetsSEXP);
+    ipu_step_ref(w, classes, targets);
+    return R_NilValue;
+END_RCPP
+}
+// ipu_step
+NumericVector ipu_step(NumericVector w, IntegerVector classes, NumericVector targets);
+RcppExport SEXP _simPop_ipu_step(SEXP wSEXP, SEXP classesSEXP, SEXP targetsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type w(wSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type classes(classesSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type targets(targetsSEXP);
+    rcpp_result_gen = Rcpp::wrap(ipu_step(w, classes, targets));
+    return rcpp_result_gen;
+END_RCPP
+}
+// ipu_step_f
+NumericVector ipu_step_f(NumericVector w, IntegerVector classes, NumericVector targets);
+RcppExport SEXP _simPop_ipu_step_f(SEXP wSEXP, SEXP classesSEXP, SEXP targetsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type w(wSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type classes(classesSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type targets(targetsSEXP);
+    rcpp_result_gen = Rcpp::wrap(ipu_step_f(w, classes, targets));
     return rcpp_result_gen;
 END_RCPP
 }
