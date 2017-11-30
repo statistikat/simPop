@@ -3,7 +3,7 @@
 # Author: alex
 ###############################################################################
 library(simPop)
-
+test_that("simInit Spatial Test",{
 data(eusilcS)
 data(eusilcP)
 
@@ -48,9 +48,8 @@ simPopObj <- simStructure(data=inp, method="direct", basicHHvars=c("age", "gende
   simPopObj1 <- simInitSpatial(simPopObj, additional="district", region="db040", tspatialHH=tabHH,
       tspatialP=NULL,nr_cpus = 1)
   test1 <- merge(tabHH,simPopObj1@pop@data[!duplicated(db030),.N,by=district],by="district")
-  if(test1[,max(abs(Freq-N)/Freq)]>0.01){
-    stop("Test should result in perfect distribution of the households")
-  }
+  expect_false(test1[,max(abs(Freq-N)/Freq)]>0.01,info=
+    "Test should result in perfect distribution of the households")
   
   simPopObj <- simStructure(data=inp, method="direct", basicHHvars=c("age", "gender"))
 # use only P counts
@@ -60,9 +59,7 @@ simPopObj <- simStructure(data=inp, method="direct", basicHHvars=c("age", "gende
   test2[abs(Freq-N)/Freq>0.05,.N]
   test2[,summary(abs(Freq-N)/Freq)]
   
-  if(!test2[abs(Freq-N)/Freq>0.05,.N]<10){
-    stop("Test should result in good distribution of the persons")
-  }
+  expect_false(!test2[abs(Freq-N)/Freq>0.05,.N]<10,info="Test should result in good distribution of the persons")
   
   simPopObj <- simStructure(data=inp, method="direct", basicHHvars=c("age", "gender"))
   simPopObj <- simCategorical(simPopObj,additional = "citizenship",method="ranger",nr_cpus=1)
@@ -73,8 +70,8 @@ test3 <- merge(tabHH[,.(db040,district,FreqH=Freq)],
     merge(tabP,simPopObj3@pop@data[,.(np=.N,nh=sum(!duplicated(db030))),by=district],by="district"),by="district")
 
 test3[abs(Freq-np)/Freq>0.05,.N]
-if(!test3[abs(Freq-np)/Freq>0.05,.N]<10){
-  stop("Test should result in good distribution of the persons")
+expect_false(!test3[abs(Freq-np)/Freq>0.05,.N]<10,
+  info="Test should result in good distribution of the persons")
 }
 
 margins <- eusilcP[,.(freq=.N),by=.(district,gender,citizenship)]
@@ -83,3 +80,4 @@ simPopObj3 <- addKnownMargins(simPopObj3,margins)
 #simPop_adj <- calibPop(simPopObj3, split="district", temp=10, eps.factor=0.1)
 #marginsSynth2 <- simPop_adj@pop@data[,.(freqSynth=.N),by=.(district,gender,citizenship)]
 #out <- merge(merge(margins,marginsSynth,by=c("district","gender","citizenship")),marginsSynth2,by=c("district","gender","citizenship"))
+})

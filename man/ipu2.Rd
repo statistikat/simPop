@@ -10,7 +10,7 @@
 \usage{
 ipu2(dat, hid = NULL, conP = NULL, conH = NULL, epsP = 1e-06,
   epsH = 0.01, verbose = FALSE, w = NULL, bound = 4, maxIter = 200,
-  meanHH = TRUE, returnNA = TRUE, looseH = FALSE,
+  meanHH = TRUE, allPthenH = TRUE, returnNA = TRUE, looseH = FALSE,
   numericalWeighting = computeLinear)
 
 computeLinear(curValue, Value, numericVar, weightVec, boundLinear = 10)
@@ -68,6 +68,10 @@ that should be performed.}
 
 \item{meanHH}{if TRUE, every person in a household is assigned the mean of
 the person weights corresponding to the household.}
+
+\item{allPthenH}{if TRUE, all the person level calibration steps are performed before the houshold level calibration steps (and \code{meanHH}, if specified). 
+If FALSE, the houshold level calibration steps (and \code{meanHH}, if specified) are performed after everey person level calibration step.
+This can lead to better convergence properties in certain cases but also means that the total number of calibration steps is increased.}
 
 \item{returnNA}{if TRUE, the calibrated weight will be set to NA in case of no convergence.}
 

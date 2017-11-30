@@ -1,5 +1,5 @@
 library(simPop)
-
+test_that("All examples dontruns run",{
 data(eusilcS,package="simPop")
 data(eusilcP,package="simPop")
 ## approx. 20 seconds computation time
@@ -8,10 +8,10 @@ inp <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090"))
 inp <- simCategorical(inp, additional=c("pl030", "pb220a"), method="multinom",nr_cpus=1)
 
 margins <- as.data.frame(
-  xtabs(rep(1, nrow(eusilcP)) ~ eusilcP$region + eusilcP$gender + eusilcP$citizenship))
-colnames(margins) <- c("db040", "rb090", "pb220a", "freq")
-inp <- addKnownMargins(inp, margins)
-str(inp)
+    xtabs(rep(1, nrow(eusilcP)) ~ eusilcP$region + eusilcP$gender + eusilcP$citizenship))
+  colnames(margins) <- c("db040", "rb090", "pb220a", "freq")
+  inp <- addKnownMargins(inp, margins)
+  str(inp)
 
 
 data(eusilcS) # load sample data
@@ -118,3 +118,4 @@ class(eusilcM)
 spBwplot(eusilcM, x="netIncome", cond=NULL)
 spBwplot(eusilcM, x="netIncome", cond="rb090", layout=c(1,2))
 
+})

@@ -42,14 +42,154 @@ meltepsfun <- function(x){
   }
   return(x)
 }
-# From package robCompositions
-gm_mean <- function(x){
-  if (!is.numeric(x)) 
-    stop("x has to be a vector of class numeric")
-  if (any(na.omit(x == 0))) 
-    0
-  else exp(mean(log(unclass(x)[is.finite(x) & x > 0])))
+calibP <- function(i,conP, epsP, mepsP, dat, error, valueP, pColNames, bound, verbose, calIter, numericalWeighting){  
+  OriginalSortingVariable <- V1 <- baseWeight <- calibWeight <- epsvalue <- f <- NULL
+  temporary_hid <- temporary_hvar <- tmpVarForMultiplication <- value <- wValue <- wvst<- NULL
+  if(is.list(epsP)){
+    epsPcur <- epsP[[i]]
+    mepsPcur <- mepsP[[i]]
+  }else{
+    epsPcur <- epsP
+    # mepsPcur <- mepsP
+  }
+  
+  if(isTRUE(names(conP)[i]!="")){
+    ## numerical variable to be calibrated
+    ## use name of conP list element to define numerical variable
+    setnames(dat,names(conP)[i],"tmpVarForMultiplication")
+    dat[,wValue:=sum(calibWeight*tmpVarForMultiplication),by=eval(pColNames[[i]])]
+    setnames(dat,valueP[i],"value")
+    # try to divide the weight between units with larger/smaller value in the numerical variable linear
+    dat[,f:=numericalWeighting(head(wValue,1),head(value,1),tmpVarForMultiplication,calibWeight),by=eval(pColNames[[i]])]
+    
+    # if(meanHH){
+    #   # Apply person-level adjustments in a multilicative way per http://www.scag.ca.gov/Documents/PopulationSynthesizerPaper_TRB.pdf
+    #   # dat[duplicated(subset(dat, select = c(hid, eval(pColNames[[i]])))),f:= 1]
+    #   # dat[,f:=prod(f),by=eval(hid)] 
+    #   dat[,f:=gm_mean(f),by=eval(hid)] 
+    # }
+    
+    setnames(dat,"tmpVarForMultiplication",names(conP)[i])
+    if(is.array(epsPcur)){## for numeric variables not the factor f is used but the abs relative deviation is computed per class
+      curEps <- abs(dat[!is.na(f),1/(value/wValue)-1]) ## curEps is computed for all observations to compare it with the right epsValue
+    }else{
+      curEps <- dat[!is.na(f),max(abs(1/(value/wValue)-1))]  ## only the max curEps is needed because it is the same for all classed of the current variable
+    }
+  }else{
+    # categorical variable to be calibrated
+    dat[,wValue:=sum(calibWeight),by=eval(pColNames[[i]])]
+    setnames(dat,valueP[i],"value")
+    dat[,f:= value/wValue,by=eval(pColNames[[i]])]
+    
+    # if(meanHH){
+    #   # Apply person-level adjustments in a multilicative way per http://www.scag.ca.gov/Documents/PopulationSynthesizerPaper_TRB.pdf
+    #   # dat[duplicated(subset(dat, select = c(hid, eval(pColNames[[i]])))),f:= 1]
+    #   # dat[,f:=prod(f),by=eval(hid)] 
+    #   dat[,f:=gm_mean(f),by=eval(hid)] 
+    # }
+    
+    if(is.array(epsPcur)){
+      curEps <- abs(dat[!is.na(f),1/f-1]) ## curEps is computed for all observations to compare it with the right epsValue
+    }else{
+      curEps <- dat[!is.na(f),max(abs(1/f-1))]  ## only the max curEps is needed because it is the same for all classed of the current variable
+    }
+  }
+  if(is.array(epsPcur)){
+    dat <- merge(dat,mepsPcur,by=pColNames[[i]],all.x=TRUE,all.y=FALSE)
+    epsPcur <-dat[!is.na(f),epsvalue]
+    dat[,epsvalue:=NULL]
+  }
+  
+  if(any(curEps>epsPcur)){## sicherheitshalber abs(epsPcur)? Aber es wird schon niemand negative eps Werte uebergeben??
+    
+    if(!is.null(bound)){
+      dat[!is.na(f),calibWeight:=boundsFak(calibWeight,baseWeight,f,bound=bound)]#,by=eval(pColNames[[i]])]  
+    }else{
+      dat[!is.na(f),calibWeight:=f*calibWeight,by=eval(pColNames[[i]])]
+    }
+    error <- TRUE
+  }
+  setnames(dat,"value",valueP[i])
+  
+  if(verbose&&any(curEps>epsPcur)&&calIter%%10==0){
+    if(calIter%%100==0)
+      print(subset(dat,!is.na(f))[abs(1/f-1)>epsPcur][,list(mean(f),.N),by=eval(pColNames[[i]])])
+    #print(dat[abs(1/f-1)>epsPcur][,list(mean(f),.N),by=eval(pColNames[[i]])])
+    cat(calIter, ":Not yet converged for P-Constraint",i,"\n")
+  }
+  
+  return(list(dat=dat,error=error))
 }
+calibH <- function(i,conH, epsH, mepsH, dat, error, valueH, hColNames, bound, verbose, calIter, looseH){  
+  OriginalSortingVariable <- V1 <- baseWeight <- calibWeight <- epsvalue <- f <- NULL
+  temporary_hid <- temporary_hvar <- tmpVarForMultiplication <- value <- wValue <- wvst<- NULL
+  if(is.list(epsH)){
+    epsHcur <- epsH[[i]]
+    mepsHcur <- mepsH[[i]]
+  }else{
+    epsHcur <- epsH
+    #mepsHcur <- mepsH
+  }
+  
+  if(isTRUE(names(conH)[i]!="")){
+    ## numerical variable to be calibrated
+    ## use name of conH list element to define numerical variable
+    setnames(dat,names(conH)[i],"tmpVarForMultiplication")
+    dat[,wValue:=sum(calibWeight*wvst*tmpVarForMultiplication),by=eval(hColNames[[i]])]
+    setnames(dat,"tmpVarForMultiplication",names(conH)[i])
+  }else{
+    # categorical variable to be calibrated
+    dat[,wValue:=sum(calibWeight*wvst),by=eval(hColNames[[i]])]
+  }
+  
+  setnames(dat,valueH[i],"value")
+  dat[,f:= value/wValue,by=eval(hColNames[[i]])]
+  
+  if(is.array(epsHcur)){
+    dat <- merge(dat,mepsHcur,by=hColNames[[i]],all.x=TRUE,all.y=FALSE)
+    curEps <- dat[,abs(1/f-1)]
+    epsHcur <- dat[,epsvalue]
+  }else{
+    curEps <- dat[,max(abs(1/f-1))]
+  }
+  # if(is.array(epsHcur)){## was soll das?
+  #   dat[,epsvalue:=NULL]
+  # }
+  if(any(curEps>epsHcur)){    
+    if(!is.null(bound)){
+      if(!looseH){
+        dat[,calibWeight:=boundsFak(g1=calibWeight,g0=baseWeight,f=f,bound=bound)]#,by=eval(hColNames[[i]])]    
+      }else{
+        dat[,calibWeight:=boundsFakHH(g1=calibWeight,g0=baseWeight,eps=epsvalue,orig=value,p=wValue,bound=bound)]  
+      }
+    }else{
+      dat[,calibWeight:=f*calibWeight,by=eval(hColNames[[i]])]
+    }
+    error <- TRUE
+  }
+  if("epsvalue"%in%colnames(dat)){
+    dat[,epsvalue:=NULL]
+  }
+  
+  setnames(dat,"value",valueH[i])
+  # if(any(curEps>epsHcur)){ 
+  #   error <- TRUE
+  # }
+  if(verbose&&any(curEps>epsHcur)&&calIter%%10==0){
+    if(calIter%%100==0)
+      print(subset(dat,!is.na(f))[abs(1/f-1)>epsHcur][,list(mean(f),.N),by=eval(hColNames[[i]])])
+    cat(calIter, ":Not yet converged for H-Constraint",i,"\n")
+  }
+  return(list(dat=dat,error=error))
+}
+# From package robCompositions
+# gm_mean <- function(x){
+#   if (!is.numeric(x)) 
+#     stop("x has to be a vector of class numeric")
+#   if (any(na.omit(x == 0))) 
+#     0
+#   else exp(mean(log(unclass(x)[is.finite(x) & x > 0])))
+# }
 
 #' Iterative Proportional Updating
 #' 
@@ -99,6 +239,9 @@ gm_mean <- function(x){
 #' that should be performed.
 #' @param meanHH if TRUE, every person in a household is assigned the mean of
 #' the person weights corresponding to the household.
+#' @param allPthenH if TRUE, all the person level calibration steps are performed before the houshold level calibration steps (and \code{meanHH}, if specified). 
+#' If FALSE, the houshold level calibration steps (and \code{meanHH}, if specified) are performed after everey person level calibration step.
+#' This can lead to better convergence properties in certain cases but also means that the total number of calibration steps is increased.
 #' @param returnNA if TRUE, the calibrated weight will be set to NA in case of no convergence.
 #' @param looseH if FALSE, the actual constraints \code{conH} are used for calibrating all the hh weights. 
 #' If TRUE, only the weights for which the lower and upper thresholds defined by \code{conH} and \code{epsH} are exceeded
@@ -172,7 +315,7 @@ gm_mean <- function(x){
 #  }
 #  coef <- optim(c(1,1),fn)$par
 ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FALSE,
-                 w=NULL,bound=4,maxIter=200,meanHH=TRUE,returnNA=TRUE,looseH=FALSE,numericalWeighting=computeLinear){
+                 w=NULL,bound=4,maxIter=200,meanHH=TRUE,allPthenH=TRUE,returnNA=TRUE,looseH=FALSE,numericalWeighting=computeLinear){
   
   OriginalSortingVariable <- V1 <- baseWeight <- calibWeight <- epsvalue <- f <- NULL
   temporary_hid <- temporary_hvar <- tmpVarForMultiplication <- value <- wValue <- wvst<- NULL
@@ -338,158 +481,51 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
   while(error&&calIter<=maxIter){
     error <- FALSE
     
-    ### Person calib
-    #random order of constraint sequence
-    # spcon <- sample(1:3,3)
-    # conP <- conP[spcon]
-    # #falls epsP Liste
-    # epsP <- epsP[spcon]
-    # mepsP <- mepsP[spcon]
-    for(i in seq_along(conP)){
-      if(is.list(epsP)){
-        epsPcur <- epsP[[i]]
-        mepsPcur <- mepsP[[i]]
-      }else{
-        epsPcur <- epsP
-        # mepsPcur <- mepsP
+    if(allPthenH){
+      ### Person calib
+      for(i in seq_along(conP)){
+        
+        res <- calibP(i=i, conP=conP, epsP=epsP, mepsP=if(exists("mepsP")){mepsP=mepsP}else{mepsP=NULL}, dat=dat, error=error,
+                      valueP=valueP, pColNames=pColNames,bound=bound, verbose=verbose, calIter=calIter, numericalWeighting=numericalWeighting)
+        
+        dat <- res[["dat"]]
+        error <- res[["error"]]
+        rm(res)
       }
-      
-      if(isTRUE(names(conP)[i]!="")){
-        ## numerical variable to be calibrated
-        ## use name of conP list element to define numerical variable
-        setnames(dat,names(conP)[i],"tmpVarForMultiplication")
-        dat[,wValue:=sum(calibWeight*tmpVarForMultiplication),by=eval(pColNames[[i]])]
-        setnames(dat,valueP[i],"value")
-        # try to divide the weight between units with larger/smaller value in the numerical variable linear
-        dat[,f:=numericalWeighting(head(wValue,1),head(value,1),tmpVarForMultiplication,calibWeight),by=eval(pColNames[[i]])]
+      if(meanHH){
+        dat[,calibWeight:=mean(calibWeight),by=eval(hid)] ## das machen wir bei MZ-HR-Paper vor der hh-Kalibrierung. Hier wird nur erstes hh-member kalibriert.
+      }
+      ### Household calib
+      for(i in seq_along(conH)){
+        res <- calibH(i=i, conH=conH, epsH=epsH, mepsH=if(exists("mepsH")){mepsH=mepsH}else{mepsH=NULL}, dat=dat, error=error,
+                      valueH=valueH, hColNames=hColNames,bound=bound, verbose=verbose, calIter=calIter, looseH=looseH)
+        dat <- res[["dat"]]
+        error <- res[["error"]]
+        rm(res)
+      }
+    }else{
+      ### Person calib
+      for(i in seq_along(conP)){
+        
+        res <- calibP(i=i, conP=conP, epsP=epsP, mepsP=if(exists("mepsP")){mepsP=mepsP}else{mepsP=NULL}, dat=dat, error=error,
+                      valueP=valueP, pColNames=pColNames,bound=bound, verbose=verbose, calIter=calIter, numericalWeighting=numericalWeighting)
+        dat <- res[["dat"]]
+        error <- res[["error"]]
+        rm(res)
         
         if(meanHH){
-          # Apply person-level adjustments in a multilicative way per http://www.scag.ca.gov/Documents/PopulationSynthesizerPaper_TRB.pdf
-          # dat[duplicated(subset(dat, select = c(hid, eval(pColNames[[i]])))),f:= 1]
-          # dat[,f:=prod(f),by=eval(hid)] 
-          dat[,f:=gm_mean(f),by=eval(hid)] 
+          dat[,calibWeight:=mean(calibWeight),by=eval(hid)] ## das machen wir bei MZ-HR-Paper vor der hh-Kalibrierung. Hier wird nur erstes hh-member kalibriert.
         }
-        
-        setnames(dat,"tmpVarForMultiplication",names(conP)[i])
-        if(is.array(epsPcur)){## for numeric variables not the factor f is used but the abs relative deviation is computed per class
-          curEps <- abs(dat[!is.na(f),1/(value/wValue)-1]) ## curEps is computed for all observations to compare it with the right epsValue
-        }else{
-          curEps <- dat[!is.na(f),max(abs(1/(value/wValue)-1))]  ## only the max curEps is needed because it is the same for all classed of the current variable
+        ### Household calib
+        for(i in seq_along(conH)){
+          res <- calibH(i=i, conH=conH, epsH=epsH, mepsH=if(exists("mepsH")){mepsH=mepsH}else{mepsH=NULL}, dat=dat, error=error,
+                        valueH=valueH, hColNames=hColNames,bound=bound, verbose=verbose, calIter=calIter, looseH=looseH)
+          dat <- res[["dat"]]
+          error <- res[["error"]]
+          rm(res)
         }
-      }else{
-        # categorical variable to be calibrated
-        dat[,wValue:=sum(calibWeight),by=eval(pColNames[[i]])]
-        setnames(dat,valueP[i],"value")
-        dat[,f:= value/wValue,by=eval(pColNames[[i]])]
-        
-        if(meanHH){
-          # Apply person-level adjustments in a multilicative way per http://www.scag.ca.gov/Documents/PopulationSynthesizerPaper_TRB.pdf
-          # dat[duplicated(subset(dat, select = c(hid, eval(pColNames[[i]])))),f:= 1]
-          # dat[,f:=prod(f),by=eval(hid)] 
-          dat[,f:=gm_mean(f),by=eval(hid)] 
-        }
-        
-        if(is.array(epsPcur)){
-          curEps <- abs(dat[!is.na(f),1/f-1]) ## curEps is computed for all observations to compare it with the right epsValue
-        }else{
-          curEps <- dat[!is.na(f),max(abs(1/f-1))]  ## only the max curEps is needed because it is the same for all classed of the current variable
-        }
-      }
-      if(is.array(epsPcur)){
-        dat <- merge(dat,mepsPcur,by=pColNames[[i]],all.x=TRUE,all.y=FALSE)
-        epsPcur <-dat[!is.na(f),epsvalue]
-        dat[,epsvalue:=NULL]
-      }
-      
-      if(any(curEps>epsPcur)){## sicherheitshalber abs(epsPcur)? Aber es wird schon niemand negative eps Werte uebergeben??
-        
-        if(!is.null(bound)){
-          dat[!is.na(f),calibWeight:=boundsFak(calibWeight,baseWeight,f,bound=bound)]#,by=eval(pColNames[[i]])]  
-        }else{
-          dat[!is.na(f),calibWeight:=f*calibWeight,by=eval(pColNames[[i]])]
-        }
-        error <- TRUE
-      }
-      setnames(dat,"value",valueP[i])
-      
-      # if(any(curEps>epsPcur)){ ##  gleich zu oberer if-Abfrage dazugegeben
-      #   error <- TRUE
-      # }
-      
-      if(verbose&&any(curEps>epsPcur)&&calIter%%10==0){
-        if(calIter%%100==0)
-          print(subset(dat,!is.na(f))[abs(1/f-1)>epsPcur][,list(mean(f),.N),by=eval(pColNames[[i]])])
-        #print(dat[abs(1/f-1)>epsPcur][,list(mean(f),.N),by=eval(pColNames[[i]])])
-        cat(calIter, ":Not yet converged for P-Constraint",i,"\n")
-      }
-      
-    }
-    
-    if(meanHH){
-      dat[,calibWeight:=mean(calibWeight),by=eval(hid)] ## das machen wir bei MZ-HR-Paper vor der hh-Kalibrierung. Hier wird nur erstes hh-member kalibriert.
-    }
-    
-    ### Household calib
-    for(i in seq_along(conH)){
-      if(is.list(epsH)){
-        epsHcur <- epsH[[i]]
-        mepsHcur <- mepsH[[i]]
-      }else{
-        epsHcur <- epsH
-        #mepsHcur <- mepsH
-      }
-      
-      if(isTRUE(names(conH)[i]!="")){
-        ## numerical variable to be calibrated
-        ## use name of conH list element to define numerical variable
-        setnames(dat,names(conH)[i],"tmpVarForMultiplication")
-        dat[,wValue:=sum(calibWeight*wvst*tmpVarForMultiplication),by=eval(hColNames[[i]])]
-        setnames(dat,"tmpVarForMultiplication",names(conH)[i])
-      }else{
-        # categorical variable to be calibrated
-        dat[,wValue:=sum(calibWeight*wvst),by=eval(hColNames[[i]])]
-      }
-      
-      setnames(dat,valueH[i],"value")
-      dat[,f:= value/wValue,by=eval(hColNames[[i]])]
-      
-      if(is.array(epsHcur)){
-        dat <- merge(dat,mepsHcur,by=hColNames[[i]],all.x=TRUE,all.y=FALSE)
-        curEps <- dat[,abs(1/f-1)]
-        epsHcur <- dat[,epsvalue]
-      }else{
-        curEps <- dat[,max(abs(1/f-1))]
-      }
-      # if(is.array(epsHcur)){## was soll das?
-      #   dat[,epsvalue:=NULL]
-      # }
-      if(any(curEps>epsHcur)){    
-        if(!is.null(bound)){
-          if(!looseH){
-            dat[,calibWeight:=boundsFak(g1=calibWeight,g0=baseWeight,f=f,bound=bound)]#,by=eval(hColNames[[i]])]    
-          }else{
-            dat[,calibWeight:=boundsFakHH(g1=calibWeight,g0=baseWeight,eps=epsvalue,orig=value,p=wValue,bound=bound)]  
-          }
-        }else{
-          dat[,calibWeight:=f*calibWeight,by=eval(hColNames[[i]])]
-        }
-        error <- TRUE
-      }
-      if("epsvalue"%in%colnames(dat)){
-        dat[,epsvalue:=NULL]
-      }
-      
-      setnames(dat,"value",valueH[i])
-      # if(any(curEps>epsHcur)){ 
-      #   error <- TRUE
-      # }
-      if(verbose&&any(curEps>epsHcur)&&calIter%%10==0){
-        if(calIter%%100==0)
-        print(subset(dat,!is.na(f))[abs(1/f-1)>epsHcur][,list(mean(f),.N),by=eval(hColNames[[i]])])
-        cat(calIter, ":Not yet converged for H-Constraint",i,"\n")
       }
     }
-    
     
     if(verbose&&!error){
       cat("Convergence reached in ",calIter," steps \n")

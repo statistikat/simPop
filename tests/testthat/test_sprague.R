@@ -1,5 +1,6 @@
 ## test sprague index:
 library(simPop)
+test_that("sprague test",{
 x <- data.frame(age=as.factor(c(
   "0-4",
   "5-9","10-14","15-19", "20-24",
@@ -14,7 +15,6 @@ x <- data.frame(age=as.factor(c(
 # debugonce(sprague)
 s  <- sprague(x[,2])
 
+expect_true(all.equal(sum(s), sum(x[,2])),info="not identical")
 
-if(!all.equal(sum(s), sum(x[,2]))) stop("not identical")
-
-
+})
