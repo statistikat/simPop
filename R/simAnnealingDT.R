@@ -1,3 +1,5 @@
+#' @importFrom wrswoR sample_int_crank
+#' @importFrom stats sd
 #######################################################################################
 # Help-functions for simulated annealing without c++
 # tries to avoid large memory allocations
@@ -7,7 +9,7 @@ dteval <- function(...,envir=parent.frame()){
 
 simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
                            sample.prob=TRUE,choose.temp=FALSE,split.level=NULL){
-  
+  weight_choose_new <- N <- sim_ID <- ID_GRP <- weight_choose <- V1 <- NULL
   ######################################
   ## define variables from param
   eps <- params[["eps_factor"]]*totals0[,sum(N)]
@@ -117,8 +119,8 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
           select_01 <- select_equal(x=init_weight,val1=0,val2=1)
           select_add <- select_01[[1]]+1
           select_remove <- select_01[[2]]+1
-          prob_add <- totals_diff[.(init_group[select_add]),prob_add]
-          prob_remove <- totals_diff[.(init_group[select_remove]),prob_remove]
+          prob_add <- totals_diff[list(init_group[select_add]),prob_add]
+          prob_remove <- totals_diff[list(init_group[select_remove]),prob_remove]
           
           select_add <- select_add[prob_add>0]
           select_remove <- select_remove[prob_remove>0]
