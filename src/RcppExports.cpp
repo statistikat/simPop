@@ -6,6 +6,29 @@
 
 using namespace Rcpp;
 
+// geometric_mean_reference
+void geometric_mean_reference(NumericVector w, const IntegerVector classes);
+RcppExport SEXP _simPop_geometric_mean_reference(SEXP wSEXP, SEXP classesSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type w(wSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type classes(classesSEXP);
+    geometric_mean_reference(w, classes);
+    return R_NilValue;
+END_RCPP
+}
+// geometric_mean
+NumericVector geometric_mean(const NumericVector w, const IntegerVector& classes);
+RcppExport SEXP _simPop_geometric_mean(SEXP wSEXP, SEXP classesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector >::type w(wSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type classes(classesSEXP);
+    rcpp_result_gen = Rcpp::wrap(geometric_mean(w, classes));
+    return rcpp_result_gen;
+END_RCPP
+}
 // sample_int_crank
 IntegerVector sample_int_crank(int n, int size, NumericVector prob);
 RcppExport SEXP _simPop_sample_int_crank(SEXP nSEXP, SEXP sizeSEXP, SEXP probSEXP) {

@@ -355,6 +355,10 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
     setnames(dat,"temporary_hid",hid)
   }
   
+  setnames(dat, hid, "temporary_hid")
+  dat[, temporary_hid := as.factor(temporary_hid)]
+  setnames(dat, "temporary_hid", hid)
+
   mconP <- lapply(conP,melt,as.is=TRUE)##convert tables to long form
   mconH <- lapply(conH,melt,as.is=TRUE) 
   
@@ -493,7 +497,8 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
         rm(res)
       }
       if(meanHH){
-        dat[,calibWeight:=mean(calibWeight),by=eval(hid)] ## das machen wir bei MZ-HR-Paper vor der hh-Kalibrierung. Hier wird nur erstes hh-member kalibriert.
+        ## replace person weight with household average
+        dat[,calibWeight := geometric_mean(calibWeight, dat[[hid]])]
       }
       ### Household calib
       for(i in seq_along(conH)){
@@ -514,7 +519,8 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
         rm(res)
         
         if(meanHH){
-          dat[,calibWeight:=mean(calibWeight),by=eval(hid)] ## das machen wir bei MZ-HR-Paper vor der hh-Kalibrierung. Hier wird nur erstes hh-member kalibriert.
+          ## replace person weight with household average
+          dat[,calibWeight := geometric_mean(calibWeight, dat[[hid]])]
         }
         ### Household calib
         for(i in seq_along(conH)){
