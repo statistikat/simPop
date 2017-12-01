@@ -36,6 +36,12 @@ combine_factors <- function(dat, factor_columns, asfactor = TRUE) {
     .Call('_simPop_combine_factors', PACKAGE = 'simPop', dat, factor_columns, asfactor)
 }
 
+#' @rdname ipu2
+#' @export
+computeLinear <- function(curValue, Value, numericVar, weightVec, boundLinear = 10) {
+    .Call('_simPop_computeLinear', PACKAGE = 'simPop', curValue, Value, numericVar, weightVec, boundLinear)
+}
+
 #' Geometric mean by factor
 #' 
 #' This function calculates the geometric mean of the weight for each class. `geometric_mean` returns a `numeric` of 

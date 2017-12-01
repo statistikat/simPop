@@ -588,19 +588,6 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
   }  
 }
 #' @rdname ipu2
-#' @export computeLinear
-computeLinear <- function(curValue,Value,numericVar,weightVec,boundLinear=10){#current summed up value, correct summed up value, numeric variable, current weight
-  h <- sum(weightVec*numericVar)
-  j <- sum(weightVec*numericVar^2)
-  N <- sum(weightVec)
-  b <- (Value-N*j/h)/((-N*j/h)+h)
-  a <- (N-b*N)/h
-  f <- a*numericVar+b
-  f[f<(1/boundLinear)] <- 1/boundLinear
-  f[f>boundLinear] <- boundLinear
-  return(f)
-}
-#' @rdname ipu2
 #' @export computeFrac
 computeFrac <- function(curValue,Value,numericVar,weightVec){
   Value/curValue

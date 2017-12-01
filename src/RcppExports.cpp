@@ -19,6 +19,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// computeLinear
+NumericVector computeLinear(double curValue, double Value, const NumericVector& numericVar, const NumericVector& weightVec, double boundLinear);
+RcppExport SEXP _simPop_computeLinear(SEXP curValueSEXP, SEXP ValueSEXP, SEXP numericVarSEXP, SEXP weightVecSEXP, SEXP boundLinearSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type curValue(curValueSEXP);
+    Rcpp::traits::input_parameter< double >::type Value(ValueSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type numericVar(numericVarSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type weightVec(weightVecSEXP);
+    Rcpp::traits::input_parameter< double >::type boundLinear(boundLinearSEXP);
+    rcpp_result_gen = Rcpp::wrap(computeLinear(curValue, Value, numericVar, weightVec, boundLinear));
+    return rcpp_result_gen;
+END_RCPP
+}
 // geometric_mean_reference
 void geometric_mean_reference(NumericVector w, const IntegerVector classes);
 RcppExport SEXP _simPop_geometric_mean_reference(SEXP wSEXP, SEXP classesSEXP) {
