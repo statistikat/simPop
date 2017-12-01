@@ -1,3 +1,5 @@
+#' @importFrom wrswoR sample_int_crank
+#' @importFrom stats sd
 #######################################################################################
 # Help-functions for simulated annealing without c++
 # tries to avoid large memory allocations
@@ -45,7 +47,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   
   # choose starting temperatur as percentage of objective function
   if(choose.temp){
-    temp <- max(temp,eps*.01)
+    temp <- max(temp,eps*.2)
     #min_temp <- temp*temp_cooldown^50
   }
   
@@ -91,16 +93,15 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
       while( n<maxiter ) {
         
         # scale redraw for add and remove to keep synthetic totals stable
-        synth_tot <- totals_diff[,c(sum(V1)-sum(N))/sum(N)]*.5
-        redraw_gap <- redraw*synth_tot
+        redraw_gap <- totals_diff[,c(sum(V1)-sum(N))/med_hh]
         
-        if(abs(redraw_gap)<redraw){
-          redraw_add <- ceiling(redraw-redraw_gap)
-          redraw_remove <- ceiling(redraw+redraw_gap)
-        }else{
-          redraw_add <- redraw_remove <- redraw
-        }
-
+        #if(abs(redraw_gap)<redraw){
+        redraw_add <- max(ceiling(redraw-redraw_gap),1)
+        redraw_remove <- max(ceiling(redraw+redraw_gap),1)
+        #}else{
+        #  redraw_add <- redraw_remove <- redraw
+        #}
+        
         
         if(sample.prob){
           # get weights for resampling
@@ -117,8 +118,8 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
           select_01 <- select_equal(x=init_weight,val1=0,val2=1)
           select_add <- select_01[[1]]+1
           select_remove <- select_01[[2]]+1
-          prob_add <- totals_diff[.(init_group[select_add]),prob_add]
-          prob_remove <- totals_diff[.(init_group[select_remove]),prob_remove]
+          prob_add <- totals_diff[list(init_group[select_add]),prob_add]
+          prob_remove <- totals_diff[list(init_group[select_remove]),prob_remove]
           
           select_add <- select_add[prob_add>0]
           select_remove <- select_remove[prob_remove>0]
@@ -130,7 +131,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
                                                   prob=prob_add[prob_add>0])]-1
           }else{
             add_hh <- sample(select_01[[1]],redraw_add)
-    
+            
           }
           if(n_remove>0){
             remove_hh <- select_remove[sample_int_crank(n_remove,
@@ -139,7 +140,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
           }else{
             remove_hh <- sample(select_01[[2]],redraw_remove)
           }
-         #add_hh <- sample(select_add,redraw_add)-1
+          #add_hh <- sample(select_add,redraw_add)-1
           #remove_hh <- sample(select_remove,redraw_remove)-1
         }else{
           prob_remove <- prob_add <- NULL
@@ -237,7 +238,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
         cat(paste0("Cooldown number ",cooldown,"\n"))
       }
       if ( objective.new <= eps | cooldown == 500 | redraw<2) {
-          break
+        break
       }  
     }
     if(objective>eps){
