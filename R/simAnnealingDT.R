@@ -27,9 +27,6 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   # parameters used für c++ code
   # set index for original order
   data0[,sim_ID:=.I]
-  setkeyv(data0,hhid)
-  size <- dteval("as.numeric(as.character(data0[,",hhsize,"]))")
-  id <- dteval("data0[,",hhid,"]")
   
   ## initialize other parameter
   size_all <- sizefactor+1
@@ -40,6 +37,9 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   cooldown <- 0 
   totals0[,ID_GRP:=.GRP,by=c(parameter)]
   data0 <- merge(data0,unique(subset(totals0,select=c("ID_GRP",parameter))),by=c(parameter),all.x=TRUE)
+  setkeyv(data0,hhid)
+  id <- dteval("data0[,",hhid,"]")
+  size <- dteval("as.numeric(as.character(data0[,",hhsize,"]))")
   
   if(sample.prob==TRUE){
     init_group <- rep(data0[,ID_GRP],size_all)# used for internal loop
@@ -93,7 +93,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
       while( n<maxiter ) {
         
         # scale redraw for add and remove to keep synthetic totals stable
-        redraw_gap <- totals_diff[,c(sum(V1)-sum(N))/med_hh]
+        redraw_gap <- totals_diff[,c(sum(V1)-sum(N))/med_hh]*.5
         
         #if(abs(redraw_gap)<redraw){
         redraw_add <- max(ceiling(redraw-redraw_gap),1)
