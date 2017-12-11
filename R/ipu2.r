@@ -55,8 +55,12 @@ calibP <- function(i,conP, epsP, mepsP, dat, error, valueP, pColNames, bound, ve
     ## numerical variable to be calibrated
     ## use name of conP list element to define numerical variable
     setnames(dat,names(conP)[i],"tmpVarForMultiplication")
-    dat[,wValue:=sum(calibWeight*tmpVarForMultiplication),by=eval(pColNames[[i]])]
+    combined_factors <- dat[[paste0("combined_factors_", i)]]
+    dat[, f := ipu_step_f(calibWeight*tmpVarForMultiplication, 
+                          combined_factors, conP[[i]])]
     setnames(dat,valueP[i],"value")
+    dat[, wValue := f*value]
+    
     # try to divide the weight between units with larger/smaller value in the numerical variable linear
     dat[,f:=numericalWeighting(head(wValue,1),head(value,1),tmpVarForMultiplication,calibWeight),by=eval(pColNames[[i]])]
     
