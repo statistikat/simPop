@@ -93,9 +93,7 @@ calibP <- function(i,conP, epsP, mepsP, dat, error, valueP, pColNames, bound, ve
     }
   }
   if(is.array(epsPcur)){
-    dat <- merge(dat,mepsPcur,by=pColNames[[i]],all.x=TRUE,all.y=FALSE)
-    epsPcur <-dat[!is.na(f),epsvalue]
-    dat[,epsvalue:=NULL]
+    epsPcur <- dat[!is.na(f), paste0("epsP_", i)]
   }
   
   if(any(curEps>epsPcur)){## sicherheitshalber abs(epsPcur)? Aber es wird schon niemand negative eps Werte uebergeben??
@@ -147,9 +145,8 @@ calibH <- function(i,conH, epsH, mepsH, dat, error, valueH, hColNames, bound, ve
   }
   
   if(is.array(epsHcur)){
-    dat <- merge(dat,mepsHcur,by=hColNames[[i]],all.x=TRUE,all.y=FALSE)
     curEps <- dat[,abs(1/f-1)]
-    epsHcur <- dat[,epsvalue]
+    epsHcur <- dat[[paste0("epsH_", i)]]
   }else{
     curEps <- dat[,max(abs(1/f-1))]
   }
@@ -161,7 +158,7 @@ calibH <- function(i,conH, epsH, mepsH, dat, error, valueH, hColNames, bound, ve
       if(!looseH){
         dat[,calibWeight:=boundsFak(g1=calibWeight,g0=baseWeight,f=f,bound=bound)]#,by=eval(hColNames[[i]])]    
       }else{
-        dat[,calibWeight:=boundsFakHH(g1=calibWeight,g0=baseWeight,eps=epsvalue,orig=value,p=wValue,bound=bound)]  
+        dat[,calibWeight:=boundsFakHH(g1=calibWeight,g0=baseWeight,eps=epsHcur,orig=value,p=wValue,bound=bound)]  
       }
     }else{
       dat[,calibWeight:=f*calibWeight,by=eval(hColNames[[i]])]
@@ -498,6 +495,8 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
             mepsP[[i]][[cn[j]]] <- as.integer(mepsP[[i]][[cn[j]]])
           }
         }
+        dat <- merge(dat,mepsP[[i]], by = cn)
+        setnames(dat, "epsvalue", paste0("epsP_", i))
       }
     }
   }
@@ -517,6 +516,8 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
             mepsH[[i]][[cn[j]]] <- as.integer(mepsH[[i]][[cn[j]]])
           }
         }
+        dat <- merge(dat,mepsH[[i]], by = cn)
+        setnames(dat, "epsvalue", paste0("epsH_", i))
       }
     }
   }
