@@ -366,17 +366,24 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
   setnames(dat, hid, "temporary_hid")
   dat[, temporary_hid := as.factor(temporary_hid)]
   setnames(dat, "temporary_hid", hid)
-
-  mconP <- lapply(conP,melt,as.is=TRUE)##convert tables to long form
-  mconH <- lapply(conH,melt,as.is=TRUE) 
+  
+  mconP <- lapply(conP, melt) ##convert tables to long form
+  mconH <- lapply(conH, melt) 
   
   ## Names of the calibration variables for Person and household dimension
   pColNames <- lapply(conP,function(x)names(dimnames(x)))
   hColNames <- lapply(conH,function(x)names(dimnames(x)))
   
   for(i in seq_along(conP)){
-    colnames <- pColNames[[i]]
-    dat[, (colnames) := lapply(.SD, as.factor), .SDcols = colnames]
+    current_colnames <- pColNames[[i]]
+
+    for(colname in current_colnames){
+      if(class(dat[[colname]]) != "factor")
+        set(
+          dat, j = colname, 
+          value = factor(dat[[colname]], levels = dimnames(conP[[i]])[[colname]])
+        )
+    }
     dat[, paste0("combined_factors_", i) := combine_factors(dat, pColNames[[i]])]
     
     # Harmonize the class of columns coming from the constraints
@@ -387,7 +394,11 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
       for(j in seq_along(cn)){
         cl <- class(dat[[cn[j]]])
         if("factor"%in%cl){
-          mconP[[i]][[cn[j]]] <- factor(mconP[[i]][[cn[j]]],levels=levels(dat[[cn[j]]]))
+          if (!identical(levels(dat[[cn[j]]]), levels(mconP[[i]][[cn[j]]]))){
+            if(verbose)
+              message("convert conP", i, " ", j, " ", class(mconP[[i]][[cn[j]]]))
+            mconP[[i]][[cn[j]]] <- factor(mconP[[i]][[cn[j]]],levels=levels(dat[[cn[j]]]))
+          }
         }else if("numeric"%in%cl){
           mconP[[i]][[cn[j]]] <- as.numeric(mconP[[i]][[cn[j]]])
         }else if("integer"%in%cl){
@@ -404,7 +415,18 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
   }
   for(i in seq_along(conH)){
     colnames <- hColNames[[i]]
-    dat[, (colnames) := lapply(.SD, as.factor), .SDcols = colnames]
+    
+    ## make sure the columns mentioned in the contingency table are in fact factors
+    for(colname in colnames){
+      if (!identical(levels(dat[[colname]]), dimnames(conH[[i]])[[colname]])){
+        message("converting column ", colname, " to factor.\n")
+        set(
+          dat, j = colname, 
+          value = factor(dat[[colname]], levels = dimnames(conH[[i]])[[colname]])
+        )
+      }
+    }
+    
     dat[, paste0("combined_factors_h_", i) := combine_factors(dat, hColNames[[i]])]
     
     if(!(dim(conH[[i]])==1 && identical(colnames(mconH[[i]]),c("Var1", "value")))){
@@ -412,7 +434,11 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
       for(j in seq_along(cn)){
         cl <- class(dat[[cn[j]]])
         if("factor"%in%cl){
-          mconH[[i]][[cn[j]]] <- factor(mconH[[i]][[cn[j]]],levels=levels(dat[[cn[j]]]))
+          if (!identical(levels(dat[[cn[j]]]), levels(mconH[[i]][[cn[j]]]))){
+            if(verbose)
+              message("convert conH", i, " ", j, " ", class(mconH[[i]][[cn[j]]]))
+            mconH[[i]][[cn[j]]] <- factor(mconH[[i]][[cn[j]]],levels=levels(dat[[cn[j]]]))
+          }
         }else if("numeric"%in%cl){
           mconH[[i]][[cn[j]]] <- as.numeric(mconH[[i]][[cn[j]]])
         }else if("integer"%in%cl){
