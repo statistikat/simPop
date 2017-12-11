@@ -34,26 +34,33 @@ using namespace Rcpp;
 //' @rdname geometric_mean
 //' @export
 // [[Rcpp::export]]
-void geometric_mean_reference(NumericVector w, const IntegerVector classes) {
+void geometric_mean_reference(NumericVector& w, const IntegerVector& classes) {
   CharacterVector levels(classes.attr("levels"));
   int nclasses = levels.size();
   
   NumericVector sums( nclasses );
   NumericVector sizes( nclasses );
+  
   for (int i = 0; i < w.size(); i++){
     int cl = classes[i] - 1;
     sums[cl] += log(w[i]);
     sizes[cl] += 1;
   }
+  
+  NumericVector means(nclasses);
+  for(int cl = 0; cl < means.size(); cl++){
+    means[cl] = exp(sums[cl]/sizes[cl]);
+  }
+  
   for(int i = 0; i < w.size(); i++){
     int cl = classes[i] - 1;
-    w[i] = exp( sums[cl]/sizes[cl] );
+    w[i] = means[cl];
   }
 }
 //' @rdname geometric_mean
 //' @export
 // [[Rcpp::export]]
-NumericVector geometric_mean( const NumericVector w, const IntegerVector& classes ){
+NumericVector geometric_mean( const NumericVector& w, const IntegerVector& classes ){
   NumericVector w_copy( Rcpp::clone( w ) );
   geometric_mean_reference( w_copy, classes );
   return w_copy;
