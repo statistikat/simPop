@@ -585,33 +585,12 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
     calIter <- calIter + 1 
   }
   
-  if(!is.null(w)){
-    setnames(dat,"baseWeight",w)  
-  }
-  
-  ##Housekeeping
-  ###Housekeeping of the varNames used
-  delVars <- c(delVars,"wvst","wValue","f")
-  if(any(valueP%in%names(dat)))
-    delVars <- c(delVars,valueP)
-  if(any(valueH%in%names(dat)))
-    delVars <- c(delVars,valueH)
-  dat[,eval(delVars):=NULL]
-  if(!is.null(renameVars)){
-    setnames(dat,paste0(renameVars,"_safekeeping"),renameVars)
-  }
-  # loeschen; da macht man doch das umbenennen wieder rueckgaengig und das will man nicht!  
-  #   if(any(names(dat)%in%usedVarNames)){
-  #     renameVars <- names(dat)[names(dat)%in%usedVarNames]
-  #     setnames(dat,renameVars,paste0(renameVars,"_safekeeping"))
-  #   }
   ## originalsorting is fucked up without this
-  setkey(dat,OriginalSortingVariable)
-  dat[,OriginalSortingVariable:=NULL]
+  setkey(dat, OriginalSortingVariable)
   
   ## Return missings in calibWeight variable if no convergence was reached
   if(maxIter<calIter&returnNA){
-    invisible(dat_original)  
+    invisible(copy(dat_original)[, calibWeight := NA])
   }else{
     invisible(copy(dat_original)[,calibWeight := dat$calibWeight])  
   }  
