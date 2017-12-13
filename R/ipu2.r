@@ -42,13 +42,11 @@ meltepsfun <- function(x){
   }
   return(x)
 }
-calibP <- function(i,conP, epsP, mepsP, dat, error, valueP, pColNames, bound, verbose, calIter, numericalWeighting){  
+calibP <- function(i,conP, epsP, dat, error, valueP, pColNames, bound, verbose, calIter, numericalWeighting){  
   if(is.list(epsP)){
     epsPcur <- epsP[[i]]
-    mepsPcur <- mepsP[[i]]
   }else{
     epsPcur <- epsP
-    # mepsPcur <- mepsP
   }
   
   if(isTRUE(names(conP)[i]!="")){
@@ -120,13 +118,11 @@ calibP <- function(i,conP, epsP, mepsP, dat, error, valueP, pColNames, bound, ve
   
   return(list(dat=dat,error=error))
 }
-calibH <- function(i,conH, epsH, mepsH, dat, error, valueH, hColNames, bound, verbose, calIter, looseH){  
+calibH <- function(i,conH, epsH, dat, error, valueH, hColNames, bound, verbose, calIter, looseH){  
   if(is.list(epsH)){
     epsHcur <- epsH[[i]]
-    mepsHcur <- mepsH[[i]]
   }else{
     epsHcur <- epsH
-    #mepsHcur <- mepsH
   }
   
   setnames(dat,valueH[i],"value")
@@ -455,44 +451,18 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
   }
   
   if(is.list(epsP)){
-    #mepsP <- lapply(epsP,melt,as.is=TRUE,value.name="epsvalue")##convert tables to long form
-    mepsP <- lapply(epsP,meltepsfun)
     for(i in seq_along(epsP)){
       if(is.array(epsP[[i]])){
-        cn <- colnames(mepsP[[i]])[-ncol(mepsP[[i]])]
-        for(j in seq_along(cn)){
-          cl <- class(dat[[cn[j]]])
-          if("factor"%in%cl){
-            mepsP[[i]][[cn[j]]] <- factor(mepsP[[i]][[cn[j]]],levels=levels(dat[[cn[j]]]))
-          }else if("numeric"%in%cl){
-            mepsP[[i]][[cn[j]]] <- as.numeric(mepsP[[i]][[cn[j]]])
-          }else if("integer"%in%cl){
-            mepsP[[i]][[cn[j]]] <- as.integer(mepsP[[i]][[cn[j]]])
-          }
-        }
-        dat <- merge(dat,mepsP[[i]], by = cn)
-        setnames(dat, "epsvalue", paste0("epsP_", i))
+        combined_factors <- dat[[paste0("combined_factors_", i)]]
+        dat[, paste0("epsP_", i) := epsP[[i]][combined_factors] ]
       }
     }
   }
   if(is.list(epsH)){
-    #mepsH <- lapply(epsH,melt,as.is=TRUE,value.name="epsvalue")##convert tables to long form
-    mepsH <- lapply(epsH,meltepsfun)
     for(i in seq_along(epsH)){
       if(is.array(epsH[[i]])){
-        cn <- colnames(mepsH[[i]])[-ncol(mepsH[[i]])]
-        for(j in seq_along(cn)){
-          cl <- class(dat[[cn[j]]])
-          if("factor"%in%cl){
-            mepsH[[i]][[cn[j]]] <- factor(mepsH[[i]][[cn[j]]],levels=levels(dat[[cn[j]]]))
-          }else if("numeric"%in%cl){
-            mepsH[[i]][[cn[j]]] <- as.numeric(mepsH[[i]][[cn[j]]])
-          }else if("integer"%in%cl){
-            mepsH[[i]][[cn[j]]] <- as.integer(mepsH[[i]][[cn[j]]])
-          }
-        }
-        dat <- merge(dat,mepsH[[i]], by = cn)
-        setnames(dat, "epsvalue", paste0("epsH_", i))
+        combined_factors <- dat[[paste0("combined_factors_h_", i)]]
+        dat[, paste0("epsH_", i) := epsH[[i]][combined_factors] ]
       }
     }
   }
@@ -508,7 +478,7 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
       ### Person calib
       for(i in seq_along(conP)){
         
-        res <- calibP(i=i, conP=conP, epsP=epsP, mepsP=if(exists("mepsP")){mepsP=mepsP}else{mepsP=NULL}, dat=dat, error=error,
+        res <- calibP(i=i, conP=conP, epsP=epsP, dat=dat, error=error,
                       valueP=valueP, pColNames=pColNames,bound=bound, verbose=verbose, calIter=calIter, numericalWeighting=numericalWeighting)
         
         dat <- res[["dat"]]
@@ -521,7 +491,7 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
       }
       ### Household calib
       for(i in seq_along(conH)){
-        res <- calibH(i=i, conH=conH, epsH=epsH, mepsH=if(exists("mepsH")){mepsH=mepsH}else{mepsH=NULL}, dat=dat, error=error,
+        res <- calibH(i=i, conH=conH, epsH=epsH, dat=dat, error=error,
                       valueH=valueH, hColNames=hColNames,bound=bound, verbose=verbose, calIter=calIter, looseH=looseH)
         dat <- res[["dat"]]
         error <- res[["error"]]
@@ -531,7 +501,7 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
       ### Person calib
       for(i in seq_along(conP)){
         
-        res <- calibP(i=i, conP=conP, epsP=epsP, mepsP=if(exists("mepsP")){mepsP=mepsP}else{mepsP=NULL}, dat=dat, error=error,
+        res <- calibP(i=i, conP=conP, epsP=epsP, dat=dat, error=error,
                       valueP=valueP, pColNames=pColNames,bound=bound, verbose=verbose, calIter=calIter, numericalWeighting=numericalWeighting)
         dat <- res[["dat"]]
         error <- res[["error"]]
@@ -543,7 +513,7 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
         }
         ### Household calib
         for(i in seq_along(conH)){
-          res <- calibH(i=i, conH=conH, epsH=epsH, mepsH=if(exists("mepsH")){mepsH=mepsH}else{mepsH=NULL}, dat=dat, error=error,
+          res <- calibH(i=i, conH=conH, epsH=epsH, dat=dat, error=error,
                         valueH=valueH, hColNames=hColNames,bound=bound, verbose=verbose, calIter=calIter, looseH=looseH)
           dat <- res[["dat"]]
           error <- res[["error"]]
