@@ -433,17 +433,16 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
     if(!(dim(conH[[i]])==1 && identical(colnames(mconH[[i]]),c("Var1", "value")))){
       cn <- colnames(mconH[[i]])[-ncol(mconH[[i]])]
       for(j in seq_along(cn)){
-        cl <- class(dat[[cn[j]]])
-        if("factor"%in%cl){
-          if (!identical(levels(dat[[cn[j]]]), levels(mconH[[i]][[cn[j]]]))){
-            if(verbose)
-              message("convert conH", i, " ", j, " ", class(mconH[[i]][[cn[j]]]))
-            mconH[[i]][[cn[j]]] <- factor(mconH[[i]][[cn[j]]],levels=levels(dat[[cn[j]]]))
-          }
-        }else if("numeric"%in%cl){
-          mconH[[i]][[cn[j]]] <- as.numeric(mconH[[i]][[cn[j]]])
-        }else if("integer"%in%cl){
-          mconH[[i]][[cn[j]]] <- as.integer(mconH[[i]][[cn[j]]])
+        ## if dimnames of arrays are "numerics" i.e. "1", "2", etc., melt will save them as
+        ## integer columns. convert those columns to factors. 
+        if (!inherits(mconH[[i]][[cn[j]]], "factor")){
+          if(verbose)
+            message("convert melted version of conH to factor: variable ", cn[j])
+          mconH[[i]][[cn[j]]] <- factor(
+            mconH[[i]][[cn[j]]],
+            ## explicitly pass levels to keep levels-order intact
+            levels=levels(dat[[cn[j]]])
+          )
         }
       }
       dat <- merge(dat,mconH[[i]],by=colnames(mconH[[i]])[-ncol(mconH[[i]])],all.x=TRUE,all.y=FALSE)
