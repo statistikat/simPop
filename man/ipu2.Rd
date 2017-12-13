@@ -99,6 +99,8 @@ household constraints}
 \value{
 The function will return the input data \code{dat} with the
 calibrated weights \code{calibWeight} as an additional column.
+The algorithm performs best if all varables occuring in the constraints (\code{conP} and \code{conH}) are coded as \code{factor}-columns in 
+\code{dat}.
 }
 \description{
 Adjust sampling weights to given totals based on household-level and/or
