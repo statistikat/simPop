@@ -255,6 +255,8 @@ calibH <- function(i,conH, epsH, mepsH, dat, error, valueH, hColNames, bound, ve
 #' @param numericVar vector with the values of the numeric variable
 #' @param weightVec vector with the current weights
 #' @param boundLinear the result of computeLinear will be bound by \code{1/boundLinear} and \code{boundLinear}
+#' @param check_hh_vars If \code{TRUE} check for non-unique values inside of a household for variables in 
+#'                      household constraints
 #' @return The function will return the input data \code{dat} with the
 #' calibrated weights \code{calibWeight} as an additional column.
 #' @seealso \code{\link{ipu}}
@@ -323,7 +325,8 @@ calibH <- function(i,conH, epsH, mepsH, dat, error, valueH, hColNames, bound, ve
 #  }
 #  coef <- optim(c(1,1),fn)$par
 ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FALSE,
-                 w=NULL,bound=4,maxIter=200,meanHH=TRUE,allPthenH=TRUE,returnNA=TRUE,looseH=FALSE,numericalWeighting=computeLinear){
+                 w=NULL,bound=4,maxIter=200,meanHH=TRUE,allPthenH=TRUE,returnNA=TRUE,looseH=FALSE,
+                 numericalWeighting=computeLinear, check_hh_vars = TRUE){
   
   OriginalSortingVariable <- V1 <- baseWeight <- calibWeight <- epsvalue <- f <- NULL
   temporary_hid <- temporary_hvar <- tmpVarForMultiplication <- value <- wValue <- wvst<- NULL
@@ -436,17 +439,19 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
     setnames(dat,w,"baseWeight")
   }
   
-  ## Check for non-unqiue values inside of a household for variabels used in Household constraints
-  for(hh in hColNames){
-    setnames(dat,hid,"temporary_hid")
-    for(h in hh){
-      setnames(dat,h,"temporary_hvar")
-      if(dat[,length(unique(temporary_hvar)),by=temporary_hid][,any(V1!=1)]){
-        stop(paste(h,"has different values inside a household"))
+  if(check_hh_vars){
+    ## Check for non-unqiue values inside of a household for variabels used in Household constraints
+    for(hh in hColNames){
+      setnames(dat,hid,"temporary_hid")
+      for(h in hh){
+        setnames(dat,h,"temporary_hvar")
+        if(dat[,length(unique(temporary_hvar)),by=temporary_hid][,any(V1!=1)]){
+          stop(paste(h,"has different values inside a household"))
+        }
+        setnames(dat,"temporary_hvar",h)
       }
-      setnames(dat,"temporary_hvar",h)
+      setnames(dat,"temporary_hid",hid)
     }
-    setnames(dat,"temporary_hid",hid)
   }
   
   if(is.list(epsP)){

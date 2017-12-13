@@ -11,7 +11,7 @@
 ipu2(dat, hid = NULL, conP = NULL, conH = NULL, epsP = 1e-06,
   epsH = 0.01, verbose = FALSE, w = NULL, bound = 4, maxIter = 200,
   meanHH = TRUE, allPthenH = TRUE, returnNA = TRUE, looseH = FALSE,
-  numericalWeighting = computeLinear)
+  numericalWeighting = computeLinear, check_hh_vars = TRUE)
 
 computeFrac(curValue, Value, numericVar, weightVec)
 
@@ -81,6 +81,9 @@ are calibrated. They are however not calibrated against the actual constraints \
 these lower and upper thresholds, i.e. \code{conH}-\code{conH}*\code{epsH} and \code{conH}+\code{conH}*\code{epsH}.}
 
 \item{numericalWeighting}{...}
+
+\item{check_hh_vars}{If \code{TRUE} check for non-unique values inside of a household for variables in 
+household constraints}
 
 \item{curValue}{the current value of the group total}
 
