@@ -368,9 +368,6 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
   dat[, temporary_hid := as.factor(temporary_hid)]
   setnames(dat, "temporary_hid", hid)
   
-  mconP <- lapply(conP, melt) ##convert tables to long form
-  mconH <- lapply(conH, melt) 
-  
   ## Names of the calibration variables for Person and household dimension
   pColNames <- lapply(conP,function(x)names(dimnames(x)))
   hColNames <- lapply(conH,function(x)names(dimnames(x)))
@@ -379,48 +376,40 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
     current_colnames <- pColNames[[i]]
 
     for(colname in current_colnames){
-      if(class(dat[[colname]]) != "factor")
+      if(!inherits(dat[[colname]], "factor")){
+        message("converting column ", colname, " to factor.\n")
         set(
           dat, j = colname, 
           value = factor(dat[[colname]], levels = dimnames(conP[[i]])[[colname]])
         )
-    }
-    dat[, paste0("combined_factors_", i) := combine_factors(dat, pColNames[[i]])]
-    
-    # Harmonize the class of columns coming from the constraints
-    # the result from melt is taken as character and then the class is set
-    # melt does not make any sense for one dimensional numerical constraints however
-    if(!(dim(conP[[i]])==1 && identical(colnames(mconP[[i]]),c("Var1", "value")))){
-      cn <- colnames(mconP[[i]])[-ncol(mconP[[i]])]
-      for(j in seq_along(cn)){
-        cl <- class(dat[[cn[j]]])
-        if("factor"%in%cl){
-          if (!identical(levels(dat[[cn[j]]]), levels(mconP[[i]][[cn[j]]]))){
-            if(verbose)
-              message("convert conP", i, " ", j, " ", class(mconP[[i]][[cn[j]]]))
-            mconP[[i]][[cn[j]]] <- factor(mconP[[i]][[cn[j]]],levels=levels(dat[[cn[j]]]))
-          }
-        }else if("numeric"%in%cl){
-          mconP[[i]][[cn[j]]] <- as.numeric(mconP[[i]][[cn[j]]])
-        }else if("integer"%in%cl){
-          mconP[[i]][[cn[j]]] <- as.integer(mconP[[i]][[cn[j]]])
-        }
       }
-      
-      dat <- merge(dat,mconP[[i]],by=colnames(mconP[[i]])[-ncol(mconP[[i]])],all.x=TRUE,all.y=FALSE)
-      setnames(dat,"value",valueP[i])
-    }else{
-      dat[,value:=conP[[i]]]
-      setnames(dat,"value",valueP[i])
+      else if(!identical(levels(dat[[colname]]), dimnames(conP[[i]])[[colname]])){
+        message("correct levels of column ", colname)
+        set(
+          dat, j = colname, 
+          value = factor(dat[[colname]], levels = dimnames(conP[[i]])[[colname]])
+        )
+      }
     }
+    combined_factors <- combine_factors(dat, pColNames[[i]])
+    
+    dat[, paste0("combined_factors_", i) := combined_factors]
+    dat[, paste0("valueP", i) := conP[[i]][combined_factors]]
   }
   for(i in seq_along(conH)){
     colnames <- hColNames[[i]]
     
     ## make sure the columns mentioned in the contingency table are in fact factors
     for(colname in colnames){
-      if (!identical(levels(dat[[colname]]), dimnames(conH[[i]])[[colname]])){
+      if (!inherits(dat[[colname]], "factor")){
         message("converting column ", colname, " to factor.\n")
+        set(
+          dat, j = colname, 
+          value = factor(dat[[colname]], levels = dimnames(conH[[i]])[[colname]])
+        )
+      }
+      else if(!identical(levels(dat[[colname]]), dimnames(conH[[i]])[[colname]])){
+        message("correct levels of column ", colname)
         set(
           dat, j = colname, 
           value = factor(dat[[colname]], levels = dimnames(conH[[i]])[[colname]])
@@ -428,34 +417,12 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
       }
     }
     
-    dat[, paste0("combined_factors_h_", i) := combine_factors(dat, hColNames[[i]])]
+    combined_factors <- combine_factors(dat, hColNames[[i]])
     
-    if(!(dim(conH[[i]])==1 && identical(colnames(mconH[[i]]),c("Var1", "value")))){
-      cn <- colnames(mconH[[i]])[-ncol(mconH[[i]])]
-      for(j in seq_along(cn)){
-        ## if dimnames of arrays are "numerics" i.e. "1", "2", etc., melt will save them as
-        ## integer columns. convert those columns to factors. 
-        if (!inherits(mconH[[i]][[cn[j]]], "factor")){
-          if(verbose)
-            message("convert melted version of conH to factor: variable ", cn[j])
-          mconH[[i]][[cn[j]]] <- factor(
-            mconH[[i]][[cn[j]]],
-            ## explicitly pass levels to keep levels-order intact
-            levels=levels(dat[[cn[j]]])
-          )
-        }
-      }
-      dat <- merge(dat,mconH[[i]],by=colnames(mconH[[i]])[-ncol(mconH[[i]])],all.x=TRUE,all.y=FALSE)
-      setnames(dat,"value",valueH[i])
-    }else{
-      dat[,value:=conH[[i]]]
-      setnames(dat,"value",valueH[i])
-    }
+    dat[, paste0("combined_factors_h_", i) := combined_factors]
+    dat[, paste0("valueH", i) := conH[[i]][combined_factors]]
   }
   
-  if(nrow(dat)!=nrowOriginal){
-    stop("There were problems merging the constraints to the data!\n")
-  }
   pCalVar <- paste0("pcal",1:ncp)
   hCalVar <- paste0("hcal",1:nch)
   
