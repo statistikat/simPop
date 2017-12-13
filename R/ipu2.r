@@ -97,8 +97,9 @@ calibP <- function(i,conP, epsP, dat, error, valueP, pColNames, bound, verbose, 
     cat(calIter, ":Not yet converged for P-Constraint",i,"\n")
   }
   
-  return(list(dat=dat,error=error))
+  return(error)
 }
+
 calibH <- function(i,conH, epsH, dat, error, valueH, hColNames, bound, verbose, calIter, looseH){  
   if(is.list(epsH)){
     epsHcur <- epsH[[i]]
@@ -154,7 +155,7 @@ calibH <- function(i,conH, epsH, dat, error, valueH, hColNames, bound, verbose, 
       print(subset(dat,!is.na(f))[abs(1/f-1)>epsHcur][,list(mean(f),.N),by=eval(hColNames[[i]])])
     cat(calIter, ":Not yet converged for H-Constraint",i,"\n")
   }
-  return(list(dat=dat,error=error))
+  return(error)
 }
 
 #' Iterative Proportional Updating
@@ -446,12 +447,8 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
       ### Person calib
       for(i in seq_along(conP)){
         
-        res <- calibP(i=i, conP=conP, epsP=epsP, dat=dat, error=error,
+        error <- calibP(i=i, conP=conP, epsP=epsP, dat=dat, error=error,
                       valueP=valueP, pColNames=pColNames,bound=bound, verbose=verbose, calIter=calIter, numericalWeighting=numericalWeighting)
-        
-        dat <- res[["dat"]]
-        error <- res[["error"]]
-        rm(res)
       }
       if(meanHH){
         ## replace person weight with household average
@@ -459,33 +456,24 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
       }
       ### Household calib
       for(i in seq_along(conH)){
-        res <- calibH(i=i, conH=conH, epsH=epsH, dat=dat, error=error,
+        error <- calibH(i=i, conH=conH, epsH=epsH, dat=dat, error=error,
                       valueH=valueH, hColNames=hColNames,bound=bound, verbose=verbose, calIter=calIter, looseH=looseH)
-        dat <- res[["dat"]]
-        error <- res[["error"]]
-        rm(res)
       }
     }else{
       ### Person calib
       for(i in seq_along(conP)){
         
-        res <- calibP(i=i, conP=conP, epsP=epsP, dat=dat, error=error,
+        error <- calibP(i=i, conP=conP, epsP=epsP, dat=dat, error=error,
                       valueP=valueP, pColNames=pColNames,bound=bound, verbose=verbose, calIter=calIter, numericalWeighting=numericalWeighting)
-        dat <- res[["dat"]]
-        error <- res[["error"]]
-        rm(res)
-        
+
         if(meanHH){
           ## replace person weight with household average
           dat[,calibWeight := geometric_mean(calibWeight, dat[[hid]])]
         }
         ### Household calib
         for(i in seq_along(conH)){
-          res <- calibH(i=i, conH=conH, epsH=epsH, dat=dat, error=error,
+          error <- calibH(i=i, conH=conH, epsH=epsH, dat=dat, error=error,
                         valueH=valueH, hColNames=hColNames,bound=bound, verbose=verbose, calIter=calIter, looseH=looseH)
-          dat <- res[["dat"]]
-          error <- res[["error"]]
-          rm(res)
         }
       }
     }
