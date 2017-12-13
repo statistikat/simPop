@@ -11,7 +11,8 @@
 ipu2(dat, hid = NULL, conP = NULL, conH = NULL, epsP = 1e-06,
   epsH = 0.01, verbose = FALSE, w = NULL, bound = 4, maxIter = 200,
   meanHH = TRUE, allPthenH = TRUE, returnNA = TRUE, looseH = FALSE,
-  numericalWeighting = computeLinear, check_hh_vars = TRUE)
+  numericalWeighting = computeLinear, check_hh_vars = TRUE,
+  conversion_messages = FALSE)
 
 computeFrac(curValue, Value, numericVar, weightVec)
 

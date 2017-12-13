@@ -291,8 +291,8 @@ calibH <- function(i,conH, epsH, dat, error, valueH, hColNames, bound, verbose, 
 #  coef <- optim(c(1,1),fn)$par
 ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FALSE,
                  w=NULL,bound=4,maxIter=200,meanHH=TRUE,allPthenH=TRUE,returnNA=TRUE,looseH=FALSE,
-                 numericalWeighting=computeLinear, check_hh_vars = TRUE){
-  
+                 numericalWeighting=computeLinear, check_hh_vars = TRUE, conversion_messages = FALSE){
+
   OriginalSortingVariable <- V1 <- baseWeight <- calibWeight <- epsvalue <- f <- NULL
   temporary_hid <- temporary_hvar <- tmpVarForMultiplication <- value <- wValue <- wvst<- NULL
   dat_original <- dat
@@ -345,14 +345,16 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
 
     for(colname in current_colnames){
       if(!inherits(dat[[colname]], "factor")){
-        message("converting column ", colname, " to factor.\n")
+        if(conversion_messages)
+          message("converting column ", colname, " to factor")
         set(
           dat, j = colname, 
           value = factor(dat[[colname]], levels = dimnames(conP[[i]])[[colname]])
         )
       }
       else if(!identical(levels(dat[[colname]]), dimnames(conP[[i]])[[colname]])){
-        message("correct levels of column ", colname)
+        if(conversion_messages)
+          message("correct levels of column ", colname)
         set(
           dat, j = colname, 
           value = factor(dat[[colname]], levels = dimnames(conP[[i]])[[colname]])
@@ -370,14 +372,16 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
     ## make sure the columns mentioned in the contingency table are in fact factors
     for(colname in colnames){
       if (!inherits(dat[[colname]], "factor")){
-        message("converting column ", colname, " to factor.\n")
+        if(conversion_messages)
+          message("converting column ", colname, " to factor")
         set(
           dat, j = colname, 
           value = factor(dat[[colname]], levels = dimnames(conH[[i]])[[colname]])
         )
       }
       else if(!identical(levels(dat[[colname]]), dimnames(conH[[i]])[[colname]])){
-        message("correct levels of column ", colname)
+        if(conversion_messages)
+          message("correct levels of column ", colname)
         set(
           dat, j = colname, 
           value = factor(dat[[colname]], levels = dimnames(conH[[i]])[[colname]])
