@@ -36,12 +36,7 @@ boundsFakHH <- function(g1,g0,eps,orig,p,bound=4){ # Berechnet die neuen Gewicht
   g1[(g1/g0)<(1/bound)] <- (1/bound)*g0[(g1/g0)<(1/bound)]
   return(g1)
 }
-meltepsfun <- function(x){
-  if(is.array(x)){
-    x <- melt(x,as.is=TRUE,value.name="epsvalue")
-  }
-  return(x)
-}
+
 calibP <- function(i,conP, epsP, dat, error, valueP, pColNames, bound, verbose, calIter, numericalWeighting){  
   if(is.list(epsP)){
     epsPcur <- epsP[[i]]
@@ -62,13 +57,6 @@ calibP <- function(i,conP, epsP, dat, error, valueP, pColNames, bound, verbose, 
     # try to divide the weight between units with larger/smaller value in the numerical variable linear
     dat[,f:=numericalWeighting(head(wValue,1),head(value,1),tmpVarForMultiplication,calibWeight),by=eval(pColNames[[i]])]
     
-    # if(meanHH){
-    #   # Apply person-level adjustments in a multilicative way per http://www.scag.ca.gov/Documents/PopulationSynthesizerPaper_TRB.pdf
-    #   # dat[duplicated(subset(dat, select = c(hid, eval(pColNames[[i]])))),f:= 1]
-    #   # dat[,f:=prod(f),by=eval(hid)] 
-    #   dat[,f:=gm_mean(f),by=eval(hid)] 
-    # }
-    
     setnames(dat,"tmpVarForMultiplication",names(conP)[i])
     if(is.array(epsPcur)){## for numeric variables not the factor f is used but the abs relative deviation is computed per class
       curEps <- abs(dat[!is.na(f),1/(value/wValue)-1]) ## curEps is computed for all observations to compare it with the right epsValue
@@ -80,13 +68,6 @@ calibP <- function(i,conP, epsP, dat, error, valueP, pColNames, bound, verbose, 
     setnames(dat,valueP[i],"value")
     combined_factors <- dat[[paste0("combined_factors_", i)]]
     dat[, f := ipu_step_f(dat$calibWeight, combined_factors, conP[[i]])]
-    
-    # if(meanHH){
-    #   # Apply person-level adjustments in a multilicative way per http://www.scag.ca.gov/Documents/PopulationSynthesizerPaper_TRB.pdf
-    #   # dat[duplicated(subset(dat, select = c(hid, eval(pColNames[[i]])))),f:= 1]
-    #   # dat[,f:=prod(f),by=eval(hid)] 
-    #   dat[,f:=gm_mean(f),by=eval(hid)] 
-    # }
     
     if(is.array(epsPcur)){
       curEps <- abs(dat[!is.na(f),1/f-1]) ## curEps is computed for all observations to compare it with the right epsValue
@@ -150,9 +131,7 @@ calibH <- function(i,conH, epsH, dat, error, valueH, hColNames, bound, verbose, 
   }else{
     curEps <- dat[,max(abs(1/f-1))]
   }
-  # if(is.array(epsHcur)){## was soll das?
-  #   dat[,epsvalue:=NULL]
-  # }
+
   if(any(curEps>epsHcur)){    
     if(!is.null(bound)){
       if(!looseH){
@@ -164,9 +143,6 @@ calibH <- function(i,conH, epsH, dat, error, valueH, hColNames, bound, verbose, 
       dat[,calibWeight:=f*calibWeight,by=eval(hColNames[[i]])]
     }
     error <- TRUE
-  }
-  if("epsvalue"%in%colnames(dat)){
-    dat[,epsvalue:=NULL]
   }
   
   setnames(dat,"value",valueH[i])
@@ -180,14 +156,6 @@ calibH <- function(i,conH, epsH, dat, error, valueH, hColNames, bound, verbose, 
   }
   return(list(dat=dat,error=error))
 }
-# From package robCompositions
-# gm_mean <- function(x){
-#   if (!is.numeric(x)) 
-#     stop("x has to be a vector of class numeric")
-#   if (any(na.omit(x == 0))) 
-#     0
-#   else exp(mean(log(unclass(x)[is.finite(x) & x > 0])))
-# }
 
 #' Iterative Proportional Updating
 #' 
