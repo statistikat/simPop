@@ -328,7 +328,11 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
   }
   
   setnames(dat, hid, "temporary_hid")
-  dat[, temporary_hid := as.factor(temporary_hid)]
+  if(!is.factor(dat$temporary_hid)){
+    if(conversion_messages)
+      message("convert household variable ", hid, " to factor")
+    dat[, temporary_hid := as.factor(temporary_hid)]
+  }
   setnames(dat, "temporary_hid", hid)
   
   ## Names of the calibration variables for Person and household dimension
