@@ -86,6 +86,9 @@ these lower and upper thresholds, i.e. \code{conH}-\code{conH}*\code{epsH} and \
 \item{check_hh_vars}{If \code{TRUE} check for non-unique values inside of a household for variables in 
 household constraints}
 
+\item{conversion_messages}{show a message, if inputs need to be reformatted. This can be useful for speed 
+optimizations if ipu2 is called several times with similar inputs (for example bootstrapping)}
+
 \item{curValue}{the current value of the group total}
 
 \item{Value}{the target group total}

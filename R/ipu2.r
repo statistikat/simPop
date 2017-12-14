@@ -221,6 +221,8 @@ calibH <- function(i,conH, epsH, dat, error, valueH, hColNames, bound, verbose, 
 #' @param boundLinear the result of computeLinear will be bound by \code{1/boundLinear} and \code{boundLinear}
 #' @param check_hh_vars If \code{TRUE} check for non-unique values inside of a household for variables in 
 #'                      household constraints
+#' @param conversion_messages show a message, if inputs need to be reformatted. This can be useful for speed 
+#'        optimizations if ipu2 is called several times with similar inputs (for example bootstrapping)
 #' @return The function will return the input data \code{dat} with the
 #' calibrated weights \code{calibWeight} as an additional column.
 #' The algorithm performs best if all varables occuring in the constraints (\code{conP} and \code{conH}) are coded as \code{factor}-columns in 
