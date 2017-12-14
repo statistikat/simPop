@@ -57,7 +57,7 @@ calibP <- function(i,conP, epsP, dat, error, valueP, pColNames, bound, verbose, 
     
     # try to divide the weight between units with larger/smaller value in the numerical variable linear
     dat[,f:=numericalWeighting(head(wValue,1),head(value,1),tmpVarForMultiplication,calibWeight),
-        by=eval(pColNames[[i]])]
+        by=combined_factors]
     
     if(is.array(epsPcur)){## for numeric variables not the factor f is used but the abs relative deviation is computed per class
       curEps <- abs(dat[!is.na(f),1/(value/wValue)-1]) ## curEps is computed for all observations to compare it with the right epsValue
@@ -86,14 +86,14 @@ calibP <- function(i,conP, epsP, dat, error, valueP, pColNames, bound, verbose, 
     if(!is.null(bound)){
       dat[!is.na(f),calibWeight:=boundsFak(calibWeight,baseWeight,f,bound=bound)]#,by=eval(pColNames[[i]])]  
     }else{
-      dat[!is.na(f),calibWeight:=f*calibWeight,by=eval(pColNames[[i]])]
+      dat[!is.na(f),calibWeight:=f*calibWeight,by=combined_factors]
     }
     error <- TRUE
   }
   
   if(verbose&&any(curEps>epsPcur)&&calIter%%10==0){
     if(calIter%%100==0)
-      print(subset(dat,!is.na(f))[abs(1/f-1)>epsPcur][,list(mean(f),.N),by=eval(pColNames[[i]])])
+      print(subset(dat,!is.na(f))[abs(1/f-1)>epsPcur][,list(mean(f),.N),by=combined_factors])
     #print(dat[abs(1/f-1)>epsPcur][,list(mean(f),.N),by=eval(pColNames[[i]])])
     cat(calIter, ":Not yet converged for P-Constraint",i,"\n")
   }
@@ -144,14 +144,14 @@ calibH <- function(i,conH, epsH, dat, error, valueH, hColNames, bound, verbose, 
         dat[,calibWeight:=boundsFakHH(g1=calibWeight,g0=baseWeight,eps=epsHcur,orig=value,p=wValue,bound=bound)]  
       }
     }else{
-      dat[,calibWeight:=f*calibWeight,by=eval(hColNames[[i]])]
+      dat[,calibWeight:=f*calibWeight,by=combined_factors]
     }
     error <- TRUE
   }
   
   if(verbose&&any(curEps>epsHcur)&&calIter%%10==0){
     if(calIter%%100==0)
-      print(subset(dat,!is.na(f))[abs(1/f-1)>epsHcur][,list(mean(f),.N),by=eval(hColNames[[i]])])
+      print(subset(dat,!is.na(f))[abs(1/f-1)>epsHcur][,list(mean(f),.N),by=combined_factors])
     cat(calIter, ":Not yet converged for H-Constraint",i,"\n")
   }
   return(error)
