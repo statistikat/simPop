@@ -53,7 +53,7 @@ calibP <- function(i,conP, epsP, dat, error, valueP, pColNames, bound, verbose, 
     
     dat[, f := ipu_step_f(calibWeight*tmpVarForMultiplication, 
                           combined_factors, conP[[i]])]
-    dat[, wValue := f*value]
+    dat[, wValue := value/f]
     
     # try to divide the weight between units with larger/smaller value in the numerical variable linear
     dat[,f:=numericalWeighting(head(wValue,1),head(value,1),tmpVarForMultiplication,calibWeight),
@@ -125,7 +125,7 @@ calibH <- function(i,conH, epsH, dat, error, valueH, hColNames, bound, verbose, 
     dat[, f := ipu_step_f(calibWeight*wvst, combined_factors, conH[[i]])]
   }
   
-  dat[, wValue := f*value]
+  dat[, wValue := value/f]
   
   if(is.array(epsHcur)){
     curEps <- dat[,abs(1/f-1)]
@@ -139,7 +139,7 @@ calibH <- function(i,conH, epsH, dat, error, valueH, hColNames, bound, verbose, 
       if(!looseH){
         dat[,calibWeight:=boundsFak(g1=calibWeight,g0=baseWeight,f=f,bound=bound)]#,by=eval(hColNames[[i]])]    
       }else{
-        dat[,calibWeight:=boundsFakHH(g1=calibWeight,g0=baseWeight,eps=epsHcur,orig=value,p=wValue,bound=bound)]  
+        dat[,calibWeight:=boundsFakHH(g1=calibWeight,g0=baseWeight,eps=epsHcur*.9,orig=value,p=wValue,bound=bound)]  
       }
     }else{
       dat[,calibWeight:=f*calibWeight,by=combined_factors]
