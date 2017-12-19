@@ -42,14 +42,15 @@ computeLinear <- function(curValue, Value, numericVar, weightVec, boundLinear = 
     .Call('_simPop_computeLinear', PACKAGE = 'simPop', curValue, Value, numericVar, weightVec, boundLinear)
 }
 
-#' Geometric mean by factor
+#' Calculate mean by factors
 #' 
-#' This function calculates the geometric mean of the weight for each class. `geometric_mean` returns a `numeric` of 
-#' the same length as `w` which stores the averaged weight for each observation. `geometric_mean_reference` returns
-#' the same value by reference, i.e. the input value `w` gets overwritten by the updated weights. See examples.
+#' These functions calculate the arithmetic and geometric mean of the weight for each class. `geometric_mean` and
+#' `arithmetic_mean` return a `numeric` vector of the same length as `w` which stores the averaged weight for each 
+#' observation. `geometric_mean_reference` returns the same value by reference, i.e. the input value `w` gets 
+#' overwritten by the updated weights. See examples.
 #' 
 #' @md
-#' @name geometric_mean
+#' @name cpp_mean
 #' @param w An numeric vector. All entries should be positive.
 #' @param classes A factor variable. Must have the same length as `w`.
 #' @examples
@@ -64,26 +65,30 @@ computeLinear <- function(curValue, Value, numericVar, weightVec, boundLinear = 
 #' dat
 #' 
 #' ## calculate weights with geometric_mean
-#' new_weight <- geometric_mean(dat$weight, dat$household)
-#' cbind(dat, new_weight)
+#' geom_weight <- geometric_mean(dat$weight, dat$household)
+#' cbind(dat, geom_weight)
+#' 
+#' ## calculate weights with arithmetic_mean
+#' arith_weight <- arithmetic_mean(dat$weight, dat$household)
+#' cbind(dat, arith_weight)
 #' 
 #' ## calculate weights "by reference"
 #' geometric_mean_reference(dat$weight, dat$household)
 #' dat
 #' 
-#' @rdname geometric_mean
+#' @rdname cpp_mean
 #' @export
 geometric_mean_reference <- function(w, classes) {
     invisible(.Call('_simPop_geometric_mean_reference', PACKAGE = 'simPop', w, classes))
 }
 
-#' @rdname geometric_mean
+#' @rdname cpp_mean
 #' @export
 geometric_mean <- function(w, classes) {
     .Call('_simPop_geometric_mean', PACKAGE = 'simPop', w, classes)
 }
 
-#' @rdname geometric_mean
+#' @rdname cpp_mean
 #' @export
 arithmetic_mean <- function(w, classes) {
     .Call('_simPop_arithmetic_mean', PACKAGE = 'simPop', w, classes)
