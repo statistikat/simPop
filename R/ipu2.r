@@ -249,6 +249,8 @@ calibH <- function(i,conH, epsH, dat, error, valueH, hColNames, bound, verbose, 
 #' eusilcS[netIncome < 0, netIncome := 0] 
 #' # set hsize to 1,...,5+
 #' eusilcS[, hsize := cut(hsize, c(0:4, Inf), labels = c(1:4, "5+"))]
+#' # treat households as a factor variable
+#' eusilcS[, household := as.factor(household)]
 #' 
 #' ## example for base weights assuming a simple random sample of households stratified per region
 #' eusilcS[, regSamp := .N, by = state]
