@@ -66,3 +66,32 @@ NumericVector geometric_mean( const NumericVector& w, const IntegerVector& class
   return w_copy;
 }
 
+//' @rdname geometric_mean
+//' @export
+// [[Rcpp::export]]
+NumericVector arithmetic_mean(const NumericVector& w, const IntegerVector& classes) {
+  CharacterVector levels(classes.attr("levels"));
+  int nclasses = levels.size();
+  
+  NumericVector sums( nclasses );
+  NumericVector sizes( nclasses );
+  NumericVector w_copy(Rcpp::clone(w));
+  
+  for (int i = 0; i < w.size(); i++){
+    int cl = classes[i] - 1;
+    sums[cl] += w[i];
+    sizes[cl] += 1;
+  }
+  
+  NumericVector means(nclasses);
+  for(int cl = 0; cl < means.size(); cl++){
+    means[cl] = sums[cl]/sizes[cl];
+  }
+  
+  for(int i = 0; i < w.size(); i++){
+    int cl = classes[i] - 1;
+    w_copy[i] = means[cl];
+  }
+  return w_copy;
+}
+

@@ -83,6 +83,12 @@ geometric_mean <- function(w, classes) {
     .Call('_simPop_geometric_mean', PACKAGE = 'simPop', w, classes)
 }
 
+#' @rdname geometric_mean
+#' @export
+arithmetic_mean <- function(w, classes) {
+    .Call('_simPop_arithmetic_mean', PACKAGE = 'simPop', w, classes)
+}
+
 #' Perform one step of iterative proportional updating
 #' 
 #' C++ routine to invoke a single iteration of the IPU scheme. Targets and classes are assumed to be one dimensional. 

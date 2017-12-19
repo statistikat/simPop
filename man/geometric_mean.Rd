@@ -4,11 +4,14 @@
 \alias{geometric_mean}
 \alias{geometric_mean_reference}
 \alias{geometric_mean}
+\alias{arithmetic_mean}
 \title{Geometric mean by factor}
 \usage{
 geometric_mean_reference(w, classes)
 
 geometric_mean(w, classes)
+
+arithmetic_mean(w, classes)
 }
 \arguments{
 \item{w}{An numeric vector. All entries should be positive.}

@@ -68,7 +68,8 @@ and \code{bound}*\code{w}.}
 that should be performed.}
 
 \item{meanHH}{if TRUE, every person in a household is assigned the mean of
-the person weights corresponding to the household.}
+the person weights corresponding to the household. If \code{"geometric"}, the geometric mean
+is used rather than the arithmetic mean.}
 
 \item{allPthenH}{if TRUE, all the person level calibration steps are performed before the houshold level calibration steps (and \code{meanHH}, if specified). 
 If FALSE, the houshold level calibration steps (and \code{meanHH}, if specified) are performed after everey person level calibration step.

@@ -1,3 +1,18 @@
+getMeanFun <- function(meanHH){
+  if(isTRUE(meanHH))
+    meanHH <- "arithmetic"
+  if(identical(meanHH, FALSE))
+    meanHH <- "none"
+  meanfun <- switch (meanHH,
+    arithmetic = arithmetic_mean,
+    geometric = geometric_mean,
+    none = function(x,w){x}
+  )
+  if(is.null(meanfun))
+    stop("invalid value for meanHH")
+  meanfun
+}
+
 #' Kish Factor
 #' 
 #' Compute the kish factor for a specific weight vector
@@ -204,7 +219,8 @@ calibH <- function(i,conH, epsH, dat, error, valueH, hColNames, bound, verbose, 
 #' @param maxIter numeric value specifying the maximum number of iterations
 #' that should be performed.
 #' @param meanHH if TRUE, every person in a household is assigned the mean of
-#' the person weights corresponding to the household.
+#' the person weights corresponding to the household. If \code{"geometric"}, the geometric mean
+#' is used rather than the arithmetic mean.
 #' @param allPthenH if TRUE, all the person level calibration steps are performed before the houshold level calibration steps (and \code{meanHH}, if specified). 
 #' If FALSE, the houshold level calibration steps (and \code{meanHH}, if specified) are performed after everey person level calibration step.
 #' This can lead to better convergence properties in certain cases but also means that the total number of calibration steps is increased.
@@ -304,6 +320,7 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
   dat <- copy(dat)
   ## originalsorting is fucked up without this
   dat[,OriginalSortingVariable:=.I]
+  meanfun <- getMeanFun(meanHH)
   
   # dat sollte ein data.table sein
   # w ein Name eines Basisgewichts oder NULL
@@ -454,10 +471,10 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
         error <- calibP(i=i, conP=conP, epsP=epsP, dat=dat, error=error,
                       valueP=valueP, pColNames=pColNames,bound=bound, verbose=verbose, calIter=calIter, numericalWeighting=numericalWeighting)
       }
-      if(meanHH){
-        ## replace person weight with household average
-        dat[,calibWeight := geometric_mean(calibWeight, dat[[hid]])]
-      }
+        
+      ## replace person weight with household average
+      dat[,calibWeight := meanfun(calibWeight, dat[[hid]])]
+
       ### Household calib
       for(i in seq_along(conH)){
         error <- calibH(i=i, conH=conH, epsH=epsH, dat=dat, error=error,
@@ -470,10 +487,9 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
         error <- calibP(i=i, conP=conP, epsP=epsP, dat=dat, error=error,
                       valueP=valueP, pColNames=pColNames,bound=bound, verbose=verbose, calIter=calIter, numericalWeighting=numericalWeighting)
 
-        if(meanHH){
-          ## replace person weight with household average
-          dat[,calibWeight := geometric_mean(calibWeight, dat[[hid]])]
-        }
+        ## replace person weight with household average
+        dat[,calibWeight := meanfun(calibWeight, dat[[hid]])]
+
         ### Household calib
         for(i in seq_along(conH)){
           error <- calibH(i=i, conH=conH, epsH=epsH, dat=dat, error=error,
