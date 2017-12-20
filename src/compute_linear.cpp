@@ -1,33 +1,33 @@
 #include <Rcpp.h>
 using namespace Rcpp;
 
-//' @rdname ipu2
+//' @rdname computeFrac
 //' @export
 // [[Rcpp::export]]
 NumericVector computeLinear(double curValue, 
-                            double Value, 
-                            const NumericVector& numericVar,
-                            const NumericVector& weightVec, 
+                            double target, 
+                            const NumericVector& x,
+                            const NumericVector& w, 
                             double boundLinear = 10) {
   double h = 0.0;
   double j = 0.0;
   double N = 0.0;
   
-  for(int i = 0; i < numericVar.size(); i++){
-    h += weightVec[i]*numericVar[i];
-    j += weightVec[i]*numericVar[i]*numericVar[i];
-    N += weightVec[i];
+  for(int i = 0; i < x.size(); i++){
+    h += w[i]*x[i];
+    j += w[i]*x[i]*x[i];
+    N += w[i];
   }
   
-  double b = (Value-N*j/h)/(h-N*j/h);
+  double b = (target-N*j/h)/(h-N*j/h);
   double a = (N-b*N)/h;
 
-  NumericVector f(numericVar.size());
-  for(int i = 0; i < numericVar.size(); i++)
-    f[i] = a*numericVar[i] + b;
+  NumericVector f(x.size());
+  for(int i = 0; i < x.size(); i++)
+    f[i] = a*x[i] + b;
   
   //apply bounds
-  for(int i = 0; i < numericVar.size(); i++){
+  for(int i = 0; i < x.size(); i++){
     if (f[i] < 1.0/boundLinear)
       f[i] = 1.0/boundLinear;
     if (f[i] > boundLinear)

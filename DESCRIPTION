@@ -53,6 +53,7 @@ Collate:
     'getBreaks.R'
     'getCat.R'
     'ipu.r'
+    'numericalWeighting.R'
     'ipu2.r'
     'meanWt.R'
     'printFunctions.R'

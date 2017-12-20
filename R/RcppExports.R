@@ -15,10 +15,10 @@ combine_factors <- function(dat, factor_columns, asfactor = TRUE) {
     .Call('_simPop_combine_factors', PACKAGE = 'simPop', dat, factor_columns, asfactor)
 }
 
-#' @rdname ipu2
+#' @rdname computeFrac
 #' @export
-computeLinear <- function(curValue, Value, numericVar, weightVec, boundLinear = 10) {
-    .Call('_simPop_computeLinear', PACKAGE = 'simPop', curValue, Value, numericVar, weightVec, boundLinear)
+computeLinear <- function(curValue, target, x, w, boundLinear = 10) {
+    .Call('_simPop_computeLinear', PACKAGE = 'simPop', curValue, target, x, w, boundLinear)
 }
 
 #' Calculate mean by factors

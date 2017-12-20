@@ -179,7 +179,8 @@ calibH <- function(i,conH, epsH, dat, error, valueH, hColNames, bound, verbose, 
 #' 
 #'
 #' @name ipu2 
-#' @aliases ipu2 computeLinear computeFrac 
+#' @md
+#' @aliases ipu2
 #' @param dat a \code{data.table} containing household ids (optionally), base
 #' weights (optionally), household and/or personal level variables (numerical
 #' or categorical) that should be fitted.
@@ -229,7 +230,7 @@ calibH <- function(i,conH, epsH, dat, error, valueH, hColNames, bound, verbose, 
 #' If TRUE, only the weights for which the lower and upper thresholds defined by \code{conH} and \code{epsH} are exceeded
 #' are calibrated. They are however not calibrated against the actual constraints \code{conH} but against
 #' these lower and upper thresholds, i.e. \code{conH}-\code{conH}*\code{epsH} and \code{conH}+\code{conH}*\code{epsH}.
-#' @param numericalWeighting ...
+#' @param numericalWeighting See [numericalWeighting]
 #' @param curValue the current value of the group total
 #' @param Value the target group total
 #' @param numericVar vector with the values of the numeric variable
@@ -515,9 +516,4 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
   }else{
     invisible(copy(dat_original)[,calibWeight := dat$calibWeight])  
   }  
-}
-#' @rdname ipu2
-#' @export computeFrac
-computeFrac <- function(curValue,Value,numericVar,weightVec){
-  Value/curValue
 }
