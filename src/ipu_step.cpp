@@ -48,7 +48,8 @@ using namespace Rcpp;
 //' 
 //' ## load data
 //' factors <- c("time", "sex", "smoker", "day")
-//' tips <- reshape2::tips[factors]
+//' data(tips, package = "reshape2")
+//' tips <- tips[factors]
 //' 
 //' ## combine factors
 //' cf <- combine_factors(tips, names(tips))

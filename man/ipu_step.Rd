@@ -23,14 +23,14 @@ ipu_step_f(w, classes, targets)
 \item{factor_columns}{a \code{character} vector containing the column names in \code{dat} to be combined. All columns must
 be factors.}
 
+\item{asfactor}{Wheter to return an integer or a factor variable.}
+
 \item{w}{An numeric vector of weights. All entries should be positive.}
 
 \item{classes}{A factor variable. Must have the same length as \code{w}.}
 
 \item{targets}{key figure to target with the ipu scheme. A numeric verctor of the same length as \code{levels(classes)}.
 This can also be a \code{table} produced by \code{xtabs}. See examples.}
-
-\item{as_factor}{Wheter to return an integer or a factor variable.}
 }
 \description{
 C++ routines to invoke a single iteration of the Iterative proportional updating (IPU) scheme. Targets and classes
@@ -73,7 +73,8 @@ dat
 
 ## load data
 factors <- c("time", "sex", "smoker", "day")
-tips <- reshape2::tips[factors]
+data(tips, package = "reshape2")
+tips <- tips[factors]
 
 ## combine factors
 cf <- combine_factors(tips, names(tips))

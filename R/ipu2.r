@@ -52,7 +52,10 @@ boundsFakHH <- function(g1,g0,eps,orig,p,bound=4){ # Berechnet die neuen Gewicht
   return(g1)
 }
 
-calibP <- function(i,conP, epsP, dat, error, valueP, pColNames, bound, verbose, calIter, numericalWeighting){  
+calibP <- function(i,conP, epsP, dat, error, valueP, pColNames, bound, verbose, calIter, numericalWeighting){
+  OriginalSortingVariable <- V1 <- baseWeight <- calibWeight <- epsvalue <- f <- NULL
+  temporary_hid <- temporary_hvar <- tmpVarForMultiplication <- value <- wValue <- wvst<- NULL
+  
   if(is.list(epsP)){
     epsPcur <- epsP[[i]]
   }else{
@@ -117,6 +120,9 @@ calibP <- function(i,conP, epsP, dat, error, valueP, pColNames, bound, verbose, 
 }
 
 calibH <- function(i,conH, epsH, dat, error, valueH, hColNames, bound, verbose, calIter, looseH){  
+  OriginalSortingVariable <- V1 <- baseWeight <- calibWeight <- epsvalue <- f <- NULL
+  temporary_hid <- temporary_hvar <- tmpVarForMultiplication <- value <- wValue <- wvst<- NULL
+  
   if(is.list(epsH)){
     epsHcur <- epsH[[i]]
   }else{

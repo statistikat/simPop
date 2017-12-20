@@ -7,7 +7,7 @@ using namespace Rcpp;
 //' @param dat a data.frame containing the factor variables to be combined.
 //' @param factor_columns a `character` vector containing the column names in `dat` to be combined. All columns must
 //' be factors.
-//' @param as_factor Wheter to return an integer or a factor variable.
+//' @param asfactor Wheter to return an integer or a factor variable.
 //' 
 //' @export
 // [[Rcpp::export]]

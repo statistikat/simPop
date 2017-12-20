@@ -8,7 +8,7 @@
 #' @param dat a data.frame containing the factor variables to be combined.
 #' @param factor_columns a `character` vector containing the column names in `dat` to be combined. All columns must
 #' be factors.
-#' @param as_factor Wheter to return an integer or a factor variable.
+#' @param asfactor Wheter to return an integer or a factor variable.
 #' 
 #' @export
 combine_factors <- function(dat, factor_columns, asfactor = TRUE) {
@@ -120,7 +120,8 @@ arithmetic_mean <- function(w, classes) {
 #' 
 #' ## load data
 #' factors <- c("time", "sex", "smoker", "day")
-#' tips <- reshape2::tips[factors]
+#' data(tips, package = "reshape2")
+#' tips <- tips[factors]
 #' 
 #' ## combine factors
 #' cf <- combine_factors(tips, names(tips))
