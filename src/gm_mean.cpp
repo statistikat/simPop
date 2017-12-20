@@ -2,14 +2,15 @@
 #include <math.h>
 using namespace Rcpp;
 
-//' Geometric mean by factor
+//' Calculate mean by factors
 //' 
-//' This function calculates the geometric mean of the weight for each class. `geometric_mean` returns a `numeric` of 
-//' the same length as `w` which stores the averaged weight for each observation. `geometric_mean_reference` returns
-//' the same value by reference, i.e. the input value `w` gets overwritten by the updated weights. See examples.
+//' These functions calculate the arithmetic and geometric mean of the weight for each class. `geometric_mean` and
+//' `arithmetic_mean` return a `numeric` vector of the same length as `w` which stores the averaged weight for each 
+//' observation. `geometric_mean_reference` returns the same value by reference, i.e. the input value `w` gets 
+//' overwritten by the updated weights. See examples.
 //' 
 //' @md
-//' @name geometric_mean
+//' @name cpp_mean
 //' @param w An numeric vector. All entries should be positive.
 //' @param classes A factor variable. Must have the same length as `w`.
 //' @examples
@@ -24,38 +25,78 @@ using namespace Rcpp;
 //' dat
 //' 
 //' ## calculate weights with geometric_mean
-//' new_weight <- geometric_mean(dat$weight, dat$household)
-//' cbind(dat, new_weight)
+//' geom_weight <- geometric_mean(dat$weight, dat$household)
+//' cbind(dat, geom_weight)
+//' 
+//' ## calculate weights with arithmetic_mean
+//' arith_weight <- arithmetic_mean(dat$weight, dat$household)
+//' cbind(dat, arith_weight)
 //' 
 //' ## calculate weights "by reference"
 //' geometric_mean_reference(dat$weight, dat$household)
 //' dat
 //' 
-//' @rdname geometric_mean
+//' @rdname cpp_mean
 //' @export
 // [[Rcpp::export]]
-void geometric_mean_reference(NumericVector w, const IntegerVector classes) {
+void geometric_mean_reference(NumericVector& w, const IntegerVector& classes) {
   CharacterVector levels(classes.attr("levels"));
   int nclasses = levels.size();
   
   NumericVector sums( nclasses );
   NumericVector sizes( nclasses );
+  
   for (int i = 0; i < w.size(); i++){
     int cl = classes[i] - 1;
     sums[cl] += log(w[i]);
     sizes[cl] += 1;
   }
+  
+  NumericVector means(nclasses);
+  for(int cl = 0; cl < means.size(); cl++){
+    means[cl] = exp(sums[cl]/sizes[cl]);
+  }
+  
   for(int i = 0; i < w.size(); i++){
     int cl = classes[i] - 1;
-    w[i] = exp( sums[cl]/sizes[cl] );
+    w[i] = means[cl];
   }
 }
-//' @rdname geometric_mean
+//' @rdname cpp_mean
 //' @export
 // [[Rcpp::export]]
-NumericVector geometric_mean( const NumericVector w, const IntegerVector& classes ){
+NumericVector geometric_mean( const NumericVector& w, const IntegerVector& classes ){
   NumericVector w_copy( Rcpp::clone( w ) );
   geometric_mean_reference( w_copy, classes );
+  return w_copy;
+}
+
+//' @rdname cpp_mean
+//' @export
+// [[Rcpp::export]]
+NumericVector arithmetic_mean(const NumericVector& w, const IntegerVector& classes) {
+  CharacterVector levels(classes.attr("levels"));
+  int nclasses = levels.size();
+  
+  NumericVector sums( nclasses );
+  NumericVector sizes( nclasses );
+  NumericVector w_copy(Rcpp::clone(w));
+  
+  for (int i = 0; i < w.size(); i++){
+    int cl = classes[i] - 1;
+    sums[cl] += w[i];
+    sizes[cl] += 1;
+  }
+  
+  NumericVector means(nclasses);
+  for(int cl = 0; cl < means.size(); cl++){
+    means[cl] = sums[cl]/sizes[cl];
+  }
+  
+  for(int i = 0; i < w.size(); i++){
+    int cl = classes[i] - 1;
+    w_copy[i] = means[cl];
+  }
   return w_copy;
 }
 

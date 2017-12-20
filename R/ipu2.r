@@ -1,3 +1,18 @@
+getMeanFun <- function(meanHH){
+  if(isTRUE(meanHH))
+    meanHH <- "arithmetic"
+  if(identical(meanHH, FALSE))
+    meanHH <- "none"
+  meanfun <- switch (meanHH,
+    arithmetic = arithmetic_mean,
+    geometric = geometric_mean,
+    none = function(x,w){x}
+  )
+  if(is.null(meanfun))
+    stop("invalid value for meanHH")
+  meanfun
+}
+
 #' Kish Factor
 #' 
 #' Compute the kish factor for a specific weight vector
@@ -36,57 +51,43 @@ boundsFakHH <- function(g1,g0,eps,orig,p,bound=4){ # Berechnet die neuen Gewicht
   g1[(g1/g0)<(1/bound)] <- (1/bound)*g0[(g1/g0)<(1/bound)]
   return(g1)
 }
-meltepsfun <- function(x){
-  if(is.array(x)){
-    x <- melt(x,as.is=TRUE,value.name="epsvalue")
-  }
-  return(x)
-}
-calibP <- function(i,conP, epsP, mepsP, dat, error, valueP, pColNames, bound, verbose, calIter, numericalWeighting){  
+
+calibP <- function(i,conP, epsP, dat, error, valueP, pColNames, bound, verbose, calIter, numericalWeighting){
   OriginalSortingVariable <- V1 <- baseWeight <- calibWeight <- epsvalue <- f <- NULL
   temporary_hid <- temporary_hvar <- tmpVarForMultiplication <- value <- wValue <- wvst<- NULL
+  
   if(is.list(epsP)){
     epsPcur <- epsP[[i]]
-    mepsPcur <- mepsP[[i]]
   }else{
     epsPcur <- epsP
-    # mepsPcur <- mepsP
   }
+  combined_factors <- dat[[paste0("combined_factors_", i)]]
   
   if(isTRUE(names(conP)[i]!="")){
     ## numerical variable to be calibrated
     ## use name of conP list element to define numerical variable
     setnames(dat,names(conP)[i],"tmpVarForMultiplication")
-    dat[,wValue:=sum(calibWeight*tmpVarForMultiplication),by=eval(pColNames[[i]])]
     setnames(dat,valueP[i],"value")
+    
+    dat[, f := ipu_step_f(calibWeight*tmpVarForMultiplication, 
+                          combined_factors, conP[[i]])]
+    dat[, wValue := value/f]
+    
     # try to divide the weight between units with larger/smaller value in the numerical variable linear
-    dat[,f:=numericalWeighting(head(wValue,1),head(value,1),tmpVarForMultiplication,calibWeight),by=eval(pColNames[[i]])]
+    dat[,f:=numericalWeighting(head(wValue,1),head(value,1),tmpVarForMultiplication,calibWeight),
+        by=combined_factors]
     
-    # if(meanHH){
-    #   # Apply person-level adjustments in a multilicative way per http://www.scag.ca.gov/Documents/PopulationSynthesizerPaper_TRB.pdf
-    #   # dat[duplicated(subset(dat, select = c(hid, eval(pColNames[[i]])))),f:= 1]
-    #   # dat[,f:=prod(f),by=eval(hid)] 
-    #   dat[,f:=gm_mean(f),by=eval(hid)] 
-    # }
-    
-    setnames(dat,"tmpVarForMultiplication",names(conP)[i])
     if(is.array(epsPcur)){## for numeric variables not the factor f is used but the abs relative deviation is computed per class
       curEps <- abs(dat[!is.na(f),1/(value/wValue)-1]) ## curEps is computed for all observations to compare it with the right epsValue
     }else{
       curEps <- dat[!is.na(f),max(abs(1/(value/wValue)-1))]  ## only the max curEps is needed because it is the same for all classed of the current variable
     }
+    
+    setnames(dat,"tmpVarForMultiplication",names(conP)[i])
+    setnames(dat,"value",valueP[i])
   }else{
     # categorical variable to be calibrated
-    setnames(dat,valueP[i],"value")
-    combined_factors <- dat[[paste0("combined_factors_", i)]]
     dat[, f := ipu_step_f(dat$calibWeight, combined_factors, conP[[i]])]
-    
-    # if(meanHH){
-    #   # Apply person-level adjustments in a multilicative way per http://www.scag.ca.gov/Documents/PopulationSynthesizerPaper_TRB.pdf
-    #   # dat[duplicated(subset(dat, select = c(hid, eval(pColNames[[i]])))),f:= 1]
-    #   # dat[,f:=prod(f),by=eval(hid)] 
-    #   dat[,f:=gm_mean(f),by=eval(hid)] 
-    # }
     
     if(is.array(epsPcur)){
       curEps <- abs(dat[!is.na(f),1/f-1]) ## curEps is computed for all observations to compare it with the right epsValue
@@ -95,9 +96,7 @@ calibP <- function(i,conP, epsP, mepsP, dat, error, valueP, pColNames, bound, ve
     }
   }
   if(is.array(epsPcur)){
-    dat <- merge(dat,mepsPcur,by=pColNames[[i]],all.x=TRUE,all.y=FALSE)
-    epsPcur <-dat[!is.na(f),epsvalue]
-    dat[,epsvalue:=NULL]
+    epsPcur <- dat[!is.na(f), paste0("epsP_", i)]
   }
   
   if(any(curEps>epsPcur)){## sicherheitshalber abs(epsPcur)? Aber es wird schon niemand negative eps Werte uebergeben??
@@ -105,11 +104,10 @@ calibP <- function(i,conP, epsP, mepsP, dat, error, valueP, pColNames, bound, ve
     if(!is.null(bound)){
       dat[!is.na(f),calibWeight:=boundsFak(calibWeight,baseWeight,f,bound=bound)]#,by=eval(pColNames[[i]])]  
     }else{
-      dat[!is.na(f),calibWeight:=f*calibWeight,by=eval(pColNames[[i]])]
+      dat[!is.na(f),calibWeight:=f*calibWeight,by=combined_factors]
     }
     error <- TRUE
   }
-  setnames(dat,"value",valueP[i])
   
   if(verbose&&any(curEps>epsPcur)&&calIter%%10==0){
     if(calIter%%100==0)
@@ -118,17 +116,17 @@ calibP <- function(i,conP, epsP, mepsP, dat, error, valueP, pColNames, bound, ve
     cat(calIter, ":Not yet converged for P-Constraint",i,"\n")
   }
   
-  return(list(dat=dat,error=error))
+  return(error)
 }
-calibH <- function(i,conH, epsH, mepsH, dat, error, valueH, hColNames, bound, verbose, calIter, looseH){  
+
+calibH <- function(i,conH, epsH, dat, error, valueH, hColNames, bound, verbose, calIter, looseH){  
   OriginalSortingVariable <- V1 <- baseWeight <- calibWeight <- epsvalue <- f <- NULL
   temporary_hid <- temporary_hvar <- tmpVarForMultiplication <- value <- wValue <- wvst<- NULL
+  
   if(is.list(epsH)){
     epsHcur <- epsH[[i]]
-    mepsHcur <- mepsH[[i]]
   }else{
     epsHcur <- epsH
-    #mepsHcur <- mepsH
   }
   
   setnames(dat,valueH[i],"value")
@@ -139,77 +137,79 @@ calibH <- function(i,conH, epsH, mepsH, dat, error, valueH, hColNames, bound, ve
     ## use name of conH list element to define numerical variable
     setnames(dat,names(conH)[i],"tmpVarForMultiplication")
     
-    dat[, f := ipu_step_f(dat$calibWeight*dat$wvst*dat$tmpVarForMultiplication, 
+    dat[, f := ipu_step_f(calibWeight*wvst*tmpVarForMultiplication, 
                           combined_factors, conH[[i]])]
-    dat[, wValue := f*value]
     
     setnames(dat,"tmpVarForMultiplication",names(conH)[i])
   }else{
     # categorical variable to be calibrated
-    dat[, f := ipu_step_f(dat$calibWeight*dat$wvst, combined_factors, conH[[i]])]
-    dat[, wValue := f*value]
+    dat[, f := ipu_step_f(calibWeight*wvst, combined_factors, conH[[i]])]
   }
   
+  dat[, wValue := value/f]
+  
   if(is.array(epsHcur)){
-    dat <- merge(dat,mepsHcur,by=hColNames[[i]],all.x=TRUE,all.y=FALSE)
     curEps <- dat[,abs(1/f-1)]
-    epsHcur <- dat[,epsvalue]
+    epsHcur <- dat[[paste0("epsH_", i)]]
   }else{
     curEps <- dat[,max(abs(1/f-1))]
   }
-  # if(is.array(epsHcur)){## was soll das?
-  #   dat[,epsvalue:=NULL]
-  # }
+
   if(any(curEps>epsHcur)){    
     if(!is.null(bound)){
       if(!looseH){
         dat[,calibWeight:=boundsFak(g1=calibWeight,g0=baseWeight,f=f,bound=bound)]#,by=eval(hColNames[[i]])]    
       }else{
-        dat[,calibWeight:=boundsFakHH(g1=calibWeight,g0=baseWeight,eps=epsvalue,orig=value,p=wValue,bound=bound)]  
+        dat[,calibWeight:=boundsFakHH(g1=calibWeight,g0=baseWeight,eps=epsHcur*.9,orig=value,p=wValue,bound=bound)]  
       }
     }else{
-      dat[,calibWeight:=f*calibWeight,by=eval(hColNames[[i]])]
+      dat[,calibWeight:=f*calibWeight,by=combined_factors]
     }
     error <- TRUE
   }
-  if("epsvalue"%in%colnames(dat)){
-    dat[,epsvalue:=NULL]
-  }
   
   setnames(dat,"value",valueH[i])
-  # if(any(curEps>epsHcur)){ 
-  #   error <- TRUE
-  # }
+  
   if(verbose&&any(curEps>epsHcur)&&calIter%%10==0){
     if(calIter%%100==0)
       print(subset(dat,!is.na(f))[abs(1/f-1)>epsHcur][,list(mean(f),.N),by=eval(hColNames[[i]])])
     cat(calIter, ":Not yet converged for H-Constraint",i,"\n")
   }
-  return(list(dat=dat,error=error))
+  return(error)
 }
-# From package robCompositions
-# gm_mean <- function(x){
-#   if (!is.numeric(x)) 
-#     stop("x has to be a vector of class numeric")
-#   if (any(na.omit(x == 0))) 
-#     0
-#   else exp(mean(log(unclass(x)[is.finite(x) & x > 0])))
-# }
 
 #' Iterative Proportional Updating
 #' 
 #' Adjust sampling weights to given totals based on household-level and/or
 #' individual level constraints.
 #' 
+#' This functions implements the weighting procedure described 
+#' [here](http://www.ajs.or.at/index.php/ajs/article/viewFile/doi10.17713ajs.v45i3.120/512). 
+#' 
+#' `conP` and `conH` are contingency tables, which can be created with `xtabs`. The `dimnames` of those
+#' tables should match the names and levels of the corresponding columns in `dat`.
+#' 
+#' `maxIter`, `epsP` and `epsH` are the stopping criteria. `epsP` and `epsH` describe relative tolerances
+#' in the sense that
+#' \out{<center>1 - epsP &lt; w<sub>i+1</sub>/w<sub>i</sub> &lt; 1 + epsP </center> }
+#' will be used as convergence criterium. Here i is the iteration step and \out{w<sub>i</sub>} is the weight of a 
+#' specific person at step i.
+#' 
+#' The algorithm 
+#' performs best if all varables occuring in the constraints (\code{conP} and \code{conH}) as well as the 
+#' household variable are coded as \code{factor}-columns in \code{dat}. Otherwise, conversions will be necessary
+#' which can be monitored with the `conversion_messages` argument.
+#' Setting `check_hh_vars` to `FALSE` can also incease the performance of the scheme considerably.
 #'
 #' @name ipu2 
-#' @aliases ipu2 computeLinear computeFrac 
+#' @md
+#' @aliases ipu2
 #' @param dat a \code{data.table} containing household ids (optionally), base
 #' weights (optionally), household and/or personal level variables (numerical
 #' or categorical) that should be fitted.
-#' @param hid character vector specifying the variable containing household-ids
+#' @param hid name of the column containing the household-ids
 #' within \code{dat} or NULL if such a variable does not exist.
-#' @param w character vector specifying the variable containing the base
+#' @param w name if the column containing the base
 #' weights within \code{dat} or NULL if such a variable does not exist. In the
 #' latter case, every observation in \code{dat} is assigned a starting weight
 #' of 1.
@@ -243,7 +243,8 @@ calibH <- function(i,conH, epsH, mepsH, dat, error, valueH, hColNames, bound, ve
 #' @param maxIter numeric value specifying the maximum number of iterations
 #' that should be performed.
 #' @param meanHH if TRUE, every person in a household is assigned the mean of
-#' the person weights corresponding to the household.
+#' the person weights corresponding to the household. If \code{"geometric"}, the geometric mean
+#' is used rather than the arithmetic mean.
 #' @param allPthenH if TRUE, all the person level calibration steps are performed before the houshold level calibration steps (and \code{meanHH}, if specified). 
 #' If FALSE, the houshold level calibration steps (and \code{meanHH}, if specified) are performed after everey person level calibration step.
 #' This can lead to better convergence properties in certain cases but also means that the total number of calibration steps is increased.
@@ -252,96 +253,100 @@ calibH <- function(i,conH, epsH, mepsH, dat, error, valueH, hColNames, bound, ve
 #' If TRUE, only the weights for which the lower and upper thresholds defined by \code{conH} and \code{epsH} are exceeded
 #' are calibrated. They are however not calibrated against the actual constraints \code{conH} but against
 #' these lower and upper thresholds, i.e. \code{conH}-\code{conH}*\code{epsH} and \code{conH}+\code{conH}*\code{epsH}.
-#' @param numericalWeighting ...
-#' @param curValue the current value of the group total
-#' @param Value the target group total
-#' @param numericVar vector with the values of the numeric variable
-#' @param weightVec vector with the current weights
-#' @param boundLinear the result of computeLinear will be bound by \code{1/boundLinear} and \code{boundLinear}
+#' @param numericalWeighting See [numericalWeighting]
+#' @param check_hh_vars If \code{TRUE} check for non-unique values inside of a household for variables in 
+#'                      household constraints
+#' @param conversion_messages show a message, if inputs need to be reformatted. This can be useful for speed 
+#'        optimizations if ipu2 is called several times with similar inputs (for example bootstrapping)
 #' @return The function will return the input data \code{dat} with the
-#' calibrated weights \code{calibWeight} as an additional column.
+#' calibrated weights \code{calibWeight} as an additional column. If no convergence has been reached in `maxIter` 
+#' steps, and `returnNA` is `TRUE` (the default), only a copy of the input data will be returned.
 #' @seealso \code{\link{ipu}}
 #' @export ipu2
-#' @author Alexander Kowarik
+#' @author Alexander Kowarik, Gregor de Cillia
 #' @examples
 #' data(eusilcS)
 #' setDT(eusilcS)
 #' eusilcS <- eusilcS[, list(db030,hsize,db040,age,rb090,netIncome,db090,rb050)]
 #' 
+#' ## rename columns
+#' setnames(eusilcS, "rb090", "gender")
+#' setnames(eusilcS, "db040", "state")
+#' setnames(eusilcS, "db030", "household")
+#' setnames(eusilcS, "rb050", "weight")
+#' 
 #' ## some recoding
 #' # generate age groups
-#' eusilcS[age<0, age:=0]
-#' eusilcS[,agegroup:=floor(age/10)]
+#' eusilcS[, agegroup := cut(age, c(-Inf, 10*1:9, Inf), right = FALSE)]
 #' # some recoding of netIncome for reasons of simplicity
-#' eusilcS[is.na(netIncome), netIncome:=0] 
-#' eusilcS[netIncome<0, netIncome:=0] 
+#' eusilcS[is.na(netIncome), netIncome := 0] 
+#' eusilcS[netIncome < 0, netIncome := 0] 
 #' # set hsize to 1,...,5+
-#' eusilcS[hsize>=5, hsize:=5] 
+#' eusilcS[, hsize := cut(hsize, c(0:4, Inf), labels = c(1:4, "5+"))]
+#' # treat households as a factor variable
+#' eusilcS[, household := as.factor(household)]
 #' 
 #' ## example for base weights assuming a simple random sample of households stratified per region
-#' eusilcS[, regSamp:=.N, by=db040]
-#' eusilcS[, regPop:=sum(rb050), by=db040]
-#' eusilcS[, baseWeight:=regPop/regSamp]
+#' eusilcS[, regSamp := .N, by = state]
+#' eusilcS[, regPop := sum(weight), by = state]
+#' eusilcS[, baseWeight := regPop/regSamp]
 #' 
 #' ## constraints on person level
 #' # age 
-#' conP1 <- xtabs(V1 ~ agegroup, data=eusilcS[,sum(rb050),by=agegroup])
+#' conP1 <- xtabs(weight ~ agegroup, data = eusilcS)
 #' # gender by region
-#' conP2 <- xtabs(V1 ~ rb090+db040, data=eusilcS[,sum(rb050),by=list(rb090,db040)])
+#' conP2 <- xtabs(weight ~ gender + state, data = eusilcS)
 #' # personal net income by gender
-#' conP3 <- xtabs(V1 ~ rb090, data=eusilcS[,sum(rb050*netIncome),by=rb090])
+#' conP3 <- xtabs(weight*netIncome ~ gender, data = eusilcS)
+#' 
 #' ## constraints on household level
-#' conH1 <- xtabs(V1 ~ hsize+db040, data=eusilcS[!duplicated(db030),sum(rb050),list(hsize,db040)])
+#' conH1 <- xtabs(weight ~ hsize + state, data = eusilcS, subset = !duplicated(household))
 #' 
 #' # array of convergence limits for conH1
 #' epsH1 <- conH1
-#' epsH1[as.character(1:4),] <- 0.005
-#' epsH1["5",] <- 0.2
+#' epsH1[1:4,] <- 0.005
+#' epsH1["5+",] <- 0.2
 #' 
 #' # without array epsP1
-#' calibweights1 <- ipu2(eusilcS, hid = "db030", 
-#'                       conP = list(conP1,conP2,netIncome=conP3), 
+#' calibweights1 <- ipu2(eusilcS, hid = "household", 
+#'                       conP = list(conP1, conP2, netIncome = conP3), 
 #'                       conH = list(conH1), 
-#'                       epsP = list(1e-06,1e-06,1e-03),
+#'                       epsP = list(1e-06, 1e-06, 1e-03),
 #'                       epsH = 0.01,  
-#'                       bound = NULL, verbose=TRUE,  maxIter = 200)
+#'                       bound = NULL, verbose = TRUE,  maxIter = 200)
 #' 
 #' # with array epsP1, base weights and bound
-#' calibweights2 <- ipu2(eusilcS, hid = "db030", 
-#'                       conP = list(conP1,conP2), 
+#' calibweights2 <- ipu2(eusilcS, hid = "household", 
+#'                       conP = list(conP1, conP2), 
 #'                       conH = list(conH1), 
 #'                       epsP = 1e-06,
 #'                       epsH = list(epsH1),  
-#'                       w="baseWeight",
-#'                       bound = 4, verbose=TRUE,  maxIter = 200)
+#'                       w = "baseWeight",
+#'                       bound = 4, verbose = TRUE, maxIter = 200)
 #   fn <- function(a){
 #    f <- a[1]*var+a[2]
 #    (sum(f*var*w)-v)^2+(sum(f*w)-sum(w))^2
 #  }
 #  coef <- optim(c(1,1),fn)$par
 ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FALSE,
-                 w=NULL,bound=4,maxIter=200,meanHH=TRUE,allPthenH=TRUE,returnNA=TRUE,looseH=FALSE,numericalWeighting=computeLinear){
-  
+                 w=NULL,bound=4,maxIter=200,meanHH=TRUE,allPthenH=TRUE,returnNA=TRUE,looseH=FALSE,
+                 numericalWeighting=computeLinear, check_hh_vars = TRUE, conversion_messages = FALSE){
+
   OriginalSortingVariable <- V1 <- baseWeight <- calibWeight <- epsvalue <- f <- NULL
   temporary_hid <- temporary_hvar <- tmpVarForMultiplication <- value <- wValue <- wvst<- NULL
   dat_original <- dat
   dat <- copy(dat)
-  nrowOriginal <- nrow(dat)
   ## originalsorting is fucked up without this
   dat[,OriginalSortingVariable:=.I]
+  meanfun <- getMeanFun(meanHH)
   
   # dat sollte ein data.table sein
   # w ein Name eines Basisgewichts oder NULL
-  ncp <- length(conP) # number of constraints on person level
-  nch <- length(conH) # number of constraints on household level
-  dimncp <- sapply(conP,function(x)prod(dim(x)))
-  dimnch <- sapply(conH,function(x)prod(dim(x)))
   valueP <- paste0("valueP",seq_along(conP))###fixed target value, should not be changed in iterations
   valueH <- paste0("valueH",seq_along(conH))
   ###Housekeeping of the varNames used
   usedVarNames <- c(valueP,valueH,"value","baseWeight","wvst","wValue")
-  renameVars <- NULL
-  
+
   if(any(names(dat)%in%usedVarNames)){
     renameVars <- names(dat)[names(dat)%in%usedVarNames]
     setnames(dat,renameVars,paste0(renameVars,"_safekeeping"))
@@ -362,74 +367,71 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
   }
   
   setnames(dat, hid, "temporary_hid")
-  dat[, temporary_hid := as.factor(temporary_hid)]
+  if(!is.factor(dat$temporary_hid)){
+    if(conversion_messages)
+      message("convert household variable ", hid, " to factor")
+    dat[, temporary_hid := as.factor(temporary_hid)]
+  }
   setnames(dat, "temporary_hid", hid)
-
-  mconP <- lapply(conP,melt,as.is=TRUE)##convert tables to long form
-  mconH <- lapply(conH,melt,as.is=TRUE) 
   
   ## Names of the calibration variables for Person and household dimension
   pColNames <- lapply(conP,function(x)names(dimnames(x)))
   hColNames <- lapply(conH,function(x)names(dimnames(x)))
   
   for(i in seq_along(conP)){
-    colnames <- pColNames[[i]]
-    dat[, (colnames) := lapply(.SD, as.factor), .SDcols = colnames]
-    dat[, paste0("combined_factors_", i) := combine_factors(dat, pColNames[[i]])]
-    
-    # Harmonize the class of columns coming from the constraints
-    # the result from melt is taken as character and then the class is set
-    # melt does not make any sense for one dimensional numerical constraints however
-    if(!(dim(conP[[i]])==1 && identical(colnames(mconP[[i]]),c("Var1", "value")))){
-      cn <- colnames(mconP[[i]])[-ncol(mconP[[i]])]
-      for(j in seq_along(cn)){
-        cl <- class(dat[[cn[j]]])
-        if("factor"%in%cl){
-          mconP[[i]][[cn[j]]] <- factor(mconP[[i]][[cn[j]]],levels=levels(dat[[cn[j]]]))
-        }else if("numeric"%in%cl){
-          mconP[[i]][[cn[j]]] <- as.numeric(mconP[[i]][[cn[j]]])
-        }else if("integer"%in%cl){
-          mconP[[i]][[cn[j]]] <- as.integer(mconP[[i]][[cn[j]]])
-        }
+    current_colnames <- pColNames[[i]]
+
+    for(colname in current_colnames){
+      if(!inherits(dat[[colname]], "factor")){
+        if(conversion_messages)
+          message("converting column ", colname, " to factor")
+        set(
+          dat, j = colname, 
+          value = factor(dat[[colname]], levels = dimnames(conP[[i]])[[colname]])
+        )
       }
-      
-      dat <- merge(dat,mconP[[i]],by=colnames(mconP[[i]])[-ncol(mconP[[i]])],all.x=TRUE,all.y=FALSE)
-      setnames(dat,"value",valueP[i])
-    }else{
-      dat[,value:=conP[[i]]]
-      setnames(dat,"value",valueP[i])
+      else if(!identical(levels(dat[[colname]]), dimnames(conP[[i]])[[colname]])){
+        if(conversion_messages)
+          message("correct levels of column ", colname)
+        set(
+          dat, j = colname, 
+          value = factor(dat[[colname]], levels = dimnames(conP[[i]])[[colname]])
+        )
+      }
     }
+    combined_factors <- combine_factors(dat, pColNames[[i]])
+    
+    dat[, paste0("combined_factors_", i) := combined_factors]
+    dat[, paste0("valueP", i) := conP[[i]][combined_factors]]
   }
   for(i in seq_along(conH)){
     colnames <- hColNames[[i]]
-    dat[, (colnames) := lapply(.SD, as.factor), .SDcols = colnames]
-    dat[, paste0("combined_factors_h_", i) := combine_factors(dat, hColNames[[i]])]
     
-    if(!(dim(conH[[i]])==1 && identical(colnames(mconH[[i]]),c("Var1", "value")))){
-      cn <- colnames(mconH[[i]])[-ncol(mconH[[i]])]
-      for(j in seq_along(cn)){
-        cl <- class(dat[[cn[j]]])
-        if("factor"%in%cl){
-          mconH[[i]][[cn[j]]] <- factor(mconH[[i]][[cn[j]]],levels=levels(dat[[cn[j]]]))
-        }else if("numeric"%in%cl){
-          mconH[[i]][[cn[j]]] <- as.numeric(mconH[[i]][[cn[j]]])
-        }else if("integer"%in%cl){
-          mconH[[i]][[cn[j]]] <- as.integer(mconH[[i]][[cn[j]]])
-        }
+    ## make sure the columns mentioned in the contingency table are in fact factors
+    for(colname in colnames){
+      if (!inherits(dat[[colname]], "factor")){
+        if(conversion_messages)
+          message("converting column ", colname, " to factor")
+        set(
+          dat, j = colname, 
+          value = factor(dat[[colname]], levels = dimnames(conH[[i]])[[colname]])
+        )
       }
-      dat <- merge(dat,mconH[[i]],by=colnames(mconH[[i]])[-ncol(mconH[[i]])],all.x=TRUE,all.y=FALSE)
-      setnames(dat,"value",valueH[i])
-    }else{
-      dat[,value:=conH[[i]]]
-      setnames(dat,"value",valueH[i])
+      else if(!identical(levels(dat[[colname]]), dimnames(conH[[i]])[[colname]])){
+        if(conversion_messages)
+          message("correct levels of column ", colname)
+        set(
+          dat, j = colname, 
+          value = factor(dat[[colname]], levels = dimnames(conH[[i]])[[colname]])
+        )
+      }
     }
+    
+    combined_factors <- combine_factors(dat, hColNames[[i]])
+    
+    dat[, paste0("combined_factors_h_", i) := combined_factors]
+    dat[, paste0("valueH", i) := conH[[i]][combined_factors]]
   }
-  
-  if(nrow(dat)!=nrowOriginal){
-    stop("There were problems merging the constraints to the data!\n")
-  }
-  pCalVar <- paste0("pcal",1:ncp)
-  hCalVar <- paste0("hcal",1:nch)
   
   if(is.null(w)){
     if(!is.null(bound)&&is.null(w))
@@ -441,54 +443,34 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
     setnames(dat,w,"baseWeight")
   }
   
-  ## Check for non-unqiue values inside of a household for variabels used in Household constraints
-  for(hh in hColNames){
-    setnames(dat,hid,"temporary_hid")
-    for(h in hh){
-      setnames(dat,h,"temporary_hvar")
-      if(dat[,length(unique(temporary_hvar)),by=temporary_hid][,any(V1!=1)]){
-        stop(paste(h,"has different values inside a household"))
+  if(check_hh_vars){
+    ## Check for non-unqiue values inside of a household for variabels used in Household constraints
+    for(hh in hColNames){
+      setnames(dat,hid,"temporary_hid")
+      for(h in hh){
+        setnames(dat,h,"temporary_hvar")
+        if(dat[,length(unique(temporary_hvar)),by=temporary_hid][,any(V1!=1)]){
+          stop(paste(h,"has different values inside a household"))
+        }
+        setnames(dat,"temporary_hvar",h)
       }
-      setnames(dat,"temporary_hvar",h)
+      setnames(dat,"temporary_hid",hid)
     }
-    setnames(dat,"temporary_hid",hid)
   }
   
   if(is.list(epsP)){
-    #mepsP <- lapply(epsP,melt,as.is=TRUE,value.name="epsvalue")##convert tables to long form
-    mepsP <- lapply(epsP,meltepsfun)
     for(i in seq_along(epsP)){
       if(is.array(epsP[[i]])){
-        cn <- colnames(mepsP[[i]])[-ncol(mepsP[[i]])]
-        for(j in seq_along(cn)){
-          cl <- class(dat[[cn[j]]])
-          if("factor"%in%cl){
-            mepsP[[i]][[cn[j]]] <- factor(mepsP[[i]][[cn[j]]],levels=levels(dat[[cn[j]]]))
-          }else if("numeric"%in%cl){
-            mepsP[[i]][[cn[j]]] <- as.numeric(mepsP[[i]][[cn[j]]])
-          }else if("integer"%in%cl){
-            mepsP[[i]][[cn[j]]] <- as.integer(mepsP[[i]][[cn[j]]])
-          }
-        }
+        combined_factors <- dat[[paste0("combined_factors_", i)]]
+        dat[, paste0("epsP_", i) := epsP[[i]][combined_factors] ]
       }
     }
   }
   if(is.list(epsH)){
-    #mepsH <- lapply(epsH,melt,as.is=TRUE,value.name="epsvalue")##convert tables to long form
-    mepsH <- lapply(epsH,meltepsfun)
     for(i in seq_along(epsH)){
       if(is.array(epsH[[i]])){
-        cn <- colnames(mepsH[[i]])[-ncol(mepsH[[i]])]
-        for(j in seq_along(cn)){
-          cl <- class(dat[[cn[j]]])
-          if("factor"%in%cl){
-            mepsH[[i]][[cn[j]]] <- factor(mepsH[[i]][[cn[j]]],levels=levels(dat[[cn[j]]]))
-          }else if("numeric"%in%cl){
-            mepsH[[i]][[cn[j]]] <- as.numeric(mepsH[[i]][[cn[j]]])
-          }else if("integer"%in%cl){
-            mepsH[[i]][[cn[j]]] <- as.integer(mepsH[[i]][[cn[j]]])
-          }
-        }
+        combined_factors <- dat[[paste0("combined_factors_h_", i)]]
+        dat[, paste0("epsH_", i) := epsH[[i]][combined_factors] ]
       }
     }
   }
@@ -504,46 +486,32 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
       ### Person calib
       for(i in seq_along(conP)){
         
-        res <- calibP(i=i, conP=conP, epsP=epsP, mepsP=if(exists("mepsP")){mepsP=mepsP}else{mepsP=NULL}, dat=dat, error=error,
+        error <- calibP(i=i, conP=conP, epsP=epsP, dat=dat, error=error,
                       valueP=valueP, pColNames=pColNames,bound=bound, verbose=verbose, calIter=calIter, numericalWeighting=numericalWeighting)
+      }
         
-        dat <- res[["dat"]]
-        error <- res[["error"]]
-        rm(res)
-      }
-      if(meanHH){
-        ## replace person weight with household average
-        dat[,calibWeight := geometric_mean(calibWeight, dat[[hid]])]
-      }
+      ## replace person weight with household average
+      dat[,calibWeight := meanfun(calibWeight, dat[[hid]])]
+
       ### Household calib
       for(i in seq_along(conH)){
-        res <- calibH(i=i, conH=conH, epsH=epsH, mepsH=if(exists("mepsH")){mepsH=mepsH}else{mepsH=NULL}, dat=dat, error=error,
+        error <- calibH(i=i, conH=conH, epsH=epsH, dat=dat, error=error,
                       valueH=valueH, hColNames=hColNames,bound=bound, verbose=verbose, calIter=calIter, looseH=looseH)
-        dat <- res[["dat"]]
-        error <- res[["error"]]
-        rm(res)
       }
     }else{
       ### Person calib
       for(i in seq_along(conP)){
         
-        res <- calibP(i=i, conP=conP, epsP=epsP, mepsP=if(exists("mepsP")){mepsP=mepsP}else{mepsP=NULL}, dat=dat, error=error,
+        error <- calibP(i=i, conP=conP, epsP=epsP, dat=dat, error=error,
                       valueP=valueP, pColNames=pColNames,bound=bound, verbose=verbose, calIter=calIter, numericalWeighting=numericalWeighting)
-        dat <- res[["dat"]]
-        error <- res[["error"]]
-        rm(res)
-        
-        if(meanHH){
-          ## replace person weight with household average
-          dat[,calibWeight := geometric_mean(calibWeight, dat[[hid]])]
-        }
+
+        ## replace person weight with household average
+        dat[,calibWeight := meanfun(calibWeight, dat[[hid]])]
+
         ### Household calib
         for(i in seq_along(conH)){
-          res <- calibH(i=i, conH=conH, epsH=epsH, mepsH=if(exists("mepsH")){mepsH=mepsH}else{mepsH=NULL}, dat=dat, error=error,
+          error <- calibH(i=i, conH=conH, epsH=epsH, dat=dat, error=error,
                         valueH=valueH, hColNames=hColNames,bound=bound, verbose=verbose, calIter=calIter, looseH=looseH)
-          dat <- res[["dat"]]
-          error <- res[["error"]]
-          rm(res)
         }
       }
     }
@@ -556,52 +524,13 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
     calIter <- calIter + 1 
   }
   
-  if(!is.null(w)){
-    setnames(dat,"baseWeight",w)  
-  }
-  
-  ##Housekeeping
-  ###Housekeeping of the varNames used
-  delVars <- c(delVars,"wvst","wValue","f")
-  if(any(valueP%in%names(dat)))
-    delVars <- c(delVars,valueP)
-  if(any(valueH%in%names(dat)))
-    delVars <- c(delVars,valueH)
-  dat[,eval(delVars):=NULL]
-  if(!is.null(renameVars)){
-    setnames(dat,paste0(renameVars,"_safekeeping"),renameVars)
-  }
-  # loeschen; da macht man doch das umbenennen wieder rueckgaengig und das will man nicht!  
-  #   if(any(names(dat)%in%usedVarNames)){
-  #     renameVars <- names(dat)[names(dat)%in%usedVarNames]
-  #     setnames(dat,renameVars,paste0(renameVars,"_safekeeping"))
-  #   }
   ## originalsorting is fucked up without this
-  setkey(dat,OriginalSortingVariable)
-  dat[,OriginalSortingVariable:=NULL]
+  setkey(dat, OriginalSortingVariable)
   
   ## Return missings in calibWeight variable if no convergence was reached
   if(maxIter<calIter&returnNA){
-    invisible(dat_original)  
+    invisible(copy(dat_original)[, calibWeight := NA])
   }else{
     invisible(copy(dat_original)[,calibWeight := dat$calibWeight])  
   }  
-}
-#' @rdname ipu2
-#' @export computeLinear
-computeLinear <- function(curValue,Value,numericVar,weightVec,boundLinear=10){#current summed up value, correct summed up value, numeric variable, current weight
-  h <- sum(weightVec*numericVar)
-  j <- sum(weightVec*numericVar^2)
-  N <- sum(weightVec)
-  b <- (Value-N*j/h)/((-N*j/h)+h)
-  a <- (N-b*N)/h
-  f <- a*numericVar+b
-  f[f<(1/boundLinear)] <- 1/boundLinear
-  f[f>boundLinear] <- boundLinear
-  return(f)
-}
-#' @rdname ipu2
-#' @export computeFrac
-computeFrac <- function(curValue,Value,numericVar,weightVec){
-  Value/curValue
 }

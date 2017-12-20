@@ -2,27 +2,20 @@
 % Please edit documentation in R/ipu2.r
 \name{ipu2}
 \alias{ipu2}
-\alias{computeLinear}
-\alias{computeFrac}
-\alias{computeLinear}
-\alias{computeFrac}
 \title{Iterative Proportional Updating}
 \usage{
 ipu2(dat, hid = NULL, conP = NULL, conH = NULL, epsP = 1e-06,
   epsH = 0.01, verbose = FALSE, w = NULL, bound = 4, maxIter = 200,
   meanHH = TRUE, allPthenH = TRUE, returnNA = TRUE, looseH = FALSE,
-  numericalWeighting = computeLinear)
-
-computeLinear(curValue, Value, numericVar, weightVec, boundLinear = 10)
-
-computeFrac(curValue, Value, numericVar, weightVec)
+  numericalWeighting = computeLinear, check_hh_vars = FALSE,
+  conversion_messages = TRUE)
 }
 \arguments{
 \item{dat}{a \code{data.table} containing household ids (optionally), base
 weights (optionally), household and/or personal level variables (numerical
 or categorical) that should be fitted.}
 
-\item{hid}{character vector specifying the variable containing household-ids
+\item{hid}{name of the column containing the household-ids
 within \code{dat} or NULL if such a variable does not exist.}
 
 \item{conP}{list or (partly) named list defining the constraints on person
@@ -53,7 +46,7 @@ dimensions and dimnames as the corresponding constraint in \code{conH}.}
 
 \item{verbose}{if TRUE, some progress information will be printed.}
 
-\item{w}{character vector specifying the variable containing the base
+\item{w}{name if the column containing the base
 weights within \code{dat} or NULL if such a variable does not exist. In the
 latter case, every observation in \code{dat} is assigned a starting weight
 of 1.}
@@ -67,94 +60,119 @@ and \code{bound}*\code{w}.}
 that should be performed.}
 
 \item{meanHH}{if TRUE, every person in a household is assigned the mean of
-the person weights corresponding to the household.}
+the person weights corresponding to the household. If \code{"geometric"}, the geometric mean
+is used rather than the arithmetic mean.}
 
-\item{allPthenH}{if TRUE, all the person level calibration steps are performed before the houshold level calibration steps (and \code{meanHH}, if specified). 
+\item{allPthenH}{if TRUE, all the person level calibration steps are performed before the houshold level calibration steps (and \code{meanHH}, if specified).
 If FALSE, the houshold level calibration steps (and \code{meanHH}, if specified) are performed after everey person level calibration step.
 This can lead to better convergence properties in certain cases but also means that the total number of calibration steps is increased.}
 
 \item{returnNA}{if TRUE, the calibrated weight will be set to NA in case of no convergence.}
 
-\item{looseH}{if FALSE, the actual constraints \code{conH} are used for calibrating all the hh weights. 
+\item{looseH}{if FALSE, the actual constraints \code{conH} are used for calibrating all the hh weights.
 If TRUE, only the weights for which the lower and upper thresholds defined by \code{conH} and \code{epsH} are exceeded
 are calibrated. They are however not calibrated against the actual constraints \code{conH} but against
 these lower and upper thresholds, i.e. \code{conH}-\code{conH}*\code{epsH} and \code{conH}+\code{conH}*\code{epsH}.}
 
-\item{numericalWeighting}{...}
+\item{numericalWeighting}{See \link{numericalWeighting}}
 
-\item{curValue}{the current value of the group total}
+\item{check_hh_vars}{If \code{TRUE} check for non-unique values inside of a household for variables in
+household constraints}
 
-\item{Value}{the target group total}
-
-\item{numericVar}{vector with the values of the numeric variable}
-
-\item{weightVec}{vector with the current weights}
-
-\item{boundLinear}{the result of computeLinear will be bound by \code{1/boundLinear} and \code{boundLinear}}
+\item{conversion_messages}{show a message, if inputs need to be reformatted. This can be useful for speed
+optimizations if ipu2 is called several times with similar inputs (for example bootstrapping)}
 }
 \value{
 The function will return the input data \code{dat} with the
-calibrated weights \code{calibWeight} as an additional column.
+calibrated weights \code{calibWeight} as an additional column. If no convergence has been reached in \code{maxIter}
+steps, and \code{returnNA} is \code{TRUE} (the default), only a copy of the input data will be returned.
 }
 \description{
 Adjust sampling weights to given totals based on household-level and/or
 individual level constraints.
+}
+\details{
+This functions implements the weighting procedure described
+\href{http://www.ajs.or.at/index.php/ajs/article/viewFile/doi10.17713ajs.v45i3.120/512}{here}.
+
+\code{conP} and \code{conH} are contingency tables, which can be created with \code{xtabs}. The \code{dimnames} of those
+tables should match the names and levels of the corresponding columns in \code{dat}.
+
+\code{maxIter}, \code{epsP} and \code{epsH} are the stopping criteria. \code{epsP} and \code{epsH} describe relative tolerances
+in the sense that
+\out{<center>1 - epsP &lt; w<sub>i+1</sub>/w<sub>i</sub> &lt; 1 + epsP </center> }
+will be used as convergence criterium. Here i is the iteration step and \out{w<sub>i</sub>} is the weight of a
+specific person at step i.
+
+The algorithm
+performs best if all varables occuring in the constraints (\code{conP} and \code{conH}) as well as the
+household variable are coded as \code{factor}-columns in \code{dat}. Otherwise, conversions will be necessary
+which can be monitored with the \code{conversion_messages} argument.
+Setting \code{check_hh_vars} to \code{FALSE} can also incease the performance of the scheme considerably.
 }
 \examples{
 data(eusilcS)
 setDT(eusilcS)
 eusilcS <- eusilcS[, list(db030,hsize,db040,age,rb090,netIncome,db090,rb050)]
 
+## rename columns
+setnames(eusilcS, "rb090", "gender")
+setnames(eusilcS, "db040", "state")
+setnames(eusilcS, "db030", "household")
+setnames(eusilcS, "rb050", "weight")
+
 ## some recoding
 # generate age groups
-eusilcS[age<0, age:=0]
-eusilcS[,agegroup:=floor(age/10)]
+eusilcS[, agegroup := cut(age, c(-Inf, 10*1:9, Inf), right = FALSE)]
 # some recoding of netIncome for reasons of simplicity
-eusilcS[is.na(netIncome), netIncome:=0] 
-eusilcS[netIncome<0, netIncome:=0] 
+eusilcS[is.na(netIncome), netIncome := 0] 
+eusilcS[netIncome < 0, netIncome := 0] 
 # set hsize to 1,...,5+
-eusilcS[hsize>=5, hsize:=5] 
+eusilcS[, hsize := cut(hsize, c(0:4, Inf), labels = c(1:4, "5+"))]
+# treat households as a factor variable
+eusilcS[, household := as.factor(household)]
 
 ## example for base weights assuming a simple random sample of households stratified per region
-eusilcS[, regSamp:=.N, by=db040]
-eusilcS[, regPop:=sum(rb050), by=db040]
-eusilcS[, baseWeight:=regPop/regSamp]
+eusilcS[, regSamp := .N, by = state]
+eusilcS[, regPop := sum(weight), by = state]
+eusilcS[, baseWeight := regPop/regSamp]
 
 ## constraints on person level
 # age 
-conP1 <- xtabs(V1 ~ agegroup, data=eusilcS[,sum(rb050),by=agegroup])
+conP1 <- xtabs(weight ~ agegroup, data = eusilcS)
 # gender by region
-conP2 <- xtabs(V1 ~ rb090+db040, data=eusilcS[,sum(rb050),by=list(rb090,db040)])
+conP2 <- xtabs(weight ~ gender + state, data = eusilcS)
 # personal net income by gender
-conP3 <- xtabs(V1 ~ rb090, data=eusilcS[,sum(rb050*netIncome),by=rb090])
+conP3 <- xtabs(weight*netIncome ~ gender, data = eusilcS)
+
 ## constraints on household level
-conH1 <- xtabs(V1 ~ hsize+db040, data=eusilcS[!duplicated(db030),sum(rb050),list(hsize,db040)])
+conH1 <- xtabs(weight ~ hsize + state, data = eusilcS, subset = !duplicated(household))
 
 # array of convergence limits for conH1
 epsH1 <- conH1
-epsH1[as.character(1:4),] <- 0.005
-epsH1["5",] <- 0.2
+epsH1[1:4,] <- 0.005
+epsH1["5+",] <- 0.2
 
 # without array epsP1
-calibweights1 <- ipu2(eusilcS, hid = "db030", 
-                      conP = list(conP1,conP2,netIncome=conP3), 
+calibweights1 <- ipu2(eusilcS, hid = "household", 
+                      conP = list(conP1, conP2, netIncome = conP3), 
                       conH = list(conH1), 
-                      epsP = list(1e-06,1e-06,1e-03),
+                      epsP = list(1e-06, 1e-06, 1e-03),
                       epsH = 0.01,  
-                      bound = NULL, verbose=TRUE,  maxIter = 200)
+                      bound = NULL, verbose = TRUE,  maxIter = 200)
 
 # with array epsP1, base weights and bound
-calibweights2 <- ipu2(eusilcS, hid = "db030", 
-                      conP = list(conP1,conP2), 
+calibweights2 <- ipu2(eusilcS, hid = "household", 
+                      conP = list(conP1, conP2), 
                       conH = list(conH1), 
                       epsP = 1e-06,
                       epsH = list(epsH1),  
-                      w="baseWeight",
-                      bound = 4, verbose=TRUE,  maxIter = 200)
+                      w = "baseWeight",
+                      bound = 4, verbose = TRUE, maxIter = 200)
 }
 \seealso{
 \code{\link{ipu}}
 }
 \author{
-Alexander Kowarik
+Alexander Kowarik, Gregor de Cillia
 }

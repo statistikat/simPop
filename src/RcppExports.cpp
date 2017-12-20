@@ -19,26 +19,53 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// computeLinear
+NumericVector computeLinear(double curValue, double target, const NumericVector& x, const NumericVector& w, double boundLinear);
+RcppExport SEXP _simPop_computeLinear(SEXP curValueSEXP, SEXP targetSEXP, SEXP xSEXP, SEXP wSEXP, SEXP boundLinearSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type curValue(curValueSEXP);
+    Rcpp::traits::input_parameter< double >::type target(targetSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type w(wSEXP);
+    Rcpp::traits::input_parameter< double >::type boundLinear(boundLinearSEXP);
+    rcpp_result_gen = Rcpp::wrap(computeLinear(curValue, target, x, w, boundLinear));
+    return rcpp_result_gen;
+END_RCPP
+}
 // geometric_mean_reference
-void geometric_mean_reference(NumericVector w, const IntegerVector classes);
+void geometric_mean_reference(NumericVector& w, const IntegerVector& classes);
 RcppExport SEXP _simPop_geometric_mean_reference(SEXP wSEXP, SEXP classesSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type w(wSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector >::type classes(classesSEXP);
+    Rcpp::traits::input_parameter< NumericVector& >::type w(wSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type classes(classesSEXP);
     geometric_mean_reference(w, classes);
     return R_NilValue;
 END_RCPP
 }
 // geometric_mean
-NumericVector geometric_mean(const NumericVector w, const IntegerVector& classes);
+NumericVector geometric_mean(const NumericVector& w, const IntegerVector& classes);
 RcppExport SEXP _simPop_geometric_mean(SEXP wSEXP, SEXP classesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericVector >::type w(wSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type w(wSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type classes(classesSEXP);
     rcpp_result_gen = Rcpp::wrap(geometric_mean(w, classes));
+    return rcpp_result_gen;
+END_RCPP
+}
+// arithmetic_mean
+NumericVector arithmetic_mean(const NumericVector& w, const IntegerVector& classes);
+RcppExport SEXP _simPop_arithmetic_mean(SEXP wSEXP, SEXP classesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector& >::type w(wSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type classes(classesSEXP);
+    rcpp_result_gen = Rcpp::wrap(arithmetic_mean(w, classes));
     return rcpp_result_gen;
 END_RCPP
 }

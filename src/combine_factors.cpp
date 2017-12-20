@@ -1,35 +1,13 @@
 #include <Rcpp.h>
 using namespace Rcpp;
-
-//' Combine multiple factorvariables to a single one
-//' 
-//' In order to apply [ipu_step] to multidimensional contigency-tables, this function is used to reduce
-//' several factor variables to a single factor variable. The number of levels for the result is the 
-//' product of the number of levels of the input factors.
-//' 
+//' @rdname ipu_step
+//' @name ipu_step
 //' @md
-//' @param dat A `data.frame` object that holds several factor variables.
-//' @param factor_columns A `character` naming all factors to be combined
-//' @param asfactor A `logical` of length one, specifying whether the return value should be a `factor` (default)
-//' or an `intger`.
-//' @examples
 //' 
-//' ################## create data ##################
-//' factors <- c("time", "sex", "smoker", "day")
-//' tips <- reshape2::tips[factors]
-//' 
-//' ################ combine factors ################
-//' cf <- combine_factors(tips, names(tips))
-//' cbind(tips, cf)[sample(nrow(tips), 10),]
-//' 
-//' ############# high dimensional ipu ##############
-//' con <- xtabs(~., tips)
-//' weight <- rnorm(nrow(tips)) + 5
-//' adjusted_weight <- ipu_step(weight, cf, con)
-//' 
-//' #################### check ######################
-//' con2 <- xtabs(adjusted_weight ~ ., data = tips)
-//' sum((con - con2)^2)
+//' @param dat a data.frame containing the factor variables to be combined.
+//' @param factor_columns a `character` vector containing the column names in `dat` to be combined. All columns must
+//' be factors.
+//' @param asfactor Wheter to return an integer or a factor variable.
 //' 
 //' @export
 // [[Rcpp::export]]
