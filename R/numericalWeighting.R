@@ -30,12 +30,12 @@
 #' @param target Target value. An element of `conP` in [ipu2]
 #' @param x Vector of numeric values to be calibrated against
 #' @param w Vector of weights
-#' @param boundLinear See [ipu2]
+#' @param boundLinear The output `f` will satisfy `1/boundLinear <= f <= boundLinear`. See `bound` in [ipu2]
 #' 
 #' @return A weight multiplier `f`
 #' 
 #' @aliases numericalWeighting
 #' @export computeFrac
-computeFrac <- function(curValue,target, x, w, boundLinear = 10){
+computeFrac <- function(curValue,target, x, w){
   target/curValue
 }

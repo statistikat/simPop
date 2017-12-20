@@ -177,6 +177,23 @@ calibH <- function(i,conH, epsH, dat, error, valueH, hColNames, bound, verbose, 
 #' Adjust sampling weights to given totals based on household-level and/or
 #' individual level constraints.
 #' 
+#' This functions implements the weighting procedure described 
+#' [here](http://www.ajs.or.at/index.php/ajs/article/viewFile/doi10.17713ajs.v45i3.120/512). 
+#' 
+#' `conP` and `conH` are contingency tables, which can be created with `xtabs`. The `dimnames` of those
+#' tables should match the names and levels of the corresponding columns in `dat`.
+#' 
+#' `maxIter`, `epsP` and `epsH` are the stopping criteria. `epsP` and `epsH` describe relative tolerances
+#' in the sense that
+#' \out{<center>1 - epsP &lt; w<sub>i+1</sub>/w<sub>i</sub> &lt; 1 + epsP </center> }
+#' will be used as convergence criterium. Here i is the iteration step and \out{w<sub>i</sub>} is the weight of a 
+#' specific person at step i.
+#' 
+#' The algorithm 
+#' performs best if all varables occuring in the constraints (\code{conP} and \code{conH}) as well as the 
+#' household variable are coded as \code{factor}-columns in \code{dat}. Otherwise, conversions will be necessary
+#' which can be monitored with the `conversion_messages` argument.
+#' Setting `check_hh_vars` to `FALSE` can also incease the performance of the scheme considerably.
 #'
 #' @name ipu2 
 #' @md
@@ -184,9 +201,9 @@ calibH <- function(i,conH, epsH, dat, error, valueH, hColNames, bound, verbose, 
 #' @param dat a \code{data.table} containing household ids (optionally), base
 #' weights (optionally), household and/or personal level variables (numerical
 #' or categorical) that should be fitted.
-#' @param hid character vector specifying the variable containing household-ids
+#' @param hid name of the column containing the household-ids
 #' within \code{dat} or NULL if such a variable does not exist.
-#' @param w character vector specifying the variable containing the base
+#' @param w name if the column containing the base
 #' weights within \code{dat} or NULL if such a variable does not exist. In the
 #' latter case, every observation in \code{dat} is assigned a starting weight
 #' of 1.
@@ -231,22 +248,16 @@ calibH <- function(i,conH, epsH, dat, error, valueH, hColNames, bound, verbose, 
 #' are calibrated. They are however not calibrated against the actual constraints \code{conH} but against
 #' these lower and upper thresholds, i.e. \code{conH}-\code{conH}*\code{epsH} and \code{conH}+\code{conH}*\code{epsH}.
 #' @param numericalWeighting See [numericalWeighting]
-#' @param curValue the current value of the group total
-#' @param Value the target group total
-#' @param numericVar vector with the values of the numeric variable
-#' @param weightVec vector with the current weights
-#' @param boundLinear the result of computeLinear will be bound by \code{1/boundLinear} and \code{boundLinear}
 #' @param check_hh_vars If \code{TRUE} check for non-unique values inside of a household for variables in 
 #'                      household constraints
 #' @param conversion_messages show a message, if inputs need to be reformatted. This can be useful for speed 
 #'        optimizations if ipu2 is called several times with similar inputs (for example bootstrapping)
 #' @return The function will return the input data \code{dat} with the
-#' calibrated weights \code{calibWeight} as an additional column.
-#' The algorithm performs best if all varables occuring in the constraints (\code{conP} and \code{conH}) are coded as \code{factor}-columns in 
-#' \code{dat}.
+#' calibrated weights \code{calibWeight} as an additional column. If no convergence has been reached in `maxIter` 
+#' steps, and `returnNA` is `TRUE` (the default), only a copy of the input data will be returned.
 #' @seealso \code{\link{ipu}}
 #' @export ipu2
-#' @author Alexander Kowarik
+#' @author Alexander Kowarik, Gregor de Cillia
 #' @examples
 #' data(eusilcS)
 #' setDT(eusilcS)

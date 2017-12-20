@@ -6,7 +6,7 @@
 \alias{computeLinear}
 \title{Numerical weighting functions}
 \usage{
-computeFrac(curValue, target, x, w, boundLinear = 10)
+computeFrac(curValue, target, x, w)
 
 computeLinear(curValue, target, x, w, boundLinear = 10)
 }
@@ -19,7 +19,7 @@ computeLinear(curValue, target, x, w, boundLinear = 10)
 
 \item{w}{Vector of weights}
 
-\item{boundLinear}{See \link{ipu2}}
+\item{boundLinear}{The output \code{f} will satisfy \code{1/boundLinear <= f <= boundLinear}. See \code{bound} in \link{ipu2}}
 }
 \value{
 A weight multiplier \code{f}

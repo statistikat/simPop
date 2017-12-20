@@ -15,7 +15,7 @@ ipu2(dat, hid = NULL, conP = NULL, conH = NULL, epsP = 1e-06,
 weights (optionally), household and/or personal level variables (numerical
 or categorical) that should be fitted.}
 
-\item{hid}{character vector specifying the variable containing household-ids
+\item{hid}{name of the column containing the household-ids
 within \code{dat} or NULL if such a variable does not exist.}
 
 \item{conP}{list or (partly) named list defining the constraints on person
@@ -46,7 +46,7 @@ dimensions and dimnames as the corresponding constraint in \code{conH}.}
 
 \item{verbose}{if TRUE, some progress information will be printed.}
 
-\item{w}{character vector specifying the variable containing the base
+\item{w}{name if the column containing the base
 weights within \code{dat} or NULL if such a variable does not exist. In the
 latter case, every observation in \code{dat} is assigned a starting weight
 of 1.}
@@ -81,26 +81,34 @@ household constraints}
 
 \item{conversion_messages}{show a message, if inputs need to be reformatted. This can be useful for speed
 optimizations if ipu2 is called several times with similar inputs (for example bootstrapping)}
-
-\item{curValue}{the current value of the group total}
-
-\item{Value}{the target group total}
-
-\item{numericVar}{vector with the values of the numeric variable}
-
-\item{weightVec}{vector with the current weights}
-
-\item{boundLinear}{the result of computeLinear will be bound by \code{1/boundLinear} and \code{boundLinear}}
 }
 \value{
 The function will return the input data \code{dat} with the
-calibrated weights \code{calibWeight} as an additional column.
-The algorithm performs best if all varables occuring in the constraints (\code{conP} and \code{conH}) are coded as \code{factor}-columns in
-\code{dat}.
+calibrated weights \code{calibWeight} as an additional column. If no convergence has been reached in \code{maxIter}
+steps, and \code{returnNA} is \code{TRUE} (the default), only a copy of the input data will be returned.
 }
 \description{
 Adjust sampling weights to given totals based on household-level and/or
 individual level constraints.
+}
+\details{
+This functions implements the weighting procedure described
+\href{http://www.ajs.or.at/index.php/ajs/article/viewFile/doi10.17713ajs.v45i3.120/512}{here}.
+
+\code{conP} and \code{conH} are contingency tables, which can be created with \code{xtabs}. The \code{dimnames} of those
+tables should match the names and levels of the corresponding columns in \code{dat}.
+
+\code{maxIter}, \code{epsP} and \code{epsH} are the stopping criteria. \code{epsP} and \code{epsH} describe relative tolerances
+in the sense that
+\out{<center>1 - epsP &lt; w<sub>i+1</sub>/w<sub>i</sub> &lt; 1 + epsP </center> }
+will be used as convergence criterium. Here i is the iteration step and \out{w<sub>i</sub>} is the weight of a
+specific person at step i.
+
+The algorithm
+performs best if all varables occuring in the constraints (\code{conP} and \code{conH}) as well as the
+household variable are coded as \code{factor}-columns in \code{dat}. Otherwise, conversions will be necessary
+which can be monitored with the \code{conversion_messages} argument.
+Setting \code{check_hh_vars} to \code{FALSE} can also incease the performance of the scheme considerably.
 }
 \examples{
 data(eusilcS)
@@ -166,5 +174,5 @@ calibweights2 <- ipu2(eusilcS, hid = "household",
 \code{\link{ipu}}
 }
 \author{
-Alexander Kowarik
+Alexander Kowarik, Gregor de Cillia
 }
