@@ -154,10 +154,6 @@ ipu_step_f <- function(w, classes, targets) {
     .Call('_simPop_ipu_step_f', PACKAGE = 'simPop', w, classes, targets)
 }
 
-sample_int_crank <- function(n, size, prob) {
-    .Call('_simPop_sample_int_crank', PACKAGE = 'simPop', n, size, prob)
-}
-
 updateMatC <- function(M, add_row, add_col, remove_row, remove_col, hhsize, hhid) {
     .Call('_simPop_updateMatC', PACKAGE = 'simPop', M, add_row, add_col, remove_row, remove_col, hhsize, hhid)
 }

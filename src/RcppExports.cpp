@@ -107,19 +107,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// sample_int_crank
-IntegerVector sample_int_crank(int n, int size, NumericVector prob);
-RcppExport SEXP _simPop_sample_int_crank(SEXP nSEXP, SEXP sizeSEXP, SEXP probSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    Rcpp::traits::input_parameter< int >::type size(sizeSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type prob(probSEXP);
-    rcpp_result_gen = Rcpp::wrap(sample_int_crank(n, size, prob));
-    return rcpp_result_gen;
-END_RCPP
-}
 // updateMatC
 NumericMatrix updateMatC(NumericMatrix M, NumericVector add_row, NumericVector add_col, NumericVector remove_row, NumericVector remove_col, NumericVector hhsize, NumericVector hhid);
 RcppExport SEXP _simPop_updateMatC(SEXP MSEXP, SEXP add_rowSEXP, SEXP add_colSEXP, SEXP remove_rowSEXP, SEXP remove_colSEXP, SEXP hhsizeSEXP, SEXP hhidSEXP) {
