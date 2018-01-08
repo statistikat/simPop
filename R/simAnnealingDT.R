@@ -9,7 +9,7 @@ dteval <- function(...,envir=parent.frame()){
 
 simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
                            sample.prob=TRUE,choose.temp=FALSE,split.level=NULL){
-  
+  ID_GRP <- N <- V1 <- sim_ID <- weight_choose <- weight_choose_new <- NULL
   ######################################
   ## define variables from param
   eps <- params[["eps_factor"]]*totals0[,sum(N)]

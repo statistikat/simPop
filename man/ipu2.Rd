@@ -100,8 +100,8 @@ tables should match the names and levels of the corresponding columns in \code{d
 
 \code{maxIter}, \code{epsP} and \code{epsH} are the stopping criteria. \code{epsP} and \code{epsH} describe relative tolerances
 in the sense that
-\out{<center>1 - epsP &lt; w<sub>i+1</sub>/w<sub>i</sub> &lt; 1 + epsP </center> }
-will be used as convergence criterium. Here i is the iteration step and \out{w<sub>i</sub>} is the weight of a
+\out{\deqn{1-epsP < \frac{w_{i+1}}{w_i} < 1+epsP}{1-epsP < w(i+1)/w(i) < 1+epsP} }
+will be used as convergence criterium. Here i is the iteration step and wi is the weight of a
 specific person at step i.
 
 The algorithm

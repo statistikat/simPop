@@ -31,6 +31,7 @@ setClassUnion('listOrNULL', c('list', 'NULL'))
 #' @importFrom EnvStats rlnormTrunc rnormTrunc
 #' @importFrom fitdistrplus fitdist
 #' @importFrom ranger ranger
+#' @importFrom RcppArmadillo armadillo_version
 NULL
 
 
