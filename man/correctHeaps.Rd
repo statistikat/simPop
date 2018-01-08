@@ -4,7 +4,8 @@
 \alias{correctHeaps}
 \title{Correct  age heaping}
 \usage{
-correctHeaps(x, heaps = "10year", method = "lnorm", start = 0)
+correctHeaps(x, heaps = "10year", method = "lnorm", start = 0,
+  fixed = NULL)
 }
 \arguments{
 \item{x}{numeric vector}
@@ -26,6 +27,8 @@ required parameters are estimated using original input data.
 
 \item{start}{a numeric value for the starting of the 5 or 10 year sequences
 (e.g. 0, 5 or 10)}
+
+\item{fixed}{numeric index vector with observation that should not be changed}
 }
 \value{
 a numeric vector without age heaps
@@ -85,11 +88,14 @@ cc10[year10+1] <- "yellow"
 barplot(table(age10), col=cc10)
 barplot(table(correctHeaps(age10, heaps="10year", method="lnorm")), col=cc10)
 
+# the first 5 observations should be unchanged
+barplot(table(correctHeaps(age10, heaps="10year", method="lnorm", fixed=1:5)), col=cc10)
+
 }
 \references{
 M. Templ, B. Meindl, A. Kowarik, A. Alfons, O. Dupriez (2017) Simulation of Synthetic Populations for Survey Data Considering Auxiliary
 Information. \emph{Journal of Statistical Survey}, \strong{79} (10), 1--38. doi: 10.18637/jss.v079.i10
 }
 \author{
-Matthias Templ, Bernhard Meindl
+Matthias Templ, Bernhard Meindl, Alexander Kowarik
 }

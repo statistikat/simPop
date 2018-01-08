@@ -4,7 +4,8 @@
 \alias{correctSingleHeap}
 \title{correctSingleHeap}
 \usage{
-correctSingleHeap(x, heap, before = 2, after = 2, method = "lnorm")
+correctSingleHeap(x, heap, before = 2, after = 2, method = "lnorm",
+  fixed = NULL)
 }
 \arguments{
 \item{x}{numeric vector representing age in years (integers)}
@@ -33,6 +34,8 @@ required parameters are estimated using original input data.
 required parameters are estimated using original input data.
 \item \code{unif}: random sampling from a (truncated) uniform distribution
 }}
+
+\item{fixed}{numeric index vector with observation that should not be changed}
 }
 \value{
 a numeric vector without age heaps
@@ -54,4 +57,11 @@ cc23[24] <- "yellow"
 barplot(table(age23), col=cc23)
 barplot(table(correctSingleHeap(age23, heap=23, before=2, after=3, method="lnorm")), col=cc23)
 barplot(table(correctSingleHeap(age23, heap=23, before=5, after=5, method="lnorm")), col=cc23)
+
+# the first 5 observations should be unchanged
+barplot(table(correctSingleHeap(age23, heap=23, before=5, after=5, method="lnorm",
+  fixed=1:5)), col=cc23)
+}
+\author{
+Matthias Templ, Bernhard Meindl, Alexander Kowarik
 }

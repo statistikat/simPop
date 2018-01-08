@@ -46,8 +46,8 @@
 #' }
 #' @param start a numeric value for the starting of the 5 or 10 year sequences
 #' (e.g. 0, 5 or 10)
-#' 
-#' @author Matthias Templ, Bernhard Meindl 
+#' @param fixed numeric index vector with observation that should not be changed
+#' @author Matthias Templ, Bernhard Meindl, Alexander Kowarik
 #' @references 
 #' M. Templ, B. Meindl, A. Kowarik, A. Alfons, O. Dupriez (2017) Simulation of Synthetic Populations for Survey Data Considering Auxiliary
 #' Information. \emph{Journal of Statistical Survey}, \strong{79} (10), 1--38. doi: 10.18637/jss.v079.i10
@@ -73,11 +73,14 @@
 #' cc10[year10+1] <- "yellow"
 #' barplot(table(age10), col=cc10)
 #' barplot(table(correctHeaps(age10, heaps="10year", method="lnorm")), col=cc10)
+#' 
+#' # the first 5 observations should be unchanged
+#' barplot(table(correctHeaps(age10, heaps="10year", method="lnorm", fixed=1:5)), col=cc10)
 #'
 
 #' @return a numeric vector without age heaps
 #' @export
-correctHeaps <- function(x, heaps="10year", method="lnorm",start=0) {
+correctHeaps <- function(x, heaps="10year", method="lnorm",start=0, fixed=NULL) {
   if ( !method %in% c("lnorm","norm","unif")) {
     stop("unsupported value in argument 'method'!\n")
   }
@@ -117,58 +120,99 @@ correctHeaps <- function(x, heaps="10year", method="lnorm",start=0) {
       # thus we need to sample twice
       if ( heaps=="10year" ) {
         size1 <- ceiling(ssize/2)
-        r1 <- sample(index, size=size1)
-        llow <- max(c(i-4,0))
-        lup <- min((i+4),max(x))
-        if ( method=="lnorm") {
-          x[r1] <- round(rlnormTrunc(length(r1),
-                  meanlog=logn$estimate[1],
-                  sdlog=as.numeric(logn$estimate[2]),
-                  min=llow, max=lup))
-        }
-        if ( method=="norm") {
-          x[r1] <- round(rnormTrunc(length(r1),
-                  mean=i, sd=1, min=llow, max=lup))
-        }
-        if ( method=="unif") {
-          x[r1] <- sample(llow:lup, length(r1), replace=TRUE)
+        if(is.null(fixed)){
+          r1 <- sample(index, size=size1)
+        }else{
+          indexTmp <- index[!index%in%fixed]
+          if(length(indexTmp)==0){
+            warning("There is no suitable observation to be changed left.")
+            r1 <- NULL
+          }else{
+            r1 <- sample(indexTmp, size=min(c(length(indexTmp),size1)))  
+          }
         }
         
-        # sample 2:
-        size2 <- ssize-size1
-        r2 <- sample(setdiff(index,r1), size=size2)
-        llow <- max(c(i-5,0))
-        lup <- min((i+5),max(x))
-        if ( method=="lnorm") {
-          x[r2] <- round(rlnormTrunc(length(r2),
-                  meanlog=logn$estimate[1],
-                  sdlog=as.numeric(logn$estimate[2]),
-                  min=llow, max=lup))
-        }
-        if ( method=="norm") {
-          x[r2] <- round(rnormTrunc(length(r2),
-                  mean=i, sd=1, min=llow, max=lup))
-        }
-        if ( method=="unif") {
-          x[r2] <- sample(llow:lup, length(r2), replace=TRUE)
+        
+        llow <- max(c(i-4,0))
+        lup <- min((i+4),max(x))
+        if(length(r1)>0){
+          if ( method=="lnorm") {
+            x[r1] <- round(rlnormTrunc(length(r1),
+                                       meanlog=logn$estimate[1],
+                                       sdlog=as.numeric(logn$estimate[2]),
+                                       min=llow, max=lup))
+          }
+          if ( method=="norm") {
+            x[r1] <- round(rnormTrunc(length(r1),
+                                      mean=i, sd=1, min=llow, max=lup))
+          }
+          if ( method=="unif") {
+            x[r1] <- sample(llow:lup, length(r1), replace=TRUE)
+          }
+          # sample 2:
+          size2 <- ssize-size1
+          if(is.null(fixed)){
+            r2 <- sample(setdiff(index,r1), size=size2)  
+          }else{
+            indexTmp2 <- setdiff(indexTmp,r1)
+            if(length(indexTmp2)==0){
+              warning("There is no suitable observation to be changed left.")
+              r2 <- NULL
+            }else{
+              r2 <- sample(indexTmp2, size=min(c(length(indexTmp2),size2)))  
+            }
+            
+          }
+          
+          llow <- max(c(i-5,0))
+          lup <- min((i+5),max(x))
+          if(length(r2)>0){
+            if ( method=="lnorm") {
+              x[r2] <- round(rlnormTrunc(length(r2),
+                                         meanlog=logn$estimate[1],
+                                         sdlog=as.numeric(logn$estimate[2]),
+                                         min=llow, max=lup))
+            }
+            if ( method=="norm") {
+              x[r2] <- round(rnormTrunc(length(r2),
+                                        mean=i, sd=1, min=llow, max=lup))
+            }
+            if ( method=="unif") {
+              x[r2] <- sample(llow:lup, length(r2), replace=TRUE)
+            }
+          }
+          
         }
       }
       if ( heaps=="5year" ) {
-        r <- sample(index, size=ssize)
+        if(is.null(fixed)){
+          r <- sample(index, size=ssize)  
+        }else{
+          indexTmp <- index[!index%in%fixed]
+          if(length(indexTmp)==0){
+            warning("There is no suitable observation to be changed left.")
+            r <- NULL
+          }else{
+            r <- sample(indexTmp, size=min(c(length(indexTmp),ssize)))  
+          } 
+        }
+        
         llow <- max(c(i-2,0))
         lup <- min((i+2),max(x))
-        if ( method=="lnorm" ) {
-          x[r] <- round(rlnormTrunc(length(r),
-                  meanlog=logn$estimate[1],
-                  sdlog=as.numeric(logn$estimate[2]),
-                  min=llow, max=lup))
-        }
-        if ( method=="norm" ) {
-          x[r] <- round(rnormTrunc(length(r),
-                  mean=i, sd=1, min=llow, max=lup))
-        }
-        if ( method=="unif" ) {
-          x[r] <- sample(llow:lup, length(r), replace=TRUE)
+        if(length(r)>0){
+          if ( method=="lnorm" ) {
+            x[r] <- round(rlnormTrunc(length(r),
+                    meanlog=logn$estimate[1],
+                    sdlog=as.numeric(logn$estimate[2]),
+                    min=llow, max=lup))
+          }
+          if ( method=="norm" ) {
+            x[r] <- round(rnormTrunc(length(r),
+                    mean=i, sd=1, min=llow, max=lup))
+          }
+          if ( method=="unif" ) {
+            x[r] <- sample(llow:lup, length(r), replace=TRUE)
+          }
         }
       }
     }
@@ -202,7 +246,9 @@ correctHeaps <- function(x, heaps="10year", method="lnorm",start=0) {
 #' required parameters are estimated using original input data.
 #' \item \code{unif}: random sampling from a (truncated) uniform distribution
 #' }
-#'
+#' @param fixed numeric index vector with observation that should not be changed
+#' 
+#' @author Matthias Templ, Bernhard Meindl, Alexander Kowarik
 #' @return a numeric vector without age heaps
 #' @export
 #' @examples
@@ -219,7 +265,11 @@ correctHeaps <- function(x, heaps="10year", method="lnorm",start=0) {
 #' barplot(table(age23), col=cc23)
 #' barplot(table(correctSingleHeap(age23, heap=23, before=2, after=3, method="lnorm")), col=cc23)
 #' barplot(table(correctSingleHeap(age23, heap=23, before=5, after=5, method="lnorm")), col=cc23)
-correctSingleHeap <- function(x, heap, before=2, after=2, method="lnorm") {
+#' 
+#' # the first 5 observations should be unchanged
+#' barplot(table(correctSingleHeap(age23, heap=23, before=5, after=5, method="lnorm",
+#'   fixed=1:5)), col=cc23)
+correctSingleHeap <- function(x, heap, before=2, after=2, method="lnorm", fixed=NULL) {
   i <- NULL
   if ( !method %in% c("lnorm","norm","unif")) {
     i
@@ -266,19 +316,32 @@ correctSingleHeap <- function(x, heap, before=2, after=2, method="lnorm") {
     ssize <- ceiling(length(index) - length(index) / ratio)
   }
   if ( ssize>0 ) {
-    r <- sample(index, size=ssize)
-    if ( method=="lnorm" ) {
-      x[r] <- round(rlnormTrunc(length(r),
-              meanlog=logn$estimate[1],
-              sdlog=as.numeric(logn$estimate[2]),
-              min=llow, max=lup))
+    if(is.null(fixed)){
+      r <- sample(index, size=ssize)
+    }else{
+      indexTmp <- index[!index%in%fixed]
+      if(length(indexTmp)==0){
+        warning("There is no suitable observation to be changed left.")
+        r <- NULL
+      }else{
+        r <- sample(indexTmp, size=min(c(length(indexTmp),ssize)))  
+      }
+      
     }
-    if ( method=="norm" ) {
-      x[r] <- round(rnormTrunc(length(r),
-              mean=heap, sd=1, min=llow, max=lup))
-    }
-    if ( method=="unif" ) {
-      x[r] <- sample(llow:lup, length(r), replace=TRUE)
+    if(length(r)>0){
+      if ( method=="lnorm" ) {
+        x[r] <- round(rlnormTrunc(length(r),
+                                  meanlog=logn$estimate[1],
+                                  sdlog=as.numeric(logn$estimate[2]),
+                                  min=llow, max=lup))
+      }
+      if ( method=="norm" ) {
+        x[r] <- round(rnormTrunc(length(r),
+                                 mean=heap, sd=1, min=llow, max=lup))
+      }
+      if ( method=="unif" ) {
+        x[r] <- sample(llow:lup, length(r), replace=TRUE)
+      }
     }
   }
   return(x)
