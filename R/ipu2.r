@@ -52,6 +52,21 @@ boundsFakHH <- function(g1,g0,eps,orig,p,bound=4){ # Berechnet die neuen Gewicht
   return(g1)
 }
 
+check_population_totals <- function(con){
+  # do not apply this check for numerical calibration
+  ind <- which(names(con) == "")
+  
+  if (length(ind) == 0)
+    return(NULL)
+  
+  pop_totals <- vapply(ind, function(index){ sum(con[[index]]) }, 0)
+  rel_errors <- abs(pop_totals - pop_totals[1])/pop_totals[1]
+  
+  # use a 1% tolerance. Maybe it would be better to make the tolerance dependent on conH?
+  if(any(rel_errors > 1e-2))
+    stop("population totals for different constraints do not match")
+}
+
 calibP <- function(i,conP, epsP, dat, error, valueP, pColNames, bound, verbose, calIter, numericalWeighting){
   OriginalSortingVariable <- V1 <- baseWeight <- calibWeight <- epsvalue <- f <- NULL
   temporary_hid <- temporary_hvar <- tmpVarForMultiplication <- value <- wValue <- wvst<- NULL
@@ -331,6 +346,9 @@ calibH <- function(i,conH, epsH, dat, error, valueH, hColNames, bound, verbose, 
 ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FALSE,
                  w=NULL,bound=4,maxIter=200,meanHH=TRUE,allPthenH=TRUE,returnNA=TRUE,looseH=FALSE,
                  numericalWeighting=computeLinear, check_hh_vars = TRUE, conversion_messages = FALSE){
+  
+  check_population_totals(conP)
+  check_population_totals(conH)
 
   OriginalSortingVariable <- V1 <- baseWeight <- calibWeight <- epsvalue <- f <- NULL
   temporary_hid <- temporary_hvar <- tmpVarForMultiplication <- value <- wValue <- wvst<- NULL
