@@ -507,9 +507,10 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
         error <- calibP(i=i, conP=conP, epsP=epsP, dat=dat, error=error,
                       valueP=valueP, pColNames=pColNames,bound=bound, verbose=verbose, calIter=calIter, numericalWeighting=numericalWeighting)
       }
-        
+      
       ## replace person weight with household average
-      dat[,calibWeight := meanfun(calibWeight, dat[[hid]])]
+      dh <- dat[[hid]]
+      dat[,calibWeight := meanfun(calibWeight, dh)]
 
       ### Household calib
       for(i in seq_along(conH)){
@@ -524,7 +525,8 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
                       valueP=valueP, pColNames=pColNames,bound=bound, verbose=verbose, calIter=calIter, numericalWeighting=numericalWeighting)
 
         ## replace person weight with household average
-        dat[,calibWeight := meanfun(calibWeight, dat[[hid]])]
+        dh <- dat[[hid]]
+        dat[,calibWeight := meanfun(calibWeight, dh)]
 
         ### Household calib
         for(i in seq_along(conH)){
