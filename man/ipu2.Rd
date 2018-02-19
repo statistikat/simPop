@@ -84,15 +84,23 @@ optimizations if ipu2 is called several times with similar inputs (for example b
 }
 \value{
 The function will return the input data \code{dat} with the
-calibrated weights \code{calibWeight} as an additional column. If no convergence has been reached in \code{maxIter}
-steps, and \code{returnNA} is \code{TRUE} (the default), only a copy of the input data will be returned.
+calibrated weights \code{calibWeight} as an additional column as well as attributes. If no convergence has been reached in \code{maxIter}
+steps, and \code{returnNA} is \code{TRUE} (the default), the column \code{calibWeights} will only consist of \code{NA}s. The attributes of the table are
+attributes derived from the \code{data.table} class as well as the following.
+\tabular{ll}{
+\code{converged} \tab Did the algorithm converge in \code{maxIter} steps? \cr
+\code{iterations} \tab The number of iterations performed. \cr
+\code{conP}, \code{conH}, \code{epsP}, \code{epsH} \tab See Arguments. \cr
+\code{conP_adj}, \code{conH_adj} \tab Adjusted versions of \code{conP} and \code{conH} \cr
+\code{formP}, \code{formH} \tab Formulas that were used to calculate \code{conP_adj} and \code{conH_adj} based on the output table.
+}
 }
 \description{
 Adjust sampling weights to given totals based on household-level and/or
 individual level constraints.
 }
 \details{
-This functions implements the weighting procedure described
+This function implements the weighting procedure described
 \href{http://www.ajs.or.at/index.php/ajs/article/viewFile/doi10.17713ajs.v45i3.120/512}{here}.
 
 \code{conP} and \code{conH} are contingency tables, which can be created with \code{xtabs}. The \code{dimnames} of those
@@ -108,7 +116,7 @@ The algorithm
 performs best if all varables occuring in the constraints (\code{conP} and \code{conH}) as well as the
 household variable are coded as \code{factor}-columns in \code{dat}. Otherwise, conversions will be necessary
 which can be monitored with the \code{conversion_messages} argument.
-Setting \code{check_hh_vars} to \code{FALSE} can also incease the performance of the scheme considerably.
+Setting \code{check_hh_vars} to \code{FALSE} can also incease the performance of the scheme.
 }
 \examples{
 data(eusilcS)
@@ -153,7 +161,7 @@ epsH1 <- conH1
 epsH1[1:4,] <- 0.005
 epsH1["5+",] <- 0.2
 
-# without array epsP1
+# without array epsH1
 calibweights1 <- ipu2(eusilcS, hid = "household", 
                       conP = list(conP1, conP2, netIncome = conP3), 
                       conH = list(conH1), 
@@ -161,7 +169,7 @@ calibweights1 <- ipu2(eusilcS, hid = "household",
                       epsH = 0.01,  
                       bound = NULL, verbose = TRUE,  maxIter = 200)
 
-# with array epsP1, base weights and bound
+# with array epsH1, base weights and bound
 calibweights2 <- ipu2(eusilcS, hid = "household", 
                       conP = list(conP1, conP2), 
                       conH = list(conH1), 
@@ -169,6 +177,11 @@ calibweights2 <- ipu2(eusilcS, hid = "household",
                       epsH = list(epsH1),  
                       w = "baseWeight",
                       bound = 4, verbose = TRUE, maxIter = 200)
+                      
+# show an adjusted version of conP and the original
+attr(calibweights2, "conP_adj")
+attr(calibweights2, "conP")
+
 }
 \seealso{
 \code{\link{ipu}}

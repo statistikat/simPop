@@ -193,12 +193,64 @@ calibH <- function(i,conH, epsH, dat, error, valueH, hColNames, bound, verbose, 
   return(error)
 }
 
+## recreate the formula argument to xtabs based on conP, conH
+getFormulas <- function(con, w = "calibWeight"){
+  formOut <- NULL
+  for(i in seq_along(con)){
+    lhs <- names(con)[i]
+    if(is.null(lhs) || lhs == ""){
+      lhs = w
+    }
+    rhs <- paste(names(dimnames(con[[i]])), collapse = "+")
+    formOut[[i]] <- formula(paste(lhs, "~", rhs), env = .GlobalEnv)
+  }
+  formOut
+}
+
+## enrich dat_original with the calibrated weights and assign attributes
+addWeightsAndAttributes <- function(dat, conP, conH, epsP, epsH, dat_original, maxIter, calIter, returnNA){
+  outTable <- copy(dat_original)
+  
+  # add calibrated weights. Use setkey to make sure the indexes match
+  setkey(dat, OriginalSortingVariable)
+  outTable[, calibWeight := ifelse((maxIter < calIter) & returnNA, NA, dat$calibWeight)]
+  
+  formP <- getFormulas(conP)
+  formH <- getFormulas(conH)
+
+  # general information  
+  attr(outTable, "converged") <- (maxIter >= calIter)
+  attr(outTable, "iterations") <- min(maxIter, calIter) # return maxIter in case of no convergence
+
+  # input constraints
+  attr(outTable, "conP") <- conP
+  attr(outTable, "conH") <- conH
+  
+  # adjusted constraints (conP, conH according to the calibrated weights)
+  attr(outTable, "conP_adj") <- lapply(formP, xtabs, dat)
+  attr(outTable, "conH_adj") <- lapply(formH, xtabs, dat)
+  
+  # tolerances
+  attr(outTable, "epsP") <- epsP
+  attr(outTable, "epsH") <- epsH
+  
+  # formulas
+  attr(outTable, "formP") <- formP
+  attr(outTable, "formH") <- formH
+  
+  # not used yet
+  #class(outTable) <- c("ipu2", class(outTable))
+  
+  invisible(outTable)
+}
+
+
 #' Iterative Proportional Updating
 #' 
 #' Adjust sampling weights to given totals based on household-level and/or
 #' individual level constraints.
 #' 
-#' This functions implements the weighting procedure described 
+#' This function implements the weighting procedure described 
 #' [here](http://www.ajs.or.at/index.php/ajs/article/viewFile/doi10.17713ajs.v45i3.120/512). 
 #' 
 #' `conP` and `conH` are contingency tables, which can be created with `xtabs`. The `dimnames` of those
@@ -214,7 +266,7 @@ calibH <- function(i,conH, epsH, dat, error, valueH, hColNames, bound, verbose, 
 #' performs best if all varables occuring in the constraints (\code{conP} and \code{conH}) as well as the 
 #' household variable are coded as \code{factor}-columns in \code{dat}. Otherwise, conversions will be necessary
 #' which can be monitored with the `conversion_messages` argument.
-#' Setting `check_hh_vars` to `FALSE` can also incease the performance of the scheme considerably.
+#' Setting `check_hh_vars` to `FALSE` can also incease the performance of the scheme.
 #'
 #' @name ipu2 
 #' @md
@@ -274,8 +326,16 @@ calibH <- function(i,conH, epsH, dat, error, valueH, hColNames, bound, verbose, 
 #' @param conversion_messages show a message, if inputs need to be reformatted. This can be useful for speed 
 #'        optimizations if ipu2 is called several times with similar inputs (for example bootstrapping)
 #' @return The function will return the input data \code{dat} with the
-#' calibrated weights \code{calibWeight} as an additional column. If no convergence has been reached in `maxIter` 
-#' steps, and `returnNA` is `TRUE` (the default), only a copy of the input data will be returned.
+#' calibrated weights \code{calibWeight} as an additional column as well as attributes. If no convergence has been reached in `maxIter` 
+#' steps, and `returnNA` is `TRUE` (the default), the column `calibWeights` will only consist of `NA`s. The attributes of the table are
+#' attributes derived from the `data.table` class as well as the following.
+#' \tabular{ll}{
+#'   `converged` \tab Did the algorithm converge in `maxIter` steps? \cr
+#'   `iterations` \tab The number of iterations performed. \cr
+#'   `conP`, `conH`, `epsP`, `epsH` \tab See Arguments. \cr
+#'   `conP_adj`, `conH_adj` \tab Adjusted versions of `conP` and `conH` \cr
+#'   `formP`, `formH` \tab Formulas that were used to calculate `conP_adj` and `conH_adj` based on the output table.
+#' }
 #' @seealso \code{\link{ipu}}
 #' @export ipu2
 #' @author Alexander Kowarik, Gregor de Cillia
@@ -322,7 +382,7 @@ calibH <- function(i,conH, epsH, dat, error, valueH, hColNames, bound, verbose, 
 #' epsH1[1:4,] <- 0.005
 #' epsH1["5+",] <- 0.2
 #' 
-#' # without array epsP1
+#' # without array epsH1
 #' calibweights1 <- ipu2(eusilcS, hid = "household", 
 #'                       conP = list(conP1, conP2, netIncome = conP3), 
 #'                       conH = list(conH1), 
@@ -330,7 +390,7 @@ calibH <- function(i,conH, epsH, dat, error, valueH, hColNames, bound, verbose, 
 #'                       epsH = 0.01,  
 #'                       bound = NULL, verbose = TRUE,  maxIter = 200)
 #' 
-#' # with array epsP1, base weights and bound
+#' # with array epsH1, base weights and bound
 #' calibweights2 <- ipu2(eusilcS, hid = "household", 
 #'                       conP = list(conP1, conP2), 
 #'                       conH = list(conH1), 
@@ -338,11 +398,11 @@ calibH <- function(i,conH, epsH, dat, error, valueH, hColNames, bound, verbose, 
 #'                       epsH = list(epsH1),  
 #'                       w = "baseWeight",
 #'                       bound = 4, verbose = TRUE, maxIter = 200)
-#   fn <- function(a){
-#    f <- a[1]*var+a[2]
-#    (sum(f*var*w)-v)^2+(sum(f*w)-sum(w))^2
-#  }
-#  coef <- optim(c(1,1),fn)$par
+#'                       
+#' # show an adjusted version of conP and the original
+#' attr(calibweights2, "conP_adj")
+#' attr(calibweights2, "conP")
+#' 
 ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FALSE,
                  w=NULL,bound=4,maxIter=200,meanHH=TRUE,allPthenH=TRUE,returnNA=TRUE,looseH=FALSE,
                  numericalWeighting=computeLinear, check_hh_vars = TRUE, conversion_messages = FALSE){
@@ -544,13 +604,5 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
     calIter <- calIter + 1 
   }
   
-  ## originalsorting is fucked up without this
-  setkey(dat, OriginalSortingVariable)
-  
-  ## Return missings in calibWeight variable if no convergence was reached
-  if(maxIter<calIter&returnNA){
-    invisible(copy(dat_original)[, calibWeight := NA])
-  }else{
-    invisible(copy(dat_original)[,calibWeight := dat$calibWeight])  
-  }  
+  addWeightsAndAttributes(dat, conP, conH, epsP, epsH, dat_original, maxIter, calIter, returnNA)
 }
