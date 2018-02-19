@@ -107,6 +107,14 @@ calcFinalWeights <- function(data0, totals0, params) {
 #' performed in parallel and no useful output can be provided.
 #' @param sizefactor the factor for inflating the population before applying 0/1 weights
 #' @param memory if TRUE simulated annealing is applied in slower but less memory intensive way. Is especially usefull if factor or population is large.
+#' @param choose.temp if TRUE \code{temp} will be rescaled according to \code{eps} and \code{choose.temp.factor}. Only used if \code{memory=TRUE}.
+#' @param choose.temp.factor number between (0,1) for rescaling \code{temp} for simulated annealing. \code{temp} redefined by\code{max(temp,eps*choose.temp.factor)}.
+#' Only used if \code{choose.temp=TRUE} and \code{memory=TRUE}.
+#' @param scale.redraw Only used if \code{memory=TRUE}. Number between (0,1) scaling the number of households that need to be drawn and discarded in each iteration step.
+#' The sum of individuals currently selected through simulated annealing is substracet from the sum over population margins added to \code{inp} via \code{addKnownMargins}.
+#' This difference is divided by the median household size resulting in an estimated number of houshold that the current synthetic population differs from the population margins (~\code{redraw_gap}).
+#' The next iteration will then adjust the number of housholds to be drawn or discarded (\code{redraw}) according to \code{max(ceiling(redraw-redraw_gap*scale.redraw),1)} or \code{max(ceiling(redraw+redraw_gap*scale.redraw),1)} respectively.
+#' This keeps the number of individuals in the synthetic population stable regarding the population margins. Otherwise the synthetic population might be considerably larger or smaller then the population margins, through selection of many large households.
 #' @return Returns an object of class \code{\linkS4class{simPopObj}} with an
 #' updated population listed in slot 'pop'.
 #' @author Bernhard Meindl, Johannes Gussenbauer and Matthias Templ
@@ -138,7 +146,9 @@ calcFinalWeights <- function(data0, totals0, params) {
 #' }
 calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
   temp.cooldown = 0.9, factor.cooldown = 0.85, min.temp = 10^-3,
-  nr_cpus=NULL, sizefactor=2, memory=FALSE ,verbose=FALSE) {
+  nr_cpus=NULL, sizefactor=2, memory=FALSE,
+  choose.temp=TRUE,choose.temp.factor=0.2,scale.redraw=.5,
+  verbose=FALSE) {
   if(verbose){
     t0 <- Sys.time()
   }
@@ -205,6 +215,24 @@ calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
     data2 <- data2[,colnames(data), with=FALSE]
     #data2 <- data2[,match(colnames(data), cn), with=FALSE]
     data <- rbind(data, data2)
+  }else{
+    # check params for memory=TRUE
+    if(!is.numeric(choose.temp.factor)){
+      stop("choose.temp.factor must be numeric!")
+    }
+    choose.temp.factor <- choose.temp.factor[1]
+    if(choose.temp.factor<=0|choose.temp.factor>=1){
+      cat("choose.temp.factor must be in (0,1)\n Setting choose.temp.factor to default value of 0.2")
+      choose.temp.factor <- .2
+    }
+    if(!is.numeric(scale.redraw)){
+      stop("scale.redraw must be numeric!")
+    }
+    scale.redraw <- scale.redraw[1]
+    if(scale.redraw<=0|scale.redraw>=1){
+      cat("scale.redraw must be in (0,1)\n Setting scale.redraw to default value of 0.5")
+      scale.redraw <- .5
+    }
   }
 
 
@@ -234,7 +262,9 @@ calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
           simAnnealingDT(
             data0=data[split.number[x]],
             totals0=totals[which(totals[,split,with=FALSE]==as.character(split.number[x][[split]])),],
-            params=params,sizefactor=sizefactor,choose.temp=TRUE)
+            params=params,sizefactor=sizefactor,choose.temp=choose.temp,
+            choose.temp.factor=choose.temp.factor,scale.redraw=scale.redraw,
+            split.level=paste0(unlist(split.number[x])))
         }
       }else{
         final_weights <- foreach(x=1:nrow(split.number), .options.snow=list(preschedule=TRUE)) %dopar% {
@@ -252,7 +282,9 @@ calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
           simAnnealingDT(
             data0=data[split.number[x]],
             totals0=totals[which(totals[,split,with=FALSE]==as.character(split.number[x][[split]])),],
-            params=params,sizefactor=sizefactor,choose.temp=TRUE)
+            params=params,sizefactor=sizefactor,choose.temp=choose.temp,
+            choose.temp.factor=choose.temp.factor,scale.redraw=scale.redraw,
+            split.level=paste0(unlist(split.number[x])))
         },mc.cores=nr_cores)
       }else{
         final_weights <- mclapply(1:nrow(split.number), function(x) {
@@ -270,7 +302,8 @@ calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
         out <- simAnnealingDT(
           data0=data[split.number[x]],
           totals0=totals[which(totals[,split,with=FALSE]==as.character(split.number[x][[split]])),],
-          params=params,sizefactor=sizefactor,choose.temp=TRUE,
+          params=params,sizefactor=sizefactor,choose.temp=choose.temp,
+          choose.temp.factor=choose.temp.factor,scale.redraw=scale.redraw,
           split.level=paste0(unlist(split.number[x])))
         return(out)
       })

@@ -8,7 +8,7 @@ dteval <- function(...,envir=parent.frame()){
 }
 
 simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
-                           sample.prob=TRUE,choose.temp=FALSE,split.level=NULL){
+                           sample.prob=TRUE,choose.temp=FALSE,choose.temp.factor=0.2,scale.redraw=.5,split.level=NULL){
   ID_GRP <- N <- V1 <- sim_ID <- weight_choose <- weight_choose_new <- NULL
   ######################################
   ## define variables from param
@@ -47,7 +47,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   
   # choose starting temperatur as percentage of objective function
   if(choose.temp){
-    temp <- max(temp,eps*.2)
+    temp <- max(temp,eps*choose.temp.factor)
     #min_temp <- temp*temp_cooldown^50
   }
   
@@ -93,7 +93,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
       while( n<maxiter ) {
         
         # scale redraw for add and remove to keep synthetic totals stable
-        redraw_gap <- totals_diff[,c(sum(V1)-sum(N))/med_hh]*.5
+        redraw_gap <- totals_diff[,c(sum(V1)-sum(N))/med_hh]*scale.redraw
         
         #if(abs(redraw_gap)<redraw){
         redraw_add <- max(ceiling(redraw-redraw_gap),1)
