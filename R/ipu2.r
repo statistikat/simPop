@@ -219,24 +219,24 @@ addWeightsAndAttributes <- function(dat, conP, conH, epsP, epsH, dat_original, m
   formH <- getFormulas(conH)
 
   # general information  
-  attr(outTable, "converged") <- (maxIter >= calIter)
-  attr(outTable, "iterations") <- min(maxIter, calIter) # return maxIter in case of no convergence
+  setattr(outTable, "converged", (maxIter >= calIter))
+  setattr(outTable, "iterations", min(maxIter, calIter)) # return maxIter in case of no convergence
 
   # input constraints
-  attr(outTable, "conP") <- conP
-  attr(outTable, "conH") <- conH
+  setattr(outTable, "conP", conP)
+  setattr(outTable, "conH", conH)
   
   # adjusted constraints (conP, conH according to the calibrated weights)
-  attr(outTable, "conP_adj") <- lapply(formP, xtabs, dat)
-  attr(outTable, "conH_adj") <- lapply(formH, xtabs, dat)
+  setattr(outTable, "conP_adj", lapply(formP, xtabs, dat))
+  setattr(outTable, "conH_adj", lapply(formH, xtabs, dat))
   
   # tolerances
-  attr(outTable, "epsP") <- epsP
-  attr(outTable, "epsH") <- epsH
+  setattr(outTable, "epsP", epsP)
+  setattr(outTable, "epsH", epsH)
   
   # formulas
-  attr(outTable, "formP") <- formP
-  attr(outTable, "formH") <- formH
+  setattr(outTable, "formP", formP)
+  setattr(outTable, "formH", formH)
   
   # not used yet
   #class(outTable) <- c("ipu2", class(outTable))
