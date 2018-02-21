@@ -34,21 +34,27 @@ kishFactor <- function(w){
 }
 boundsFak <- function(g1,g0,f,bound=4){ # Berechnet die neuen Gewichte (innerhalb 4, .25 Veraenderungsraten)
   g1 <- g1 * f
-  TF <- (g1/g0)>bound
+  TF <- which((g1/g0)>bound)
   TF[is.na(TF)] <- FALSE
   g1[TF] <- bound*g0[TF]
-  TF <- (g1/g0)<(1/bound)
+  TF <- which((g1/g0)<(1/bound))
   TF[is.na(TF)] <- FALSE
   g1[TF] <- (1/bound)*g0[TF]
   return(g1)
 }
 boundsFakHH <- function(g1,g0,eps,orig,p,bound=4){ # Berechnet die neuen Gewichte fuer Unter- und Obergrenze (innerhalb 4, .25 Veraenderungsraten)
-  u <- orig*(1-eps)
-  o <- orig*(1+eps)
-  g1[p>o] <- g1[p>o] * o[p>o]/p[p>o]
-  g1[p<u] <- g1[p<u] * u[p<u]/p[p<u]
-  g1[(g1/g0)>bound] <- bound*g0[(g1/g0)>bound]
-  g1[(g1/g0)<(1/bound)] <- (1/bound)*g0[(g1/g0)<(1/bound)]
+  u <- orig*(1 - eps)
+  o <- orig*(1 + eps)
+  
+  pbo <- which(p > o)
+  psu <- which(p < u)
+  g1[pbo] <- g1[pbo] * o[pbo]/p[pbo]
+  g1[psu] <- g1[psu] * u[psu]/p[psu]
+
+  TF <- which((g1/g0)>bound)
+  g1[TF] <- bound*g0[TF]
+  TF <- which((g1/g0)<(1/bound))
+  g1[TF] <- (1/bound)*g0[TF]
   return(g1)
 }
 
