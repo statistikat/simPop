@@ -132,7 +132,7 @@ calibP <- function(i,conP, epsP, dat, error, valueP, pColNames, bound, verbose, 
   
   if(verbose&&any(curEps>epsPcur)&&calIter%%10==0){
     if(calIter%%100==0)
-      print(subset(dat,!is.na(f))[abs(1/f-1)>epsPcur][,list(mean(f),.N),by=eval(pColNames[[i]])])
+      print(subset(dat,!is.na(f))[abs(1/f-1)>epsPcur][,list(mean(f)-1,.N),by=eval(pColNames[[i]])])
     #print(dat[abs(1/f-1)>epsPcur][,list(mean(f),.N),by=eval(pColNames[[i]])])
     cat(calIter, ":Not yet converged for P-Constraint",i,"\n")
   }
@@ -193,7 +193,7 @@ calibH <- function(i,conH, epsH, dat, error, valueH, hColNames, bound, verbose, 
   
   if(verbose&&any(curEps>epsHcur)&&calIter%%10==0){
     if(calIter%%100==0)
-      print(subset(dat,!is.na(f))[abs(1/f-1)>epsHcur][,list(mean(f),.N),by=eval(hColNames[[i]])])
+      print(subset(dat,!is.na(f))[abs(1/f-1)>epsHcur][,list(mean(f)-1,.N),by=eval(hColNames[[i]])])
     cat(calIter, ":Not yet converged for H-Constraint",i,"\n")
   }
   return(error)
