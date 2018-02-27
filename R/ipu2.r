@@ -219,8 +219,12 @@ addWeightsAndAttributes <- function(dat, conP, conH, epsP, epsH, dat_original, m
   
   # add calibrated weights. Use setkey to make sure the indexes match
   setkey(dat, OriginalSortingVariable)
-  outTable[, calibWeight := ifelse((maxIter < calIter) & returnNA, NA, dat$calibWeight)]
   
+  if ((maxIter < calIter) & returnNA)
+    outTable[ , calibWeight := NA]
+  else
+    outTable[ , calibWeight := dat$calibWeight]
+
   formP <- getFormulas(conP)
   formH <- getFormulas(conH)
 
