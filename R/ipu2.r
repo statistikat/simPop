@@ -12,7 +12,7 @@ getMeanFun <- function(meanHH){
     stop("invalid value for meanHH")
   meanfun
 }
-
+#' 
 #' Kish Factor
 #' 
 #' Compute the kish factor for a specific weight vector
@@ -215,6 +215,7 @@ getFormulas <- function(con, w = "calibWeight"){
 
 ## enrich dat_original with the calibrated weights and assign attributes
 addWeightsAndAttributes <- function(dat, conP, conH, epsP, epsH, dat_original, maxIter, calIter, returnNA){
+  OriginalSortingVariable <- calibWeight <- NULL
   outTable <- copy(dat_original)
   
   # add calibrated weights. Use setkey to make sure the indexes match
