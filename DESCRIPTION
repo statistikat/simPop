@@ -4,8 +4,8 @@ Title: Simulation of Synthetic Populations for Survey Data Considering Auxiliary
     Information
 Version: 1.1.0
 Date: 2018-03-29
-Author: Bernhard Meindl, Matthias Templ, Andreas Alfons, Alexander Kowarik, and
-    with contributions from Mathieu Ribatet
+Author: Bernhard Meindl, Matthias Templ, Andreas Alfons, Alexander Kowarik and
+    with contributions from Mathieu Ribatet, Johannes Gussenbauer and Gregor De Cillia
 Maintainer: Matthias Templ <matthias.templ@gmail.com>
 URL: https://github.com/statistikat/simPop
 Depends:
