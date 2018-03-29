@@ -7,7 +7,8 @@
 \usage{
 calibPop(inp, split, temp = 1, eps.factor = 0.05, maxiter = 200,
   temp.cooldown = 0.9, factor.cooldown = 0.85, min.temp = 10^-3,
-  nr_cpus = NULL, sizefactor = 2, memory = FALSE, verbose = FALSE)
+  nr_cpus = NULL, sizefactor = 2, memory = FALSE, choose.temp = TRUE,
+  choose.temp.factor = 0.2, scale.redraw = 0.5, verbose = FALSE)
 }
 \arguments{
 \item{inp}{an object of class \code{\linkS4class{simPopObj}} with slot
@@ -42,6 +43,17 @@ that should be used for parallel processing.}
 \item{sizefactor}{the factor for inflating the population before applying 0/1 weights}
 
 \item{memory}{if TRUE simulated annealing is applied in slower but less memory intensive way. Is especially usefull if factor or population is large.}
+
+\item{choose.temp}{if TRUE \code{temp} will be rescaled according to \code{eps} and \code{choose.temp.factor}. Only used if \code{memory=TRUE}.}
+
+\item{choose.temp.factor}{number between (0,1) for rescaling \code{temp} for simulated annealing. \code{temp} redefined by\code{max(temp,eps*choose.temp.factor)}.
+Only used if \code{choose.temp=TRUE} and \code{memory=TRUE}.}
+
+\item{scale.redraw}{Only used if \code{memory=TRUE}. Number between (0,1) scaling the number of households that need to be drawn and discarded in each iteration step.
+The sum of individuals currently selected through simulated annealing is substracet from the sum over population margins added to \code{inp} via \code{addKnownMargins}.
+This difference is divided by the median household size resulting in an estimated number of houshold that the current synthetic population differs from the population margins (~\code{redraw_gap}).
+The next iteration will then adjust the number of housholds to be drawn or discarded (\code{redraw}) according to \code{max(ceiling(redraw-redraw_gap*scale.redraw),1)} or \code{max(ceiling(redraw+redraw_gap*scale.redraw),1)} respectively.
+This keeps the number of individuals in the synthetic population stable regarding the population margins. Otherwise the synthetic population might be considerably larger or smaller then the population margins, through selection of many large households.}
 
 \item{verbose}{boolean variable; if TRUE some additional verbose output is
 provided, however only if \code{split} is NULL. Otherwise the computation is
