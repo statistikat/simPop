@@ -8,7 +8,8 @@ dteval <- function(...,envir=parent.frame()){
 }
 
 simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
-                           sample.prob=TRUE,choose.temp=FALSE,choose.temp.factor=0.2,scale.redraw=.5,split.level=NULL){
+                           sample.prob=TRUE,choose.temp=FALSE,choose.temp.factor=0.2,
+                           scale.redraw=.5,split.level=NULL,observe.times=50,observe.break=0.05){
   ID_GRP <- N <- V1 <- sim_ID <- weight_choose <- weight_choose_new <- NULL
   ######################################
   ## define variables from param
@@ -74,9 +75,13 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   
   # observe updating of objective function
   # if solution does not improve -> terminate
-  observe.times <- 50
+  # observe only if observe.times>0 and observe.break>0
   observe.count <- 1
-  observe.obj <- rep(objective,observe.times)
+  do.observe <- observe.times>0&observe.break>0
+  if(do.observe){
+    observe.obj <- rep(objective,observe.times)
+  }
+
   
   cat(paste0("Starting simulated Annealing for ",split.level,"\n"))
   ######################################
@@ -185,16 +190,18 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
           init_weight <- init_weight_new
           
           # update observe variables
-          observe.count <- observe.count +1
-          if(observe.count>observe.times){
-            if(sd(observe.obj)/mean(observe.obj)<.05){
-              break # if objective doesnt move anymore break up loop
+          if(do.observe){
+            observe.count <- observe.count +1
+            if(observe.count>observe.times){
+              if(sd(observe.obj)/mean(observe.obj)< observe.break){
+                break # if objective doesnt move anymore break up loop
+              }else{
+                observe.count <- 1
+                observe.obj[observe.count] <- objective
+              }
             }else{
-              observe.count <- 1
               observe.obj[observe.count] <- objective
             }
-          }else{
-            observe.obj[observe.count] <- objective
           }
         }
         
@@ -211,16 +218,18 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
             init_weight <- init_weight_new
             
             # update observe variables
-            observe.count <- observe.count +1
-            if(observe.count>observe.times){
-              if(sd(observe.obj)/mean(observe.obj)<.05){
-                break # if objective doesnt move anymore break up loop
+            if(do.observe){
+              observe.count <- observe.count +1
+              if(observe.count>observe.times){
+                if(sd(observe.obj)/mean(observe.obj)< observe.break){
+                  break # if objective doesnt move anymore break up loop
+                }else{
+                  observe.count <- 1
+                  observe.obj[observe.count] <- objective
+                }
               }else{
-                observe.count <- 1
                 observe.obj[observe.count] <- objective
               }
-            }else{
-              observe.obj[observe.count] <- objective
             }
           }
         }    
