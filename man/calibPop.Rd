@@ -7,7 +7,7 @@
 \usage{
 calibPop(inp, split, temp = 1, eps.factor = 0.05, maxiter = 200,
   temp.cooldown = 0.9, factor.cooldown = 0.85, min.temp = 10^-3,
-  nr_cpus = NULL, sizefactor = 2, memory = FALSE, choose.temp = TRUE,
+  nr_cpus = NULL, sizefactor = 2, memory = TRUE, choose.temp = TRUE,
   choose.temp.factor = 0.2, scale.redraw = 0.5, observe.times = 50,
   observe.break = 0.05, verbose = FALSE)
 }
@@ -25,7 +25,7 @@ possible.}
 
 \item{eps.factor}{a factor (between 0 and 1) specifying the acceptance
 error. For example eps.factor = 0.05 results in an acceptance error for the
-objective function of 0.05*sum(totals)}
+objective function of \code{0.05*sum(totals)}.}
 
 \item{maxiter}{maximum iterations during a temperature step.}
 
@@ -43,7 +43,7 @@ that should be used for parallel processing.}
 
 \item{sizefactor}{the factor for inflating the population before applying 0/1 weights}
 
-\item{memory}{if TRUE simulated annealing is applied in slower but less memory intensive way. Is especially usefull if factor or population is large.}
+\item{memory}{if TRUE simulated annealing is applied in less memory intensive way. Is especially usefull if factor or population is large. For this option simulated annealing is not entirely implemented in C++, therefore it might be slower than option \code{memory=FALSE}.}
 
 \item{choose.temp}{if TRUE \code{temp} will be rescaled according to \code{eps} and \code{choose.temp.factor}. \code{eps} is defined by the product between \code{eps_factore} and the sum over the target population margins, see \code{\link{addKnownMargins}}. Only used if \code{memory=TRUE}.}
 
@@ -51,8 +51,8 @@ that should be used for parallel processing.}
 Can be usefull if simulated annealing is split into subgroups with considerably different population sizes. Only used if \code{choose.temp=TRUE} and \code{memory=TRUE}.}
 
 \item{scale.redraw}{Only used if \code{memory=TRUE}. Number between (0,1) scaling the number of households that need to be drawn and discarded in each iteration step.
-The number of individuals currently selected through simulated annealing is substracted from the sum over the target population margins, added to \code{inp} via \code{addKnownMargins}.
-This difference is divided by the median household size resulting in an estimated number of houshold that the current synthetic population differs from the population margins (~\code{redraw_gap}).
+The number of individuals currently selected through simulated annealing is substracted from the sum over the target population margins added to \code{inp} via \code{addKnownMargins}.
+This difference is divided by the median household size resulting in an estimated number of housholds that the current synthetic population differs from the population margins (~\code{redraw_gap}).
 The next iteration will then adjust the number of housholds to be drawn or discarded (\code{redraw}) according to \code{max(ceiling(redraw-redraw_gap*scale.redraw),1)} or \code{max(ceiling(redraw+redraw_gap*scale.redraw),1)} respectively.
 This keeps the number of individuals in the synthetic population relatively stable regarding the population margins. Otherwise the synthetic population might be considerably larger or smaller then the population margins, through selection of many large or small households.}
 
@@ -112,12 +112,12 @@ margins <- as.data.frame(
   xtabs(rep(1, nrow(eusilcP)) ~ eusilcP$region + eusilcP$gender + eusilcP$citizenship))
 colnames(margins) <- c("db040", "rb090", "pb220a", "freq")
 simPop <- addKnownMargins(simPop, margins)
+simPop_adj2 <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1,memory=TRUE)
 }
-
 # apply simulated annealing
 \dontrun{
 ## long computation time
-simPop_adj <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1)
+simPop_adj <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1,memory=FALSE)
 }
 }
 \references{

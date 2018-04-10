@@ -25,7 +25,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   hhsize <- params[["hhsize"]]
   parameter <- params[["parameter"]]
   
-  # parameters used für c++ code
+  # parameters used for c++ code
   # set index for original order
   data0[,sim_ID:=.I]
   

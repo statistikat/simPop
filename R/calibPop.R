@@ -140,8 +140,8 @@ calcFinalWeights <- function(data0, totals0, params) {
 #'   xtabs(rep(1, nrow(eusilcP)) ~ eusilcP$region + eusilcP$gender + eusilcP$citizenship))
 #' colnames(margins) <- c("db040", "rb090", "pb220a", "freq")
 #' simPop <- addKnownMargins(simPop, margins)
-#' }
 #' simPop_adj2 <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1,memory=TRUE)
+#' }
 #' # apply simulated annealing
 #' \dontrun{
 #' ## long computation time

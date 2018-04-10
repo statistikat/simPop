@@ -45,7 +45,7 @@ G. Calot and J.-P. Sardon.  Methodology for the calculation of
 Eurostat's demographic indicators.  Detailed report by the European
 Demographic Observatory
 
-\url{http://www.cedefop.europa.eu/EN/Files/Methodology_for_the_calculation_of_Eurostats_demographic_indicators.pdf}
+\url{http://www.cedefop.europa.eu/files/Methodology_for_the_calculation_of_Eurostats_demographic_indicators.pdf}
 }
 \seealso{
 \code{\link{whipple}}
