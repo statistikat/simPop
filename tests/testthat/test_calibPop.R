@@ -40,18 +40,18 @@ test_that("Test CalibPop - check sizefactor",{
 
 test_that("Test CalibPop - check scale.redraw",{
   simPop_adj <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1,memory=TRUE,sizefactor = 5,scale.redraw = .2)
-  simPop_adj <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1,memory=TRUE,sizefactor = 5,scale.redraw = .8)
+  #simPop_adj <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1,memory=TRUE,sizefactor = 5,scale.redraw = .8)
 })
 
 test_that("Test CalibPop - check observe.break",{
   simPop_adj <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1,memory=TRUE,sizefactor = 5,observe.break = 0)
-  simPop_adj <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1,memory=TRUE,sizefactor = 5,observe.break = .3)
+  #simPop_adj <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1,memory=TRUE,sizefactor = 5,observe.break = .3)
 })
 
 test_that("Test CalibPop - check observe.times",{
   simPop_adj <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1,memory=TRUE,sizefactor = 5,observe.times=10)
-  simPop_adj <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1,memory=TRUE,sizefactor = 5,observe.times=0)
-  simPop_adj <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1,memory=TRUE,sizefactor = 5,observe.times=10,observe.break = 0.01)
-  simPop_adj <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1,memory=TRUE,sizefactor = 5,observe.times=10,observe.break = .5)
+  #simPop_adj <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1,memory=TRUE,sizefactor = 5,observe.times=0)
+  #simPop_adj <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1,memory=TRUE,sizefactor = 5,observe.times=10,observe.break = 0.01)
+  #simPop_adj <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1,memory=TRUE,sizefactor = 5,observe.times=10,observe.break = .5)
   simPop_adj <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1,memory=TRUE,sizefactor = 5,observe.times=10,observe.break = .5)
 })
