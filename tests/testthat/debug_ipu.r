@@ -1,4 +1,5 @@
 ## goal: calculate household weights that should also fulfil person-type constraints
+context("ipu")
 library(simPop)
 test_that("ipu debug",{
 # load sample and population data
@@ -59,7 +60,6 @@ data.frame(required=unlist(con), is=is)
 
 ######Basic not converting example
 # basic example
-require(simPop)
 inp <- as.data.frame(matrix(0, nrow=8, ncol=7))
 colnames(inp) <- c("hhid","hh1","hh2","p1","p2","p3","p4")
 inp$hhid <- 1:8

@@ -1,3 +1,4 @@
+context("sprague")
 ## test sprague index:
 library(simPop)
 test_that("sprague test",{
