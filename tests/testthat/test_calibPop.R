@@ -1,6 +1,9 @@
 ################################################
 # test calibPop functionality
 #
+if(Sys.info()["user"]%in%c("kowarik","gussenbauer")){
+  
+
 context("calibPop")
 library(simPop)
 
@@ -61,3 +64,5 @@ test_that("Test CalibPop - check observe.times",{
   simPop_adj <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1,memory=TRUE,sizefactor = 5,observe.times=10,observe.break = .5)
   expect_true(abs(simPop_adj@table[,sum(N)]-sum(margins$freq))<1)
 })
+
+}
