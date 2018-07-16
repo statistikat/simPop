@@ -140,7 +140,7 @@ calibP <- function(i,conP, epsP, dat, error, valueP, pColNames, bound, verbose, 
   return(error)
 }
 
-calibH <- function(i,conH, epsH, dat, error, valueH, hColNames, bound, verbose, calIter, looseH){  
+calibH <- function(i,conH, epsH, dat, error, valueH, hColNames, bound, verbose, calIter, looseH, numericalWeighting){  
   OriginalSortingVariable <- V1 <- baseWeight <- calibWeight <- epsvalue <- f <- NULL
   temporary_hid <- temporary_hvar <- tmpVarForMultiplication <- value <- wValue <- wvst<- NULL
   
@@ -160,6 +160,11 @@ calibH <- function(i,conH, epsH, dat, error, valueH, hColNames, bound, verbose, 
     
     dat[, f := ipu_step_f(calibWeight*wvst*tmpVarForMultiplication, 
                           combined_factors, conH[[i]])]
+    dat[, wValue := value/f]
+    
+    # try to divide the weight between units with larger/smaller value in the numerical variable linear
+    dat[,f:=numericalWeighting(head(wValue,1),head(value,1),tmpVarForMultiplication,calibWeight),
+        by=combined_factors]
     
     setnames(dat,"tmpVarForMultiplication",names(conH)[i])
   }else{
@@ -585,8 +590,9 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
 
       ### Household calib
       for(i in seq_along(conH)){
-        error <- calibH(i=i, conH=conH, epsH=epsH, dat=dat, error=error,
-                      valueH=valueH, hColNames=hColNames,bound=bound, verbose=verbose, calIter=calIter, looseH=looseH)
+        error <- calibH(i=i, conH=conH, epsH=epsH, dat=dat, error=error, valueH=valueH, 
+                        hColNames=hColNames,bound=bound, verbose=verbose, calIter=calIter, 
+                        looseH=looseH, numericalWeighting = numericalWeighting)
       }
     }else{
       ### Person calib
