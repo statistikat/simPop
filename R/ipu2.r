@@ -1,3 +1,16 @@
+#' @rdname ipu_step
+#' @name ipu_step
+#' @md
+#' 
+#' @param dat a `data.frame` containing the factor variables to be combined.
+#' 
+#' @export
+combine_factors <- function(dat, targets) {
+  as.data.frame(targets) %>% tibble::rowid_to_column("ID_ipu") %>% 
+    dplyr::right_join(dat, by = names(dimnames(targets)), sort = FALSE) %>% 
+    (function(x){ x$ID_ipu }) %>% factor(levels = 1:length(targets))
+}
+
 getMeanFun <- function(meanHH){
   if(isTRUE(meanHH))
     meanHH <- "arithmetic"
@@ -58,9 +71,18 @@ boundsFakHH <- function(g1,g0,eps,orig,p,bound=4){ # Berechnet die neuen Gewicht
   return(g1)
 }
 
-check_population_totals <- function(con){
+check_population_totals <- function(con, dat) {
   # do not apply this check for numerical calibration
   ind <- which(names(con) == "")
+  
+  # do not apply this check for constraints that only cover the population partially
+  ind <- vapply(ind, function(i) {
+    constraint <- con[i]
+    for (variable in names(dimnames(constraint))) 
+      if (!identical(levels(dat[[variable]]), dimnames(constraint)[[variable]]))
+        return(FALSE)
+    return(TRUE)
+  }, TRUE) %>% which
   
   if (length(ind) == 0)
     return(NULL)
@@ -493,7 +515,7 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
         )
       }
     }
-    combined_factors <- combine_factors(dat, pColNames[[i]])
+    combined_factors <- combine_factors(dat, conP[[i]])
     
     dat[, paste0("combined_factors_", i) := combined_factors]
     dat[, paste0("valueP", i) := conP[[i]][combined_factors]]
@@ -521,7 +543,7 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
       }
     }
     
-    combined_factors <- combine_factors(dat, hColNames[[i]])
+    combined_factors <- combine_factors(dat, conH[[i]])
     
     dat[, paste0("combined_factors_h_", i) := combined_factors]
     dat[, paste0("valueH", i) := conH[[i]][combined_factors]]

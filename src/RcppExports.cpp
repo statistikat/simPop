@@ -6,19 +6,6 @@
 
 using namespace Rcpp;
 
-// combine_factors
-IntegerVector combine_factors(DataFrame& dat, CharacterVector factor_columns, bool asfactor);
-RcppExport SEXP _simPop_combine_factors(SEXP datSEXP, SEXP factor_columnsSEXP, SEXP asfactorSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< DataFrame& >::type dat(datSEXP);
-    Rcpp::traits::input_parameter< CharacterVector >::type factor_columns(factor_columnsSEXP);
-    Rcpp::traits::input_parameter< bool >::type asfactor(asfactorSEXP);
-    rcpp_result_gen = Rcpp::wrap(combine_factors(dat, factor_columns, asfactor));
-    return rcpp_result_gen;
-END_RCPP
-}
 // computeLinear
 NumericVector computeLinear(double curValue, double target, const NumericVector& x, const NumericVector& w, double boundLinear);
 RcppExport SEXP _simPop_computeLinear(SEXP curValueSEXP, SEXP targetSEXP, SEXP xSEXP, SEXP wSEXP, SEXP boundLinearSEXP) {

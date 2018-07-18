@@ -25,6 +25,7 @@ Imports:
     foreach,
     colorspace,
     VIM,
+    dplyr,
     methods,party,EnvStats,fitdistrplus,ranger,wrswoR
 Suggests:
     haven,

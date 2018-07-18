@@ -28,6 +28,7 @@ setClassUnion('listOrNULL', c('list', 'NULL'))
 #' @importFrom stats median model.matrix optim plogis ppoints predict rnorm runif uniroot var weighted.mean glm poisson xtabs
 # removed  stats quantilerexp 
 #' @importFrom plyr revalue
+#' @importFrom dplyr %>%
 #' @importFrom EnvStats rlnormTrunc rnormTrunc
 #' @importFrom fitdistrplus fitdist
 #' @importFrom ranger ranger

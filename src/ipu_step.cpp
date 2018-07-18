@@ -13,8 +13,8 @@ using namespace Rcpp;
 //' 
 //' @md
 //' @name ipu_step
-//' @param w An numeric vector of weights. All entries should be positive.
-//' @param classes A factor variable. Must have the same length as `w`.
+//' @param w a numeric vector of weights. All entries should be positive.
+//' @param classes a factor variable. Must have the same length as `w`.
 //' @param targets key figure to target with the ipu scheme. A numeric verctor of the same length as `levels(classes)`. 
 //' This can also be a `table` produced by `xtabs`. See examples.
 //' @examples
@@ -52,11 +52,11 @@ using namespace Rcpp;
 //' tips <- tips[factors]
 //' 
 //' ## combine factors
-//' cf <- combine_factors(tips, names(tips))
+//' con <- xtabs(~., tips)
+//' cf <- combine_factors(tips, con)
 //' cbind(tips, cf)[sample(nrow(tips), 10),]
 //' 
 //' ## adjust weights
-//' con <- xtabs(~., tips)
 //' weight <- rnorm(nrow(tips)) + 5
 //' adjusted_weight <- ipu_step(weight, cf, con)
 //' 
@@ -74,13 +74,16 @@ void ipu_step_ref(NumericVector w, IntegerVector classes, NumericVector targets)
     stop("number of levels does not match the length of targets");
   NumericVector targets2(targets.length());
   for(int i = 0; i < w.size(); i++){
-    int cl = classes[i] - 1;
-    targets2[cl] += w[i];
+    int cl = classes[i];
+    if (cl >= 0)
+      targets2[cl - 1] += w[i];
   }
   for(int i = 0; i < w.size(); i++){
-    int cl = classes[i] - 1;
-    w[i] *= targets[cl];
-    w[i] /= targets2[cl];
+    int cl = classes[i];
+    if (cl >= 0) {
+      w[i] *= targets[cl - 1];
+      w[i] /= targets2[cl - 1];
+    }
   }
 }
 
@@ -103,13 +106,17 @@ NumericVector ipu_step_f(NumericVector w, IntegerVector classes, NumericVector t
     stop("number of levels does not match the length of targets");
   NumericVector targets2(targets.length());
   for(int i = 0; i < w.size(); i++){
-    int cl = classes[i] - 1;
-    targets2[cl] += w[i];
+    int cl = classes[i];
+    if (cl >= 0)
+      targets2[cl - 1] += w[i];
   }
   NumericVector adjustments(classes.size());
   for(int i = 0; i < classes.size(); i++){
-    int cl = classes[i] - 1;
-    adjustments[i] = targets[cl]/targets2[cl];
+    int cl = classes[i];
+    if(cl >= 0)
+      adjustments[i] = targets[cl - 1]/targets2[cl - 1];
+    else
+      adjustments[i] = 1;
   }
   return adjustments;
 }
