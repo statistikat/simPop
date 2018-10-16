@@ -6,7 +6,7 @@
 #' 
 #' @export
 combine_factors <- function(dat, targets) {
-  as.data.frame(targets) %>% tibble::rowid_to_column("ID_ipu") %>% 
+  as.data.frame(targets) %>% (function(x) { x$ID_ipu <- 1:nrow(x); x }) %>% 
     dplyr::right_join(dat, by = names(dimnames(targets)), sort = FALSE) %>% 
     (function(x){ x$ID_ipu }) %>% factor(levels = 1:length(targets))
 }
