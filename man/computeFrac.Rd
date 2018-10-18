@@ -4,11 +4,14 @@
 \alias{computeFrac}
 \alias{numericalWeighting}
 \alias{computeLinear}
+\alias{computeLinearG1}
 \title{Numerical weighting functions}
 \usage{
 computeFrac(curValue, target, x, w)
 
 computeLinear(curValue, target, x, w, boundLinear = 10)
+
+computeLinearG1(curValue, target, x, w, boundLinear = 10)
 }
 \arguments{
 \item{curValue}{Current summed up value. Same as \code{sum(x*w)}}

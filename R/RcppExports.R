@@ -7,6 +7,12 @@ computeLinear <- function(curValue, target, x, w, boundLinear = 10) {
     .Call('_simPop_computeLinear', PACKAGE = 'simPop', curValue, target, x, w, boundLinear)
 }
 
+#' @rdname computeFrac
+#' @export
+computeLinearG1 <- function(curValue, target, x, w, boundLinear = 10) {
+    .Call('_simPop_computeLinearG1', PACKAGE = 'simPop', curValue, target, x, w, boundLinear)
+}
+
 #' Calculate mean by factors
 #' 
 #' These functions calculate the arithmetic and geometric mean of the weight for each class. `geometric_mean` and
