@@ -73,16 +73,25 @@ boundsFakHH <- function(g1,g0,eps,orig,p,bound=4){ # Berechnet die neuen Gewicht
   return(g1)
 }
 
-check_population_totals <- function(con, dat) {
+check_population_totals <- function(con, dat, type = "personal") {
   # do not apply this check for numerical calibration
-  ind <- which(names(con) == "")
+  ind <- ifelse(
+    is.null(names(con)),
+    seq_along(con),
+    which(names(con) == "")
+  )
   
   # do not apply this check for constraints that only cover the population partially
   ind <- which(vapply(ind, function(i) {
-    constraint <- con[i]
-    for (variable in names(dimnames(constraint))) 
-      if (!identical(levels(dat[[variable]]), dimnames(constraint)[[variable]]))
+    constraint <- con[[i]]
+    for (variable in names(dimnames(constraint))) { 
+      if (!(variable %in% names(dat)))
+        stop("variable ", variable, " appears in a constraint but not in the dataset")
+      if (!identical(levels(dat[[variable]]), dimnames(constraint)[[variable]])) {
+        message(type, " constraint ", i, " only covers a subset of the population")
         return(FALSE)
+      }
+    }
     return(TRUE)
   }, TRUE))
   
@@ -447,8 +456,11 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
                  w=NULL,bound=4,maxIter=200,meanHH=TRUE,allPthenH=TRUE,returnNA=TRUE,looseH=FALSE,
                  numericalWeighting=computeLinear, check_hh_vars = TRUE, conversion_messages = FALSE){
   
-  check_population_totals(conP)
-  check_population_totals(conH)
+  check_population_totals(conP, dat, "personal")
+  check_population_totals(conH, dat, "household")
+  
+  if ("w" %in% names(dat))
+    stop("The provided dataset must not have a column called 'w'")
 
   OriginalSortingVariable <- V1 <- baseWeight <- calibWeight <- epsvalue <- f <- NULL
   temporary_hid <- temporary_hvar <- tmpVarForMultiplication <- value <- wValue <- wvst<- NULL
