@@ -6,9 +6,11 @@
 #' 
 #' @export
 combine_factors <- function(dat, targets) {
-  as.data.frame(targets) %>% (function(x) { x$ID_ipu <- 1:nrow(x); x }) %>% 
-    dplyr::right_join(dat, by = names(dimnames(targets)), sort = FALSE) %>% 
-    (function(x){ x$ID_ipu }) %>% factor(levels = 1:length(targets))
+  
+  x <- as.data.frame(targets)
+  x$ID_ipu <- 1:nrow(x)
+  x <- merge(dat,x,by = names(dimnames(targets)),sort=FALSE,all.x=TRUE)
+  factor(x$ID_ipu,levels = 1:length(targets))
 }
 
 getMeanFun <- function(meanHH){
@@ -76,13 +78,13 @@ check_population_totals <- function(con, dat) {
   ind <- which(names(con) == "")
   
   # do not apply this check for constraints that only cover the population partially
-  ind <- vapply(ind, function(i) {
+  ind <- which(vapply(ind, function(i) {
     constraint <- con[i]
     for (variable in names(dimnames(constraint))) 
       if (!identical(levels(dat[[variable]]), dimnames(constraint)[[variable]]))
         return(FALSE)
     return(TRUE)
-  }, TRUE) %>% which
+  }, TRUE))
   
   if (length(ind) == 0)
     return(NULL)
