@@ -113,9 +113,9 @@ calibP <- function(i,conP, epsP, dat, error, valueP, pColNames, bound, verbose, 
     ## use name of conP list element to define numerical variable
     setnames(dat,names(conP)[i],"tmpVarForMultiplication")
     setnames(dat,valueP[i],"value")
-    
+    tmp <- conP[[i]]
     dat[, f := ipu_step_f(calibWeight*tmpVarForMultiplication, 
-                          combined_factors, conP[[i]])]
+                          combined_factors, tmp)]
     dat[, wValue := value/f]
     
     # try to divide the weight between units with larger/smaller value in the numerical variable linear
@@ -132,7 +132,8 @@ calibP <- function(i,conP, epsP, dat, error, valueP, pColNames, bound, verbose, 
     setnames(dat,"value",valueP[i])
   }else{
     # categorical variable to be calibrated
-    dat[, f := ipu_step_f(dat$calibWeight, combined_factors, conP[[i]])]
+    tmp <- conP[[i]]
+    dat[, f := ipu_step_f(dat$calibWeight, combined_factors, tmp)]
     
     if(is.array(epsPcur)){
       curEps <- abs(dat[!is.na(f),1/f-1]) ## curEps is computed for all observations to compare it with the right epsValue
@@ -193,7 +194,8 @@ calibH <- function(i,conH, epsH, dat, error, valueH, hColNames, bound, verbose, 
     setnames(dat,"tmpVarForMultiplication",names(conH)[i])
   }else{
     # categorical variable to be calibrated
-    dat[, f := ipu_step_f(calibWeight*wvst, combined_factors, conH[[i]])]
+    tmp <- conH[[i]]
+    dat[, f := ipu_step_f(calibWeight*wvst, combined_factors, tmp)]
   }
   
   dat[, wValue := value/f]
@@ -520,7 +522,8 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
     combined_factors <- combine_factors(dat, conP[[i]])
     
     dat[, paste0("combined_factors_", i) := combined_factors]
-    dat[, paste0("valueP", i) := conP[[i]][combined_factors]]
+    tmp <- conP[[i]][combined_factors]
+    dat[, paste0("valueP", i) := tmp]
   }
   for(i in seq_along(conH)){
     colnames <- hColNames[[i]]
@@ -548,7 +551,8 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
     combined_factors <- combine_factors(dat, conH[[i]])
     
     dat[, paste0("combined_factors_h_", i) := combined_factors]
-    dat[, paste0("valueH", i) := conH[[i]][combined_factors]]
+    tmp <- conH[[i]][combined_factors]
+    dat[, paste0("valueH", i) := tmp]
   }
   
   if(is.null(w)){
