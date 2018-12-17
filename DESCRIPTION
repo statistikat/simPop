@@ -2,8 +2,8 @@ Package: simPop
 Type: Package
 Title: Simulation of Synthetic Populations for Survey Data Considering Auxiliary
     Information
-Version: 1.1.3
-Date: 2018-12-12
+Version: 1.1.4
+Date: 2018-12-17
 Author: Bernhard Meindl, Matthias Templ, Andreas Alfons, Alexander Kowarik and
     with contributions from Mathieu Ribatet, Johannes Gussenbauer and Gregor De Cillia
 Maintainer: Matthias Templ <matthias.templ@gmail.com>
