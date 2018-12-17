@@ -106,140 +106,120 @@ check_population_totals <- function(con, dat, type = "personal") {
     stop("population totals for different constraints do not match")
 }
 
-calibP <- function(i,conP, epsP, dat, error, valueP, pColNames, bound, verbose, calIter, numericalWeighting){
+calibP <- function(i, dat, error, valueP, pColNames, bound, verbose, calIter, numericalWeighting,
+                   numericalWeightingVar){
   OriginalSortingVariable <- V1 <- baseWeight <- calibWeight <- epsvalue <- f <- NULL
   temporary_hid <- temporary_hvar <- tmpVarForMultiplication <- value <- wValue <- wvst<- NULL
   
-  if(is.list(epsP)){
-    epsPcur <- epsP[[i]]
-  }else{
-    epsPcur <- epsP
-  }
   combined_factors <- dat[[paste0("combined_factors_", i)]]
+  setnames(dat,valueP[i],"value")
+  setnames(dat,paste0("epsP_",i),"epsPcur")
+  tmp <- data.table(x=factor(levels(combined_factors)))
+  setnames(tmp,"x",paste0("combined_factors_", i))
+  paste0("combined_factors_h_", i)
+  con_current <- dat[tmp,on=paste0("combined_factors_", i),mult="first",value]
   
-  if(isTRUE(names(conP)[i]!="")){
+  if(!is.null(numericalWeightingVar)){
     ## numerical variable to be calibrated
     ## use name of conP list element to define numerical variable
-    setnames(dat,names(conP)[i],"tmpVarForMultiplication")
-    setnames(dat,valueP[i],"value")
-    tmp <- conP[[i]]
+    setnames(dat,numericalWeightingVar,"tmpVarForMultiplication")
+    
     dat[, f := ipu_step_f(calibWeight*tmpVarForMultiplication, 
-                          combined_factors, tmp)]
+                          combined_factors, con_current)]
     dat[, wValue := value/f]
     
     # try to divide the weight between units with larger/smaller value in the numerical variable linear
     dat[,f:=numericalWeighting(head(wValue,1),head(value,1),tmpVarForMultiplication,calibWeight),
-        by=combined_factors]
+        by=eval(paste0("combined_factors_", i))]
     
-    if(is.array(epsPcur)){## for numeric variables not the factor f is used but the abs relative deviation is computed per class
-      curEps <- abs(dat[!is.na(f),1/(value/wValue)-1]) ## curEps is computed for all observations to compare it with the right epsValue
-    }else{
-      curEps <- dat[!is.na(f),max(abs(1/(value/wValue)-1))]  ## only the max curEps is needed because it is the same for all classed of the current variable
-    }
-    setnames(dat,"tmpVarForMultiplication",names(conP)[i])
-    setnames(dat,"value",valueP[i])
+    setnames(dat,"tmpVarForMultiplication",numericalWeightingVar)
+    
   }else{
     # categorical variable to be calibrated
-    tmp <- conP[[i]]
-    dat[, f := ipu_step_f(dat$calibWeight, combined_factors, tmp)]
-    
-    if(is.array(epsPcur)){
-      curEps <- abs(dat[!is.na(f),1/f-1]) ## curEps is computed for all observations to compare it with the right epsValue
-    }else{
-      curEps <- dat[!is.na(f),max(abs(1/f-1))]  ## only the max curEps is needed because it is the same for all classed of the current variable
+    dat[, f := ipu_step_f(dat$calibWeight, combined_factors, con_current)]
+  }
+  if(dat[!is.na(f),any(abs(1/f-1)>epsPcur)]){## sicherheitshalber abs(epsPcur)? Aber es wird schon niemand negative eps Werte uebergeben??
+    if(verbose&&calIter%%10==0){
+      cat(calIter, ":Not yet converged for P-Constraint",i,"\n")
+      if(calIter%%100==0){
+        tmp <- dat[!is.na(f)&(abs(1/f-1)>epsPcur),.(maxFac=max(abs(1/f-1)),.N,head(epsPcur,1),
+                                                    sumCalib=sum(calibWeight),head(value,1)),by=eval(pColNames[[i]])]
+        print(tmp[order(maxFac,decreasing = TRUE),])
+        cat("-----------------------------------------\n")
+      }
     }
-  }
-  if(is.array(epsPcur)){
-    epsPcur <- dat[!is.na(f), paste0("epsP_", i),with=FALSE]
-  }
-  
-  if(any(curEps>epsPcur)){## sicherheitshalber abs(epsPcur)? Aber es wird schon niemand negative eps Werte uebergeben??
-    
     if(!is.null(bound)){
       dat[!is.na(f),calibWeight:=boundsFak(calibWeight,baseWeight,f,bound=bound)]#,by=eval(pColNames[[i]])]  
     }else{
-      dat[!is.na(f),calibWeight:=f*calibWeight,by=combined_factors]
+      dat[!is.na(f),calibWeight:=f*calibWeight,by=eval(paste0("combined_factors_", i))]
     }
     error <- TRUE
   }
-  
-  if(verbose&&any(curEps>epsPcur)&&calIter%%10==0){
-    if(calIter%%100==0){
-      tmp <- dat[!is.na(f)&abs(1/f-1)>quantile(abs(1/f-1),.95),.(maxFac=max(abs(1/f-1)),.N),
-                 by=eval(pColNames[[i]])]
-      print(tmp[order(maxFac,decreasing = TRUE),])
-    }
-    cat(calIter, ":Not yet converged for P-Constraint",i,"\n")
-  }
-  
+  setnames(dat,"value",valueP[i])
+  setnames(dat,"epsPcur",paste0("epsP_",i))
   return(error)
 }
 
-calibH <- function(i,conH, epsH, dat, error, valueH, hColNames, bound, verbose, calIter, looseH, numericalWeighting){  
+calibH <- function(i, dat, error, valueH, hColNames, bound, verbose, calIter, looseH,
+                   numericalWeighting, numericalWeightingVar){  
   OriginalSortingVariable <- V1 <- baseWeight <- calibWeight <- epsvalue <- f <- NULL
   temporary_hid <- temporary_hvar <- tmpVarForMultiplication <- value <- wValue <- wvst<- NULL
   
-  if(is.list(epsH)){
-    epsHcur <- epsH[[i]]
-  }else{
-    epsHcur <- epsH
-  }
-  
   setnames(dat,valueH[i],"value")
-  combined_factors <- dat[[paste0("combined_factors_h_", i)]]
+  setnames(dat,paste0("epsH_",i),"epsHcur")
   
-  if(isTRUE(names(conH)[i]!="")){
+  combined_factors <- dat[[paste0("combined_factors_h_", i)]]
+  tmp <- data.table(x=factor(levels(combined_factors)))
+  setnames(tmp,"x",paste0("combined_factors_h_", i))
+    paste0("combined_factors_h_", i)
+  con_current <- dat[tmp,on=paste0("combined_factors_h_", i),mult="first",value]
+  if(!is.null(numericalWeightingVar)){
     ## numerical variable to be calibrated
     ## use name of conH list element to define numerical variable
-    setnames(dat,names(conH)[i],"tmpVarForMultiplication")
+    setnames(dat,numericalWeightingVar,"tmpVarForMultiplication")
     
     dat[, f := ipu_step_f(calibWeight*wvst*tmpVarForMultiplication, 
-                          combined_factors, conH[[i]])]
+                          combined_factors, con_current)]
     dat[, wValue := value/f]
     
     # try to divide the weight between units with larger/smaller value in the numerical variable linear
     dat[,f:=numericalWeighting(head(wValue,1),head(value,1),tmpVarForMultiplication,calibWeight),
-        by=combined_factors]
+        by=eval(paste0("combined_factors_h_", i))]
     
-    setnames(dat,"tmpVarForMultiplication",names(conH)[i])
+    setnames(dat,"tmpVarForMultiplication",numericalWeightingVar)
   }else{
     # categorical variable to be calibrated
-    tmp <- conH[[i]]
-    dat[, f := ipu_step_f(calibWeight*wvst, combined_factors, tmp)]
+    dat[, f := ipu_step_f(calibWeight*wvst, combined_factors, con_current)]
   }
   
   dat[, wValue := value/f]
   
-  if(is.array(epsHcur)){
-    curEps <- dat[,abs(1/f-1)]
-    epsHcur <- dat[[paste0("epsH_", i)]]
-  }else{
-    curEps <- dat[,max(abs(1/f-1))]
-  }
 
-  if(any(curEps>epsHcur)){    
+  if(dat[!is.na(f),any(max(abs(1/f-1))>epsHcur)]){
+    if(verbose&&calIter%%10==0){
+      cat(calIter, ":Not yet converged for H-Constraint",i,"\n")
+      if(calIter%%100==0){
+        tmp <- dat[!is.na(f)&(abs(1/f-1)>epsHcur),.(maxFac=max(abs(1/f-1)),.N,head(epsHcur,1),
+                                                    sumCalibWeight=sum(calibWeight*wvst),head(value,1)),by=eval(hColNames[[i]])]
+        print(tmp[order(maxFac,decreasing = TRUE),])
+        
+        cat("-----------------------------------------\n")
+      }
+    }
     if(!is.null(bound)){
       if(!looseH){
         dat[,calibWeight:=boundsFak(g1=calibWeight,g0=baseWeight,f=f,bound=bound)]#,by=eval(hColNames[[i]])]    
       }else{
-        dat[,calibWeight:=boundsFakHH(g1=calibWeight,g0=baseWeight,eps=epsHcur*.9,orig=value,p=wValue,bound=bound)]  
+        dat[,calibWeight:=boundsFakHH(g1=calibWeight,g0=baseWeight,eps=epsHcur,orig=value,p=wValue,bound=bound)]  
       }
     }else{
-      dat[,calibWeight:=f*calibWeight,by=combined_factors]
+      dat[,calibWeight:=f*calibWeight,by=eval(paste0("combined_factors_h_", i))]
     }
     error <- TRUE
   }
   
   setnames(dat,"value",valueH[i])
-  
-  if(verbose&&any(curEps>epsHcur)&&calIter%%10==0){
-    if(calIter%%100==0){
-      tmp <- dat[!is.na(f)&abs(1/f-1)>quantile(abs(1/f-1),.95),.(maxFac=max(abs(1/f-1)),.N),
-                 by=eval(hColNames[[i]])]
-      print(tmp[order(maxFac,decreasing = TRUE),])
-    }
-    cat(calIter, ":Not yet converged for H-Constraint",i,"\n")
-  }
+  setnames(dat,"epsHcur",paste0("epsH_",i))
   return(error)
 }
 
@@ -602,7 +582,13 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
         combined_factors <- dat[[paste0("combined_factors_", i)]]
         tmp <- as.vector(epsP[[i]][combined_factors])
         dat[, paste0("epsP_", i) := tmp ]
+      }else{
+        dat[, paste0("epsP_", i) := conP[[i]] ]
       }
+    }
+  }else{
+    for(i in seq_along(conP)){
+      dat[, paste0("epsP_", i) := epsP ]
     }
   }
   if(is.list(epsH)){
@@ -611,21 +597,33 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
         combined_factors <- dat[[paste0("combined_factors_h_", i)]]
         tmp <- as.vector(epsH[[i]][combined_factors])
         dat[, paste0("epsH_", i) := tmp ]
+      }else{
+        dat[, paste0("epsH_", i) := conH[[i]] ]
       }
+    }
+  }else{
+    for(i in seq_along(conH)){
+      dat[, paste0("epsH_", i) := epsH ]
     }
   }
   ###Calib
   error <- TRUE
   calIter <- 1
+  xx <<- dat
   while(error&&calIter<=maxIter){
     error <- FALSE
     
     if(allPthenH){
       ### Person calib
       for(i in seq_along(conP)){
-        
-        error <- calibP(i=i, conP=conP, epsP=epsP, dat=dat, error=error,
-                      valueP=valueP, pColNames=pColNames,bound=bound, verbose=verbose, calIter=calIter, numericalWeighting=numericalWeighting)
+        numericalWeightingTmp <- NULL
+        if(isTRUE(names(conP)[i]!="")){
+          numericalWeightingTmp <- names(conP)[i]
+        }
+        error <- calibP(i=i, dat=dat, error=error,
+                      valueP=valueP, pColNames=pColNames,bound=bound, verbose=verbose,
+                      calIter=calIter, numericalWeighting=numericalWeighting,
+                      numericalWeightingVar = numericalWeightingTmp)
       }
       
       ## replace person weight with household average
@@ -634,17 +632,27 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
 
       ### Household calib
       for(i in seq_along(conH)){
-        error <- calibH(i=i, conH=conH, epsH=epsH, dat=dat, error=error, valueH=valueH, 
+        numericalWeightingTmp <- NULL
+        if(isTRUE(names(conH)[i]!="")){
+          numericalWeightingTmp <- names(conH)[i]
+        }
+        error <- calibH(i=i, dat=dat, error=error, valueH=valueH, 
                         hColNames=hColNames,bound=bound, verbose=verbose, calIter=calIter, 
-                        looseH=looseH, numericalWeighting = numericalWeighting)
+                        looseH=looseH, numericalWeighting = numericalWeighting,
+                        numericalWeightingVar = numericalWeightingTmp)
       }
     }else{
       ### Person calib
       for(i in seq_along(conP)){
-        
-        error <- calibP(i=i, conP=conP, epsP=epsP, dat=dat, error=error,
-                      valueP=valueP, pColNames=pColNames,bound=bound, verbose=verbose, calIter=calIter,
-                      numericalWeighting=numericalWeighting)
+        numericalWeightingTmp <- NULL
+        if(isTRUE(names(conP)[i]!="")){
+          numericalWeightingTmp <- names(conP)[i]
+        }
+        error <- calibP(i=i, dat=dat, error=error,
+                      valueP=valueP, pColNames=pColNames,bound=bound, verbose=verbose,
+                      calIter=calIter,
+                      numericalWeighting = numericalWeighting,
+                      numericalWeightingVar = numericalWeightingTmp)
 
         ## replace person weight with household average
         dh <- dat[[hid]]
@@ -652,8 +660,14 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
 
         ### Household calib
         for(i in seq_along(conH)){
-          error <- calibH(i=i, conH=conH, epsH=epsH, dat=dat, error=error,
-                        valueH=valueH, hColNames=hColNames,bound=bound, verbose=verbose, calIter=calIter,
+          numericalWeightingTmp <- NULL
+          if(isTRUE(names(conH)[i]!="")){
+            numericalWeightingTmp <- numericalWeighting
+          }
+          error <- calibH(i=i, dat=dat, error=error,
+                        valueH=valueH, hColNames=hColNames,bound=bound, verbose=verbose,
+                        calIter=calIter,numericalWeighting=numericalWeighting,
+                        numericalWeightingVar = numericalWeightingTmp,
                         looseH=looseH)
         }
       }
