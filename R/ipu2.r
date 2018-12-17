@@ -583,7 +583,7 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
         tmp <- as.vector(epsP[[i]][combined_factors])
         dat[, paste0("epsP_", i) := tmp ]
       }else{
-        dat[, paste0("epsP_", i) := conP[[i]] ]
+        dat[, paste0("epsP_", i) := epsP[[i]] ]
       }
     }
   }else{
@@ -598,7 +598,7 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
         tmp <- as.vector(epsH[[i]][combined_factors])
         dat[, paste0("epsH_", i) := tmp ]
       }else{
-        dat[, paste0("epsH_", i) := conH[[i]] ]
+        dat[, paste0("epsH_", i) := epsH[[i]] ]
       }
     }
   }else{
