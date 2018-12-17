@@ -263,7 +263,7 @@ addWeightsAndAttributes <- function(dat, conP, conH, epsP, epsH, dat_original, m
   
   # adjusted constraints (conP, conH according to the calibrated weights)
   setattr(outTable, "conP_adj", lapply(formP, xtabs, dat))
-  setattr(outTable, "conH_adj", lapply(formH, xtabs, dat))
+  setattr(outTable, "conH_adj", lapply(formH, xtabs, dat[wvst==1]))
   
   # tolerances
   setattr(outTable, "epsP", epsP)
