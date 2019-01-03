@@ -140,12 +140,12 @@ calibP <- function(i, dat, error, valueP, pColNames, bound, verbose, calIter, nu
   }
   if(dat[!is.na(f),any(abs(1/f-1)>epsPcur)]){## sicherheitshalber abs(epsPcur)? Aber es wird schon niemand negative eps Werte uebergeben??
     if(verbose&&calIter%%10==0){
-      cat(calIter, ":Not yet converged for P-Constraint",i,"\n")
+      message(calIter, ":Not yet converged for P-Constraint",i,"\n")
       if(calIter%%100==0){
         tmp <- dat[!is.na(f)&(abs(1/f-1)>epsPcur),.(maxFac=max(abs(1/f-1)),.N,head(epsPcur,1),
                                                     sumCalib=sum(calibWeight),head(value,1)),by=eval(pColNames[[i]])]
         print(tmp[order(maxFac,decreasing = TRUE),])
-        cat("-----------------------------------------\n")
+        message("-----------------------------------------\n")
       }
     }
     if(!is.null(bound)){
@@ -195,15 +195,15 @@ calibH <- function(i, dat, error, valueH, hColNames, bound, verbose, calIter, lo
   dat[, wValue := value/f]
   
 
-  if(dat[!is.na(f),any(max(abs(1/f-1))>epsHcur)]){
+  if(dat[!is.na(f),any(abs(1/f-1)>epsHcur)]){
     if(verbose&&calIter%%10==0){
-      cat(calIter, ":Not yet converged for H-Constraint",i,"\n")
+      message(calIter, ":Not yet converged for H-Constraint",i,"\n")
       if(calIter%%100==0){
         tmp <- dat[!is.na(f)&(abs(1/f-1)>epsHcur),.(maxFac=max(abs(1/f-1)),.N,head(epsHcur,1),
                                                     sumCalibWeight=sum(calibWeight*wvst),head(value,1)),by=eval(hColNames[[i]])]
         print(tmp[order(maxFac,decreasing = TRUE),])
         
-        cat("-----------------------------------------\n")
+        message("-----------------------------------------\n")
       }
     }
     if(!is.null(bound)){
@@ -609,7 +609,6 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
   ###Calib
   error <- TRUE
   calIter <- 1
-  xx <<- dat
   while(error&&calIter<=maxIter){
     error <- FALSE
     
@@ -674,9 +673,9 @@ ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FA
     }
     
     if(verbose&&!error){
-      cat("Convergence reached in ",calIter," steps \n")
+      message("Convergence reached in ",calIter," steps \n")
     }else if(verbose&&maxIter==calIter){
-      cat("Not converged in",maxIter,"steps \n")
+      message("Not converged in",maxIter,"steps \n")
     }
     calIter <- calIter + 1 
   }
