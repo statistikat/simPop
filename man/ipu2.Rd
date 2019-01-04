@@ -7,8 +7,8 @@
 ipu2(dat, hid = NULL, conP = NULL, conH = NULL, epsP = 1e-06,
   epsH = 0.01, verbose = FALSE, w = NULL, bound = 4,
   maxIter = 200, meanHH = TRUE, allPthenH = TRUE, returnNA = TRUE,
-  looseH = FALSE, numericalWeighting = computeLinear,
-  check_hh_vars = TRUE, conversion_messages = FALSE)
+  looseH = FALSE, numericalWeighting = NULL, check_hh_vars = TRUE,
+  conversion_messages = FALSE)
 }
 \arguments{
 \item{dat}{a \code{data.table} containing household ids (optionally), base
@@ -74,7 +74,7 @@ If TRUE, only the weights for which the lower and upper thresholds defined by \c
 are calibrated. They are however not calibrated against the actual constraints \code{conH} but against
 these lower and upper thresholds, i.e. \code{conH}-\code{conH}*\code{epsH} and \code{conH}+\code{conH}*\code{epsH}.}
 
-\item{numericalWeighting}{See \link{numericalWeighting}}
+\item{numericalWeighting}{If NULL computeLinear from the pacakge survey sd will be used.}
 
 \item{check_hh_vars}{If \code{TRUE} check for non-unique values inside of a household for variables in
 household constraints}

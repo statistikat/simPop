@@ -12,7 +12,8 @@
 #' kishFactor(rep(1,10))
 #' kishFactor(rlnorm(10))
 kishFactor <- function(w){
-  if(!require(surveysd)){
+  
+  if(!requireNamespace("surveysd",quietly=TRUE)){
     stop("the functionality of ipu2 moved to survey sd and the package survey sd is not available")
   }
   .Deprecated("kishFactor", package="surveysd",
@@ -94,7 +95,7 @@ kishFactor <- function(w){
 #' If TRUE, only the weights for which the lower and upper thresholds defined by \code{conH} and \code{epsH} are exceeded
 #' are calibrated. They are however not calibrated against the actual constraints \code{conH} but against
 #' these lower and upper thresholds, i.e. \code{conH}-\code{conH}*\code{epsH} and \code{conH}+\code{conH}*\code{epsH}.
-#' @param numericalWeighting See [numericalWeighting]
+#' @param numericalWeighting If NULL computeLinear from the pacakge survey sd will be used.
 #' @param check_hh_vars If \code{TRUE} check for non-unique values inside of a household for variables in 
 #'                      household constraints
 #' @param conversion_messages show a message, if inputs need to be reformatted. This can be useful for speed 
@@ -179,10 +180,13 @@ kishFactor <- function(w){
 #' 
 ipu2 <- function(dat,hid=NULL,conP=NULL,conH=NULL,epsP=1e-6,epsH=1e-2,verbose=FALSE,
                  w=NULL,bound=4,maxIter=200,meanHH=TRUE,allPthenH=TRUE,returnNA=TRUE,looseH=FALSE,
-                 numericalWeighting=computeLinear, check_hh_vars = TRUE, conversion_messages = FALSE){
+                 numericalWeighting=NULL, check_hh_vars = TRUE, conversion_messages = FALSE){
   .Deprecated("ipf",package="surveysd", msg="the functionality of ipu2 moved to the package surveysd in the function ipf")
-  if(!require(surveysd)){
+  if(!requireNamespace("surveysd",quietly=TRUE)){
     stop("the functionality of ipu2 moved to surveysd::ipf and the package surveysd is not available")
+  }
+  if(is.null(numericalWeighting)){
+    numericalWeighting <- surveysd::computeLinear
   }
   return(surveysd::ipf(dat, hid, conP, conH, epsP, epsH, verbose, w, bound, maxIter, 
               meanHH, allPthenH, returnNA, looseH, numericalWeighting,
