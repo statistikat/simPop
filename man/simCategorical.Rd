@@ -4,10 +4,11 @@
 \alias{simCategorical}
 \title{Simulate categorical variables of population data}
 \usage{
-simCategorical(simPopObj, additional, method = c("multinom", "distribution",
-  "ctree", "cforest", "ranger"), limit = NULL, censor = NULL, maxit = 500,
-  MaxNWts = 1500, eps = NULL, nr_cpus = NULL, regModel = NULL,
-  seed = 1, verbose = FALSE, by = "strata")
+simCategorical(simPopObj, additional, method = c("multinom",
+  "distribution", "ctree", "cforest", "ranger"), limit = NULL,
+  censor = NULL, maxit = 500, MaxNWts = 1500, eps = NULL,
+  nr_cpus = NULL, regModel = NULL, seed = 1, verbose = FALSE,
+  by = "strata")
 }
 \arguments{
 \item{simPopObj}{a \code{simPopObj} containing population and household

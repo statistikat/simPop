@@ -4,10 +4,10 @@
 \alias{simRelation}
 \title{Simulate categorical variables of population data}
 \usage{
-simRelation(simPopObj, relation = "relate", head = "head", direct = NULL,
-  additional = c("nation", "ethnic", "religion"), limit = NULL,
-  censor = NULL, maxit = 500, MaxNWts = 2000, eps = NULL,
-  nr_cpus = NULL, seed)
+simRelation(simPopObj, relation = "relate", head = "head",
+  direct = NULL, additional = c("nation", "ethnic", "religion"),
+  limit = NULL, censor = NULL, maxit = 500, MaxNWts = 2000,
+  eps = NULL, nr_cpus = NULL, seed)
 }
 \arguments{
 \item{simPopObj}{a \code{simPopObj} containing population and household

@@ -1,3 +1,6 @@
+Changes in simPop version 1.2.0
+  * the function ipu2 is only a wrapper to surveysd::ipf and set as deprecated
+  
 Changes in simPop version 0.6.2
   * Updated function simInitSpatial (it now works with household and/or person counts per subregion)
   * Moved repo to https://github.com/statistikat/simPop from previous private git repo

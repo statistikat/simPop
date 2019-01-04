@@ -9,12 +9,6 @@
 \alias{prepCdf}
 \alias{prepCdf.data.frame}
 \alias{prepCdf.default}
-\alias{panelSpCdfplot}
-\alias{prepanelSpCdfplot}
-\alias{getCdf}
-\alias{prepCdf}
-\alias{prepCdf.data.frame}
-\alias{prepCdf.default}
 \title{Plot weighted cumulative distribution functions}
 \usage{
 spCdfplot(inp, x, cond = NULL, approx = c(FALSE, TRUE), n = 10000,

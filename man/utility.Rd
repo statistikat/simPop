@@ -2,7 +2,6 @@
 % Please edit documentation in R/utility.R
 \name{utility}
 \alias{utility}
-\alias{utility}
 \alias{utilityModal}
 \alias{utilityIndicator}
 \title{Utility measures}

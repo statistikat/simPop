@@ -6,18 +6,14 @@
 \alias{getBwplotStats}
 \alias{prepBwplotStats.data.frame}
 \alias{prepBwplotStats.default}
-\alias{panelSpBwplot}
-\alias{getBwplotStats}
 \alias{prepBwplotStats}
-\alias{prepBwplotStats.data.frame}
-\alias{prepBwplotStats.default}
 \title{Weighted box plots}
 \usage{
 spBwplot(inp, x, cond = NULL, horizontal = TRUE, coef = 1.5,
   zeros = TRUE, minRatio = NULL, do.out = FALSE, ...)
 
-panelSpBwplot(x, y, coef = 1.5, zeros = TRUE, ratio, outliers, subscripts,
-  ...)
+panelSpBwplot(x, y, coef = 1.5, zeros = TRUE, ratio, outliers,
+  subscripts, ...)
 
 getBwplotStats(x, weights = NULL, cond = NULL, data, ..., name = "")
 

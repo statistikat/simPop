@@ -4,14 +4,13 @@
 \alias{simple_dis}
 \alias{univariate.dis}
 \alias{conditional.dis}
-\alias{univariate.dis}
-\alias{conditional.dis}
 \title{Simple generation of new variables}
 \usage{
-univariate.dis(puf, data, additional, weights, value = "data", fNA = NA)
-
-conditional.dis(puf, data, additional, conditional, weights, value = "data",
+univariate.dis(puf, data, additional, weights, value = "data",
   fNA = NA)
+
+conditional.dis(puf, data, additional, conditional, weights,
+  value = "data", fNA = NA)
 }
 \arguments{
 \item{puf}{data for which one additional column specified by function argument \sQuote{additional} is simulated}

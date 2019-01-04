@@ -9,13 +9,6 @@
 \alias{getHsize}
 \alias{restructureHHid}
 \alias{factorNA}
-\alias{getAge}
-\alias{getGender}
-\alias{getEcoStat}
-\alias{getCitizenship}
-\alias{getHsize}
-\alias{restructureHHid}
-\alias{factorNA}
 \title{Utility functions for socio-economic data sets}
 \usage{
 getAge(birth, year, data = NULL)
