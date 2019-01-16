@@ -36,6 +36,8 @@ Suggests:
     stringr,
     testthat,
     surveysd
+Remotes: 
+    statistikat/surveysd
 LinkingTo: Rcpp,RcppArmadillo
 Description: Tools and methods to simulate populations for surveys based
     on auxiliary data. The tools include model-based methods, calibration and
