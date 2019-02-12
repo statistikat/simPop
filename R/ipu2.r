@@ -17,7 +17,7 @@ kishFactor <- function(w){
     stop("the functionality of ipu2 moved to survey sd and the package survey sd is not available")
   }
   .Deprecated("kishFactor", package="surveysd",
-              msg="the function kishFactor moved to the package surveysd in the function ipf.")
+              msg="the function kishFactor moved to the package surveysd in the function kishFactor")
   return(surveysd::kishFactor(w))
 }
 #' Iterative Proportional Updating
