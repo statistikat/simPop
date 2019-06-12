@@ -86,9 +86,9 @@ names(con) <- setdiff(names(inp), "db030")
 # run ipu und check results
 res <- ipu(inp=inp, hid="db030", con=con, verbose=TRUE)
 
-is <- sapply(2:(ncol(res)-1), function(x) { 
+is <- sapply(2:(ncol(res)-1), function(x) {
   sum(res[,x]*res$weights)
-}) 
+})
 data.frame(required=unlist(con), is=is)
 }
 \author{

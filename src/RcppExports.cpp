@@ -6,6 +6,48 @@
 
 using namespace Rcpp;
 
+// calibPop_work
+IntegerVector calibPop_work(IntegerMatrix inp, NumericVector totals, IntegerVector weights, List hh_info, List params);
+RcppExport SEXP _simPop_calibPop_work(SEXP inpSEXP, SEXP totalsSEXP, SEXP weightsSEXP, SEXP hh_infoSEXP, SEXP paramsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerMatrix >::type inp(inpSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type totals(totalsSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type weights(weightsSEXP);
+    Rcpp::traits::input_parameter< List >::type hh_info(hh_infoSEXP);
+    Rcpp::traits::input_parameter< List >::type params(paramsSEXP);
+    rcpp_result_gen = Rcpp::wrap(calibPop_work(inp, totals, weights, hh_info, params));
+    return rcpp_result_gen;
+END_RCPP
+}
+// binary_representation
+IntegerMatrix binary_representation(IntegerVector levels, IntegerVector values);
+RcppExport SEXP _simPop_binary_representation(SEXP levelsSEXP, SEXP valuesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type levels(levelsSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type values(valuesSEXP);
+    rcpp_result_gen = Rcpp::wrap(binary_representation(levels, values));
+    return rcpp_result_gen;
+END_RCPP
+}
+// ipu_work
+NumericVector ipu_work(NumericMatrix inp, NumericVector con, NumericVector w, double eps, IntegerVector verbose);
+RcppExport SEXP _simPop_ipu_work(SEXP inpSEXP, SEXP conSEXP, SEXP wSEXP, SEXP epsSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type inp(inpSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type con(conSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type w(wSEXP);
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(ipu_work(inp, con, w, eps, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
 // updateMatC
 NumericMatrix updateMatC(NumericMatrix M, NumericVector add_row, NumericVector add_col, NumericVector remove_row, NumericVector remove_col, NumericVector hhsize, NumericVector hhid);
 RcppExport SEXP _simPop_updateMatC(SEXP MSEXP, SEXP add_rowSEXP, SEXP add_colSEXP, SEXP remove_rowSEXP, SEXP remove_colSEXP, SEXP hhsizeSEXP, SEXP hhidSEXP) {

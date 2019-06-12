@@ -16,7 +16,7 @@
 #' @return A matrix of binary variables that indicate membership to the
 #' corresponding factor levels.
 #' @author Bernhard Meindl and Andreas Alfons
-#' @references 
+#' @references
 #' M. Templ, B. Meindl, A. Kowarik, A. Alfons, O. Dupriez (2017) Simulation of Synthetic Populations for Survey Data Considering Auxiliary
 #' Information. \emph{Journal of Statistical Survey}, \strong{79} (10), 1--38. doi: 10.18637/jss.v079.i10
 #' @export calibVars
@@ -37,7 +37,7 @@ calibVars.default <- function(x) {
   if(length(x) == 0) matrix(integer(), 0, 0)
   x <- as.factor(x)
   levs <- levels(x)
-  res <- .Call("simPop_binary_representation", levels=1:length(levels(x)), values=as.integer(x), package="simPop")
+  res <- binary_representation(levels=1:length(levels(x)), values=as.integer(x))
   colnames(res) <- levs
   rownames(res) <- names(x)  # set rownames from original vector
   res

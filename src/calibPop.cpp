@@ -82,6 +82,7 @@ IntegerVector generate_new_solution(IntegerVector weights, IntegerVector hh_ids,
   return(w_neu);
 }
 
+//[[Rcpp::export]]
 IntegerVector calibPop_work(IntegerMatrix inp, NumericVector totals, IntegerVector weights,
   List hh_info, List params) {
 
@@ -198,24 +199,4 @@ IntegerVector calibPop_work(IntegerMatrix inp, NumericVector totals, IntegerVect
     }
   }
   return(weights);
-}
-
-// exporting for package (compileAttributes())
-IntegerVector calibPop_work(IntegerMatrix inp, NumericVector totals, IntegerVector weights, List hh_info, List params);
-RcppExport SEXP simPop_calibPop_work(SEXP inpSEXP, SEXP totalsSEXP, SEXP weightsSEXP, SEXP hh_infoSEXP, SEXP paramsSEXP) {
-BEGIN_RCPP
-    SEXP __sexp_result;
-    {
-        Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< IntegerMatrix >::type inp(inpSEXP );
-        Rcpp::traits::input_parameter< NumericVector >::type totals(totalsSEXP );
-        Rcpp::traits::input_parameter< IntegerVector >::type weights(weightsSEXP );
-        Rcpp::traits::input_parameter< List >::type hh_info(hh_infoSEXP );
-        Rcpp::traits::input_parameter< List >::type params(paramsSEXP );
-        IntegerVector __result = calibPop_work(inp, totals, weights, hh_info, params);
-        PROTECT(__sexp_result = Rcpp::wrap(__result));
-    }
-    UNPROTECT(1);
-    return __sexp_result;
-END_RCPP
 }

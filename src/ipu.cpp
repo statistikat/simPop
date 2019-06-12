@@ -9,6 +9,7 @@ void R_init_simPop(DllInfo* info) {
 
 using namespace Rcpp;
 
+//[[Rcpp::export]]
 NumericVector ipu_work(NumericMatrix inp, NumericVector con, NumericVector w, double eps, IntegerVector verbose) {
   int nr_con = con.size();
   int nr_rows = inp.nrow();
@@ -68,25 +69,4 @@ NumericVector ipu_work(NumericMatrix inp, NumericVector con, NumericVector w, do
     }
   }
   return(w);
-}
-
-
-// exporting for package (compileAttributes())
-NumericVector ipu_work(NumericMatrix inp, NumericVector con, NumericVector w, double eps, IntegerVector verbose);
-RcppExport SEXP simPop_ipu_work(SEXP inpSEXP, SEXP conSEXP, SEXP wSEXP, SEXP epsSEXP, SEXP verboseSEXP) {
-BEGIN_RCPP
-  SEXP __sexp_result;
-  {
-      Rcpp::RNGScope __rngScope;
-      Rcpp::traits::input_parameter< NumericMatrix >::type inp(inpSEXP );
-      Rcpp::traits::input_parameter< NumericVector >::type con(conSEXP );
-      Rcpp::traits::input_parameter< NumericVector >::type w(wSEXP );
-      Rcpp::traits::input_parameter< double >::type eps(epsSEXP );
-      Rcpp::traits::input_parameter< IntegerVector >::type verbose(verboseSEXP );
-      NumericVector __result = ipu_work(inp, con, w, eps, verbose);
-      PROTECT(__sexp_result = Rcpp::wrap(__result));
-  }
-  UNPROTECT(1);
-  return __sexp_result;
-END_RCPP
 }

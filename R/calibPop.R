@@ -46,8 +46,13 @@ calcFinalWeights <- function(data0, totals0, params) {
   hh_info$hh_size <- as.integer(data0[[params$hhsize]])
   hh_info$median_hhsize <- median(hh_info$hh_size[hh_info$hh_head==1], na.rm=TRUE)
 
-  w <- .Call("simPop_calibPop_work", inp=inp, totals=current_totals,
-    weights=weights, hh_info=hh_info, params=params, package="simPop")
+  w <- calibPop_work(
+    inp = inp,
+    totals = current_totals,
+    weights = weights,
+    hh_info = hh_info,
+    params = params
+  )
   invisible(w)
 }
 
@@ -121,7 +126,7 @@ calcFinalWeights <- function(data0, totals0, params) {
 #' @return Returns an object of class \code{\linkS4class{simPopObj}} with an
 #' updated population listed in slot 'pop'.
 #' @author Bernhard Meindl, Johannes Gussenbauer and Matthias Templ
-#' @references 
+#' @references
 #' M. Templ, B. Meindl, A. Kowarik, A. Alfons, O. Dupriez (2017) Simulation of Synthetic Populations for Survey Data Considering Auxiliary
 #' Information. \emph{Journal of Statistical Survey}, \strong{79} (10), 1--38. \doi{10.18637/jss.v079.i10}
 #' @keywords datasets
@@ -199,7 +204,7 @@ calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
   params$hhid <- hid
   params$pid <- pid
   params$hhsize <- hhsize
-  
+
   if(!memory){
     # generate donors
     data2 <- sampHH(data, sizefactor=sizefactor, hid=hid, strata=split, hsize=hhsize)
