@@ -3,7 +3,6 @@ Type: Package
 Title: Simulation of Synthetic Populations for Survey Data Considering Auxiliary
     Information
 Version: 1.2.0
-Date: 2019-01-04
 Authors@R: c(
   person("Matthias", "Templ", email = "matthias.templ@gmail.com", role = c("aut","cre")),
   person("Alexander", "Kowarik", email = "alexander.kowarik@statistik.gv.at", role = c("aut"), comment=c(ORCID="0000-0001-8598-4130")),
