@@ -14,7 +14,7 @@
 kishFactor <- function(w){
   
   if(!requireNamespace("surveysd",quietly=TRUE)){
-    stop("the functionality of ipu2 moved to survey sd and the package survey sd is not available")
+    stop("the functionality of kishFactor moved to survey sd and the package survey sd is not available")
   }
   .Deprecated("kishFactor", package="surveysd",
               msg="the function kishFactor moved to the package surveysd in the function kishFactor")
