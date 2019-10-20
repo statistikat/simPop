@@ -56,6 +56,110 @@ calcFinalWeights <- function(data0, totals0, params) {
   invisible(w)
 }
 
+#####
+# additional helper functions
+# subset list of data tables using on=.()
+subsetList <- function(totals,split,x){
+  
+  totals0 <- lapply(totals,function(z){
+    lapply(z,function(dt){
+      dt[.(x),,on=c(split)]
+    })
+  })
+  return(totals0)
+}  
+
+
+# check list of contingency tables 
+checkTables <- function(tabs,namesData,split=NULL,verbose=FALSE){
+  
+  if(is.null(tabs)){
+    return(NULL)
+  }
+  
+  if(!is.list(tabs)){
+    tabs <- list(tabs)
+  }
+  
+  cNames <- copy(colnames(data))
+  tabs <- lapply(tabs,function(z){
+    
+    if(!any(class(z)%in%c("data.frame","data.table"))){
+      stop("Each contingency Table must bei either a 'data.frame' or 'data.table'")  
+    }
+    setDT(z)
+    
+    if(!split%in%colnames(z)){
+      stop(paste0("Variable ",split," not available in either persTables or hhTables!"))
+    }
+    if(!"Freq"%in%colnames(z)){
+      stop(paste0("Totals, either number of households or number persons, in each contingency table must be specified by 'Freq'!"))
+    }
+    
+    keepNames <- colnames(z)[colnames(z)%in%c(colnames(data),"Freq")]
+    makeFactor <- keepNames[keepNames!="Freq"]
+    z[,c(makeFactor):=lapply(.SD,factor),.SDcols=c(makeFactor)]
+    
+    z[,..keepNames]
+    
+  })
+  
+  if(verbose){
+    cat("\nKeepig variables for Tables\n")
+    sapply(hhTables,function(z){
+      print(colnames(z))
+      cat("\n")
+    })
+  }
+  return(tabs)
+}
+
+######
+# make factor variables
+# and check if factor in totals coincide with factors in data
+makeFactors <- function(totals,data){
+  
+  ########
+  # check and get all factors + levels in totals
+  facLevels <- lapply(unlist(totals,recursive = FALSE),function(z){
+    
+    facNames <- colnames(z)[which(sapply(z,is.factor))]
+    output <- lapply(facNames,function(f){levels(z[[f]])})
+    names(output) <- facNames
+    return(output)
+  })
+  facLevels <- unlist(facLevels,recursive = FALSE)
+  names(facLevels) <- gsub("^.*\\.","",names(facLevels))
+  
+  checkSplit <- facLevels[names(facLevels)==split]
+  if(uniqueN(lengths(checkSplit))>1){
+    stop(paste0("Splitvariable ",split," does not have the same number of values in each contingency table!"))
+  }
+  
+  facLevels <- facLevels[!duplicated(facLevels)]
+  
+  ########
+  # apply factor levels from totals to variables in data
+  # and make some checks
+  
+  for(i in 1:length(facLevels)){
+    varName <- names(facLevels)[i]
+    levels <- facLevels[[i]]
+    dataLevels <- as.character(data[,unique(get(varName))])
+    
+    leveldiff <- setdiff(dataLevels,levels)
+    
+    if(length(leveldiff)>0){
+      stopMess <- paste0("Not all levels for variable ", varName," match in data and contingency table!\nLevels which only occure in data or contingency table:\n",paste(leveldiff,collapse=" "))
+      stop(stopMess)
+    }
+    data[,c(varName):=factor(get(varName),levels=levels)]
+  }
+  
+  return(data)
+}
+
+
 #' Calibration of 0/1 weights by Simulated Annealing
 #'
 #' A Simulated Annealing Algorithm for calibration of synthetic population data
@@ -95,9 +199,12 @@ calcFinalWeights <- function(data0, totals0, params) {
 #' different regions. Parallel computing is performed automatically, if
 #' possible.
 #' @param temp starting temperatur for simulated annealing algorithm
-#' @param eps.factor a factor (between 0 and 1) specifying the acceptance
-#' error. For example eps.factor = 0.05 results in an acceptance error for the
-#' objective function of \code{0.05*sum(totals)}.
+#' @param epsP.factor a factor (between 0 and 1) specifying the acceptance
+#' error for contingency table on individual level. For example epsP.factor = 0.05 results in an acceptance error for the
+#' objective function of \code{0.05*sum(People)}.
+#' @param epsH.factor a factor (between 0 and 1) specifying the acceptance
+#' error for contingency table on household level. For example epsH.factor = 0.05 results in an acceptance error for the
+#' objective function of \code{0.05*sum(Households)}.
 #' @param maxiter maximum iterations during a temperature step.
 #' @param temp.cooldown a factor (between 0 and 1) specifying the rate at which
 #' temperature will be reduced in each step.
@@ -152,11 +259,12 @@ calcFinalWeights <- function(data0, totals0, params) {
 #' ## long computation time
 #' simPop_adj <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1,memory=FALSE)
 #' }
-calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
+calibPop <- function(inp, split=NULL, temp = 1, epsP.factor = 0.05, epsH.factor = 0.05, maxiter=200,
   temp.cooldown = 0.9, factor.cooldown = 0.85, min.temp = 10^-3,
-  nr_cpus=NULL, sizefactor=2, memory=TRUE,
+  nr_cpus=NULL, sizefactor=2, 
   choose.temp=TRUE,choose.temp.factor=0.2,scale.redraw=.5,observe.times=50,observe.break=0.05,
-  verbose=FALSE) {
+  verbose=FALSE,hhTables=NULL,persTables=NULL) {
+  
   if(verbose){
     t0 <- Sys.time()
   }
@@ -174,16 +282,44 @@ calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
   hid <- popObj(inp)@hhid
   pid <- popObj(inp)@pid
   hhsize <- popObj(inp)@hhsize
-  totals <- tableObj(inp)
-  parameter <- colnames(totals)[-ncol(totals)]
-
+  
+  
+  # check persTables
+  if(verbose){
+    cat("\nCheck Household-Tables\n")
+  }
+  persTables <- checkTables(persTables,namesData=copy(colnames(data)),split=split,verbose=verbose)
+  
+  # check hhTables
+  if(verbose){
+    cat("\nCheck Household-Tables\n")
+  }
+  hhTables <- checkTables(hhTables,namesData=copy(colnames(data)),split=split,verbose=verbose)
+  
+  totals <- list(pers=persTables,hh=hhTables)
+  totals <- totals[!sapply(totals,is.null)]
+  
+  # check some params
+  if(!is.numeric(choose.temp.factor)){
+    stop("choose.temp.factor must be numeric!")
+  }
+  choose.temp.factor <- choose.temp.factor[1]
+  if(choose.temp.factor<=0|choose.temp.factor>=1){
+    cat("choose.temp.factor must be in (0,1)\n Setting choose.temp.factor to default value of 0.2")
+    choose.temp.factor <- .2
+  }
+  if(!is.numeric(scale.redraw)){
+    stop("scale.redraw must be numeric!")
+  }
+  scale.redraw <- scale.redraw[1]
+  if(scale.redraw<=0|scale.redraw>=1){
+    cat("scale.redraw must be in (0,1)\n Setting scale.redraw to default value of 0.5")
+    scale.redraw <- .5
+  }
+  
   if ( !is.null(split) ) {
-    verbose <- FALSE
     if ( !split %in% colnames(data) ) {
       stop("variable specified in argument 'split' must be a column in synthetic population (slot 'data' of argument 'inp')!\n")
-    }
-    if ( !split %in% parameter ) {
-      stop("variable specified in argument 'split' must be a column in slot 'table' of argument 'inp'!\n")
     }
   } else {
     data$tmpsplit <- 1
@@ -193,155 +329,92 @@ calibPop <- function(inp, split, temp = 1, eps.factor = 0.05, maxiter=200,
 
   params <- list()
   params$temp <- as.numeric(temp)[1]
-  params$eps_factor = as.numeric(eps.factor)[1]
+  params$epsP_factor = as.numeric(epsP.factor)[1]
+  params$epsH_factor = as.numeric(epsH.factor)[1]
   params$maxiter = as.integer(maxiter)[1]
   params$temp_cooldown = as.numeric(temp.cooldown)[1]
   params$factor_cooldown = as.numeric(factor.cooldown)[1]
   params$min_temp = as.numeric(min.temp)[1]
   params$verbose <- ifelse(verbose, 1L, 0L)
-  params$parameter <- parameter
   params$weight <- popObj(inp)@weight
   params$hhid <- hid
   params$pid <- pid
   params$hhsize <- hhsize
 
-  if(!memory){
-    # generate donors
-    data2 <- sampHH(data, sizefactor=sizefactor, hid=hid, strata=split, hsize=hhsize)
-    data2[,(params$weight):=list(0)]
-    setnames(data2,hid,"temporaryhid")
-    if(is.numeric(data2[[hid]])){
-      data2[,hid:=list(data[,sapply(.SD,max),.SDcols=hid]+temporaryhid)]
-    }else{
-      data2[,hid:=list(paste0("9999_",temporaryhid))]
-    }
-    setnames(data2,"temporaryhid",hid)
-    #  data2 <- data2[, which(!grepl(hid, colnames(data2))), with=FALSE]
-    cn <- colnames(data2)
-    #  cn[length(cn)] <- hid
-    #  setnames(data2, cn)
-    data2 <- data2[,colnames(data), with=FALSE]
-    #data2 <- data2[,match(colnames(data), cn), with=FALSE]
-    data <- rbind(data, data2)
-  }else{
-    # check params for memory=TRUE
-    if(!is.numeric(choose.temp.factor)){
-      stop("choose.temp.factor must be numeric!")
-    }
-    choose.temp.factor <- choose.temp.factor[1]
-    if(choose.temp.factor<=0|choose.temp.factor>=1){
-      cat("choose.temp.factor must be in (0,1)\n Setting choose.temp.factor to default value of 0.2")
-      choose.temp.factor <- .2
-    }
-    if(!is.numeric(scale.redraw)){
-      stop("scale.redraw must be numeric!")
-    }
-    scale.redraw <- scale.redraw[1]
-    if(scale.redraw<=0|scale.redraw>=1){
-      cat("scale.redraw must be in (0,1)\n Setting scale.redraw to default value of 0.5")
-      scale.redraw <- .5
-    }
-  }
-
-
+  
   # parameters for parallel computing
   nr_strata <- length(unique(data[[split]]))
   pp <- parallelParameters(nr_cpus=nr_cpus, nr_strata=nr_strata)
   parallel <- pp$parallel
   nr_cores <- pp$nr_cores
   have_win <- pp$have_win; rm(pp)
+  
+  # make factor variables
+  # and check if factor in totals coincide with factors in data
+  data <- makeFactors(totals,data)
 
-  ii <- match(parameter, colnames(data))
-  data[,ii] <- data[,lapply(.SD,as.factor),.SDcols=parameter]
-  rm(ii)
-
-  ## split problem by "split"-factor
-  setkeyv(data, split)
-  setkeyv(totals, split)
-  split.number <- unique(data[,split,with=FALSE])
+  ## split the problem by "split"-factor
+  setkeyv(data,split)
+  split.number <- data[,unique(get(split))]
 
   if ( parallel ) {
     # windows
     if ( have_win ) {
       cl <- makePSOCKcluster(nr_cores)
       registerDoParallel(cl,cores=nr_cores)
-      if(memory){
-        final_weights <- foreach(x=1:nrow(split.number), .options.snow=list(preschedule=TRUE)) %dopar% {
-          simAnnealingDT(
-            data0=data[split.number[x]],
-            totals0=totals[which(totals[,split,with=FALSE]==as.character(split.number[x][[split]])),],
-            params=params,sizefactor=sizefactor,choose.temp=choose.temp,
-            choose.temp.factor=choose.temp.factor,scale.redraw=scale.redraw,
-            split.level=paste0(unlist(split.number[x])),observe.times=observe.times,observe.break=observe.break)
-        }
-      }else{
-        final_weights <- foreach(x=1:nrow(split.number), .options.snow=list(preschedule=TRUE)) %dopar% {
-          calcFinalWeights(
-            data0=data[split.number[x]],
-            totals0=totals[which(totals[,split,with=FALSE]==as.character(split.number[x][[split]])),],
-            params=params
-          )
-        }
-      }
-      stopCluster(cl)
-    }else if ( !have_win ) {# linux/mac
-      if(memory){
-        final_weights <- mclapply(1:nrow(split.number), function(x) {
-          simAnnealingDT(
-            data0=data[split.number[x]],
-            totals0=totals[which(totals[,split,with=FALSE]==as.character(split.number[x][[split]])),],
-            params=params,sizefactor=sizefactor,choose.temp=choose.temp,
-            choose.temp.factor=choose.temp.factor,scale.redraw=scale.redraw,
-            split.level=paste0(unlist(split.number[x])),observe.times=observe.times,observe.break=observe.break)
-        },mc.cores=nr_cores)
-      }else{
-        final_weights <- mclapply(1:nrow(split.number), function(x) {
-          calcFinalWeights(
-            data0=data[split.number[x]],
-            totals0=totals[which(totals[,split,with=FALSE]==as.character(split.number[x][[split]])),],
-            params=params)
-        },mc.cores=nr_cores)
-      }
-    }
-  } else {
-    if(memory){
-      # use memory efficient but slower method
-      final_weights <- lapply(1:nrow(split.number), function(x) {
-        out <- simAnnealingDT(
-          data0=data[split.number[x]],
-          totals0=totals[which(totals[,split,with=FALSE]==as.character(split.number[x][[split]])),],
+      
+      final_weights <- foreach(x=1:nrow(split.number), .options.snow=list(preschedule=TRUE)) %dopar% {
+        split.x <- split.number[x]
+        data0 <- data[.(split.x),,on=c(split)]
+        totals0 <- subsetList(totals,split=split,x=split.x)
+        
+        simAnnealingDT(
+          data0=data0,
+          totals0=totals0,
           params=params,sizefactor=sizefactor,choose.temp=choose.temp,
           choose.temp.factor=choose.temp.factor,scale.redraw=scale.redraw,
           split.level=paste0(unlist(split.number[x])),observe.times=observe.times,observe.break=observe.break)
-        return(out)
-      })
-    }else{
-      # use c++ implementation - can be quite memory intensive
-      final_weights <- lapply(1:nrow(split.number), function(x) {
-        calcFinalWeights(
-          data0=data[split.number[x]],
-          totals0=totals[which(totals[,split,with=FALSE]==as.character(split.number[x][[split]])),],
-          params=params)
-      })
+      }
+      stopCluster(cl)
+    }else if ( !have_win ) {# linux/mac
+      final_weights <- mclapply(1:nrow(split.number), function(x) {
+        split.x <- split.number[x]
+        data0 <- data[.(split.x),,on=c(split)]
+        totals0 <- subsetList(totals,split=split,x=split.x)
+        
+        simAnnealingDT(
+          data0=data0,
+          totals0=totals0,
+          params=params,sizefactor=sizefactor,choose.temp=choose.temp,
+          choose.temp.factor=choose.temp.factor,scale.redraw=scale.redraw,
+          split.level=paste0(unlist(split.number[x])),observe.times=observe.times,observe.break=observe.break)
+      },mc.cores=nr_cores)
     }
+  } else {
+    final_weights <- lapply(1:nrow(split.number), function(x) {
+      split.x <- split.number[x]
+      data0 <- data[.(split.x),,on=c(split)]
+      totals0 <- subsetList(totals,split=split,x=split.x)
+      simAnnealingDT(
+        data0=data0,
+        totals0=totals0,
+        params=params,sizefactor=sizefactor,choose.temp=choose.temp,
+        choose.temp.factor=choose.temp.factor,scale.redraw=scale.redraw,
+        split.level=paste0(unlist(split.number[x])),observe.times=observe.times,observe.break=observe.break)
+    })
   }
-
+    
   # return dataset with new weights
   data[,new.weights:=as.integer(unlist(final_weights))]
-  if(memory){
-    data <- data[new.weights>0,]
-    data <- rbind(data[new.weights==1],data[new.weights>1,.SD[rep(1:.N,new.weights)]])
-    data[,doub:=1:.N,by=c(params[["pid"]],params[["hhid"]])]
-    data[,hid_help:=paste(get(params[["hhid"]]),doub,sep="_")]
-    data[,c(params[["hhid"]]):=.GRP,by=hid_help]
-    data[,c(params[["pid"]]):=paste(get(params[["hhid"]]),gsub("^[[:digit:]]*.","",get(params[["pid"]])),sep=".")]
-    data[,c("new.weights","doub","hid_help"):=NULL]
-  }else{
-    data <- data[data$new.weights==1,]
-    data[[inp@pop@weight]] <- data$new.weights
-    data$new.weights <- NULL
-  }
-
+  data <- data[new.weights>0,]
+  data <- rbind(data[new.weights==1],data[new.weights>1,.SD[rep(1:.N,new.weights)]])
+  data[,doub:=1:.N,by=c(params[["pid"]],params[["hhid"]])]
+  data[,hid_help:=paste(get(params[["hhid"]]),doub,sep="_")]
+  data[,c(params[["hhid"]]):=.GRP,by=hid_help]
+  data[,c(params[["pid"]]):=paste(get(params[["hhid"]]),gsub("^[[:digit:]]*.","",get(params[["pid"]])),sep=".")]
+  data[,c("new.weights","doub","hid_help"):=NULL]
+  
+  
   inp@pop@data <- data
   if(verbose){
     Sys.time()-t0
