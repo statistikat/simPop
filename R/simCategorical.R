@@ -69,15 +69,8 @@ generateValues <- function(dataSample, dataPop, params) {
         probs <- probs[,2]
 	  }
     }else if ( meth %in% c("ranger") ) {
-	  probs <- t(apply(predict(mod,data=newdata,type="response",predict.all=TRUE)$predictions,1,function(x)prop.table(table(factor(x,levels=1:2)))))
-	  if(ncol(probs)!=length(mod$forest$levels)){ # Levels with no occurence in the predictions
-		  missingCV <- mod$forest$class.values[!mod$forest$class.values%in%as.numeric(colnames(probs))]
-		  zeroProbs <- matrix(0,ncol=length(missingCV),nrow=nrow(probs))
-		  colnames(zeroProbs) <- as.character(missingCV)
-		  probs <- cbind(probs,zeroProbs)
-	  }
-	  colnames(probs) <- mod$forest$levels[match(as.numeric(colnames(probs)),mod$forest$class.values)]
-	  probs <- probs[,mod$forest$levels]
+      probs <- predict(mod,data=newdata,type="response")$predictions
+      colnames(probs) <- mod$forest$levels
 	}
     #if ( meth %in% "naivebayes" ) {
     #  probs <- predict(mod, newdata=newdata, type="raw")
@@ -494,7 +487,7 @@ simCategorical <- function(simPopObj, additional,
 		  if(!dataS@ispopulation){
   		  formula.cmd <- paste0(formula.cmd,", case.weights=dataSample$", dataS@weight)
 	  	}
-  		formula.cmd <- paste0(formula.cmd, ", data=dataSample))", sep="")
+		  formula.cmd <- paste0(formula.cmd, ", data=dataSample,probability=TRUE))", sep="")
 	  	if(verbose) cat("we are running random forest (ranger):\n")
 		  if(verbose) cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
 	}

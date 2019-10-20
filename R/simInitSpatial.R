@@ -335,7 +335,7 @@ simInitSpatial <- function(simPopObj, additional, region, tspatialP=NULL,tspatia
   names(values) <- levels(data_sample[[region]])
   
   ## add new categorical variables to data set and return
-  data_pop[,c(additional):=values[head(eval(parse(text=region)),1)],by=c(region)]
+  data_pop[,c(additional):=values[unlist(.BY)],by=c(region)]
   
   # check
   simPopObj@pop@data <- data_pop
