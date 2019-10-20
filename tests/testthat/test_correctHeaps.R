@@ -1,6 +1,5 @@
 context("heap")
 library(simPop)
-
 test_that("correctHeaps",{
   ## create some artificial data
   age <- rlnorm(10000, meanlog=2.466869, sdlog=1.652772)

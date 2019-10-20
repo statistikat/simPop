@@ -2,7 +2,7 @@ Package: simPop
 Type: Package
 Title: Simulation of Synthetic Populations for Survey Data Considering Auxiliary
     Information
-Version: 1.2.0
+Version: 1.2.1
 Authors@R: c(
   person("Matthias", "Templ", email = "matthias.templ@gmail.com", role = c("aut","cre")),
   person("Alexander", "Kowarik", email = "alexander.kowarik@statistik.gv.at", role = c("aut"), comment=c(ORCID="0000-0001-8598-4130")),
@@ -14,8 +14,7 @@ URL: https://github.com/statistikat/simPop
 Depends:
     R(>= 3.0.0),
     lattice,
-    vcd,
-    data.table
+    vcd
 Imports:
     laeken,
     plyr,
@@ -28,7 +27,8 @@ Imports:
     foreach,
     colorspace,
     VIM,
-    methods,party,EnvStats,fitdistrplus,ranger,wrswoR
+    methods,party,EnvStats,fitdistrplus,ranger,wrswoR,
+    data.table
 Suggests:
     haven,
     microbenchmark,

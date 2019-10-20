@@ -51,6 +51,7 @@
 #' @examples
 #' data(eusilcS)
 #' data(eusilcP)
+#' library(data.table)
 #' 
 #' # no districts are available in the population, so we have to generate those
 #' # we randomly assign districts within "region" in the eusilc population data

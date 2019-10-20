@@ -54,6 +54,7 @@ eusilcP$hsize  <- factor(eusilcP$hsize , levels = levels(eusilcS$hsize))
 # generate input matrix
 # we want to adjust to variable "db040" (region) as household variables and
 # variable "rb090" (gender) as individual information
+library(data.table)
 samp <- data.table(eusilcS)
 pop <-  data.table(eusilcP)
 setkeyv(samp, "db030")

@@ -119,6 +119,7 @@ which can be monitored with the \code{conversion_messages} argument.
 Setting \code{check_hh_vars} to \code{FALSE} can also incease the performance of the scheme.
 }
 \examples{
+library(data.table)
 data(eusilcS)
 setDT(eusilcS)
 eusilcS <- eusilcS[, list(db030,hsize,db040,age,rb090,netIncome,db090,rb050)]
