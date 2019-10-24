@@ -72,7 +72,7 @@ simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), 
   if ( is.null(dataS@pid) ) {
     setkeyv(dataS@data, dataS@hhid)
   } else {
-    setkeyv(dataS@data, dataS@pid)
+    setkeyv(dataS@data, c(dataS@hhid,dataS@pid))
   }
 
   # extract variables
