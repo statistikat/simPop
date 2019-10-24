@@ -106,7 +106,7 @@ checkTables <- function(tabs,namesData,split=NULL,verbose=FALSE){
   
   if(verbose){
     cat("\nKeepig variables for Tables\n")
-    sapply(hhTables,function(z){
+    sapply(tabs,function(z){
       print(colnames(z))
       cat("\n")
     })
@@ -363,7 +363,7 @@ calibPop <- function(inp, split=NULL, temp = 1, epsP.factor = 0.05, epsH.factor 
       cl <- makePSOCKcluster(nr_cores)
       registerDoParallel(cl,cores=nr_cores)
       
-      final_weights <- foreach(x=1:nrow(split.number), .options.snow=list(preschedule=TRUE)) %dopar% {
+      final_weights <- foreach(x=1:length(split.number), .options.snow=list(preschedule=TRUE)) %dopar% {
         split.x <- split.number[x]
         data0 <- data[.(split.x),,on=c(split)]
         totals0 <- subsetList(totals,split=split,x=split.x)
@@ -377,7 +377,7 @@ calibPop <- function(inp, split=NULL, temp = 1, epsP.factor = 0.05, epsH.factor 
       }
       stopCluster(cl)
     }else if ( !have_win ) {# linux/mac
-      final_weights <- mclapply(1:nrow(split.number), function(x) {
+      final_weights <- mclapply(1:length(split.number), function(x) {
         split.x <- split.number[x]
         data0 <- data[.(split.x),,on=c(split)]
         totals0 <- subsetList(totals,split=split,x=split.x)
@@ -391,10 +391,12 @@ calibPop <- function(inp, split=NULL, temp = 1, epsP.factor = 0.05, epsH.factor 
       },mc.cores=nr_cores)
     }
   } else {
-    final_weights <- lapply(1:nrow(split.number), function(x) {
+    final_weights <- lapply(1:length(split.number), function(x) {
       split.x <- split.number[x]
       data0 <- data[.(split.x),,on=c(split)]
+      data0 <- data[.(data0$upazilaCode[1]),,on=.(upazilaCode)]
       totals0 <- subsetList(totals,split=split,x=split.x)
+      rm(inp)
       simAnnealingDT(
         data0=data0,
         totals0=totals0,

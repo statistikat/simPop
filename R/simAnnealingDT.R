@@ -26,6 +26,7 @@ updateTotals <- function(totals0,data0,hhid,numberPop="weight_choose"){
   if("pers"%in%names(totals0)){
     sapply(totals0$pers,function(z){
       byVars <- intersect(colnames(z),colnames(data0))
+      byVars <- byVars[byVars!="unionCode"]
       set(z,j="FreqPop",value=0.0)
       z[data0[,sum(get(numberPop)),by=c(byVars)],FreqPop:=as.numeric(V1),on=c(byVars)]
       return(NULL)
@@ -34,6 +35,7 @@ updateTotals <- function(totals0,data0,hhid,numberPop="weight_choose"){
   if("hh"%in%names(totals0)){
     sapply(totals0$hh,function(z){
       byVars <- intersect(colnames(z),colnames(data0))
+      byVars <- byVars[byVars!="unionCode"]
       set(z,j="FreqPop",value=0.0)
       z[data0[firstPersonInHousehold==TRUE,sum(get(numberPop)),by=c(byVars)],FreqPop:=as.numeric(V1),on=c(byVars)]
       return(NULL)
@@ -97,33 +99,33 @@ setRedrawGap <- function(totals0,med_hh=1,scale.redraw=0.5){
 
 
 # get probabilites for resampling
-getProbabilities <- function(totals0,data0){
+getProbabilities <- function(totals0,data0,select_add,select_remove){
   totals_diff <- copy(unlist(totals0,recursive = FALSE))
   for(i in seq_along(totals_diff)){
     prob_add <- paste0("prob_add",i)
     prob_remove <- paste0("prob_remove",i)
     
     totals_diff[[i]][,diff:=Freq-FreqPop]
-    totals_diff[[i]][,c(prob_add):=diff*-1]
+    totals_diff[[i]][,c(prob_add):=diff]
     totals_diff[[i]][get(prob_add)<=0,c(prob_add):=exp(sum(get(prob_add)))]
-    totals_diff[[i]][,c(prob_remove):=diff]
+    totals_diff[[i]][,c(prob_remove):=diff*-1]
     totals_diff[[i]][get(prob_remove)<=0,c(prob_remove):=exp(sum(get(prob_remove)))]
     totals_diff[[i]][,c("Freq","FreqPop","diff"):=NULL]
   }
   totals_diff <- Reduce(function(...) merge(..., all = TRUE,allow.cartesian=TRUE), totals_diff)
   cnames <- colnames(totals_diff)
   getCols <- cnames[grepl("^prob_add",cnames)]
-  totals_diff[,prob_add:=rowMeans(.SD),.SDcols=c(getCols)]
+  totals_diff[,prob_add:=matrixStats::rowMaxs(as.matrix(.SD)),.SDcols=c(getCols)]
   totals_diff[,c(getCols):=NULL]
   getCols <- cnames[grepl("^prob_remove",cnames)]
-  totals_diff[,prob_remove:=rowMeans(.SD),.SDcols=c(getCols)]
+  totals_diff[,prob_remove:=matrixStats::rowMaxs(as.matrix(.SD)),.SDcols=c(getCols)]
   totals_diff[,c(getCols):=NULL]
   
-  keyVars <- colnames(totals_diff)[!grepl("prob_remove|prob_add",colnames(totals_diff))]
+  keyVars <- colnames(totals_diff)[!grepl("prob_remove|prob_add|unionCode",colnames(totals_diff))]
   
-  addIndex <- ((select_add-1)%%nd) + 1
+  addIndex <- ((select_add-1)%%nrow(data0)) + 1
   prob_add <- totals_diff[data0[addIndex,..keyVars],prob_add,on=c(keyVars)]
-  removeIndex <- ((select_remove-1)%%nd) + 1
+  removeIndex <- ((select_remove-1)%%nrow(data0)) + 1
   prob_remove <- totals_diff[data0[removeIndex,..keyVars],prob_add,on=c(keyVars)]
   
   probSample <- list(add=prob_add,remove=prob_remove)
@@ -155,7 +157,6 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   factor_cooldown <- params[["factor_cooldown"]]
   temp_cooldown <- params[["temp_cooldown"]]
   maxiter <- params[["maxiter"]]
-  eps_factor <- params[["eps_factor"]]
   temp <- params[["temp"]]
   hhsize <- params[["hhsize"]]
   parameter <- params[["parameter"]]
@@ -192,19 +193,24 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   
   # choose starting temperatur as percentage of objective function
   if(choose.temp){
-    temp <- max(temp,eps*choose.temp.factor)
+    eps <- unlist(c(epsP,epsH))
+    eps <- eps[eps>0]
+    temp <- max(temp,mean(eps)*choose.temp.factor)
     #min_temp <- temp*temp_cooldown^50
   }
   
   ######################################
   # initialize weights
-  init_weight <- c(rep(1L,nd),rep(0L,max_n-nd))
-  # init_weight <- sample(c(rep(1L,init_n),rep(0L,max_n-init_n)))
-  choose_hh <- matrix(init_weight,nrow=nd,ncol=size_all)
+  init_index <- sample(1:nd,init_n,replace=FALSE)
+  init_weight <- rep(0L,max_n)
+  init_weight <-  updateVecC(init_weight,add_index=init_index, remove_index=c(max_n), hhsize=size, hhid=id, sizefactor=size_all)
+  data0[ ,weight_choose:=sumVec(init_weight,size_all)]
   
+  # init_weight <- sample(c(rep(1L,init_n),rep(0L,max_n-init_n)))
+  # choose_hh <- matrix(init_weight,nrow=nd,ncol=size_all)
   # adjust choose_hh and select all householdmembers
-  data0[,weight_choose:=matrixStats::rowSums2(choose_hh)]
-  data0[,weight_choose:=max(weight_choose),by=c(hhid)]
+  # data0[,weight_choose:=matrixStats::rowSums2(choose_hh)]
+  # data0[,weight_choose:=max(weight_choose),by=c(hhid)]
   
   updateTotals(totals0=totals0,data0=data0,hhid=hhid)
   
@@ -253,7 +259,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
           #####################################
           # resample
           # get weights for resampling
-          probs <- getProbabilities(totals0=totals0,data0=data0)
+          probs <- getProbabilities(totals0=totals0,data0=data0,select_add=select_add,select_remove=select_remove)
          
           select_add <- select_add[probs[["add"]]>0]
           probs[["add"]] <- probs[["add"]][probs[["add"]]>0]
@@ -285,7 +291,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
           add_hh <- sample(select_add,n_add)
           remove_hh <- sample(select_remove,n_remove)
         }
-        
+
         ####################################
         ## create new composition
         init_weight_new <- copy(init_weight)
