@@ -353,8 +353,8 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
   }
 
   # variables are coerced to factors
-  dataS <- checkFactor(dataS, c(strata, basic, relation, additional))
-  dataP <- checkFactor(dataP, c(strata, basic, relation))
+  dataS <- checkFactor(dataS, unique(c(strata, basic, relation, additional)))
+  dataP <- checkFactor(dataP, unique(c(strata, basic, relation)))
 
   # check arguments to account for structural zeros
   if ( length(additional) == 1 ) {
