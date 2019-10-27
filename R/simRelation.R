@@ -299,7 +299,15 @@ simulateValues <- function(dataSample, dataPop, params) {
 #' one containing one of the choices described above.  If parameter 'regModel'
 #' is NULL, only basic household variables are used in any case.
 #' @param verbose set to TRUE if additional print output should be shown.
-
+#' @param method a character string specifying the method to be used for
+#' simulating the additional categorical variables. Accepted values are
+#' \code{"multinom"} (estimation of the conditional probabilities using
+#' multinomial log-linear models and random draws from the resulting
+#' distributions) or \code{"distribution"} (random draws from the observed
+#' conditional distributions of their multivariate realizations).
+#' \code{"ctree"}  for using Classification trees
+#' \code{"cforest"}  for using random forest (implementation in package party)
+#' \code{"ranger"}  for using random forest (implementation in package ranger)
 #' @return An object of class \code{\linkS4class{simPopObj}} containing survey
 #' data as well as the simulated population data including the categorical
 #' variables specified by \code{additional}.
@@ -326,10 +334,13 @@ simulateValues <- function(dataSample, dataPop, params) {
 simRelation <- function(simPopObj, relation = "relate", head = "head",
   direct = NULL, additional = c("nation", "ethnic", "religion"),
   limit = NULL, censor = NULL, maxit = 500, MaxNWts = 2000,
-  eps = NULL, nr_cpus=NULL, seed = 1, regModel = NULL, verbose = FALSE) {
+  eps = NULL, nr_cpus=NULL, seed = 1, regModel = NULL, verbose = FALSE,
+  method=c("multinom", "distribution","ctree","cforest","ranger")) {
 
-  x <- NULL
-
+  x <- newAdditionalVarible <- NULL
+  
+  method <- match.arg(method)
+  
   # set seed of random number generator
   if ( !missing(seed) ) {
     set.seed(seed,"L'Ecuyer")  # set seed of random number generator
@@ -440,14 +451,58 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
     
     # variables are coerced to factors
     sampWork <- checkFactor(sampWork, unique(c(curStrata, additional)))
+    TF_head_samp <- sampWork[[relation]] %in% head
     data_pop <- checkFactor(data_pop_o, unique(c(curStrata)))
+    TF_head_pop <- data_pop[[relation]] %in% head
+    
     # components of multinomial model are specified
     levelsResponse <- levels(sampWork[[i]])
-    
-    formula <- paste(i, "~", paste(predNames, collapse=" + "))
-    # check if population data contains factor levels that do not exist in the sample
+    # simulation of variables using a sequence of multinomial models
+    if ( method == "multinom" ) {
+      formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
+      formula.cmd <- paste0("suppressWarnings(multinom(", formula.cmd)
+      if(!dataS@ispopulation){
+        formula.cmd <- paste0(formula.cmd,", weights=", dataS@weight)
+      }
+      formula.cmd <- paste0(formula.cmd,", data=dataSample, trace=FALSE",
+                            ", maxit=",maxit, ", MaxNWts=", MaxNWts,"))")
+      
+      if(verbose) cat("we are running the following multinom-model:\n")
+      if(verbose) cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
+    }else if ( method == "ctree" ) {
+      # simulation via recursive partitioning and regression trees
+      formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
+      formula.cmd <- paste("suppressWarnings(ctree(", formula.cmd)
+      if(!dataS@ispopulation){
+        formula.cmd <- paste0(formula.cmd,", weights=as.integer(dataSample$", dataS@weight,")")
+      }
+      formula.cmd <- paste0(formula.cmd,
+                            ", data=dataSample))")
+      if(verbose) cat("we are running recursive partitioning:\n")
+      if(verbose) cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
+    }else if ( method == "cforest" ) {
+      # simulation via random forest
+      formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
+      formula.cmd <- paste("suppressWarnings(cforest(", formula.cmd)
+      if(!dataS@ispopulation){
+        formula.cmd <- paste0(formula.cmd,", weights=as.integer(dataSample$", dataS@weight,")")
+      }
+      formula.cmd <- paste0(formula.cmd,", data=dataSample))")
+      if(verbose) cat("we are running random forest classification (cforest):\n")
+      if(verbose) cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
+    }else if ( method == "ranger" ) {
+      # simulation via random forest
+      formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
+      formula.cmd <- paste("suppressWarnings(ranger(", formula.cmd)
+      if(!dataS@ispopulation){
+        formula.cmd <- paste0(formula.cmd,", case.weights=dataSample$", dataS@weight)
+      }
+      formula.cmd <- paste0(formula.cmd, ", data=dataSample,probability=TRUE))", sep="")
+      if(verbose) cat("we are running random forest (ranger):\n")
+      if(verbose) cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
+    }
     newLevels <- lapply(predNames, function(nam) {
-      levelsS <- levels(data_sample[[nam]])
+      levelsS <- levels(sampWork[[nam]])
       levelsP <- levels(data_pop[[nam]])
       levelsP[!(levelsP %in% levelsS)]
     })
@@ -455,6 +510,8 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
     excludeLevels <- any(hasNewLevels)
 
     params <- list()
+    params$method <- method
+    params$cur.var <- i
     params$hasNewLevels <- hasNewLevels
     params$newLevels <- newLevels
     params$strata <- strata
@@ -462,25 +519,22 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
     params$excludeLevels <- excludeLevels
     params$w <- w
     params$relation <- relation
-    params$predNames <- predNames
-    params$indStrata <- indStrata
+    params$formula.cmd <- formula.cmd
     params$formula <- formula
-    params$MaxNWts <- MaxNWts
-    params$maxit <- maxit
     params$eps <- eps
-    params$current.strata <- i
     params$limit <- limit
     params$censor <- censor
     params$levelsResponse <- levelsResponse
     params$hid <- hid
     params$direct <- direct
-
+    params$TF_head_samp <- TF_head_samp
+    params$TF_head_pop <- TF_head_pop
     if ( parallel ) {
       # windows
       if ( have_win ) {
         cl <- makePSOCKcluster(nr_cores)
         registerDoParallel(cl,cores=nr_cores)
-        values <- foreach(x=levels(data_sample[[strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
+        values <- foreach(x=levels(data_sample[[strata]]), .options.snow=list(preschedule=FALSE)) %dopar% {
           simulateValues(
             dataSample=data_sample[data_sample[[strata]] == x,],
             dataPop=data_pop[indStrata[[x]], c(predNames, simPopObj@pop@hhid), with=FALSE], params
@@ -503,13 +557,13 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
         )
       })
     }
-    values <- unlist(values, data_pop[[strata]])
+    values <- factor(unsplit(values, data_pop[[curStrata]]), levels=levelsResponse)
 
     ## add new categorical variable to data set
-    data_pop[[i]] <- values
+    data_pop_o[[i]] <- values
     predNames <- c(predNames, i)
   }
   # return simulated data
-  simPopObj@pop@data <- data_pop
+  simPopObj@pop@data <- data_pop_o
   invisible(simPopObj)
 }
