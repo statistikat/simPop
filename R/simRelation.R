@@ -36,8 +36,8 @@ simulateValues <- function(dataSample, dataPop, params) {
   # unique combinations in the stratum of the population need
   # to be computed for prediction
   indGrid <- split(1:nrow(dataPop), dataPop, drop=TRUE)
-  grid <- dataPop[sapply(indGrid, function(i) i[1]), , drop=FALSE]
-  grid <- as.data.frame(grid)
+  grid <- dataPop[sapply(indGrid, function(i) i[1])]
+                  
   # in sample, observations with NAs have been removed to fit the
   # model, hence population can have additional levels
   # these need to be removed since those probabilities cannot
@@ -136,8 +136,8 @@ simulateValues <- function(dataSample, dataPop, params) {
   #        for the household head that do not exist in the
   #        sample and are hence not represented in the model
   # get indices of non-directly related household members
-  indSampleNonDirect <- which(!(dataSample[[relation]] %in% c(head, direct)))
-  indPopNonDirect <- which(!(relPop %in% c(head, direct)))
+  indSampleNonDirect <- which(!(params$TF_head_samp|params$TF_direct_samp))
+  indPopNonDirect <- which(!(params$TF_head_pop|params$TF_direct_pop))
   if ( length(indSampleNonDirect) > 0 && length(indPopNonDirect) > 0 ) {
     # create additional predictor in the sample
     add <- dataSample[[current.strata]][indSampleHead] # these are still numeric for population data too
@@ -467,7 +467,7 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
     }
     regInput <- regressionInput(simPopObj, additional=additional[counter], regModel=curRegModel)
     # names of predictor variables
-    predNames <- setdiff(regInput[[1]]$predNames, c(data_sample@hhsize, curStrata))
+    predNames <- setdiff(regInput[[1]]$predNames, c(dataS@hhsize, strata))
     
     # observations with missings are excluded from simulation
     exclude <- getExclude(data_sample[,c(additional,predNames),with=FALSE])
@@ -478,11 +478,12 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
     }
     
     # variables are coerced to factors
-    sampWork <- checkFactor(sampWork, unique(c(curStrata, additional)))
+    sampWork <- checkFactor(sampWork, unique(c(strata, additional)))
     TF_head_samp <- sampWork[[relation]] %in% head
-    data_pop <- checkFactor(data_pop_o, unique(c(curStrata)))
+    TF_direct_samp <- sampWork[[relation]] %in% direct
+    data_pop <- checkFactor(data_pop_o, unique(c(strata)))
     TF_head_pop <- data_pop[[relation]] %in% head
-    
+    TF_direct_pop <- data_pop[[relation]] %in% direct
     # components of multinomial model are specified
     levelsResponse <- levels(sampWork[[i]])
     # simulation of variables using a sequence of multinomial models
@@ -575,6 +576,8 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
     params$direct <- direct
     params$TF_head_samp <- TF_head_samp
     params$TF_head_pop <- TF_head_pop
+    params$TF_direct_samp <- TF_direct_samp
+    params$TF_direct_pop <- TF_direct_pop
     if ( parallel ) {
       # windows
       if ( have_win ) {
