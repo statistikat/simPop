@@ -284,6 +284,22 @@ simulateValues <- function(dataSample, dataPop, params) {
 #' @param seed optional; an integer value to be used as the seed of the random
 #' number generator, or an integer vector containing the state of the random
 #' number generator to be restored.
+#' @param regModel allows to specify the variables or model that is used when
+#' simulating additional categorical variables. The following choices are
+#' available if different from NULL.  \itemize{ \item'basic'only the basic
+#' household variables (generated with \code{\link{simStructure}}) are used.
+#' \item'available'all available variables (that are common in the sample and
+#' the synthetic population such as previously generated varaibles) excluding
+#' id-variables, strata variables and household sizes are used for the
+#' modelling. This parameter should be used with care because all factors are
+#' automatically used as factors internally.  \item formula-objectUsers may also
+#' specify a specifiy formula (class 'formula') that will be used. Checks are
+#' performed that all required variables are available.  } If method
+#' 'distribution' is used, it is only possible to specify a vector of length
+#' one containing one of the choices described above.  If parameter 'regModel'
+#' is NULL, only basic household variables are used in any case.
+#' @param verbose set to TRUE if additional print output should be shown.
+
 #' @return An object of class \code{\linkS4class{simPopObj}} containing survey
 #' data as well as the simulated population data including the categorical
 #' variables specified by \code{additional}.
@@ -309,7 +325,8 @@ simulateValues <- function(dataSample, dataPop, params) {
 #' 
 simRelation <- function(simPopObj, relation = "relate", head = "head",
   direct = NULL, additional = c("nation", "ethnic", "religion"),
-  limit = NULL, censor = NULL, maxit = 500, MaxNWts = 2000, eps = NULL, nr_cpus=NULL, seed) {
+  limit = NULL, censor = NULL, maxit = 500, MaxNWts = 2000,
+  eps = NULL, nr_cpus=NULL, seed = 1, regModel = NULL, verbose = FALSE) {
 
   x <- NULL
 
@@ -318,43 +335,65 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
     set.seed(seed,"L'Ecuyer")  # set seed of random number generator
   }
 
-  sample <- simPopObj@sample
-  pop <- simPopObj@pop
-  w <- sample@weight
-  hid <- sample@hhid
-  strata <- sample@strata
+  
+  
+  dataS <- sampleObj(simPopObj)
+  dataP <- sampleObj(simPopObj)
+  data_pop_o <- copy(popData(simPopObj))
+  data_pop <- popData(simPopObj)
+  data_sample <- sampleData(simPopObj)
   basic <- simPopObj@basicHHvars
-  dataS <- sample@data
-  dataP <- pop@data
-
-  varNames <- c(hid=hid, w=w, strata=strata, basic, relation=relation, additional)
-
+  w <- dataS@weight
+  hid <- dataS@hhid
+  strata <- dataS@strata
+  
   # parameters for parallel computing
-  nr_strata <- length(levels(dataS[[strata]]))
+  nr_strata <- length(levels(data_sample[[strata]]))
   pp <- parallelParameters(nr_cpus=nr_cpus, nr_strata=nr_strata)
   parallel <- pp$parallel
   nr_cores <- pp$nr_cores
   have_win <- pp$have_win; rm(pp)
-
+  if(verbose){
+    cat("Dimension of the population:\n")
+    print(dim(data_pop))
+    cat("Dimension of the sample:\n")
+    print(dim(data_sample))
+  }
+  if ( any(additional %in% colnames(data_pop)) ) {
+    stop("variables already exist in the population!\n")
+  }
+  if ( (length(regModel)==1|class(regModel)=="formula") &
+       length(additional)>1 ) {
+    if(class(regModel)=="formula"){
+      regModelL <- list()
+      for(i in seq_along(additional)){
+        regModelL[[i]] <- regModel
+      }
+      regModel <- regModelL
+    }else if ( regModel %in% c("available","basic") ) {
+      regModel <- rep(regModel, length(additional))
+    }
+  }
+  if ( is.null(regModel) ) {
+    regModel <- rep("basic", length(additional))
+  }
+  if(verbose){
+    message("Used model formulas:\n")
+    print(regModel)
+    message("------------------------------ \n")
+  }
+  varNames <- c(hid=hid, w=w, strata=strata, basic,
+                relation=relation, additional)
   # check data
-  if ( all(varNames %in% names(dataS)) ) {
-    dataS <- dataS[, varNames, with=F]
+  if ( all(varNames %in% names(data_sample)) ) {
+    data_sample <- data_sample[, varNames, with=F]
   } else {
     stop("undefined variables in the sample data\n")
   }
-  if ( !all(c(strata, basic, relation) %in% names(dataP)) ) {
+  if ( !all(c(strata, basic, relation) %in% names(data_pop)) ) {
     stop("undefined variables in the population data\n")
   }
 
-  # observations with missings are excluded from simulation
-  exclude <- getExclude(dataS)
-  if ( length(exclude) > 0 ) {
-    dataS <- dataS[-exclude,]
-  }
-
-  # variables are coerced to factors
-  dataS <- checkFactor(dataS, unique(c(strata, basic, relation, additional)))
-  dataP <- checkFactor(dataP, unique(c(strata, basic, relation)))
 
   # check arguments to account for structural zeros
   if ( length(additional) == 1 ) {
@@ -368,22 +407,48 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
     }
   }
 
-  # list indStrata contains the indices of dataP split by strata
-  N <- nrow(dataP)
-  indStrata <- split(1:N, dataP[[strata]])
+  # list indStrata contains the indices of data_pop split by strata
+  N <- nrow(data_pop)
+  indStrata <- split(1:N, data_pop[[strata]])
 
   ##### simulation of variables using a sequence of multinomial models
+  if( !missing(seed) ) {
+    set.seed(seed,"L'Ecuyer")  # set seed of random number generator
+  }
+  
   # predictor variables
-  predNames <- c(basic)  # names of predictor variables
-
+  counter <- 0
   for ( i in additional ) {
+    counter <- counter+1
+    if(verbose) cat(paste0("Simulating variable '",i,"'.\n"))
+    if(length(regModel)>1){
+      curRegModel <- regModel[counter]
+    }else{
+      curRegModel <- regModel
+    }
+    regInput <- regressionInput(simPopObj, additional=additional[counter], regModel=curRegModel)
+    # names of predictor variables
+    predNames <- setdiff(regInput[[1]]$predNames, c(data_sample@hhsize, curStrata))
+    
+    # observations with missings are excluded from simulation
+    exclude <- getExclude(data_sample[,c(additional,predNames),with=FALSE])
+    if ( length(exclude) > 0 ) {
+      sampWork <- data_sample[-exclude,]
+    } else {
+      sampWork <- data_sample
+    }
+    
+    # variables are coerced to factors
+    sampWork <- checkFactor(sampWork, unique(c(curStrata, additional)))
+    data_pop <- checkFactor(data_pop_o, unique(c(curStrata)))
     # components of multinomial model are specified
-    levelsResponse <- levels(dataS[[i]])
+    levelsResponse <- levels(sampWork[[i]])
+    
     formula <- paste(i, "~", paste(predNames, collapse=" + "))
     # check if population data contains factor levels that do not exist in the sample
     newLevels <- lapply(predNames, function(nam) {
-      levelsS <- levels(dataS[[nam]])
-      levelsP <- levels(dataP[[nam]])
+      levelsS <- levels(data_sample[[nam]])
+      levelsP <- levels(data_pop[[nam]])
       levelsP[!(levelsP %in% levelsS)]
     })
     hasNewLevels <- sapply(newLevels, length) > 0
@@ -415,36 +480,36 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
       if ( have_win ) {
         cl <- makePSOCKcluster(nr_cores)
         registerDoParallel(cl,cores=nr_cores)
-        values <- foreach(x=levels(dataS[[strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
+        values <- foreach(x=levels(data_sample[[strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
           simulateValues(
-            dataSample=dataS[dataS[[strata]] == x,],
-            dataPop=dataP[indStrata[[x]], c(predNames, simPopObj@pop@hhid), with=FALSE], params
+            dataSample=data_sample[data_sample[[strata]] == x,],
+            dataPop=data_pop[indStrata[[x]], c(predNames, simPopObj@pop@hhid), with=FALSE], params
           )
         }
         stopCluster(cl)
       }else if ( !have_win ) {# linux/mac
-        values <- mclapply(levels(dataS[[strata]]), function(x) {
+        values <- mclapply(levels(data_sample[[strata]]), function(x) {
           simulateValues(
-            dataSample=dataS[dataS[[strata]] == x,],
-            dataPop=dataP[indStrata[[x]], c(predNames, simPopObj@pop@hhid), with=FALSE], params
+            dataSample=data_sample[data_sample[[strata]] == x,],
+            dataPop=data_pop[indStrata[[x]], c(predNames, simPopObj@pop@hhid), with=FALSE], params
           )
-        }, mc.cores = max(nr_cores,length(levels(dataS[[strata]]))))
+        }, mc.cores = max(nr_cores,length(levels(data_sample[[strata]]))))
       }
     } else {
-      values <- lapply(levels(dataS[[strata]]), function(x) {
+      values <- lapply(levels(data_sample[[strata]]), function(x) {
         simulateValues(
-          dataSample=dataS[dataS[[strata]] == x,],
-          dataPop=dataP[indStrata[[x]], c(predNames, simPopObj@pop@hhid), with=FALSE], params
+          dataSample=data_sample[data_sample[[strata]] == x,],
+          dataPop=data_pop[indStrata[[x]], c(predNames, simPopObj@pop@hhid), with=FALSE], params
         )
       })
     }
-    values <- unlist(values, dataP[[strata]])
+    values <- unlist(values, data_pop[[strata]])
 
     ## add new categorical variable to data set
-    dataP[[i]] <- values
+    data_pop[[i]] <- values
     predNames <- c(predNames, i)
   }
   # return simulated data
-  simPopObj@pop@data <- dataP
+  simPopObj@pop@data <- data_pop
   invisible(simPopObj)
 }
