@@ -1,17 +1,18 @@
 simulateValues <- function(dataSample, dataPop, params) {
+  if ( !nrow(dataSample) ) {
+    return(character())
+  }
+  meth <- params$method
+  cur.var <- params$cur.var
   hasNewLevels <- params$hasNewLevels
   newLevels <- params$newLevels
-  strata <- params$strata
   head <- params$head
   excludeLevels <- params$excludeLevels
   w <- params$w
   relation <- params$relation
-  predNames <- params$predNames
-  indStrata <- params$indStrata
-  formula <- params$formula
-  MaxNWts <- params$MaxNWts
-  maxit <- params$maxit
   eps <- params$eps
+  formula.cmd <- params$formula.cmd
+  formula.cmd_nd <- params$formula.cmd_nd
   current.strata <- params$current.strata
   limit <- params$limit
   censor <- params$censor
@@ -22,18 +23,15 @@ simulateValues <- function(dataSample, dataPop, params) {
 
   #hhid <- dataPop[[hid]]
   dataPop[,hid] <- NULL
-  if ( !nrow(dataSample) ) {
-    return(character())
-  }
-  # first step: simulate category of household head
+
+    # first step: simulate category of household head
   # sample data
-  indSampleHead <- which(dataSample[[relation]] == head)
-  dataSampleHead <- dataSample[indSampleHead, ]
+  indSampleHead <- which(params$TF_head_samp)
+  dataSampleWork <- dataSample[indSampleHead, ]
 
   # limit population data to household heads
   # this is not stored in a separate data.frame to save memory
-  relPop <- dataPop[[relation]]
-  indPopHead <- which(relPop == head)
+  indPopHead <- which(params$TF_head_pop)
   dataPop <- dataPop[indPopHead,]
   # unique combinations in the stratum of the population need
   # to be computed for prediction
@@ -57,32 +55,48 @@ simulateValues <- function(dataSample, dataPop, params) {
   # fit multinomial model
   # command needs to be constructed as string
   # this is actually a pretty ugly way of fitting the model
-  command <- paste("suppressWarnings(multinom(", formula,
-    ", weights=", w, ", data=dataSampleHead, trace=FALSE",
-    ", maxit=maxit, MaxNWts=MaxNWts))", sep="")
-  mod <- eval(parse(text=command))  # fitted model
+  mod <- eval(parse(text=formula.cmd))  # fitted model
 
   # predict probabilities
   if ( length(exclude) == 0 ) {
-    probs <- predict(mod, newdata=grid, type="probs")
+    newdata <- copy(grid)
   } else {
-    probs <- predict(mod, newdata=grid[-exclude, , drop=FALSE], type="probs")
+    newdata <- copy(grid[-exclude])
+  }
+  ind <- match(colnames(newdata), colnames(dataSample))
+  for ( i in 1:length(ind) ) {
+    if (is.factor(unlist(newdata[,i,with=FALSE]))) {
+      newdata[,colnames(newdata)[i]:=factor(as.character(unlist(newdata[,colnames(newdata)[i],with=FALSE])),levels(dataSample[[ind[i]]]))]
+    }
+  }
+  
+  if ( meth %in% "multinom" ) {
+    probs <- predict(mod, newdata=newdata, type="probs")
+  }else if ( meth %in% c("ctree","cforest") ) {
+    probs <- predict(mod, newdata=data.table(newdata), type="prob")
+    probs <- do.call("rbind",probs)
+    if(ncol(probs)==2){
+      probs <- probs[,2]
+    }
+  }else if ( meth %in% c("ranger") ) {
+    probs <- predict(mod,data=newdata,type="response")$predictions
+    colnames(probs) <- mod$forest$levels
   }
   # set too small probabilities to exactly 0
   if ( !is.null(eps) ) {
     probs[probs < eps] <- 0
   }
   # ensure code works for missing levels of response
-  ind <- as.integer(which(table(dataSampleHead[[current.strata]]) > 0))
-  if ( length(ind) > 2 && (nrow(grid)-length(exclude)) == 1 ) {
+  ind <- as.integer(which(table(dataSample[[cur.var]]) > 0))
+  if( length(ind) > 2 && (nrow(grid)-length(exclude)) == 1 ) {
     probs <- t(probs)
   }
   # account for structural zeros
   if ( (!is.null(limit) || !is.null(censor)) && !is.null(dim(probs)) ) {
-    if ( length(exclude) == 0 ) {
-      probs <- adjustProbs(probs, grid, names(indGrid), limit[[current.strata]], censor[[current.strata]])
+    if(length(exclude) == 0) {
+      probs <- adjustProbs(probs, grid, names(indGrid), limit, censor)
     } else {
-      probs <- adjustProbs(probs, grid[-exclude, , drop=FALSE], names(indGrid)[-exclude], limit[[current.strata]], censor[[current.strata]])
+      probs <- adjustProbs(probs, grid[-exclude, , drop=FALSE], names(indGrid)[-exclude], limit, censor)
     }
   }
   # local function for sampling from probabilities
@@ -133,8 +147,8 @@ simulateValues <- function(dataSample, dataPop, params) {
     iHead <- getHeadName(current.strata)
     dataSample[, iHead] <- add
     # limit sample and population data to non-directly related household members
-    dataSample <- dataSample[indSampleNonDirect,]
-    dataPop <- totPop[,predNames, with=FALSE]
+    dataSampleWork <- dataSample[indSampleNonDirect,]
+    dataPop <- totPop#[,predNames, with=FALSE]
     dataPop[, iHead] <- sim
     dataPop <- dataPop[indPopNonDirect,]
     dataPop[,hid] <- NULL
@@ -160,31 +174,48 @@ simulateValues <- function(dataSample, dataPop, params) {
     # fit multinomial model
     # command needs to be constructed as string
     # this is actually a pretty ugly way of fitting the model
-    formula <- paste(formula, iHead, sep = " + ")
-    command <- paste("suppressWarnings(multinom(", formula, ", weights=", w, ", data=dataSample, trace=FALSE", ", maxit=maxit, MaxNWts=MaxNWts))", sep="")
-    mod <- eval(parse(text=command))  # fitted model
-
+    mod <- eval(parse(text=formula.cmd))  # fitted model
+    
     # predict probabilities
     if ( length(exclude) == 0 ) {
-      probs <- predict(mod, newdata=grid, type="probs")
+      newdata <- copy(grid)
     } else {
-      probs <- predict(mod, newdata=grid[-exclude, , drop=FALSE], type="probs")
+      newdata <- copy(grid[-exclude])
+    }
+    ind <- match(colnames(newdata), colnames(dataSample))
+    for ( i in 1:length(ind) ) {
+      if (is.factor(unlist(newdata[,i,with=FALSE]))) {
+        newdata[,colnames(newdata)[i]:=factor(as.character(unlist(newdata[,colnames(newdata)[i],with=FALSE])),levels(dataSample[[ind[i]]]))]
+      }
+    }
+    
+    if ( meth %in% "multinom" ) {
+      probs <- predict(mod, newdata=newdata, type="probs")
+    }else if ( meth %in% c("ctree","cforest") ) {
+      probs <- predict(mod, newdata=data.table(newdata), type="prob")
+      probs <- do.call("rbind",probs)
+      if(ncol(probs)==2){
+        probs <- probs[,2]
+      }
+    }else if ( meth %in% c("ranger") ) {
+      probs <- predict(mod,data=newdata,type="response")$predictions
+      colnames(probs) <- mod$forest$levels
     }
     # set too small probabilities to exactly 0
     if ( !is.null(eps) ) {
       probs[probs < eps] <- 0
     }
     # ensure code works for missing levels of response
-    ind <- as.integer(which(table(dataSample[[current.strata]]) > 0))
-    if ( length(ind) > 2 && (nrow(grid)-length(exclude)) == 1 ) {
+    ind <- as.integer(which(table(dataSample[[cur.var]]) > 0))
+    if( length(ind) > 2 && (nrow(grid)-length(exclude)) == 1 ) {
       probs <- t(probs)
     }
     # account for structural zeros
     if ( (!is.null(limit) || !is.null(censor)) && !is.null(dim(probs)) ) {
-      if ( length(exclude) == 0 ) {
-        probs <- adjustProbs(probs, grid, names(indGrid), limit[[current.strata]], censor[[current.strata]])
+      if(length(exclude) == 0) {
+        probs <- adjustProbs(probs, grid, names(indGrid), limit, censor)
       } else {
-        probs <- adjustProbs(probs, grid[-exclude, , drop=FALSE], names(indGrid)[-exclude], limit[[current.strata]], censor[[current.strata]])
+        probs <- adjustProbs(probs, grid[-exclude, , drop=FALSE], names(indGrid)[-exclude], limit, censor)
       }
     }
     # local function for sampling from probabilities
@@ -294,17 +325,14 @@ simulateValues <- function(dataSample, dataPop, params) {
 #' modelling. This parameter should be used with care because all factors are
 #' automatically used as factors internally.  \item formula-objectUsers may also
 #' specify a specifiy formula (class 'formula') that will be used. Checks are
-#' performed that all required variables are available.  } If method
-#' 'distribution' is used, it is only possible to specify a vector of length
-#' one containing one of the choices described above.  If parameter 'regModel'
+#' performed that all required variables are available.  } If parameter 'regModel'
 #' is NULL, only basic household variables are used in any case.
 #' @param verbose set to TRUE if additional print output should be shown.
 #' @param method a character string specifying the method to be used for
 #' simulating the additional categorical variables. Accepted values are
 #' \code{"multinom"} (estimation of the conditional probabilities using
 #' multinomial log-linear models and random draws from the resulting
-#' distributions) or \code{"distribution"} (random draws from the observed
-#' conditional distributions of their multivariate realizations).
+#' distributions).
 #' \code{"ctree"}  for using Classification trees
 #' \code{"cforest"}  for using random forest (implementation in package party)
 #' \code{"ranger"}  for using random forest (implementation in package ranger)
@@ -335,7 +363,7 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
   direct = NULL, additional = c("nation", "ethnic", "religion"),
   limit = NULL, censor = NULL, maxit = 500, MaxNWts = 2000,
   eps = NULL, nr_cpus=NULL, seed = 1, regModel = NULL, verbose = FALSE,
-  method=c("multinom", "distribution","ctree","cforest","ranger")) {
+  method=c("multinom", "ctree","cforest","ranger")) {
 
   x <- newAdditionalVarible <- NULL
   
@@ -460,11 +488,16 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
     # simulation of variables using a sequence of multinomial models
     if ( method == "multinom" ) {
       formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
+      formula.cmd_nd <- paste(i, "~", paste(c(predNames,getHeadName(i)), collapse = " + "))
       formula.cmd <- paste0("suppressWarnings(multinom(", formula.cmd)
+      formula.cmd_nd <- paste0("suppressWarnings(multinom(", formula.cmd_nd)
       if(!dataS@ispopulation){
         formula.cmd <- paste0(formula.cmd,", weights=", dataS@weight)
+        formula.cmd_nd <- paste0(formula.cmd_nd,", weights=", dataS@weight)
       }
-      formula.cmd <- paste0(formula.cmd,", data=dataSample, trace=FALSE",
+      formula.cmd <- paste0(formula.cmd,", data=dataSampleWork, trace=FALSE",
+                            ", maxit=",maxit, ", MaxNWts=", MaxNWts,"))")
+      formula.cmd_nd <- paste0(formula.cmd_nd,", data=dataSampleWork, trace=FALSE",
                             ", maxit=",maxit, ", MaxNWts=", MaxNWts,"))")
       
       if(verbose) cat("we are running the following multinom-model:\n")
@@ -472,32 +505,45 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
     }else if ( method == "ctree" ) {
       # simulation via recursive partitioning and regression trees
       formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
+      formula.cmd_nd <- paste(i, "~", paste(c(predNames,getHeadName(i)), collapse = " + "))
       formula.cmd <- paste("suppressWarnings(ctree(", formula.cmd)
+      formula.cmd_nd <- paste("suppressWarnings(ctree(", formula.cmd_nd)
       if(!dataS@ispopulation){
-        formula.cmd <- paste0(formula.cmd,", weights=as.integer(dataSample$", dataS@weight,")")
+        formula.cmd <- paste0(formula.cmd,", weights=as.integer(dataSampleWork$", dataS@weight,")")
+        formula.cmd_nd <- paste0(formula.cmd_nd,", weights=as.integer(dataSampleWork$", dataS@weight,")")
       }
       formula.cmd <- paste0(formula.cmd,
-                            ", data=dataSample))")
+                            ", data=dataSampleWork))")
+      formula.cmd_nd <- paste0(formula.cmd_nd,
+                            ", data=dataSampleWork))")
       if(verbose) cat("we are running recursive partitioning:\n")
       if(verbose) cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
     }else if ( method == "cforest" ) {
       # simulation via random forest
       formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
+      formula.cmd_nd <- paste(i, "~", paste(c(predNames,getHeadName(i)), collapse = " + "))
       formula.cmd <- paste("suppressWarnings(cforest(", formula.cmd)
+      formula.cmd_nd <- paste("suppressWarnings(cforest(", formula.cmd_nd)
       if(!dataS@ispopulation){
-        formula.cmd <- paste0(formula.cmd,", weights=as.integer(dataSample$", dataS@weight,")")
+        formula.cmd <- paste0(formula.cmd,", weights=as.integer(dataSampleWork$", dataS@weight,")")
+        formula.cmd_nd <- paste0(formula.cmd_nd,", weights=as.integer(dataSampleWork$", dataS@weight,")")
       }
-      formula.cmd <- paste0(formula.cmd,", data=dataSample))")
+      formula.cmd <- paste0(formula.cmd,", data=dataSampleWork))")
+      formula.cmd_nd <- paste0(formula.cmd_nd,", data=dataSampleWork))")
       if(verbose) cat("we are running random forest classification (cforest):\n")
       if(verbose) cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
     }else if ( method == "ranger" ) {
       # simulation via random forest
       formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
+      formula.cmd_nd <- paste(i, "~", paste(c(predNames,getHeadName(i)), collapse = " + "))
       formula.cmd <- paste("suppressWarnings(ranger(", formula.cmd)
+      formula.cmd_nd <- paste("suppressWarnings(ranger(", formula.cmd_nd)
       if(!dataS@ispopulation){
-        formula.cmd <- paste0(formula.cmd,", case.weights=dataSample$", dataS@weight)
+        formula.cmd <- paste0(formula.cmd,", case.weights=dataSampleWork$", dataS@weight)
+        formula.cmd_nd <- paste0(formula.cmd_nd,", case.weights=dataSampleWork$", dataS@weight)
       }
-      formula.cmd <- paste0(formula.cmd, ", data=dataSample,probability=TRUE))", sep="")
+      formula.cmd <- paste0(formula.cmd, ", data=dataSampleWork,probability=TRUE))", sep="")
+      formula.cmd_nd <- paste0(formula.cmd_nd, ", data=dataSampleWork,probability=TRUE))", sep="")
       if(verbose) cat("we are running random forest (ranger):\n")
       if(verbose) cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
     }
@@ -520,7 +566,7 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
     params$w <- w
     params$relation <- relation
     params$formula.cmd <- formula.cmd
-    params$formula <- formula
+    params$formula.cmd_nd <- formula.cmd_nd
     params$eps <- eps
     params$limit <- limit
     params$censor <- censor
@@ -557,11 +603,9 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
         )
       })
     }
-    values <- factor(unsplit(values, data_pop[[curStrata]]), levels=levelsResponse)
 
     ## add new categorical variable to data set
     data_pop_o[[i]] <- values
-    predNames <- c(predNames, i)
   }
   # return simulated data
   simPopObj@pop@data <- data_pop_o
