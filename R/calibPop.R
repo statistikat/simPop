@@ -61,17 +61,17 @@ calcFinalWeights <- function(data0, totals0, params) {
 # subset list of data tables using on=.()
 subsetList <- function(totals,split,x){
   
-  totals0 <- lapply(totals,function(z){
-    lapply(z,function(dt){
-      dt[.(x),,on=c(split)]
-    })
+  totals <- lapply(totals,function(dt){
+    dt.x <- dt[.(x),,on=c(split)]
+    dt.x[[split]]<-NULL
+    return(dt.x)
   })
-  return(totals0)
+  return(totals)
 }  
 
 
 # check list of contingency tables 
-checkTables <- function(tabs,namesData,split=NULL,verbose=FALSE){
+checkTables <- function(tabs,namesData,split=NULL,verbose=FALSE,namesTabs="pers"){
   
   if(is.null(tabs)){
     return(NULL)
@@ -104,6 +104,8 @@ checkTables <- function(tabs,namesData,split=NULL,verbose=FALSE){
     
   })
   
+  names(tabs) <- paste0(namesTabs,1:length(tabs))
+  
   if(verbose){
     cat("\nKeepig variables for Tables\n")
     sapply(tabs,function(z){
@@ -121,7 +123,7 @@ makeFactors <- function(totals,data){
   
   ########
   # check and get all factors + levels in totals
-  facLevels <- lapply(unlist(totals,recursive = FALSE),function(z){
+  facLevels <- lapply(totals,function(z){
     
     facNames <- colnames(z)[which(sapply(z,is.factor))]
     output <- lapply(facNames,function(f){levels(z[[f]])})
@@ -343,11 +345,11 @@ calibPop <- function(inp, split=NULL, temp = 1, epsP.factor = 0.05, epsH.factor 
 
   
   # parameters for parallel computing
-  nr_strata <- length(unique(data[[split]]))
-  pp <- parallelParameters(nr_cpus=nr_cpus, nr_strata=nr_strata)
-  parallel <- pp$parallel
-  nr_cores <- pp$nr_cores
-  have_win <- pp$have_win; rm(pp)
+  # nr_strata <- length(unique(data[[split]]))
+  # pp <- parallelParameters(nr_cpus=nr_cpus, nr_strata=nr_strata)
+  # parallel <- pp$parallel
+  # nr_cores <- pp$nr_cores
+  # have_win <- pp$have_win; rm(pp)
   
   # make factor variables
   # and check if factor in totals coincide with factors in data
@@ -392,9 +394,10 @@ calibPop <- function(inp, split=NULL, temp = 1, epsP.factor = 0.05, epsH.factor 
     }
   } else {
     final_weights <- lapply(1:length(split.number), function(x) {
+      x <- 1
       split.x <- split.number[x]
       data0 <- data[.(split.x),,on=c(split)]
-      data0 <- data[.(data0$upazilaCode[1]),,on=.(upazilaCode)]
+      # data0 <- data[.(data0$upazilaCode[1]),,on=.(upazilaCode)]
       totals0 <- subsetList(totals,split=split,x=split.x)
       rm(inp)
       simAnnealingDT(
@@ -402,7 +405,7 @@ calibPop <- function(inp, split=NULL, temp = 1, epsP.factor = 0.05, epsH.factor 
         totals0=totals0,
         params=params,sizefactor=sizefactor,choose.temp=choose.temp,
         choose.temp.factor=choose.temp.factor,scale.redraw=scale.redraw,
-        split.level=paste0(unlist(split.number[x])),observe.times=observe.times,observe.break=observe.break)
+        split=split,observe.times=observe.times,observe.break=observe.break)
     })
   }
     
