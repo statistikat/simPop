@@ -528,7 +528,7 @@ simCategorical <- function(simPopObj, additional,
         values <- foreach(x=levels(data_sample[[curStrata]]), .options.snow=list(preschedule=FALSE)) %dopar% {
           generateValues(
               dataSample=sampWork[sampWork[[curStrata]] == x,c(params$cur.var,predNames,params$w),with=FALSE],
-              dataPop=data_pop[indStrata[[x]], predNames, with=F], params
+              dataPop=data_pop[indStrata[[x]], predNames, with=FALSE], params
           )
         }
         stopCluster(cl)
@@ -538,7 +538,7 @@ simCategorical <- function(simPopObj, additional,
         values <- mclapply(levels(data_sample[[curStrata]]), function(x) {
               generateValues(
                   dataSample=sampWork[sampWork[[curStrata]] == x,c(params$cur.var,predNames,params$w),with=FALSE],
-                  dataPop=data_pop[indStrata[[x]], predNames, with=F], params
+                  dataPop=data_pop[indStrata[[x]], predNames, with=FALSE], params
               )
             }, mc.cores=nr_cores)
       }
@@ -546,7 +546,7 @@ simCategorical <- function(simPopObj, additional,
       values <- lapply(levels(data_sample[[curStrata]]), function(x) {
             generateValues(
                 dataSample=sampWork[sampWork[[curStrata]] == x,c(params$cur.var,predNames,params$w),with=FALSE],
-                dataPop=data_pop[indStrata[[x]], predNames, with=F], params
+                dataPop=data_pop[indStrata[[x]], predNames, with=FALSE], params
             )
           })
     }
