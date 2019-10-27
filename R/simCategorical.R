@@ -65,13 +65,13 @@ generateValues <- function(dataSample, dataPop, params) {
     }else if ( meth %in% c("ctree","cforest") ) {
       probs <- predict(mod, newdata=data.table(newdata), type="prob")
       probs <- do.call("rbind",probs)
-	  if(ncol(probs)==2){
+	    if(ncol(probs)==2){
         probs <- probs[,2]
-	  }
+	    }
     }else if ( meth %in% c("ranger") ) {
       probs <- predict(mod,data=newdata,type="response")$predictions
       colnames(probs) <- mod$forest$levels
-	}
+	  }
     #if ( meth %in% "naivebayes" ) {
     #  probs <- predict(mod, newdata=newdata, type="raw")
     #}
