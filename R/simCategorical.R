@@ -273,6 +273,8 @@ simCategorical <- function(simPopObj, additional,
   # required because we do not want to change existing populaton by reference
   # thus a copy of the dataset is taken. additional variables will be added to
   # this dataset
+  dataS <- sampleObj(simPopObj)
+  dataP <- sampleObj(simPopObj)
   data_pop_o <- copy(popData(simPopObj))
   data_pop <- popData(simPopObj)
   data_sample <- sampleData(simPopObj)
