@@ -399,15 +399,20 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
   w <- dataS@weight
   hid <- dataS@hhid
   ## checking for household heads
-  problematicHHsample <- data_sample[,any(get(relation)==head),by=c(hid)][V1==FALSE,hid,with=FALSE]
-  problematicHHpop <- data_pop[,any(get(relation)==head),by=c(hid)][V1==FALSE,hid,with=FALSE]
-  if(nrow(problematicHHsample)>0){
-    warning("Sample:There are households without a head, a random head will be asigned.")
-    stop("to be implemented")
+  problematicHHsample <- data_sample[,any(get(relation)==head),by=c(hid)][V1==FALSE][[hid]]
+  problematicHHpop <- data_pop[,any(get(relation)==head),by=c(hid)][V1==FALSE][[hid]]
+  makeOneRandom <- function(x,head){
+    x[sample(1:length(x), 1)] <- head[1]
   }
-  if(nrow(problematicHHpop)>0){
+  if(length(problematicHHsample)>0){
+    warning("Sample:There are households without a head, a random head will be asigned.")
+    setkeyv(data_sample,hid)
+    data_sample[.(problematicHHsample),c(relation):=makeOneRandom(get(relation),head), by=c(hid)]
+  }
+  if(length(problematicHHpop)>0){
     warning("Population:There are households without a head, a random head will be asigned.")
-    stop("to be implemented")
+    setkeyv(data_pop,hid)
+    data_pop[.(problematicHHpop),c(relation):=makeOneRandom(get(relation),head), by=c(hid)]
   }
   
   
