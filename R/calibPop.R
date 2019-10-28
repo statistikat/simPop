@@ -261,7 +261,7 @@ makeFactors <- function(totals,data){
 #' ## long computation time
 #' simPop_adj <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1,memory=FALSE)
 #' }
-calibPop <- function(inp, split=NULL, temp = 1, epsP.factor = 0.05, epsH.factor = 0.05, maxiter=200,
+calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0.05, epsH.factor = 0.05, maxiter=200,
   temp.cooldown = 0.9, factor.cooldown = 0.85, min.temp = 10^-3,
   nr_cpus=NULL, sizefactor=2, 
   choose.temp=TRUE,choose.temp.factor=0.2,scale.redraw=.5,observe.times=50,observe.break=0.05,
@@ -326,7 +326,7 @@ calibPop <- function(inp, split=NULL, temp = 1, epsP.factor = 0.05, epsH.factor 
   } else {
     data$tmpsplit <- 1
     totals$tmpsplit <- 1
-    split <- "tmpsplit"
+    split <- splitUpper <- "tmpsplit"
   }
 
   params <- list()
@@ -345,11 +345,11 @@ calibPop <- function(inp, split=NULL, temp = 1, epsP.factor = 0.05, epsH.factor 
 
   
   # parameters for parallel computing
-  # nr_strata <- length(unique(data[[split]]))
-  # pp <- parallelParameters(nr_cpus=nr_cpus, nr_strata=nr_strata)
-  # parallel <- pp$parallel
-  # nr_cores <- pp$nr_cores
-  # have_win <- pp$have_win; rm(pp)
+  nr_strata <- length(unique(data[[split]]))
+  pp <- parallelParameters(nr_cpus=nr_cpus, nr_strata=nr_strata)
+  parallel <- pp$parallel
+  nr_cores <- pp$nr_cores
+  have_win <- pp$have_win; rm(pp)
   
   # make factor variables
   # and check if factor in totals coincide with factors in data
@@ -367,37 +367,38 @@ calibPop <- function(inp, split=NULL, temp = 1, epsP.factor = 0.05, epsH.factor 
       
       final_weights <- foreach(x=1:length(split.number), .options.snow=list(preschedule=TRUE)) %dopar% {
         split.x <- split.number[x]
-        data0 <- data[.(split.x),,on=c(split)]
+        splitUpper.x <- data[.(split.x),,on=c(split)][[splitUpper]][1]
+        data0 <- data[.(splitUpper.x),,on=.(upazilaCode)]
         totals0 <- subsetList(totals,split=split,x=split.x)
-        
+        rm(inp)
         simAnnealingDT(
           data0=data0,
           totals0=totals0,
           params=params,sizefactor=sizefactor,choose.temp=choose.temp,
           choose.temp.factor=choose.temp.factor,scale.redraw=scale.redraw,
-          split.level=paste0(unlist(split.number[x])),observe.times=observe.times,observe.break=observe.break)
+          split=x,observe.times=observe.times,observe.break=observe.break)
       }
       stopCluster(cl)
     }else if ( !have_win ) {# linux/mac
       final_weights <- mclapply(1:length(split.number), function(x) {
         split.x <- split.number[x]
-        data0 <- data[.(split.x),,on=c(split)]
+        splitUpper.x <- data[.(split.x),,on=c(split)][[splitUpper]][1]
+        data0 <- data[.(splitUpper.x),,on=.(upazilaCode)]
         totals0 <- subsetList(totals,split=split,x=split.x)
-        
+        rm(inp)
         simAnnealingDT(
           data0=data0,
           totals0=totals0,
           params=params,sizefactor=sizefactor,choose.temp=choose.temp,
           choose.temp.factor=choose.temp.factor,scale.redraw=scale.redraw,
-          split.level=paste0(unlist(split.number[x])),observe.times=observe.times,observe.break=observe.break)
+          split=x,observe.times=observe.times,observe.break=observe.break)
       },mc.cores=nr_cores)
     }
   } else {
     final_weights <- lapply(1:length(split.number), function(x) {
-      x <- 1
       split.x <- split.number[x]
-      data0 <- data[.(split.x),,on=c(split)]
-      # data0 <- data[.(data0$upazilaCode[1]),,on=.(upazilaCode)]
+      splitUpper.x <- data[.(split.x),,on=c(split)][[splitUpper]][1]
+      data0 <- data[.(splitUpper.x),,on=.(upazilaCode)]
       totals0 <- subsetList(totals,split=split,x=split.x)
       rm(inp)
       simAnnealingDT(
@@ -405,7 +406,7 @@ calibPop <- function(inp, split=NULL, temp = 1, epsP.factor = 0.05, epsH.factor 
         totals0=totals0,
         params=params,sizefactor=sizefactor,choose.temp=choose.temp,
         choose.temp.factor=choose.temp.factor,scale.redraw=scale.redraw,
-        split=split,observe.times=observe.times,observe.break=observe.break)
+        split=x,observe.times=observe.times,observe.break=observe.break)
     })
   }
     
