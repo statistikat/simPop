@@ -1,4 +1,11 @@
 simulateValues <- function(dataSample, dataPop, params) {
+   # dS <<- copy(dataSample)
+   # dP <<- copy(dataPop)
+   # pp <<- copy(params)
+   # stop()
+  if(params$verbose){
+    message("starting simulateValues...")
+  }
   if ( !nrow(dataSample) ) {
     return(character())
   }
@@ -13,30 +20,31 @@ simulateValues <- function(dataSample, dataPop, params) {
   eps <- params$eps
   formula.cmd <- params$formula.cmd
   formula.cmd_nd <- params$formula.cmd_nd
-  current.strata <- params$current.strata
-  limit <- params$limit
-  censor <- params$censor
+  limit <- params$limit[[cur.var]]
+  censor <- params$censor[[cur.var]]
   levelsResponse <- params$levelsResponse
   hid <- params$hid
   direct <- params$direct
-  totPop <- copy(dataPop) # copy for later use
-
-  #hhid <- dataPop[[hid]]
-  dataPop[,hid] <- NULL
+  TF_head_samp <- dataSample[[relation]] %in% head
+  TF_direct_samp <- dataSample[[relation]] %in% direct
+  TF_head_pop <- dataPop[[relation]] %in% head
+  TF_direct_pop <- dataPop[[relation]] %in% direct
+  
 
     # first step: simulate category of household head
   # sample data
-  indSampleHead <- which(params$TF_head_samp)
+  indSampleHead <- which(TF_head_samp)
   dataSampleWork <- dataSample[indSampleHead, ]
 
   # limit population data to household heads
   # this is not stored in a separate data.frame to save memory
-  indPopHead <- which(params$TF_head_pop)
-  dataPop <- dataPop[indPopHead,]
+  indPopHead <- which(TF_head_pop)
+  dataPopWork <- dataPop[indPopHead,]
+  dataPopWork[[hid]] <- NULL
   # unique combinations in the stratum of the population need
   # to be computed for prediction
-  indGrid <- split(1:nrow(dataPop), dataPop, drop=TRUE)
-  grid <- dataPop[sapply(indGrid, function(i) i[1])]
+  indGrid <- split(1:nrow(dataPopWork), dataPopWork, drop=TRUE)
+  grid <- dataPopWork[sapply(indGrid, function(i) i[1])]
                   
   # in sample, observations with NAs have been removed to fit the
   # model, hence population can have additional levels
@@ -80,14 +88,13 @@ simulateValues <- function(dataSample, dataPop, params) {
     }
   }else if ( meth %in% c("ranger") ) {
     probs <- predict(mod,data=newdata,type="response")$predictions
-    colnames(probs) <- mod$forest$levels
   }
   # set too small probabilities to exactly 0
   if ( !is.null(eps) ) {
     probs[probs < eps] <- 0
   }
   # ensure code works for missing levels of response
-  ind <- as.integer(which(table(dataSample[[cur.var]]) > 0))
+  ind <- as.integer(which(table(dataSampleWork[[cur.var]]) > 0))
   if( length(ind) > 2 && (nrow(grid)-length(exclude)) == 1 ) {
     probs <- t(probs)
   }
@@ -116,18 +123,19 @@ simulateValues <- function(dataSample, dataPop, params) {
     sim <- as.list(rep.int(NA, length(indGrid)))
     sim[-exclude] <- lapply(1:length(ncomb), resample, ncomb, probs)
   }
-  sim <- unsplit(sim, dataPop, drop=TRUE)
+  sim <- unsplit(sim, dataPopWork, drop=TRUE)
   sim <- factor(levelsResponse[ind][sim], levels=levelsResponse)
-
+  simHead <- dataPop[indPopHead][,c(hid), with = FALSE]
+  simHead[,c(cur.var):=sim]
   # second step: assign category of household head to
   # directly related household members
   # we actually assign the category of the household head to
   # all household members (because we need that variable
   # anyway) and replace the values of non-directly related
   # in the third step
-  hidPop <- totPop[[hid]]
-  names(sim) <- hidPop[indPopHead]
-  sim <- sim[as.character(hidPop)]
+  setkeyv(simHead, hid)
+  sim <- simHead[.(dataPop[[hid]])][[cur.var]]
+  rm(simHead)
 
   # third step: simulate category of non-directly related
   # household members using category of household head as
@@ -140,22 +148,20 @@ simulateValues <- function(dataSample, dataPop, params) {
   indPopNonDirect <- which(!(params$TF_head_pop|params$TF_direct_pop))
   if ( length(indSampleNonDirect) > 0 && length(indPopNonDirect) > 0 ) {
     # create additional predictor in the sample
-    add <- dataSample[[current.strata]][indSampleHead] # these are still numeric for population data too
+    add <- dataSample[[cur.var]][indSampleHead] # these are still numeric for population data too
     hidSample <- dataSample[[hid]]
     names(add) <- hidSample[indSampleHead]
     add <- add[as.character(hidSample)]
-    iHead <- getHeadName(current.strata)
+    iHead <- getHeadName(cur.var)
     dataSample[, iHead] <- add
     # limit sample and population data to non-directly related household members
     dataSampleWork <- dataSample[indSampleNonDirect,]
-    dataPop <- totPop#[,predNames, with=FALSE]
     dataPop[, iHead] <- sim
-    dataPop <- dataPop[indPopNonDirect,]
-    dataPop[,hid] <- NULL
+    dataPopWork <- dataPop[indPopNonDirect,predNames]
     # unique combinations in the stratum of the population need
     # to be computed for prediction
-    indGrid <- split(1:nrow(dataPop), dataPop, drop=TRUE)
-    grid <- dataPop[sapply(indGrid, function(i) i[1]), , drop=FALSE]
+    indGrid <- split(1:nrow(dataPopWork), dataPopWork, drop=TRUE)
+    grid <- dataPopWork[sapply(indGrid, function(i) i[1]), , drop=FALSE]
     grid <- as.data.frame(grid)
     # in sample, observations with NAs have been removed to fit the
     # model, hence population can have additional levels
@@ -184,7 +190,7 @@ simulateValues <- function(dataSample, dataPop, params) {
     }
     ind <- match(colnames(newdata), colnames(dataSample))
     for ( i in 1:length(ind) ) {
-      if (is.factor(unlist(newdata[,i,with=FALSE]))) {
+      if (is.factor(unlist(newdata[[i]]))) {
         newdata[,colnames(newdata)[i]:=factor(as.character(unlist(newdata[,colnames(newdata)[i],with=FALSE])),levels(dataSample[[ind[i]]]))]
       }
     }
@@ -235,12 +241,17 @@ simulateValues <- function(dataSample, dataPop, params) {
       simTmp <- as.list(rep.int(NA, length(indGrid)))
       simTmp[-exclude] <- lapply(1:length(ncomb), resample, ncomb, probs)
     }
-    simTmp <- unsplit(simTmp, dataPop, drop=TRUE)
+    simTmp <- unsplit(simTmp, dataPopWork, drop=TRUE)
     simTmp <- levelsResponse[ind][simTmp]
     sim[indPopNonDirect] <- simTmp
   }
+  if(params$verbose){
+    message("done.")
+  }
+  if(any(is.na(sim)))
+    stop("na in sim")
   # return realizations
-  sim
+  return(sim)
 }
 
 
@@ -336,6 +347,7 @@ simulateValues <- function(dataSample, dataPop, params) {
 #' \code{"ctree"}  for using Classification trees
 #' \code{"cforest"}  for using random forest (implementation in package party)
 #' \code{"ranger"}  for using random forest (implementation in package ranger)
+#' @param by defining which variable to use as split up variable of the estimation. Defaults to the strata variable.
 #' @return An object of class \code{\linkS4class{simPopObj}} containing survey
 #' data as well as the simulated population data including the categorical
 #' variables specified by \code{additional}.
@@ -355,15 +367,17 @@ simulateValues <- function(dataSample, dataPop, params) {
 #' 
 #' \dontrun{
 #' ## long computation time ... 
-#' ghanaP <- simRelation(simPopObj=ghanaP, relation="relate", head="head")
+#' ghanaP <- simRelation(simPopObj=ghanaP, relation="relate", head="head",
+#' additional = c("nation", "ethnic", "religion"))
 #' str(ghanaP)
 #' }
 #' 
 simRelation <- function(simPopObj, relation = "relate", head = "head",
-  direct = NULL, additional = c("nation", "ethnic", "religion"),
+  direct = NULL, additional,
   limit = NULL, censor = NULL, maxit = 500, MaxNWts = 2000,
   eps = NULL, nr_cpus=NULL, seed = 1, regModel = NULL, verbose = FALSE,
-  method=c("multinom", "ctree","cforest","ranger")) {
+  method=c("multinom", "ctree","cforest","ranger"),
+  by = "strata") {
 
   x <- newAdditionalVarible <- NULL
   
@@ -377,18 +391,49 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
   
   
   dataS <- sampleObj(simPopObj)
-  dataP <- sampleObj(simPopObj)
+  dataP <- popObj(simPopObj)
   data_pop_o <- copy(popData(simPopObj))
   data_pop <- popData(simPopObj)
   data_sample <- sampleData(simPopObj)
   basic <- simPopObj@basicHHvars
   w <- dataS@weight
   hid <- dataS@hhid
-  strata <- dataS@strata
+  ## checking for household heads
+  problematicHHsample <- data_sample[,any(get(relation)==head),by=c(hid)][V1==FALSE,hid,with=FALSE]
+  problematicHHpop <- data_pop[,any(get(relation)==head),by=c(hid)][V1==FALSE,hid,with=FALSE]
+  if(nrow(problematicHHsample)>0){
+    warning("Sample:There are households without a head, a random head will be asigned.")
+    stop("to be implemented")
+  }
+  if(nrow(problematicHHpop)>0){
+    warning("Population:There are households without a head, a random head will be asigned.")
+    stop("to be implemented")
+  }
+  
   
   # parameters for parallel computing
-  nr_strata <- length(levels(data_sample[[strata]]))
+  if(by=="strata"){
+    curStrata <- dataS@strata
+  }else{
+    curStrata <- by
+  }
+  if(!curStrata%in%colnames(data_sample)){
+    stop(curStrata," is defined as by variable, but not in the sample data set.")
+  }
+  if(!curStrata%in%colnames(data_pop)){
+    stop(curStrata," is defined as by variable, but not in the population data set.")
+  }
+  
+  if(nrow(data_sample[,length(unique(get(curStrata))),by=hid][V1>1])>0){
+    stop("sample: the by-variable must be the same for the whole HH")
+  }
+  if(nrow(data_pop[,length(unique(get(curStrata))),by=hid][V1>1])>0){
+    stop("population: the by-variable must be the same for the whole HH")
+  }
+  
+  nr_strata <- length(levels(data_sample[[curStrata]]))
   pp <- parallelParameters(nr_cpus=nr_cpus, nr_strata=nr_strata)
+  
   parallel <- pp$parallel
   nr_cores <- pp$nr_cores
   have_win <- pp$have_win; rm(pp)
@@ -421,15 +466,15 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
     print(regModel)
     message("------------------------------ \n")
   }
-  varNames <- c(hid=hid, w=w, strata=strata, basic,
-                relation=relation, additional)
+  varNames <- unique(c(hid=hid, w=w, curStrata, basic,
+                relation=relation, additional))
   # check data
   if ( all(varNames %in% names(data_sample)) ) {
     data_sample <- data_sample[, varNames, with=F]
   } else {
     stop("undefined variables in the sample data\n")
   }
-  if ( !all(c(strata, basic, relation) %in% names(data_pop)) ) {
+  if ( !all(c(curStrata, basic, relation) %in% names(data_pop)) ) {
     stop("undefined variables in the population data\n")
   }
 
@@ -448,7 +493,7 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
 
   # list indStrata contains the indices of data_pop split by strata
   N <- nrow(data_pop)
-  indStrata <- split(1:N, data_pop[[strata]])
+  indStrata <- split(1:N, data_pop[[curStrata]])
 
   ##### simulation of variables using a sequence of multinomial models
   if( !missing(seed) ) {
@@ -467,7 +512,7 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
     }
     regInput <- regressionInput(simPopObj, additional=additional[counter], regModel=curRegModel)
     # names of predictor variables
-    predNames <- setdiff(regInput[[1]]$predNames, c(dataS@hhsize, strata))
+    predNames <- setdiff(regInput[[1]]$predNames, c(dataS@hhsize, curStrata, relation))
     
     # observations with missings are excluded from simulation
     exclude <- getExclude(data_sample[,c(additional,predNames),with=FALSE])
@@ -478,12 +523,8 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
     }
     
     # variables are coerced to factors
-    sampWork <- checkFactor(sampWork, unique(c(strata, additional)))
-    TF_head_samp <- sampWork[[relation]] %in% head
-    TF_direct_samp <- sampWork[[relation]] %in% direct
-    data_pop <- checkFactor(data_pop_o, unique(c(strata)))
-    TF_head_pop <- data_pop[[relation]] %in% head
-    TF_direct_pop <- data_pop[[relation]] %in% direct
+    sampWork <- checkFactor(sampWork, unique(c(curStrata, additional)))
+    data_pop <- checkFactor(data_pop_o, unique(c(curStrata)))
     # components of multinomial model are specified
     levelsResponse <- levels(sampWork[[i]])
     # simulation of variables using a sequence of multinomial models
@@ -557,11 +598,13 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
     excludeLevels <- any(hasNewLevels)
 
     params <- list()
+    params$verbose <- verbose
     params$method <- method
     params$cur.var <- i
     params$hasNewLevels <- hasNewLevels
     params$newLevels <- newLevels
-    params$strata <- strata
+    params$strata <- dataS@strata
+    params$curStrata <- curStrata
     params$head <- head
     params$excludeLevels <- excludeLevels
     params$w <- w
@@ -574,40 +617,44 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
     params$levelsResponse <- levelsResponse
     params$hid <- hid
     params$direct <- direct
-    params$TF_head_samp <- TF_head_samp
-    params$TF_head_pop <- TF_head_pop
-    params$TF_direct_samp <- TF_direct_samp
-    params$TF_direct_pop <- TF_direct_pop
     if ( parallel ) {
       # windows
       if ( have_win ) {
         cl <- makePSOCKcluster(nr_cores)
         registerDoParallel(cl,cores=nr_cores)
-        values <- foreach(x=levels(data_sample[[strata]]), .options.snow=list(preschedule=FALSE)) %dopar% {
+        values <- foreach(x=levels(data_sample[[curStrata]]), .options.snow=list(preschedule=FALSE)) %dopar% {
           simulateValues(
-            dataSample=data_sample[data_sample[[strata]] == x,],
-            dataPop=data_pop[indStrata[[x]], c(predNames, simPopObj@pop@hhid), with=FALSE], params
+            dataSample=data_sample[data_sample[[curStrata]] == x,],
+            dataPop=data_pop[indStrata[[x]], c(predNames, simPopObj@pop@hhid, relation), with=FALSE], params
           )
         }
         stopCluster(cl)
       }else if ( !have_win ) {# linux/mac
-        values <- mclapply(levels(data_sample[[strata]]), function(x) {
+        values <- mclapply(levels(data_sample[[curStrata]]), function(x) {
           simulateValues(
-            dataSample=data_sample[data_sample[[strata]] == x,],
-            dataPop=data_pop[indStrata[[x]], c(predNames, simPopObj@pop@hhid), with=FALSE], params
+            dataSample=data_sample[data_sample[[curStrata]] == x,],
+            dataPop=data_pop[indStrata[[x]], c(predNames, simPopObj@pop@hhid, relation), with=FALSE], params
           )
-        }, mc.cores = max(nr_cores,length(levels(data_sample[[strata]]))))
+        }, mc.cores = max(nr_cores,length(levels(data_sample[[curStrata]]))))
       }
     } else {
-      values <- lapply(levels(data_sample[[strata]]), function(x) {
+      if(verbose){
+        cat("Sample data:")
+        print(data_sample)
+        cat("Population data:")
+        print(data_sample)
+      }
+      
+      values <- lapply(levels(data_sample[[curStrata]]), function(x) {
         simulateValues(
-          dataSample=data_sample[data_sample[[strata]] == x,],
-          dataPop=data_pop[indStrata[[x]], c(predNames, simPopObj@pop@hhid), with=FALSE], params
+          dataSample=data_sample[data_sample[[curStrata]] == x,],
+          dataPop=data_pop[indStrata[[x]], c(predNames, simPopObj@pop@hhid, relation), with=FALSE], params
         )
       })
     }
 
     ## add new categorical variable to data set
+    values <- factor(unsplit(values, data_pop[[curStrata]]), levels=levelsResponse)
     data_pop_o[[i]] <- values
   }
   # return simulated data
