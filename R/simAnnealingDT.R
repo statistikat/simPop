@@ -58,9 +58,9 @@ setRedraw <- function(objective,med_hh=1,fac=2/3){
   namesPos <- grepl("pers",names(objective))
   
   if(any(namesPos)){
-    val <- mean(objective[namesPos])
+    val <- max(objective[namesPos])
   }else{
-    val <- mean(objective[!namesPos])
+    val <- max(objective[!namesPos])
   }
   
   redraw <- ceiling(val/med_hh*fac)
@@ -86,14 +86,14 @@ setRedrawGap <- function(totals0,med_hh=1,scale.redraw=0.5){
 # get probabilites for resampling
 getProbabilities <- function(totals0,data0,select_add,select_remove){
   
-  cat("prep totals_diff\n")
+  # cat("prep totals_diff\n")
   totals_diff <- copy(totals0)
   totals_diff_merged <- NULL
-  cat("start loop\n")
+  # cat("start loop\n")
   for(i in seq_along(totals_diff)){
     prob_add <- paste0("prob_add",i)
     prob_remove <- paste0("prob_remove",i)
-    cat(i,"\n")
+    # cat(i,"\n")
     setDT(totals_diff[[i]])
     totals_diff[[i]][,diff:=as.numeric(Freq-FreqPop)]
     totals_diff[[i]][,c(prob_add):=diff]
@@ -109,7 +109,7 @@ getProbabilities <- function(totals0,data0,select_add,select_remove){
       totals_diff_merged <- copy(totals_diff[[i]])
     }
   }
-  cat("done\n")
+  # cat("done\n")
   cnames <- colnames(totals_diff_merged)
   getCols <- cnames[grepl("^prob_add",cnames)]
   totals_diff_merged[,prob_add:=rowMeans(.SD),.SDcols=c(getCols)]
@@ -123,15 +123,9 @@ getProbabilities <- function(totals0,data0,select_add,select_remove){
   addIndex <- ((select_add-1)%%nrow(data0)) + 1
   removeIndex <- ((select_remove-1)%%nrow(data0)) + 1
 
-  if(any(addIndex<=0)|any(addIndex>nrow(data0))){
-    stop()
-  }
-  cat("merge with data0\n")
+  # cat("merge with data0\n")
   prob_add <- totals_diff_merged[data0[addIndex,mget(keyVars)],prob_add,on=c(keyVars)]
-   if(any( removeIndex<=0)|any( removeIndex>nrow(data0))){
-    stop()
-  }
-  prob_remove <- totals_diff_merged[data0[removeIndex,mget(keyVars)],prob_add,on=c(keyVars)]
+  prob_remove <- totals_diff_merged[data0[removeIndex,mget(keyVars)],prob_remove,on=c(keyVars)]
   probSample <- list(add=prob_add,remove=prob_remove)
   return(probSample)
 }
@@ -151,13 +145,16 @@ compareObjectives <- function(objective,objective_new,med_hh){
 
 simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
                            sample.prob=TRUE,choose.temp=FALSE,choose.temp.factor=0.2,
-                           scale.redraw=.5,split=NULL,observe.times=50,observe.break=0.05){
+                           scale.redraw=.5,split.level=NULL,observe.times=50,observe.break=0.05){
   N <- V1 <- sim_ID <- weight_choose <- weight_choose_new <- NULL
   ######################################
   ## define variables from param
   
-  epsP <- lapply(totals0$pers,function(z){z[,sum(Freq)]*params[["epsP_factor"]]})
-  epsH <- lapply(totals0$hh,function(z){z[,sum(Freq)]*params[["epsH_factor"]]})
+  indTabPers <- which(grepl("pers",names(totals0)))
+  indTabHH <- which(grepl("hh",names(totals0)))
+  
+  epsP <- lapply(totals0[indTabPers],function(z){z[,sum(Freq)]*params[["epsP_factor"]]})
+  epsH <- lapply(totals0[indTabHH],function(z){z[,sum(Freq)]*params[["epsH_factor"]]})
   nd <- nrow(data0)
   hhid <- params[["hhid"]]
   min_temp <- params[["min_temp"]]
@@ -167,8 +164,8 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   temp <- params[["temp"]]
   hhsize <- params[["hhsize"]]
   parameter <- params[["parameter"]]
-  npers <- length(totals0$pers)
-  nhh <- length(totals0$hh)
+  npers <- length(indTabPers)
+  nhh <- length(indTabHH)
   
   # parameters used for c++ code
   # set index for original order
@@ -180,43 +177,35 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   max_n <- size_all* nd
   med_hh <- dteval("data0[!duplicated(",hhid,"),median(as.numeric(as.character(",hhsize,")))]")
   
-  if("hh"%in%names(totals0)){
-    init_n <- sapply(totals0$hh,function(z){sum(z[["Freq"]])})
+  if(nhh>0){
+    init_n <- sapply(totals0[indTabHH],function(z){sum(z[["Freq"]])})
   }else{
-    init_n <- sapply(totals0$pers,function(z){sum(z[["Freq"]])/med_hh})
+    init_n <- sapply(totals0[indTabPers],function(z){sum(z[["Freq"]])/med_hh})
   }
   
   init_n <- mean(init_n)
-
+  
   cooldown <- 0 
   setkeyv(data0,hhid)
   id <- dteval("data0[,",hhid,"]")
   size <- dteval("as.numeric(as.character(data0[,",hhsize,"]))")
   
-  # if(sample.prob==TRUE){
-  #   init_group <- rep(data0[,ID_GRP],size_all)# used for internal loop
-  # }
   
   # choose starting temperatur as percentage of objective function
   if(choose.temp){
     eps <- unlist(c(epsP,epsH))
     eps <- eps[eps>0]
     temp <- max(temp,mean(eps)*choose.temp.factor)
-    #min_temp <- temp*temp_cooldown^50
   }
   
   ######################################
   # initialize weights
   init_index <- sample(1:nd,init_n,replace=FALSE)
-  init_weight <- rep(0L,max_n)
-  init_weight <-  updateVecC(init_weight,add_index=init_index, remove_index=c(max_n), hhsize=size, hhid=id, sizefactor=size_all)
-  data0[ ,weight_choose:=sumVec(init_weight,size_all)]
   
-  # init_weight <- sample(c(rep(1L,init_n),rep(0L,max_n-init_n)))
-  # choose_hh <- matrix(init_weight,nrow=nd,ncol=size_all)
-  # adjust choose_hh and select all householdmembers
-  # data0[,weight_choose:=matrixStats::rowSums2(choose_hh)]
-  # data0[,weight_choose:=max(weight_choose),by=c(hhid)]
+  init_weight <- rep(0L,max_n)
+  init_weight[init_index] <- 1
+  init_weight <-  simPop:::updateVecC(init_weight,add_index=init_index, remove_index=c(nd), hhsize=size, hhid=id, sizefactor=size_all)
+  data0[ ,weight_choose:=simPop:::sumVec(init_weight,size_all)]
   
   totals0 <- updateTotals(totals0=totals0,data0=data0,hhid=hhid)
   
@@ -226,7 +215,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   
   # define redraw with initial objective value
   redraw <- setRedraw(objective,med_hh=med_hh)
-
+  
   # observe updating of objective function
   # if solution does not improve -> terminate
   # observe only if observe.times>0 and observe.break>0
@@ -235,12 +224,12 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   if(do.observe){
     observe.obj <- matrix(0,ncol=npers+nhh,nrow=observe.times)
   }
-
+  
   cat(paste0("Starting simulated Annealing for ",split," ",unique(data0[[split]]),"\n"))
   ######################################
   # apply simulated annealing
   set.seed(1234)
-  if ( checkObjective(objective,epsH,epsP) ) { 
+  if ( checkObjective(objective,epsH,epsP) ) {
     out <- rowSums(choose_hh)
     cat(paste0("Convergence successfull for ",split.level),"\n")
   } else {
@@ -249,12 +238,13 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
     ## if temperature falls below minimal temp -> terminate
     while( temp > min_temp ) {      
       n <- 1
-      while( n<maxiter ) {
-        cat("n=",n,"\n")
+      while( n<maxiter) {
+        # cat("n=",n,"\n")
         # scale redraw for add and remove to keep synthetic totals stable
-        # redraw_gap <- setRedrawGap(totals0 = totals0,med_hh = med_hh, scale.redraw = scale.redraw)
-        redraw_gap <- 0
         
+        # cat("set redrawgap")
+        redraw_gap <- setRedrawGap(totals0 = totals0,med_hh = med_hh, scale.redraw = scale.redraw)
+        # cat("done")
         redraw_add <- max(ceiling(redraw-redraw_gap),1)
         redraw_remove <- max(ceiling(redraw+redraw_gap),1)
         
@@ -266,19 +256,18 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
           #####################################
           # resample
           # get weights for resampling
-          cat("get probabilites\n")
-          # probs <- getProbabilities(totals0=totals0,data0=data0,select_add=select_add,select_remove=select_remove)
-          probs <- list(
-            add=rep()
-          )
-         cat("done\n")
+          # cat("get probabilities\n")
+          probs <- getProbabilities(totals0=totals0,data0=data0,select_add=select_add,select_remove=select_remove)
           
           select_add <- select_add[probs[["add"]]>0]
+          
           probs[["add"]] <- probs[["add"]][probs[["add"]]>0]
           select_remove <- select_remove[probs[["remove"]]>0]
           probs[["remove"]] <- probs[["remove"]][probs[["remove"]]>0]
           n_add <- length(select_add)
           n_remove <- length(select_remove)
+          
+          # cat("draw sample\n")
           if(n_add>0){
             add_hh <- select_add[sample_int_crank(n_add,
                                                   min(c(redraw_add,n_add)),
@@ -294,7 +283,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
           }else{
             remove_hh <- sample(select_01[[2]],redraw_remove)
           }
-
+          
         }else{
           prob_remove <- prob_add <- NULL
           
@@ -303,22 +292,22 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
           add_hh <- sample(select_add,n_add)
           remove_hh <- sample(select_remove,n_remove)
         }
-
+        
         ####################################
         ## create new composition
         init_weight_new <- copy(init_weight)
-        if(any(is.na(c(remove_hh,add_hh)))|length(remove_hh)==0|length(add_hh)==0){
-          stop()
-        }
-        init_weight_new <-  updateVecC(init_weight_new,add_index=add_hh, remove_index=remove_hh, hhsize=size, hhid=id, sizefactor=size_all)
+
+        init_weight_new <-  simPop:::updateVecC(init_weight_new,add_index=add_hh, remove_index=remove_hh, hhsize=size, hhid=id, sizefactor=size_all)
+        data0[ ,weight_choose_new:=simPop:::sumVec(init_weight_new,size_all)]
         
-        data0[ ,weight_choose_new:=sumVec(init_weight_new,size_all)]
         ######################################
         # calculate objective
+        
         totals0_new <- copy(totals0)
-        totals0 <- updateTotals(totals0=totals0_new,data0=data0,hhid=hhid,numberPop="weight_choose_new")
+        totals0_new <- updateTotals(totals0=totals0_new,data0=data0,hhid=hhid,numberPop="weight_choose_new")
         objective_new <- calcObjective(totals0_new)
-
+        
+        # cat("compare results\n")
         ######################################
         ## if new sample fullfils marginals -> terminate
         if ( checkObjective(objective,epsH,epsP) ) {
@@ -330,7 +319,6 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
         ######################################
         ## choose wether to accepts the resample
         diffObj <- compareObjectives(objective,objective_new,med_hh=med_hh)
-    
         if ( diffObj>=0 ) { 
           objective <- objective_new
           data0[,weight_choose:=weight_choose_new]
@@ -348,20 +336,10 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
                 break # if objective doesnt move anymore break up loop
               }else{
                 observe.count <- 1
-                if(npers>0){
-                  observe.obj[observe.count,1:npers] <- objective$pers
-                }
-                if(nhh>0){
-                  observe.obj[observe.count,max(1,npers+1):c(npers+nhh)] <- objective$hh
-                }
+                observe.obj[observe.count,] <- objective
               }
             }else{
-              if(npers>0){
-                observe.obj[observe.count,1:npers] <- objective$pers
-              }
-              if(nhh>0){
-                observe.obj[observe.count,max(1,npers+1):c(npers+nhh)] <- objective$hh
-              }
+              observe.obj[observe.count,] <- objective
             }
           }
         }
@@ -382,27 +360,16 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
             if(do.observe){
               observe.count <- observe.count +1
               if(observe.count>=observe.times){
-                
                 breakCond <- matrixStats::colSds(observe.obj)/matrixStats::colMeans2(observe.obj)
                 breakCond <- max(breakCond)
                 if(breakCond< observe.break){
                   break # if objective doesnt move anymore break up loop
                 }else{
                   observe.count <- 1
-                  if(npers>0){
-                    observe.obj[observe.count,1:npers] <- objective$pers
-                  }
-                  if(nhh>0){
-                    observe.obj[observe.count,max(1,npers+1):c(npers+nhh)] <- objective$hh
-                  }
+                  observe.obj[observe.count,] <- objective
                 }
               }else{
-                if(npers>0){
-                  observe.obj[observe.count,1:npers] <- objective$pers
-                }
-                if(nhh>0){
-                  observe.obj[observe.count,max(1,npers+1):c(npers+nhh)] <- objective$hh
-                }
+                observe.obj[observe.count,] <- objective
               }
             }
           }
@@ -423,15 +390,18 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
       }
       if ( checkObjective(objective,epsH,epsP) | cooldown == 500 | redraw<2) {
         break
-      }  
+      }
     }
+
+    # check if convergence was successfull
     if(!checkObjective(objective,epsH,epsP)){
       cat(paste0("Convergence NOT successfull for ",split.level),"\n")
     }else{
       cat(paste0("Convergence successfull for ",split.level),"\n")
     }
     setkeyv(data0,"sim_ID")
-    out <- data0[,weight_choose]  
-  }  
+    out <- data0[,weight_choose] 
+  }
+  
   return(out)
 }
