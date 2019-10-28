@@ -5,11 +5,12 @@
 \alias{calibPop}
 \title{Calibration of 0/1 weights by Simulated Annealing}
 \usage{
-calibPop(inp, split, temp = 1, eps.factor = 0.05, maxiter = 200,
-  temp.cooldown = 0.9, factor.cooldown = 0.85, min.temp = 10^-3,
-  nr_cpus = NULL, sizefactor = 2, memory = TRUE,
-  choose.temp = TRUE, choose.temp.factor = 0.2, scale.redraw = 0.5,
-  observe.times = 50, observe.break = 0.05, verbose = FALSE)
+calibPop(inp, split = NULL, temp = 1, epsP.factor = 0.05,
+  epsH.factor = 0.05, maxiter = 200, temp.cooldown = 0.9,
+  factor.cooldown = 0.85, min.temp = 10^-3, nr_cpus = NULL,
+  sizefactor = 2, choose.temp = TRUE, choose.temp.factor = 0.2,
+  scale.redraw = 0.5, observe.times = 50, observe.break = 0.05,
+  verbose = FALSE, hhTables = NULL, persTables = NULL)
 }
 \arguments{
 \item{inp}{an object of class \code{\linkS4class{simPopObj}} with slot
@@ -23,9 +24,13 @@ possible.}
 
 \item{temp}{starting temperatur for simulated annealing algorithm}
 
-\item{eps.factor}{a factor (between 0 and 1) specifying the acceptance
-error. For example eps.factor = 0.05 results in an acceptance error for the
-objective function of \code{0.05*sum(totals)}.}
+\item{epsP.factor}{a factor (between 0 and 1) specifying the acceptance
+error for contingency table on individual level. For example epsP.factor = 0.05 results in an acceptance error for the
+objective function of \code{0.05*sum(People)}.}
+
+\item{epsH.factor}{a factor (between 0 and 1) specifying the acceptance
+error for contingency table on household level. For example epsH.factor = 0.05 results in an acceptance error for the
+objective function of \code{0.05*sum(Households)}.}
 
 \item{maxiter}{maximum iterations during a temperature step.}
 
@@ -42,8 +47,6 @@ reduced in each step.}
 that should be used for parallel processing.}
 
 \item{sizefactor}{the factor for inflating the population before applying 0/1 weights}
-
-\item{memory}{if TRUE simulated annealing is applied in less memory intensive way. Is especially usefull if factor or population is large. For this option simulated annealing is not entirely implemented in C++, therefore it might be slower than option \code{memory=FALSE}.}
 
 \item{choose.temp}{if TRUE \code{temp} will be rescaled according to \code{eps} and \code{choose.temp.factor}. \code{eps} is defined by the product between \code{eps_factore} and the sum over the target population margins, see \code{\link{addKnownMargins}}. Only used if \code{memory=TRUE}.}
 
@@ -64,6 +67,8 @@ simmulated annealing terminates. This repeats for each new set of \code{observe.
 \item{verbose}{boolean variable; if TRUE some additional verbose output is
 provided, however only if \code{split} is NULL. Otherwise the computation is
 performed in parallel and no useful output can be provided.}
+
+\item{memory}{if TRUE simulated annealing is applied in less memory intensive way. Is especially usefull if factor or population is large. For this option simulated annealing is not entirely implemented in C++, therefore it might be slower than option \code{memory=FALSE}.}
 }
 \value{
 Returns an object of class \code{\linkS4class{simPopObj}} with an
