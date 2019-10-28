@@ -462,6 +462,12 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
     }else if ( regModel %in% c("available","basic") ) {
       regModel <- rep(regModel, length(additional))
     }
+  }else if(class(regModel) == "formula"){
+    regModelL <- list()
+    for(i in seq_along(additional)){
+      regModelL[[i]] <- regModel
+    }
+    regModel <- regModelL
   }
   if ( is.null(regModel) ) {
     regModel <- rep("basic", length(additional))
