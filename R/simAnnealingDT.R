@@ -10,67 +10,57 @@ dteval <- function(...,envir=parent.frame()){
 # check objective function
 checkObjective <- function(objective,epsH,epsP){
   
-  hhcond <- perscond <- FALSE
-  if(!is.null(objective$hh)){
-    hhcond <- mapply(`>`,epsH,objective$hh)
+  namesPos <- grepl("pers",names(objective))
+  hhcond <- perscond <- TRUE
+  if(any(!namesPos)){
+    hhcond <- mapply(`>`,epsH,objective[!namesPos])
   }
-  if(!is.null(objective$pers)){
-    perscond <- mapply(`>`,epsP,objective$pers)
+  if(any(namesPos)){
+    perscond <- mapply(`>`,epsP,objective[namesPos])
   }
+  
   return(all(hhcond)&all(perscond))
 }
 
 # update totals0 with population totals
 updateTotals <- function(totals0,data0,hhid,numberPop="weight_choose"){
   
-  if("pers"%in%names(totals0)){
-    sapply(totals0$pers,function(z){
-      byVars <- intersect(colnames(z),colnames(data0))
-      byVars <- byVars[byVars!="unionCode"]
-      set(z,j="FreqPop",value=0.0)
-      z[data0[,sum(get(numberPop)),by=c(byVars)],FreqPop:=as.numeric(V1),on=c(byVars)]
-      return(NULL)
-    })
-  }
-  if("hh"%in%names(totals0)){
-    sapply(totals0$hh,function(z){
-      byVars <- intersect(colnames(z),colnames(data0))
-      byVars <- byVars[byVars!="unionCode"]
-      set(z,j="FreqPop",value=0.0)
-      z[data0[firstPersonInHousehold==TRUE,sum(get(numberPop)),by=c(byVars)],FreqPop:=as.numeric(V1),on=c(byVars)]
-      return(NULL)
-    })
+  for(i in 1:length(totals0)){
+    
+    byVars <- intersect(colnames(totals0[[i]]),colnames(data0))
+    if(grepl("pers",names(totals[i]))){
+      totals0[[i]] <- merge(totals0[[i]][,mget(c(byVars,"Freq"))],
+                 data0[,.(FreqPop=sum(get(numberPop))),by=c(byVars)],
+                 by=c(byVars))
+    }else{
+      totals0[[i]] <- merge(totals0[[i]][,mget(c(byVars,"Freq"))],
+                 data0[firstPersonInHousehold==TRUE,.(FreqPop=sum(get(numberPop))),by=c(byVars)],
+                 by=c(byVars))
+    }
   }
   
-  return(NULL)
+  return(totals0)
 }
 
 # calc objective function
 # absolute sum of number of people/households in population - number of people/household in contingenca table
 calcObjective <- function(totals0){
   
-  hhDiff <- persDiff <- NULL
-  if("pers"%in%names(totals0)){
-    persDiff <- sapply(totals0$pers,function(z){
-      z[,sum(abs(FreqPop-Freq))]
-    })
-  }
-  if("hh"%in%names(totals0)){
-    hhDiff <- sapply(totals0$hh,function(z){
-      z[,sum(abs(FreqPop-Freq))]
-    })
-  }
-  
-  objective <- list(pers=persDiff,hh=hhDiff)
+  objective <- sapply(totals0,function(z){
+    z[,sum(abs(FreqPop-Freq))]
+  })
   return(objective)
 }
 
 # set number of people to redraw
 setRedraw <- function(objective,med_hh=1,fac=2/3){
-  if(!is.null(objective$pers)){
-    val <- mean(unlist(objective$pers))
+  
+  namesPos <- grepl("pers",names(objective))
+  
+  if(any(namesPos)){
+    val <- mean(objective[namesPos])
   }else{
-    val <- mean(unlist(objective$hh))
+    val <- mean(objective[!namesPos])
   }
   
   redraw <- ceiling(val/med_hh*fac)
@@ -80,71 +70,88 @@ setRedraw <- function(objective,med_hh=1,fac=2/3){
 # set redraw gap
 setRedrawGap <- function(totals0,med_hh=1,scale.redraw=0.5){
   
-  hhGap <- persGap <- NULL
-  if("pers"%in%names(totals0)){
-    persGap <- sapply(totals0$pers,function(z){
-      z[,sum(FreqPop-Freq)/med_hh]
-    })
-  }
-  if("hh"%in%names(totals0)){
-    hhGap <- sapply(totals0$hh,function(z){
-      z[,sum(FreqPop-Freq)/1]
-    })
+  med_hh_help <- rep(1,length(totals0))
+  med_hh_help[grepl("hh",names(totals0))] <- med_hh_help
+  
+  Gap <- rep(0,length(totals0))
+  for(i in 1:length(Gap)){
+    Gap[i] <- totals0[[i]][,sum(FreqPop-Freq)/med_hh_help[i]]
   }
 
-  redraw_gap <- c(hhGap,persGap)
-  redraw_gap <- mean(redraw_gap)*scale.redraw
+  redraw_gap <- mean(Gap)*scale.redraw
   return(redraw_gap)  
 }
 
 
 # get probabilites for resampling
 getProbabilities <- function(totals0,data0,select_add,select_remove){
-  totals_diff <- copy(unlist(totals0,recursive = FALSE))
+  
+  cat("prep totals_diff\n")
+  totals_diff <- copy(totals0)
+  totals_diff_merged <- NULL
+  cat("start loop\n")
   for(i in seq_along(totals_diff)){
     prob_add <- paste0("prob_add",i)
     prob_remove <- paste0("prob_remove",i)
-    
-    totals_diff[[i]][,diff:=Freq-FreqPop]
+    cat(i,"\n")
+    setDT(totals_diff[[i]])
+    totals_diff[[i]][,diff:=as.numeric(Freq-FreqPop)]
     totals_diff[[i]][,c(prob_add):=diff]
     totals_diff[[i]][get(prob_add)<=0,c(prob_add):=exp(sum(get(prob_add)))]
     totals_diff[[i]][,c(prob_remove):=diff*-1]
     totals_diff[[i]][get(prob_remove)<=0,c(prob_remove):=exp(sum(get(prob_remove)))]
+    totals_diff[[i]][,helpMergeIndex:=1] # help for merging tables with no common variables
     totals_diff[[i]][,c("Freq","FreqPop","diff"):=NULL]
+    if(!is.null( totals_diff_merged)){
+      byVar <- intersect(colnames(totals_diff_merged),colnames(totals_diff[[i]]))
+      totals_diff_merged <- merge(totals_diff_merged,totals_diff[[i]],by=byVar,allow.cartesian=TRUE,all=TRUE)
+    }else{
+      totals_diff_merged <- copy(totals_diff[[i]])
+    }
   }
-  totals_diff <- Reduce(function(...) merge(..., all = TRUE,allow.cartesian=TRUE), totals_diff)
-  cnames <- colnames(totals_diff)
+  cat("done\n")
+  cnames <- colnames(totals_diff_merged)
   getCols <- cnames[grepl("^prob_add",cnames)]
-  totals_diff[,prob_add:=matrixStats::rowMaxs(as.matrix(.SD)),.SDcols=c(getCols)]
-  totals_diff[,c(getCols):=NULL]
+  totals_diff_merged[,prob_add:=rowMeans(.SD),.SDcols=c(getCols)]
+  totals_diff_merged[,c(getCols):=NULL]
   getCols <- cnames[grepl("^prob_remove",cnames)]
-  totals_diff[,prob_remove:=matrixStats::rowMaxs(as.matrix(.SD)),.SDcols=c(getCols)]
-  totals_diff[,c(getCols):=NULL]
+  totals_diff_merged[,prob_remove:=rowMeans(.SD),.SDcols=c(getCols)]
+  totals_diff_merged[,c(getCols):=NULL]
   
-  keyVars <- colnames(totals_diff)[!grepl("prob_remove|prob_add|unionCode",colnames(totals_diff))]
+  keyVars <- colnames(totals_diff_merged)[!grepl("prob_remove|prob_add|helpMergeIndex",colnames(totals_diff_merged))]
   
   addIndex <- ((select_add-1)%%nrow(data0)) + 1
-  prob_add <- totals_diff[data0[addIndex,..keyVars],prob_add,on=c(keyVars)]
   removeIndex <- ((select_remove-1)%%nrow(data0)) + 1
-  prob_remove <- totals_diff[data0[removeIndex,..keyVars],prob_add,on=c(keyVars)]
-  
+
+  if(any(addIndex<=0)|any(addIndex>nrow(data0))){
+    stop()
+  }
+  cat("merge with data0\n")
+  prob_add <- totals_diff_merged[data0[addIndex,mget(keyVars)],prob_add,on=c(keyVars)]
+   if(any( removeIndex<=0)|any( removeIndex>nrow(data0))){
+    stop()
+  }
+  prob_remove <- totals_diff_merged[data0[removeIndex,mget(keyVars)],prob_add,on=c(keyVars)]
   probSample <- list(add=prob_add,remove=prob_remove)
   return(probSample)
 }
 
+
 # compare different objectives
 compareObjectives <- function(objective,objective_new,med_hh){
-  diffPers <- objective$pers-objective_new$pers
-  diffHH <- objective$hh-objective_new$hh
+  namesPos <- grepl("pers",names(objective))
+  
+  diffPers <- objective[namesPos]-objective_new[namesPos]
+  diffHH <- objective[!namesPos]-objective_new[!namesPos]
   diffAll <- c(diffPers,diffHH)
-  w <- c(rep(1,length(objective$pers)),rep(med_hh,length(objective$hh)))
+  w <- c(rep(1,sum(namesPos)),rep(med_hh,sum(!namesPos)))
   
   weighted.mean(diffAll,w) 
 }
 
 simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
                            sample.prob=TRUE,choose.temp=FALSE,choose.temp.factor=0.2,
-                           scale.redraw=.5,split.level=NULL,observe.times=50,observe.break=0.05){
+                           scale.redraw=.5,split=NULL,observe.times=50,observe.break=0.05){
   N <- V1 <- sim_ID <- weight_choose <- weight_choose_new <- NULL
   ######################################
   ## define variables from param
@@ -162,7 +169,6 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   parameter <- params[["parameter"]]
   npers <- length(totals0$pers)
   nhh <- length(totals0$hh)
-  
   
   # parameters used for c++ code
   # set index for original order
@@ -212,7 +218,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   # data0[,weight_choose:=matrixStats::rowSums2(choose_hh)]
   # data0[,weight_choose:=max(weight_choose),by=c(hhid)]
   
-  updateTotals(totals0=totals0,data0=data0,hhid=hhid)
+  totals0 <- updateTotals(totals0=totals0,data0=data0,hhid=hhid)
   
   ######################################
   # evaluate objective
@@ -230,10 +236,10 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
     observe.obj <- matrix(0,ncol=npers+nhh,nrow=observe.times)
   }
 
-  cat(paste0("Starting simulated Annealing for ",split.level,"\n"))
+  cat(paste0("Starting simulated Annealing for ",split," ",unique(data0[[split]]),"\n"))
   ######################################
   # apply simulated annealing
-  
+  set.seed(1234)
   if ( checkObjective(objective,epsH,epsP) ) { 
     out <- rowSums(choose_hh)
     cat(paste0("Convergence successfull for ",split.level),"\n")
@@ -244,9 +250,10 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
     while( temp > min_temp ) {      
       n <- 1
       while( n<maxiter ) {
-        
+        cat("n=",n,"\n")
         # scale redraw for add and remove to keep synthetic totals stable
-        redraw_gap <- setRedrawGap(totals0 = totals0,med_hh = med_hh, scale.redraw = scale.redraw)
+        # redraw_gap <- setRedrawGap(totals0 = totals0,med_hh = med_hh, scale.redraw = scale.redraw)
+        redraw_gap <- 0
         
         redraw_add <- max(ceiling(redraw-redraw_gap),1)
         redraw_remove <- max(ceiling(redraw+redraw_gap),1)
@@ -259,8 +266,13 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
           #####################################
           # resample
           # get weights for resampling
-          probs <- getProbabilities(totals0=totals0,data0=data0,select_add=select_add,select_remove=select_remove)
-         
+          cat("get probabilites\n")
+          # probs <- getProbabilities(totals0=totals0,data0=data0,select_add=select_add,select_remove=select_remove)
+          probs <- list(
+            add=rep()
+          )
+         cat("done\n")
+          
           select_add <- select_add[probs[["add"]]>0]
           probs[["add"]] <- probs[["add"]][probs[["add"]]>0]
           select_remove <- select_remove[probs[["remove"]]>0]
@@ -295,13 +307,16 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
         ####################################
         ## create new composition
         init_weight_new <- copy(init_weight)
+        if(any(is.na(c(remove_hh,add_hh)))|length(remove_hh)==0|length(add_hh)==0){
+          stop()
+        }
         init_weight_new <-  updateVecC(init_weight_new,add_index=add_hh, remove_index=remove_hh, hhsize=size, hhid=id, sizefactor=size_all)
         
         data0[ ,weight_choose_new:=sumVec(init_weight_new,size_all)]
         ######################################
         # calculate objective
         totals0_new <- copy(totals0)
-        updateTotals(totals0=totals0_new,data0=data0,hhid=hhid,numberPop="weight_choose_new")
+        totals0 <- updateTotals(totals0=totals0_new,data0=data0,hhid=hhid,numberPop="weight_choose_new")
         objective_new <- calcObjective(totals0_new)
 
         ######################################
@@ -394,6 +409,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
         }    
         n <- n+1
       }
+      cat("cooldown\n")
       ## decrease temp and decrease factor accordingly
       ## decrease temp by a const fraction (simple method used for testing only)
       temp <- temp_cooldown*temp
