@@ -208,8 +208,8 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   
   init_weight <- rep(0L,max_n)
   init_weight[init_index] <- 1
-  init_weight <-  simPop:::updateVecC(init_weight,add_index=init_index, remove_index=c(nd), hhsize=size, hhid=id, sizefactor=size_all)
-  data0[ ,weight_choose:=simPop:::sumVec(init_weight,size_all)]
+  init_weight <-  updateVecC(init_weight,add_index=init_index, remove_index=c(nd), hhsize=size, hhid=id, sizefactor=size_all)
+  data0[ ,weight_choose:=sumVec(init_weight,size_all)]
   
   totals0 <- updateTotals(totals0=totals0,data0=data0,hhid=hhid)
   
@@ -302,8 +302,8 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
         ## create new composition
         init_weight_new <- copy(init_weight)
 
-        init_weight_new <-  simPop:::updateVecC(init_weight_new,add_index=add_hh, remove_index=remove_hh, hhsize=size, hhid=id, sizefactor=size_all)
-        data0[ ,weight_choose_new:=simPop:::sumVec(init_weight_new,size_all)]
+        init_weight_new <-  updateVecC(init_weight_new,add_index=add_hh, remove_index=remove_hh, hhsize=size, hhid=id, sizefactor=size_all)
+        data0[ ,weight_choose_new:=sumVec(init_weight_new,size_all)]
         
         ######################################
         # calculate objective

@@ -362,7 +362,7 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
   
   # parameters for parallel computing
   nr_strata <- length(unique(data[[split]]))
-  pp <- simPop:::parallelParameters(nr_cpus=nr_cpus, nr_strata=nr_strata)
+  pp <- parallelParameters(nr_cpus=nr_cpus, nr_strata=nr_strata)
   parallel <- pp$parallel
   nr_cores <- pp$nr_cores
   have_win <- pp$have_win; rm(pp)
