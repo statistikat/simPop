@@ -197,9 +197,16 @@ makeFactors <- function(totals,data){
 #' 'table' being non-null! (see \code{\link{addKnownMargins}}).
 #' @param split given strata in which the problem will be split. Has to
 #' correspond to a column population data (slot 'pop' of input argument 'inp')
-#' . For example \code{split = c("region")}, problem will be split for
+#' . For example \code{split = (c("region")}, problem will be split for
 #' different regions. Parallel computing is performed automatically, if
 #' possible.
+#' @param splitUpper optional column in the population for which decides the part
+#' of the population from which to sample for each entry in \code{split}.
+#' Has to correspond to a column population data (slot 'pop' of input argument 'inp').
+#' For example \code{split = c("region"), splitUpper = c("Country")}
+#' all units from the country are eligable for donor sample when problem is split
+#' into regions. Is usefull if \code{simInitSpatial()} was used and the variable to split
+#' the problem into results in very small groups (~couple of houndres to thousands). 
 #' @param temp starting temperatur for simulated annealing algorithm
 #' @param epsP.factor a factor (between 0 and 1) specifying the acceptance
 #' error for contingency table on individual level. For example epsP.factor = 0.05 results in an acceptance error for the
@@ -207,6 +214,8 @@ makeFactors <- function(totals,data){
 #' @param epsH.factor a factor (between 0 and 1) specifying the acceptance
 #' error for contingency table on household level. For example epsH.factor = 0.05 results in an acceptance error for the
 #' objective function of \code{0.05*sum(Households)}.
+#' @param epsMinN integer specifying the minimum number of units from which the synthetic populatin can deviate from cells in contingency tables.
+#' This overwrites \code{epsP.factor} and \code{epsH.factor}. Is especially usefull if cells in \code{hhTables} and \code{persTables} are very small, e.g. <10.
 #' @param maxiter maximum iterations during a temperature step.
 #' @param temp.cooldown a factor (between 0 and 1) specifying the rate at which
 #' temperature will be reduced in each step.
@@ -220,7 +229,6 @@ makeFactors <- function(totals,data){
 #' provided, however only if \code{split} is NULL. Otherwise the computation is
 #' performed in parallel and no useful output can be provided.
 #' @param sizefactor the factor for inflating the population before applying 0/1 weights
-#' @param memory if TRUE simulated annealing is applied in less memory intensive way. Is especially usefull if factor or population is large. For this option simulated annealing is not entirely implemented in C++, therefore it might be slower than option \code{memory=FALSE}.
 #' @param choose.temp if TRUE \code{temp} will be rescaled according to \code{eps} and \code{choose.temp.factor}. \code{eps} is defined by the product between \code{eps_factore} and the sum over the target population margins, see \code{\link{addKnownMargins}}. Only used if \code{memory=TRUE}.
 #' @param choose.temp.factor number between (0,1) for rescaling \code{temp} for simulated annealing. \code{temp} redefined by\code{max(temp,eps*choose.temp.factor)}.
 #' Can be usefull if simulated annealing is split into subgroups with considerably different population sizes. Only used if \code{choose.temp=TRUE} and \code{memory=TRUE}.
@@ -261,7 +269,7 @@ makeFactors <- function(totals,data){
 #' ## long computation time
 #' simPop_adj <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1,memory=FALSE)
 #' }
-calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0.05, epsH.factor = 0.05, maxiter=200,
+calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0.05, epsH.factor = 0.05, epsMinN=0, maxiter=200,
   temp.cooldown = 0.9, factor.cooldown = 0.85, min.temp = 10^-3,
   nr_cpus=NULL, sizefactor=2, 
   choose.temp=TRUE,choose.temp.factor=0.2,scale.redraw=.5,observe.times=50,observe.break=0.05,
@@ -276,6 +284,13 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
 
   if ( length(split) > 1 ) {
     split <- split[1]
+    warning("only first variable will be used to divide the population into strata")
+  }
+  if(is.null(splitUpper)){
+    splitUpper <- split
+  }
+  if(length(splitUpper) > 1) {
+    splitUpper <- splitUpper[1]
     warning("only first variable will be used to divide the population into strata")
   }
 
@@ -296,9 +311,9 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
   if(verbose){
     cat("\nCheck Household-Tables\n")
   }
-  hhTables <- checkTables(hhTables,namesData=copy(colnames(data)),split=split,verbose=verbose)
+  hhTables <- checkTables(hhTables,namesData=copy(colnames(data)),split=split,verbose=verbose,namesTabs="hh")
   
-  totals <- list(pers=persTables,hh=hhTables)
+  totals <- c(persTables,hhTables)
   totals <- totals[!sapply(totals,is.null)]
   
   # check some params
@@ -342,11 +357,12 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
   params$hhid <- hid
   params$pid <- pid
   params$hhsize <- hhsize
+  params$epsMinN <- epsMinN
 
   
   # parameters for parallel computing
   nr_strata <- length(unique(data[[split]]))
-  pp <- parallelParameters(nr_cpus=nr_cpus, nr_strata=nr_strata)
+  pp <- simPop:::parallelParameters(nr_cpus=nr_cpus, nr_strata=nr_strata)
   parallel <- pp$parallel
   nr_cores <- pp$nr_cores
   have_win <- pp$have_win; rm(pp)
@@ -400,26 +416,30 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
       splitUpper.x <- data[.(split.x),,on=c(split)][[splitUpper]][1]
       data0 <- data[.(splitUpper.x),,on=.(upazilaCode)]
       totals0 <- subsetList(totals,split=split,x=split.x)
-      rm(inp)
       simAnnealingDT(
         data0=data0,
         totals0=totals0,
         params=params,sizefactor=sizefactor,choose.temp=choose.temp,
-        choose.temp.factor=choose.temp.factor,scale.redraw=scale.redraw,
-        split=x,observe.times=observe.times,observe.break=observe.break)
+        choose.temp.factor=choose.temp.factor,scale.redraw=scale.redraw,split=split,
+        split.level=split.x,observe.times=observe.times,observe.break=observe.break)
     })
   }
     
   # return dataset with new weights
-  data[,new.weights:=as.integer(unlist(final_weights))]
-  data <- data[new.weights>0,]
-  data <- rbind(data[new.weights==1],data[new.weights>1,.SD[rep(1:.N,new.weights)]])
-  data[,doub:=1:.N,by=c(params[["pid"]],params[["hhid"]])]
-  data[,hid_help:=paste(get(params[["hhid"]]),doub,sep="_")]
-  data[,c(params[["hhid"]]):=.GRP,by=hid_help]
-  data[,c(params[["pid"]]):=paste(get(params[["hhid"]]),gsub("^[[:digit:]]*.","",get(params[["pid"]])),sep=".")]
-  data[,c("new.weights","doub","hid_help"):=NULL]
+  final_weights <- rbindlist(final_weights)
+  final_weights <- final_weights[weight_choose>0]
+  final_weights <- rbind(final_weights[weight_choose==1],final_weights[weight_choose>1,.SD[rep(1:.N,weight_choose)]])
+  final_weights[,doub:=1:.N,by=c(params[["pid"]],params[["hhid"]],params[["split"]])]
+  final_weights[,hid_help:=paste(get(params[["hhid"]]),get(split),doub,sep="_")]
+  final_weights[,c(paste0(params[["hhid"]],"_new")):=.GRP,by=hid_help]
+  final_weights[,c(paste0(params[["pid"]],"_new")):=paste(get(paste0(params[["hhid"]],"_new")),gsub("^[[:digit:]]*.","",get(params[["pid"]])),sep=".")]
+  final_weights[,c("weight_choose","doub","hid_help"):=NULL]
   
+  data <- data[final_weights,,on=c(params[["hhid"]],params[["pid"]])]
+  data[,c(params[["hhid"]],params[["pid"]],split):=NULL]
+  oldNames <- c(paste0(c(params[["hhid"]],params[["pid"]]),"_new"),paste0("i.",split))
+  newNames <- c(c(params[["hhid"]],params[["pid"]]),split)
+  setnames(data,oldNames,newNames)
   
   inp@pop@data <- data
   if(verbose){

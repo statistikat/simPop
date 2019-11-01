@@ -8,15 +8,19 @@ dteval <- function(...,envir=parent.frame()){
 }
 
 # check objective function
-checkObjective <- function(objective,epsH,epsP){
+checkObjective <- function(totals0,epsH,epsP,epsMinN=0){
   
-  namesPos <- grepl("pers",names(objective))
+  namesPos <- grepl("pers",names(totals0))
   hhcond <- perscond <- TRUE
   if(any(!namesPos)){
-    hhcond <- mapply(`>`,epsH,objective[!namesPos])
+    hhcond <- sapply(totals0[!namesPos],function(z){
+      all(abs(z[["Freq"]]-z[["FreqPop"]])<max(epsMinN,epsH*z[["Freq"]]))
+    })
   }
   if(any(namesPos)){
-    perscond <- mapply(`>`,epsP,objective[namesPos])
+    perscond <- sapply(totals0[!namesPos],function(z){
+      all(abs(z[["Freq"]]-z[["FreqPop"]])<max(epsMinN,epsP*z[["Freq"]]))
+    })
   }
   
   return(all(hhcond)&all(perscond))
@@ -71,7 +75,7 @@ setRedraw <- function(objective,med_hh=1,fac=2/3){
 setRedrawGap <- function(totals0,med_hh=1,scale.redraw=0.5){
   
   med_hh_help <- rep(1,length(totals0))
-  med_hh_help[grepl("hh",names(totals0))] <- med_hh_help
+  med_hh_help[grepl("hh",names(totals0))] <- med_hh
   
   Gap <- rep(0,length(totals0))
   for(i in 1:length(Gap)){
@@ -94,7 +98,6 @@ getProbabilities <- function(totals0,data0,select_add,select_remove){
     prob_add <- paste0("prob_add",i)
     prob_remove <- paste0("prob_remove",i)
     # cat(i,"\n")
-    setDT(totals_diff[[i]])
     totals_diff[[i]][,diff:=as.numeric(Freq-FreqPop)]
     totals_diff[[i]][,c(prob_add):=diff]
     totals_diff[[i]][get(prob_add)<=0,c(prob_add):=exp(sum(get(prob_add)))]
@@ -145,7 +148,7 @@ compareObjectives <- function(objective,objective_new,med_hh){
 
 simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
                            sample.prob=TRUE,choose.temp=FALSE,choose.temp.factor=0.2,
-                           scale.redraw=.5,split.level=NULL,observe.times=50,observe.break=0.05){
+                           scale.redraw=.5,split=NULL,split.level=NULL,observe.times=50,observe.break=0.05){
   N <- V1 <- sim_ID <- weight_choose <- weight_choose_new <- NULL
   ######################################
   ## define variables from param
@@ -153,8 +156,8 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   indTabPers <- which(grepl("pers",names(totals0)))
   indTabHH <- which(grepl("hh",names(totals0)))
   
-  epsP <- lapply(totals0[indTabPers],function(z){z[,sum(Freq)]*params[["epsP_factor"]]})
-  epsH <- lapply(totals0[indTabHH],function(z){z[,sum(Freq)]*params[["epsH_factor"]]})
+  epsP <- params[["epsP_factor"]]
+  epsH <- params[["epsH_factor"]]
   nd <- nrow(data0)
   hhid <- params[["hhid"]]
   min_temp <- params[["min_temp"]]
@@ -164,6 +167,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   temp <- params[["temp"]]
   hhsize <- params[["hhsize"]]
   parameter <- params[["parameter"]]
+  epsMinN <- params[["epsMinN"]]
   npers <- length(indTabPers)
   nhh <- length(indTabHH)
   
@@ -177,10 +181,10 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   max_n <- size_all* nd
   med_hh <- dteval("data0[!duplicated(",hhid,"),median(as.numeric(as.character(",hhsize,")))]")
   
-  if(nhh>0){
-    init_n <- sapply(totals0[indTabHH],function(z){sum(z[["Freq"]])})
-  }else{
+  if(npers>0){
     init_n <- sapply(totals0[indTabPers],function(z){sum(z[["Freq"]])/med_hh})
+  }else{
+    init_n <- sapply(totals0[indTabHH],function(z){sum(z[["Freq"]])})
   }
   
   init_n <- mean(init_n)
@@ -225,13 +229,14 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
     observe.obj <- matrix(0,ncol=npers+nhh,nrow=observe.times)
   }
   
-  cat(paste0("Starting simulated Annealing for ",split," ",unique(data0[[split]]),"\n"))
+  cat(paste0("Starting simulated Annealing for ",split," ",split.level,"\n"))
   ######################################
   # apply simulated annealing
-  set.seed(1234)
-  if ( checkObjective(objective,epsH,epsP) ) {
-    out <- rowSums(choose_hh)
-    cat(paste0("Convergence successfull for ",split.level),"\n")
+  if ( checkObjective(totals0,epsH,epsP,epsMinN) ) {
+    setkeyv(data0,"sim_ID")
+    selectVars <- c(hhid,params[["pid"]],"weight_choose")
+    out <- data0[,..selectVars]
+    cat(paste0("Convergence successfull for ",split," ",split.level),"\n")
   } else {
     
     ## if objective not fullfilled continue with simannealing
@@ -310,7 +315,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
         # cat("compare results\n")
         ######################################
         ## if new sample fullfils marginals -> terminate
-        if ( checkObjective(objective,epsH,epsP) ) {
+        if ( checkObjective(totals0,epsH,epsP,epsMinN) ) {
           objective <- objective_new
           data0[,weight_choose:=weight_choose_new]
           break
@@ -388,20 +393,23 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
       if(cooldown%%10==0){
         cat(paste0("Cooldown number ",cooldown,"\n"))
       }
-      if ( checkObjective(objective,epsH,epsP) | cooldown == 500 | redraw<2) {
+      if ( checkObjective(totals0,epsH,epsP,epsMinN) | cooldown == 500 | redraw<2) {
         break
       }
     }
 
     # check if convergence was successfull
-    if(!checkObjective(objective,epsH,epsP)){
-      cat(paste0("Convergence NOT successfull for ",split.level),"\n")
+    if(!checkObjective(totals0,epsH,epsP,epsMinN)){
+      cat(paste0("Convergence NOT successfull for ",split," ",split.level),"\n")
     }else{
-      cat(paste0("Convergence successfull for ",split.level),"\n")
+      cat(paste0("Convergence successfull for ",split," ",split.level),"\n")
     }
     setkeyv(data0,"sim_ID")
-    out <- data0[,weight_choose] 
+    selectVars <- c(hhid,params[["pid"]],"weight_choose")
+    out <- data0[,..selectVars] 
   }
+  
+  out[,c(split):=split.level]
   
   return(out)
 }
