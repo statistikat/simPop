@@ -250,7 +250,7 @@ simulateValues <- function(dataSample, dataPop, params) {
   }
   if(any(is.na(sim))){
     print(summary(sim))
-    stop("na in return object from simulatevalues")
+    stop("NA in return object from simulatevalues")
   }
     
   # return realizations
@@ -655,9 +655,9 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
     } else {
       if(verbose){
         cat("Sample data:")
-        print(data_sample)
+        summary(data_sample)
         cat("Population data:")
-        print(data_sample)
+        summary(data_pop)
       }
       
       values <- lapply(levels(data_sample[[curStrata]]), function(x) {
