@@ -248,8 +248,11 @@ simulateValues <- function(dataSample, dataPop, params) {
   if(params$verbose){
     message("done.")
   }
-  if(any(is.na(sim)))
-    stop("na in sim")
+  if(any(is.na(sim))){
+    print(summary(sim))
+    stop("na in return object from simulatevalues")
+  }
+    
   # return realizations
   return(sim)
 }
