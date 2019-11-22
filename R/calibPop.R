@@ -357,7 +357,7 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
   params$epsMinN <- epsMinN
 
   
-  parameters for parallel computing
+  # parameters for parallel computing
   nr_strata <- length(unique(data[[split]]))
   pp <- parallelParameters(nr_cpus=nr_cpus, nr_strata=nr_strata)
   parallel <- pp$parallel
