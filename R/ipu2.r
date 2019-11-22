@@ -115,6 +115,7 @@ kishFactor <- function(w){
 #' @export ipu2
 #' @author Alexander Kowarik, Gregor de Cillia
 #' @examples
+#' library(data.table)
 #' data(eusilcS)
 #' setDT(eusilcS)
 #' eusilcS <- eusilcS[, list(db030,hsize,db040,age,rb090,netIncome,db090,rb050)]

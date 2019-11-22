@@ -49,6 +49,7 @@
 #' @keywords manip
 #' @export
 #' @examples
+#' library(data.table)
 #' data(eusilcS)
 #' data(eusilcP)
 #' 
