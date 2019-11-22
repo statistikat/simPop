@@ -81,7 +81,6 @@ checkTables <- function(tabs,namesData,split=NULL,verbose=FALSE,namesTabs="pers"
     tabs <- list(tabs)
   }
   
-  cNames <- copy(colnames(data))
   tabs <- lapply(tabs,function(z){
     
     if(!any(class(z)%in%c("data.frame","data.table"))){
@@ -96,7 +95,7 @@ checkTables <- function(tabs,namesData,split=NULL,verbose=FALSE,namesTabs="pers"
       stop(paste0("Totals, either number of households or number persons, in each contingency table must be specified by 'Freq'!"))
     }
     
-    keepNames <- colnames(z)[colnames(z)%in%c(colnames(data),"Freq")]
+    keepNames <- colnames(z)[colnames(z)%in%c(namesData,"Freq")]
     makeFactor <- keepNames[keepNames!="Freq"]
     z[,c(makeFactor):=lapply(.SD,factor),.SDcols=c(makeFactor)]
     
@@ -118,9 +117,8 @@ checkTables <- function(tabs,namesData,split=NULL,verbose=FALSE,namesTabs="pers"
 
 ######
 # make factor variables
-# and check if factor in totals coincide with factors in data
-makeFactors <- function(totals,data){
-  
+# and check if factor in totals coincide with factors in dat
+makeFactors <- function(totals,dat,split){
   ########
   # check and get all factors + levels in totals
   facLevels <- lapply(totals,function(z){
@@ -141,13 +139,13 @@ makeFactors <- function(totals,data){
   facLevels <- facLevels[!duplicated(facLevels)]
   
   ########
-  # apply factor levels from totals to variables in data
+  # apply factor levels from totals to variables in dat
   # and make some checks
   
   for(i in 1:length(facLevels)){
     varName <- names(facLevels)[i]
     levels <- facLevels[[i]]
-    dataLevels <- as.character(data[,unique(get(varName))])
+    dataLevels <- as.character(dat[,unique(get(varName))])
     
     leveldiff <- setdiff(dataLevels,levels)
     
@@ -155,10 +153,10 @@ makeFactors <- function(totals,data){
       stopMess <- paste0("Not all levels for variable ", varName," match in data and contingency table!\nLevels which only occure in data or contingency table:\n",paste(leveldiff,collapse=" "))
       stop(stopMess)
     }
-    data[,c(varName):=factor(get(varName),levels=levels)]
+    dat[,c(varName):=factor(get(varName),levels=levels)]
   }
   
-  return(data)
+  return(dat)
 }
 
 
@@ -312,7 +310,6 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
     cat("\nCheck Household-Tables\n")
   }
   hhTables <- checkTables(hhTables,namesData=copy(colnames(data)),split=split,verbose=verbose,namesTabs="hh")
-  
   totals <- c(persTables,hhTables)
   totals <- totals[!sapply(totals,is.null)]
   
@@ -369,7 +366,7 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
   
   # make factor variables
   # and check if factor in totals coincide with factors in data
-  data <- makeFactors(totals,data)
+  data <- makeFactors(totals,data,split)
 
   ## split the problem by "split"-factor
   setkeyv(data,split)
