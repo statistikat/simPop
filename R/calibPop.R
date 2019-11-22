@@ -383,7 +383,7 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
       final_weights <- foreach(x=1:length(split.number), .options.snow=list(preschedule=TRUE)) %dopar% {
         split.x <- split.number[x]
         splitUpper.x <- data[list(split.x),,on=c(split)][[splitUpper]][1]
-        data0 <- data[list(splitUpper.x),,on=c(split)]
+        data0 <- data[list(splitUpper.x),,on=c(splitUpper)]
         totals0 <- subsetList(totals,split=split,x=split.x)
         rm(inp)
         simAnnealingDT(
@@ -398,7 +398,7 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
       final_weights <- mclapply(1:length(split.number), function(x) {
         split.x <- split.number[x]
         splitUpper.x <- data[list(split.x),,on=c(split)][[splitUpper]][1]
-        data0 <- data[list(splitUpper.x),,on=c(split)]
+        data0 <- data[list(splitUpper.x),,on=c(splitUpper)]
         totals0 <- subsetList(totals,split=split,x=split.x)
         rm(inp)
         simAnnealingDT(
@@ -413,7 +413,7 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
     final_weights <- lapply(1:length(split.number), function(x) {
       split.level <- split.number[x]
       splitUpper.x <- data[list(split.level),,on=c(split)][[splitUpper]][1]
-      data0 <- data[list(splitUpper.x),,on=c(split)]
+      data0 <- data[list(splitUpper.x),,on=c(splitUpper)]
       totals0 <- subsetList(totals,split=split,x=split.level)
       simAnnealingDT(
         data0=data0,
