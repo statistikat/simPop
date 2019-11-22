@@ -14,12 +14,12 @@ checkObjective <- function(totals0,epsH,epsP,epsMinN=0){
   hhcond <- perscond <- TRUE
   if(any(!namesPos)){
     hhcond <- sapply(totals0[!namesPos],function(z){
-      all(abs(z[["Freq"]]-z[["FreqPop"]])<max(epsMinN,epsH*z[["Freq"]]))
+      all(abs(z[["Freq"]]-z[["FreqPop"]])<=max(epsMinN,epsH*z[["Freq"]]))
     })
   }
   if(any(namesPos)){
-    perscond <- sapply(totals0[!namesPos],function(z){
-      all(abs(z[["Freq"]]-z[["FreqPop"]])<max(epsMinN,epsP*z[["Freq"]]))
+    perscond <- sapply(totals0[namesPos],function(z){
+      all(abs(z[["Freq"]]-z[["FreqPop"]])<=max(epsMinN,epsP*z[["Freq"]]))
     })
   }
   
@@ -75,7 +75,7 @@ setRedraw <- function(objective,med_hh=1,fac=2/3){
 setRedrawGap <- function(totals0,med_hh=1,scale.redraw=0.5){
   
   med_hh_help <- rep(1,length(totals0))
-  med_hh_help[grepl("hh",names(totals0))] <- med_hh
+  med_hh_help[grepl("pers",names(totals0))] <- med_hh
   
   Gap <- rep(0,length(totals0))
   for(i in 1:length(Gap)){
@@ -88,7 +88,7 @@ setRedrawGap <- function(totals0,med_hh=1,scale.redraw=0.5){
 
 
 # get probabilites for resampling
-getProbabilities <- function(totals0,data0,select_add,select_remove){
+getProbabilities <- function(totals0,data0,select_add,select_remove,med_hh){
   
   # cat("prep totals_diff\n")
   totals_diff <- copy(totals0)
@@ -99,10 +99,12 @@ getProbabilities <- function(totals0,data0,select_add,select_remove){
     prob_remove <- paste0("prob_remove",i)
     # cat(i,"\n")
     totals_diff[[i]][,diff:=as.numeric(Freq-FreqPop)]
+    if(grepl("hh",names(totals_diff[i]))){
+      totals_diff[[i]][,diff:=diff*med_hh]
+    }
+    
     totals_diff[[i]][,c(prob_add):=diff]
-    totals_diff[[i]][get(prob_add)<=0,c(prob_add):=exp(sum(get(prob_add)))]
     totals_diff[[i]][,c(prob_remove):=diff*-1]
-    totals_diff[[i]][get(prob_remove)<=0,c(prob_remove):=exp(sum(get(prob_remove)))]
     totals_diff[[i]][,helpMergeIndex:=1] # help for merging tables with no common variables
     totals_diff[[i]][,c("Freq","FreqPop","diff"):=NULL]
     if(!is.null( totals_diff_merged)){
@@ -115,10 +117,12 @@ getProbabilities <- function(totals0,data0,select_add,select_remove){
   # cat("done\n")
   cnames <- colnames(totals_diff_merged)
   getCols <- cnames[grepl("^prob_add",cnames)]
-  totals_diff_merged[,prob_add:=rowMeans(.SD),.SDcols=c(getCols)]
+  totals_diff_merged[,prob_add:=rowSums(.SD),.SDcols=c(getCols)]
+  totals_diff_merged[prob_add<=0,prob_add:=exp(sum(prob_add))]
   totals_diff_merged[,c(getCols):=NULL]
   getCols <- cnames[grepl("^prob_remove",cnames)]
-  totals_diff_merged[,prob_remove:=rowMeans(.SD),.SDcols=c(getCols)]
+  totals_diff_merged[,prob_remove:=rowSums(.SD),.SDcols=c(getCols)]
+  totals_diff_merged[prob_remove<=0,prob_remove:=exp(sum(prob_remove))]
   totals_diff_merged[,c(getCols):=NULL]
   
   keyVars <- colnames(totals_diff_merged)[!grepl("prob_remove|prob_add|helpMergeIndex",colnames(totals_diff_merged))]
@@ -140,10 +144,9 @@ compareObjectives <- function(objective,objective_new,med_hh){
   
   diffPers <- objective[namesPos]-objective_new[namesPos]
   diffHH <- objective[!namesPos]-objective_new[!namesPos]
+  diffHH <- diffHH*med_hh
   diffAll <- c(diffPers,diffHH)
-  w <- c(rep(1,sum(namesPos)),rep(med_hh,sum(!namesPos)))
-  
-  weighted.mean(diffAll,w) 
+  return(mean(diffAll)) 
 }
 
 simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
@@ -181,14 +184,6 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   max_n <- size_all* nd
   med_hh <- dteval("data0[!duplicated(",hhid,"),median(as.numeric(as.character(",hhsize,")))]")
   
-  if(npers>0){
-    init_n <- sapply(totals0[indTabPers],function(z){sum(z[["Freq"]])/med_hh})
-  }else{
-    init_n <- sapply(totals0[indTabHH],function(z){sum(z[["Freq"]])})
-  }
-  
-  init_n <- mean(init_n)
-  
   cooldown <- 0 
   setkeyv(data0,hhid)
   id <- dteval("data0[,",hhid,"]")
@@ -197,19 +192,20 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   
   # choose starting temperatur as percentage of objective function
   if(choose.temp){
-    eps <- unlist(c(epsP,epsH))
+    eps <- sapply(totals0,`[[`,"Freq")
+    eps <- c(unlist(eps[indTabPers])*epsP,
+             unlist(eps[indTabHH])*epsH)
     eps <- eps[eps>0]
     temp <- max(temp,mean(eps)*choose.temp.factor)
   }
   
   ######################################
   # initialize weights
-  init_index <- sample(1:nd,init_n,replace=FALSE)
-  
+  data0[,weight_choose:=0]
+  data0[.(split.level),weight_choose:=1,on=c(split)]
+  init_index <- data0[weight_choose==1,which=TRUE]
   init_weight <- rep(0L,max_n)
   init_weight[init_index] <- 1
-  init_weight <-  updateVecC(init_weight,add_index=init_index, remove_index=c(nd), hhsize=size, hhid=id, sizefactor=size_all)
-  data0[ ,weight_choose:=sumVec(init_weight,size_all)]
   
   totals0 <- updateTotals(totals0=totals0,data0=data0,hhid=hhid)
   
@@ -219,6 +215,13 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   
   # define redraw with initial objective value
   redraw <- setRedraw(objective,med_hh=med_hh)
+  redrawMax <- sapply(totals0,function(z){
+    sum(z[["Freq"]])
+  })
+  redrawMax[indTabPers] <- redrawMax[indTabPers]/med_hh
+  redrawMax <- round(max(redrawMax*0.05))
+  redraw <- min(redraw,redrawMax)
+  
   
   # observe updating of objective function
   # if solution does not improve -> terminate
@@ -262,13 +265,13 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
           # resample
           # get weights for resampling
           # cat("get probabilities\n")
-          probs <- getProbabilities(totals0=totals0,data0=data0,select_add=select_add,select_remove=select_remove)
+          probs <- getProbabilities(totals0=totals0,data0=data0,select_add=select_add,select_remove=select_remove,med_hh=med_hh)
           
           select_add <- select_add[probs[["add"]]>0]
-          
           probs[["add"]] <- probs[["add"]][probs[["add"]]>0]
           select_remove <- select_remove[probs[["remove"]]>0]
           probs[["remove"]] <- probs[["remove"]][probs[["remove"]]>0]
+          
           n_add <- length(select_add)
           n_remove <- length(select_remove)
           
@@ -278,15 +281,14 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
                                                   min(c(redraw_add,n_add)),
                                                   prob=probs[["add"]])]-1
           }else{
-            add_hh <- sample(select_01[[1]],redraw_add)
-            
+            add_hh <- sample(which(init_weight==0),redraw_add)-1
           }
           if(n_remove>0){
             remove_hh <- select_remove[sample_int_crank(n_remove,
                                                         min(c(redraw_remove,n_remove)),
                                                         prob=probs[["remove"]])]-1
           }else{
-            remove_hh <- sample(select_01[[2]],redraw_remove)
+            remove_hh <- sample(which(init_weight==1),redraw_remove)-1
           }
           
         }else{
@@ -298,12 +300,14 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
           remove_hh <- sample(select_remove,n_remove)
         }
         
+        add_index <- add_hh%%nrow(data0)+1
+        data0[add_index,.N,by=htype]
         ####################################
         ## create new composition
         init_weight_new <- copy(init_weight)
 
-        init_weight_new <-  updateVecC(init_weight_new,add_index=add_hh, remove_index=remove_hh, hhsize=size, hhid=id, sizefactor=size_all)
-        data0[ ,weight_choose_new:=sumVec(init_weight_new,size_all)]
+        init_weight_new <-  simPop:::updateVecC(init_weight_new,add_index=add_hh, remove_index=remove_hh, hhsize=size, hhid=id, sizefactor=size_all)
+        data0[ ,weight_choose_new:=simPop:::sumVec(init_weight_new,size_all)]
         
         ######################################
         # calculate objective
@@ -315,8 +319,9 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
         # cat("compare results\n")
         ######################################
         ## if new sample fullfils marginals -> terminate
-        if ( checkObjective(totals0,epsH,epsP,epsMinN) ) {
+        if ( checkObjective(totals0_new,epsH,epsP,epsMinN) ) {
           objective <- objective_new
+          totals0 <- totals0_new
           data0[,weight_choose:=weight_choose_new]
           break
         }
@@ -324,7 +329,37 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
         ######################################
         ## choose wether to accepts the resample
         diffObj <- compareObjectives(objective,objective_new,med_hh=med_hh)
+        diffObj
         if ( diffObj>=0 ) { 
+          # cat("solution improved!\n")
+          # 
+          # namesPos <- grepl("pers",names(totals0_new))
+          # persNotFullfilled <- hhNotFullfilled <- NULL
+          # if(any(!namesPos)){
+          #   hhNotFullfilled <- lapply(totals0_new[!namesPos],function(z){
+          #     selectRows <- abs(z[["Freq"]]-z[["FreqPop"]])>max(epsMinN,epsH*z[["Freq"]])
+          #     if(sum(selectRows)==0){
+          #       return(NULL)
+          #     }
+          #     z[selectRows]
+          #   })
+          # }
+          # if(any(namesPos)){
+          #   persNotFullfilled <- lapply(totals0_new[namesPos],function(z){
+          #     selectRows <- abs(z[["Freq"]]-z[["FreqPop"]])>max(epsMinN,epsP*z[["Freq"]])
+          #     if(sum(selectRows)==0){
+          #       return(NULL)
+          #     }
+          #     z[selectRows]
+          #   })
+          # }
+          # printTableDiff <- c(persNotFullfilled,hhNotFullfilled)
+          # printTableDiff <- printTableDiff[!sapply(printTableDiff,is.null)]
+          # cat("\n")
+          # print(printTableDiff)
+          # cat("\n")
+          
+          
           objective <- objective_new
           data0[,weight_choose:=weight_choose_new]
           totals0 <- copy(totals0_new)
@@ -334,7 +369,6 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
           if(do.observe){
             observe.count <- observe.count +1
             if(observe.count>=observe.times){
-              
               breakCond <- matrixStats::colSds(observe.obj)/matrixStats::colMeans2(observe.obj)
               breakCond <- max(breakCond)
               if(breakCond< observe.break){
@@ -356,6 +390,35 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
           x <- sample(c(0,1), 1,prob=c(1-prob,prob))
           
           if ( x == 1 ) { 
+            
+            # cat("new solution accepted!\n")
+            # 
+            # namesPos <- grepl("pers",names(totals0_new))
+            # persNotFullfilled <- hhNotFullfilled <- NULL
+            # if(any(!namesPos)){
+            #   hhNotFullfilled <- lapply(totals0_new[!namesPos],function(z){
+            #     selectRows <- abs(z[["Freq"]]-z[["FreqPop"]])>max(epsMinN,epsH*z[["Freq"]])
+            #     if(sum(selectRows)==0){
+            #       return(NULL)
+            #     }
+            #     z[selectRows]
+            #   })
+            # }
+            # if(any(namesPos)){
+            #   persNotFullfilled <- lapply(totals0_new[namesPos],function(z){
+            #     selectRows <- abs(z[["Freq"]]-z[["FreqPop"]])>max(epsMinN,epsP*z[["Freq"]])
+            #     if(sum(selectRows)==0){
+            #       return(NULL)
+            #     }
+            #     z[selectRows]
+            #   })
+            # }
+            # printTableDiff <- c(persNotFullfilled,hhNotFullfilled)
+            # printTableDiff <- printTableDiff[!sapply(printTableDiff,is.null)]
+            # cat("\n")
+            # print(printTableDiff)
+            # cat("\n")
+            # 
             objective <- objective_new
             data0[,weight_choose:=weight_choose_new]
             totals0 <- copy(totals0_new)

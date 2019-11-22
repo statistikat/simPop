@@ -360,7 +360,7 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
   params$epsMinN <- epsMinN
 
   
-  # parameters for parallel computing
+  parameters for parallel computing
   nr_strata <- length(unique(data[[split]]))
   pp <- parallelParameters(nr_cpus=nr_cpus, nr_strata=nr_strata)
   parallel <- pp$parallel
@@ -412,16 +412,16 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
     }
   } else {
     final_weights <- lapply(1:length(split.number), function(x) {
-      split.x <- split.number[x]
-      splitUpper.x <- data[.(split.x),,on=c(split)][[splitUpper]][1]
+      split.level <- split.number[x]
+      splitUpper.x <- data[.(split.level),,on=c(split)][[splitUpper]][1]
       data0 <- data[.(splitUpper.x),,on=.(upazilaCode)]
-      totals0 <- subsetList(totals,split=split,x=split.x)
+      totals0 <- subsetList(totals,split=split,x=split.level)
       simAnnealingDT(
         data0=data0,
         totals0=totals0,
         params=params,sizefactor=sizefactor,choose.temp=choose.temp,
         choose.temp.factor=choose.temp.factor,scale.redraw=scale.redraw,split=split,
-        split.level=split.x,observe.times=observe.times,observe.break=observe.break)
+        split.level=split.level,observe.times=observe.times,observe.break=observe.break)
     })
   }
     
