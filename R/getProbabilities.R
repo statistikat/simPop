@@ -9,15 +9,18 @@ getProbabilities <- function(totals0,data0,select_add,select_remove,med_hh){
     prob_add <- paste0("prob_add",i)
     prob_remove <- paste0("prob_remove",i)
     # cat(i,"\n")
-    totals_diff[[i]][,diff:=as.numeric(Freq-FreqPop)]
-    if(grepl("hh",names(totals_diff[i]))){
-      totals_diff[[i]][,diff:=diff*med_hh]
+    set(totals_diff[[i]], j = "diff", value =
+          as.numeric(totals_diff[[i]][["Freq"]] - totals_diff[[i]][["FreqPop"]]
+          ))
+    if(grepl("hh",names(totals_diff)[i])){
+      set(totals_diff[[i]], j = "diff", value =
+            totals_diff[[i]][["diff"]]*med_hh)
     }
-    
-    totals_diff[[i]][,c(prob_add):=diff]
-    totals_diff[[i]][,c(prob_remove):=diff*-1]
-    totals_diff[[i]][,helpMergeIndex:=1] # help for merging tables with no common variables
-    totals_diff[[i]][,c("Freq","FreqPop","diff"):=NULL]
+    # help for merging tables with no common variables
+    set(totals_diff[[i]], j = "helpMergeIndex", value = 1)
+    set(totals_diff[[i]], j = prob_add, value = totals_diff[[i]][["diff"]])
+    set(totals_diff[[i]], j = prob_remove, value = -totals_diff[[i]][["diff"]])
+    set(totals_diff[[i]], j = c("Freq","FreqPop","diff"), value = NULL)
     if(!is.null( totals_diff_merged)){
       byVar <- intersect(colnames(totals_diff_merged),colnames(totals_diff[[i]]))
       totals_diff_merged <- merge(totals_diff_merged,totals_diff[[i]],by=byVar,allow.cartesian=TRUE,all=TRUE)
@@ -30,11 +33,11 @@ getProbabilities <- function(totals0,data0,select_add,select_remove,med_hh){
   getCols <- cnames[grepl("^prob_add",cnames)]
   totals_diff_merged[,prob_add:=rowSums(.SD),.SDcols=c(getCols)]
   totals_diff_merged[prob_add<=0,prob_add:=exp(sum(prob_add))]
-  totals_diff_merged[,c(getCols):=NULL]
+  set(totals_diff_merged, j = getCols, value = NULL)
   getCols <- cnames[grepl("^prob_remove",cnames)]
   totals_diff_merged[,prob_remove:=rowSums(.SD),.SDcols=c(getCols)]
   totals_diff_merged[prob_remove<=0,prob_remove:=exp(sum(prob_remove))]
-  totals_diff_merged[,c(getCols):=NULL]
+  set(totals_diff_merged, j = getCols, value = NULL)
   
   keyVars <- colnames(totals_diff_merged)[!grepl("prob_remove|prob_add|helpMergeIndex",colnames(totals_diff_merged))]
   
