@@ -28,16 +28,17 @@ checkObjective <- function(totals0,epsH,epsP,epsMinN=0){
 
 # update totals0 with population totals
 updateTotals <- function(totals0,data0,hhid,numberPop="weight_choose"){
+  firstPersonInHousehold <- NULL
   for(i in 1:length(totals0)){
     
     byVars <- intersect(colnames(totals0[[i]]),colnames(data0))
     if(grepl("pers",names(totals0[i]))){
       totals0[[i]] <- merge(totals0[[i]][,mget(c(byVars,"Freq"))],
-                 data0[,.(FreqPop=sum(get(numberPop))),by=c(byVars)],
+                 data0[,list(FreqPop=sum(get(numberPop))),by=c(byVars)],
                  by=c(byVars))
     }else{
       totals0[[i]] <- merge(totals0[[i]][,mget(c(byVars,"Freq"))],
-                 data0[firstPersonInHousehold==TRUE,.(FreqPop=sum(get(numberPop))),by=c(byVars)],
+                 data0[firstPersonInHousehold==TRUE,list(FreqPop=sum(get(numberPop))),by=c(byVars)],
                  by=c(byVars))
     }
   }
@@ -48,7 +49,7 @@ updateTotals <- function(totals0,data0,hhid,numberPop="weight_choose"){
 # calc objective function
 # absolute sum of number of people/households in population - number of people/household in contingenca table
 calcObjective <- function(totals0){
-  
+  Freq <- FreqPop <- NULL
   objective <- sapply(totals0,function(z){
     z[,sum(abs(FreqPop-Freq))]
   })
@@ -72,7 +73,7 @@ setRedraw <- function(objective,med_hh=1,fac=2/3){
 
 # set redraw gap
 setRedrawGap <- function(totals0,med_hh=1,scale.redraw=0.5){
-  
+  Freq <- FreqPop <- NULL
   med_hh_help <- rep(1,length(totals0))
   med_hh_help[grepl("pers",names(totals0))] <- med_hh
   
@@ -88,7 +89,7 @@ setRedrawGap <- function(totals0,med_hh=1,scale.redraw=0.5){
 
 # get probabilites for resampling
 getProbabilities <- function(totals0,data0,select_add,select_remove,med_hh){
-  
+  helpMergeIndex <- Freq <- FreqPop <- NULL
   # cat("prep totals_diff\n")
   totals_diff <- copy(totals0)
   totals_diff_merged <- NULL
@@ -201,7 +202,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   ######################################
   # initialize weights
   data0[,weight_choose:=0]
-  data0[.(split.level),weight_choose:=1,on=c(split)]
+  data0[list(split.level),weight_choose:=1,on=c(split)]
   init_index <- data0[weight_choose==1,which=TRUE]
   init_weight <- rep(0L,max_n)
   init_weight[init_index] <- 1
@@ -237,7 +238,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   if ( checkObjective(totals0,epsH,epsP,epsMinN) ) {
     setkeyv(data0,"sim_ID")
     selectVars <- c(hhid,params[["pid"]],"weight_choose")
-    out <- data0[,..selectVars]
+    out <- data0[, selectVars, with = FALSE]
     cat(paste0("Convergence successfull for ",split," ",split.level),"\n")
   } else {
     
@@ -300,13 +301,12 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
         }
         
         add_index <- add_hh%%nrow(data0)+1
-        data0[add_index,.N,by=htype]
         ####################################
         ## create new composition
         init_weight_new <- copy(init_weight)
 
-        init_weight_new <-  simPop:::updateVecC(init_weight_new,add_index=add_hh, remove_index=remove_hh, hhsize=size, hhid=id, sizefactor=size_all)
-        data0[ ,weight_choose_new:=simPop:::sumVec(init_weight_new,size_all)]
+        init_weight_new <-  updateVecC(init_weight_new,add_index=add_hh, remove_index=remove_hh, hhsize=size, hhid=id, sizefactor=size_all)
+        data0[ ,weight_choose_new:=sumVec(init_weight_new,size_all)]
         
         ######################################
         # calculate objective
@@ -368,7 +368,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
           if(do.observe){
             observe.count <- observe.count +1
             if(observe.count>=observe.times){
-              breakCond <- matrixStats::colSds(observe.obj)/matrixStats::colMeans2(observe.obj)
+              breakCond <- colSds(observe.obj)/colMeans2(observe.obj)
               breakCond <- max(breakCond)
               if(breakCond< observe.break){
                 break # if objective doesnt move anymore break up loop
@@ -427,7 +427,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
             if(do.observe){
               observe.count <- observe.count +1
               if(observe.count>=observe.times){
-                breakCond <- matrixStats::colSds(observe.obj)/matrixStats::colMeans2(observe.obj)
+                breakCond <- colSds(observe.obj)/colMeans2(observe.obj)
                 breakCond <- max(breakCond)
                 if(breakCond< observe.break){
                   break # if objective doesnt move anymore break up loop
@@ -468,7 +468,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
     }
     setkeyv(data0,"sim_ID")
     selectVars <- c(hhid,params[["pid"]],"weight_choose")
-    out <- data0[,..selectVars] 
+    out <- data0[, selectVars, with = FALSE]
   }
   
   out[,c(split):=split.level]

@@ -9,6 +9,7 @@ simulateValues <- function(dataSample, dataPop, params) {
   if ( !nrow(dataSample) ) {
     return(character())
   }
+  predNames <- NULL
   meth <- params$method
   cur.var <- params$cur.var
   hasNewLevels <- params$hasNewLevels
@@ -110,9 +111,9 @@ simulateValues <- function(dataSample, dataPop, params) {
   if ( length(ind) == 1 ) {
     resample <- function(k, n, p) rep.int(1, n[k])
   } else if ( length(ind) == 2 ) {
-    resample <- function(k, n, p) simPop:::spSample(n[k], c(1-p[k],p[k]))
+    resample <- function(k, n, p) spSample(n[k], c(1-p[k],p[k]))
   } else {
-    resample <- function(k, n, p) simPop:::spSample(n[k], p[k,])
+    resample <- function(k, n, p) spSample(n[k], p[k,])
   }
   # generate realizations for each combination
   if ( length(exclude) == 0 ) {
@@ -134,7 +135,7 @@ simulateValues <- function(dataSample, dataPop, params) {
   # anyway) and replace the values of non-directly related
   # in the third step
   dataPopHID <- dataPop[[hid]]
-  sim <- simHead[.(dataPopHID),,on=c(hid)][[cur.var]]
+  sim <- simHead[list(dataPopHID),,on=c(hid)][[cur.var]]
   rm(simHead)
 
   # third step: simulate category of non-directly related
@@ -152,7 +153,7 @@ simulateValues <- function(dataSample, dataPop, params) {
     hidSample <- dataSample[[hid]]
     names(add) <- hidSample[indSampleHead]
     add <- add[as.character(hidSample)]
-    iHead <- simPop:::getHeadName(cur.var)
+    iHead <- getHeadName(cur.var)
     dataSample[, iHead] <- add
     # limit sample and population data to non-directly related household members
     dataSampleWork <- dataSample[indSampleNonDirect,]
@@ -382,7 +383,7 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
   method=c("multinom", "ctree","cforest","ranger"),
   by = "strata") {
 
-  x <- newAdditionalVarible <- NULL
+  V1 <- x <- newAdditionalVarible <- NULL
   
   method <- match.arg(method)
   
@@ -411,12 +412,12 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
   if(length(problematicHHsample)>0){
     warning("Sample:There are households without a head, a random head will be asigned.")
     setkeyv(data_sample,hid)
-    data_sample[.(problematicHHsample),c(relation):=makeOneRandom(get(relation),head), by=c(hid)]
+    data_sample[list(problematicHHsample),c(relation):=makeOneRandom(get(relation),head), by=c(hid)]
   }
   if(length(problematicHHpop)>0){
     warning("Population:There are households without a head, a random head will be asigned.")
     setkeyv(data_pop,hid)
-    data_pop[.(problematicHHpop),c(relation):=makeOneRandom(get(relation),head), by=c(hid)]
+    data_pop[list(problematicHHpop),c(relation):=makeOneRandom(get(relation),head), by=c(hid)]
   }
   
   
@@ -441,7 +442,7 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
   # }
   
   nr_strata <- length(levels(data_sample[[curStrata]]))
-  pp <- simPop:::parallelParameters(nr_cpus=nr_cpus, nr_strata=nr_strata)
+  pp <- parallelParameters(nr_cpus=nr_cpus, nr_strata=nr_strata)
   
   parallel <- pp$parallel
   nr_cores <- pp$nr_cores
@@ -525,12 +526,12 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
     }else{
       curRegModel <- regModel
     }
-    regInput <- simPop:::regressionInput(simPopObj, additional=additional[counter], regModel=curRegModel)
+    regInput <- regressionInput(simPopObj, additional=additional[counter], regModel=curRegModel)
     # names of predictor variables
     predNames <- setdiff(regInput[[1]]$predNames, c(dataS@hhsize, curStrata, relation))
     
     # observations with missings are excluded from simulation
-    exclude <- simPop:::getExclude.data.table(data_sample[,c(additional,predNames),with=FALSE])
+    exclude <- getExclude.data.table(data_sample[,c(additional,predNames),with=FALSE])
     if ( length(exclude) > 0 ) {
       sampWork <- data_sample[-exclude,]
     } else {
@@ -538,14 +539,14 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
     }
     
     # variables are coerced to factors
-    sampWork <- simPop:::checkFactor(sampWork, unique(c(curStrata, additional)))
-    data_pop <- simPop:::checkFactor(data_pop_o, unique(c(curStrata)))
+    sampWork <- checkFactor(sampWork, unique(c(curStrata, additional)))
+    data_pop <- checkFactor(data_pop_o, unique(c(curStrata)))
     # components of multinomial model are specified
     levelsResponse <- levels(sampWork[[i]])
     # simulation of variables using a sequence of multinomial models
     if ( method == "multinom" ) {
       formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
-      formula.cmd_nd <- paste(i, "~", paste(c(predNames,simPop:::getHeadName(i)), collapse = " + "))
+      formula.cmd_nd <- paste(i, "~", paste(c(predNames,getHeadName(i)), collapse = " + "))
       formula.cmd <- paste0("suppressWarnings(multinom(", formula.cmd)
       formula.cmd_nd <- paste0("suppressWarnings(multinom(", formula.cmd_nd)
       if(!dataS@ispopulation){
@@ -562,7 +563,7 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
     }else if ( method == "ctree" ) {
       # simulation via recursive partitioning and regression trees
       formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
-      formula.cmd_nd <- paste(i, "~", paste(c(predNames,simPop:::getHeadName(i)), collapse = " + "))
+      formula.cmd_nd <- paste(i, "~", paste(c(predNames,getHeadName(i)), collapse = " + "))
       formula.cmd <- paste("suppressWarnings(ctree(", formula.cmd)
       formula.cmd_nd <- paste("suppressWarnings(ctree(", formula.cmd_nd)
       if(!dataS@ispopulation){
@@ -578,7 +579,7 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
     }else if ( method == "cforest" ) {
       # simulation via random forest
       formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
-      formula.cmd_nd <- paste(i, "~", paste(c(predNames,simPop:::getHeadName(i)), collapse = " + "))
+      formula.cmd_nd <- paste(i, "~", paste(c(predNames,getHeadName(i)), collapse = " + "))
       formula.cmd <- paste("suppressWarnings(cforest(", formula.cmd)
       formula.cmd_nd <- paste("suppressWarnings(cforest(", formula.cmd_nd)
       if(!dataS@ispopulation){
@@ -592,7 +593,7 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
     }else if ( method == "ranger" ) {
       # simulation via random forest
       formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
-      formula.cmd_nd <- paste(i, "~", paste(c(predNames,simPop:::getHeadName(i)), collapse = " + "))
+      formula.cmd_nd <- paste(i, "~", paste(c(predNames,getHeadName(i)), collapse = " + "))
       formula.cmd <- paste("suppressWarnings(ranger(", formula.cmd)
       formula.cmd_nd <- paste("suppressWarnings(ranger(", formula.cmd_nd)
       if(!dataS@ispopulation){
@@ -662,7 +663,7 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
       
       values <- lapply(levels(data_sample[[curStrata]]), function(x) {
         simulateValues(
-          dataSample=data_sample[.(x),,on=c(curStrata)],
+          dataSample=data_sample[list(x),,on=c(curStrata)],
           dataPop=data_pop[indStrata[[x]], c(predNames, simPopObj@pop@hhid, relation), with=FALSE], params
         )
       })

@@ -62,7 +62,7 @@ calcFinalWeights <- function(data0, totals0, params) {
 subsetList <- function(totals,split,x){
   
   totals <- lapply(totals,function(dt){
-    dt.x <- dt[.(x),,on=c(split)]
+    dt.x <- dt[list(x),,on=c(split)]
     dt.x[[split]]<-NULL
     return(dt.x)
   })
@@ -99,7 +99,7 @@ checkTables <- function(tabs,namesData,split=NULL,verbose=FALSE,namesTabs="pers"
     makeFactor <- keepNames[keepNames!="Freq"]
     z[,c(makeFactor):=lapply(.SD,factor),.SDcols=c(makeFactor)]
     
-    z[,..keepNames]
+    z[, keepNames, with=FALSE]
     
   })
   
@@ -238,6 +238,8 @@ makeFactors <- function(totals,dat,split){
 #' @param observe.times Only used if \code{memory=TRUE}. Number of times the new value of the objective function is saved. If \code{observe.times=0} values are not saved.
 #' @param observe.break Only used if \code{memory=TRUE}. When objective value has been saved \code{observe.times}-times the coefficient of variation is calculated over saved values; if the coefficient of variation falls below \code{observe.break}
 #' simmulated annealing terminates. This repeats for each new set of \code{observe.times} new values of the objecive function. Can help save run time if objective value does not improve much. Disable this termination by either setting \code{observe.times=0} or \code{observe.break=0}.
+#' @param hhTables information on population margins for households
+#' @param persTables information on population margins for persons
 #' @return Returns an object of class \code{\linkS4class{simPopObj}} with an
 #' updated population listed in slot 'pop'.
 #' @author Bernhard Meindl, Johannes Gussenbauer and Matthias Templ
@@ -292,7 +294,7 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
     warning("only first variable will be used to divide the population into strata")
   }
 
-  hid_help <- doub <- new.weights <- temporaryhid <- x <- NULL
+  weight_choose <- hid_help <- doub <- new.weights <- temporaryhid <- x <- NULL
   data <- popData(inp)
   hid <- popObj(inp)@hhid
   pid <- popObj(inp)@pid
@@ -380,8 +382,8 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
       
       final_weights <- foreach(x=1:length(split.number), .options.snow=list(preschedule=TRUE)) %dopar% {
         split.x <- split.number[x]
-        splitUpper.x <- data[.(split.x),,on=c(split)][[splitUpper]][1]
-        data0 <- data[.(splitUpper.x),,on=.(upazilaCode)]
+        splitUpper.x <- data[list(split.x),,on=c(split)][[splitUpper]][1]
+        data0 <- data[list(splitUpper.x),,on=c(split)]
         totals0 <- subsetList(totals,split=split,x=split.x)
         rm(inp)
         simAnnealingDT(
@@ -395,8 +397,8 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
     }else if ( !have_win ) {# linux/mac
       final_weights <- mclapply(1:length(split.number), function(x) {
         split.x <- split.number[x]
-        splitUpper.x <- data[.(split.x),,on=c(split)][[splitUpper]][1]
-        data0 <- data[.(splitUpper.x),,on=.(upazilaCode)]
+        splitUpper.x <- data[list(split.x),,on=c(split)][[splitUpper]][1]
+        data0 <- data[list(splitUpper.x),,on=c(split)]
         totals0 <- subsetList(totals,split=split,x=split.x)
         rm(inp)
         simAnnealingDT(
@@ -410,8 +412,8 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
   } else {
     final_weights <- lapply(1:length(split.number), function(x) {
       split.level <- split.number[x]
-      splitUpper.x <- data[.(split.level),,on=c(split)][[splitUpper]][1]
-      data0 <- data[.(splitUpper.x),,on=.(upazilaCode)]
+      splitUpper.x <- data[list(split.level),,on=c(split)][[splitUpper]][1]
+      data0 <- data[list(splitUpper.x),,on=c(split)]
       totals0 <- subsetList(totals,split=split,x=split.level)
       simAnnealingDT(
         data0=data0,

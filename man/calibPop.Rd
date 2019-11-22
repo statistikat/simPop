@@ -5,12 +5,13 @@
 \alias{calibPop}
 \title{Calibration of 0/1 weights by Simulated Annealing}
 \usage{
-calibPop(inp, split = NULL, temp = 1, epsP.factor = 0.05,
-  epsH.factor = 0.05, maxiter = 200, temp.cooldown = 0.9,
-  factor.cooldown = 0.85, min.temp = 10^-3, nr_cpus = NULL,
-  sizefactor = 2, choose.temp = TRUE, choose.temp.factor = 0.2,
-  scale.redraw = 0.5, observe.times = 50, observe.break = 0.05,
-  verbose = FALSE, hhTables = NULL, persTables = NULL)
+calibPop(inp, split = NULL, splitUpper = NULL, temp = 1,
+  epsP.factor = 0.05, epsH.factor = 0.05, epsMinN = 0,
+  maxiter = 200, temp.cooldown = 0.9, factor.cooldown = 0.85,
+  min.temp = 10^-3, nr_cpus = NULL, sizefactor = 2,
+  choose.temp = TRUE, choose.temp.factor = 0.2, scale.redraw = 0.5,
+  observe.times = 50, observe.break = 0.05, verbose = FALSE,
+  hhTables = NULL, persTables = NULL)
 }
 \arguments{
 \item{inp}{an object of class \code{\linkS4class{simPopObj}} with slot
@@ -18,9 +19,17 @@ calibPop(inp, split = NULL, temp = 1, epsP.factor = 0.05,
 
 \item{split}{given strata in which the problem will be split. Has to
 correspond to a column population data (slot 'pop' of input argument 'inp')
-. For example \code{split = c("region")}, problem will be split for
+. For example \code{split = (c("region")}, problem will be split for
 different regions. Parallel computing is performed automatically, if
 possible.}
+
+\item{splitUpper}{optional column in the population for which decides the part
+of the population from which to sample for each entry in \code{split}.
+Has to correspond to a column population data (slot 'pop' of input argument 'inp').
+For example \code{split = c("region"), splitUpper = c("Country")}
+all units from the country are eligable for donor sample when problem is split
+into regions. Is usefull if \code{simInitSpatial()} was used and the variable to split
+the problem into results in very small groups (~couple of houndres to thousands).}
 
 \item{temp}{starting temperatur for simulated annealing algorithm}
 
@@ -31,6 +40,9 @@ objective function of \code{0.05*sum(People)}.}
 \item{epsH.factor}{a factor (between 0 and 1) specifying the acceptance
 error for contingency table on household level. For example epsH.factor = 0.05 results in an acceptance error for the
 objective function of \code{0.05*sum(Households)}.}
+
+\item{epsMinN}{integer specifying the minimum number of units from which the synthetic populatin can deviate from cells in contingency tables.
+This overwrites \code{epsP.factor} and \code{epsH.factor}. Is especially usefull if cells in \code{hhTables} and \code{persTables} are very small, e.g. <10.}
 
 \item{maxiter}{maximum iterations during a temperature step.}
 
@@ -68,7 +80,9 @@ simmulated annealing terminates. This repeats for each new set of \code{observe.
 provided, however only if \code{split} is NULL. Otherwise the computation is
 performed in parallel and no useful output can be provided.}
 
-\item{memory}{if TRUE simulated annealing is applied in less memory intensive way. Is especially usefull if factor or population is large. For this option simulated annealing is not entirely implemented in C++, therefore it might be slower than option \code{memory=FALSE}.}
+\item{hhTables}{information on population margins for households}
+
+\item{persTables}{information on population margins for persons}
 }
 \value{
 Returns an object of class \code{\linkS4class{simPopObj}} with an

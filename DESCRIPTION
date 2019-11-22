@@ -14,9 +14,9 @@ URL: https://github.com/statistikat/simPop
 Depends:
     R(>= 3.0.0),
     lattice,
-    vcd,
-    data.table
+    vcd
 Imports:
+    data.table,
     laeken,
     plyr,
     MASS,
@@ -27,7 +27,7 @@ Imports:
     doParallel,
     foreach,
     colorspace,
-    VIM,
+    VIM,matrixStats,
     methods,party,EnvStats,fitdistrplus,ranger,wrswoR
 Suggests:
     haven,
