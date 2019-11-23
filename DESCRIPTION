@@ -92,5 +92,7 @@ Collate:
     'whipple.R'
     'dataSets.R'
     'zzz.R'
+    'getProbabilities.R'
+    'updateTotals.R'
 RoxygenNote: 6.1.1
 Encoding: UTF-8
