@@ -381,31 +381,31 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
       registerDoParallel(cl,cores=nr_cores)
       
       final_weights <- foreach(x=1:length(split.number), .options.snow=list(preschedule=TRUE)) %dopar% {
-        split.x <- split.number[x]
-        splitUpper.x <- data[list(split.x),,on=c(split)][[splitUpper]][1]
+        split.level <- split.number[x]
+        splitUpper.x <- data[list(split.level),,on=c(split)][[splitUpper]][1]
         data0 <- data[list(splitUpper.x),,on=c(splitUpper)]
-        totals0 <- subsetList(totals,split=split,x=split.x)
-        rm(inp)
+        totals0 <- subsetList(totals,split=split,x=split.level)
         simAnnealingDT(
           data0=data0,
           totals0=totals0,
           params=params,sizefactor=sizefactor,choose.temp=choose.temp,
-          choose.temp.factor=choose.temp.factor,scale.redraw=scale.redraw,
-          split=x,observe.times=observe.times,observe.break=observe.break)
+          choose.temp.factor=choose.temp.factor,scale.redraw=scale.redraw,split=split,
+          split.level=split.level,observe.times=observe.times,observe.break=observe.break)
       }
       stopCluster(cl)
     }else if ( !have_win ) {# linux/mac
       final_weights <- mclapply(1:length(split.number), function(x) {
-        split.x <- split.number[x]
-        splitUpper.x <- data[list(split.x),,on=c(split)][[splitUpper]][1]
+        split.level <- split.number[x]
+        splitUpper.x <- data[list(split.level),,on=c(split)][[splitUpper]][1]
         data0 <- data[list(splitUpper.x),,on=c(splitUpper)]
-        totals0 <- subsetList(totals,split=split,x=split.x)
+        totals0 <- subsetList(totals,split=split,x=split.level)
         simAnnealingDT(
           data0=data0,
           totals0=totals0,
           params=params,sizefactor=sizefactor,choose.temp=choose.temp,
-          choose.temp.factor=choose.temp.factor,scale.redraw=scale.redraw,
-          split=x,observe.times=observe.times,observe.break=observe.break)
+          choose.temp.factor=choose.temp.factor,scale.redraw=scale.redraw,split=split,
+          split.level=split.level,observe.times=observe.times,observe.break=observe.break)
+        
       }, mc.cores = nr_cores, mc.preschedule = FALSE)
     }
   } else {
