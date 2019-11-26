@@ -4,7 +4,7 @@
 using namespace Rcpp;
 
 // [[Rcpp::export(updateVecC)]]
-IntegerVector updateVecC(IntegerVector init_weight,IntegerVector add_index, IntegerVector remove_index, IntegerVector hhsize, IntegerVector hhid,int sizefactor) {
+IntegerVector updateVecC(IntegerVector &init_weight,IntegerVector &add_index, IntegerVector &remove_index, IntegerVector &hhsize, IntegerVector &hhid,int &sizefactor) {
   
   // define Variables
   int n = hhsize.size();
@@ -111,71 +111,81 @@ IntegerVector sumVec(IntegerVector init_weight,int sizefactor){
   return init_hh;
 }
 
-// [[Rcpp::export(select_equal)]]
-List select_equal(IntegerVector x,int val1, int val2){
+
+// help function to calculate probabilites using x and an index matrix
+// used to calculate sampling probabilities
+// probabilities <- sum(x[indexMat(i,_)])
+// if probabilities <=0 ==> exp(sum(x[indexMat(i,_)]))
+// x = vector containing differencen
+// indexMat = matrix containing indices which subset x
+// initWeight = 0-1 vector
+// [[Rcpp::export]]
+Rcpp::List calcProbabilities(Rcpp::IntegerMatrix &indexMat, Rcpp::NumericVector &x, Rcpp::IntegerVector &indexData, Rcpp::IntegerVector &initWeight){
   
-  int n1 = sum(x==val1);
-  int n2 = sum(x==val2);
-  int k1 = 0;
-  int k2 = 0;
-  IntegerVector out1(n1);
-  IntegerVector out2(n2);
+  int nrow = indexMat.nrow();
+  Rcpp::NumericVector probAdd(nrow);
+  Rcpp::NumericVector helpVec(indexMat.ncol());
+  Rcpp::LogicalVector negIndex(nrow);
+  double sumNegatives = 0.0;
+  double sumPositives = 0.0;
   
-  for(int i=0;i<x.size();i++){
-   if(x[i]==val1){
-     out1[k1] = i;
-     k1 = k1+1;
-   }
-   if(x[i]==val2){
-     out2[k2] = i;
-     k2 = k2+1;
-   }
+  // get probabilites for adding
+  for(int i=0;i<nrow;i++){
+    helpVec = x[indexMat(i,_)];
+    probAdd[i] = sum(helpVec);
+    negIndex[i] = probAdd[i]<=0;
+    if(negIndex[i]){
+      sumNegatives += probAdd[i];
+    }else{
+      sumPositives += probAdd[i];
+    }
   }
   
-  return Rcpp::List::create(Rcpp::Named("hh_1") = out1,
-                     Rcpp::Named("hh_2") = out2);
+  // get probabilities for removing
+  Rcpp::NumericVector probRemove = probAdd*-1;
   
-}
-
-
-// [[Rcpp::export]]
-std::map<int,int> tableC(IntegerVector x){
-  // Create a map
-  std::map<int, int> tab;
+  // addjust probabilities for negative differences
+  probAdd[negIndex] = exp(sumNegatives);
+  probRemove[!negIndex] = exp(-1*sumPositives);
   
-  tab.clear();
+  // get probabilites for each index in indexData
+  // considering initWeight
+  int Ones = sum(initWeight==1);
+  int Zeros = sum(initWeight==0);
+  int nAdd = 0;
+  int nRemove = 0;
+  int helpIndex = 0;
+  int sizeData = indexData.size();
+  std::vector<int> selectRemove(Ones);
+  std::vector<int> selectAdd(Zeros);
+  std::vector<double> probAdd_out(Zeros);
+  std::vector<double> probRemove_out(Ones);
   
-  // Fill the map with occurrences per number.
-  for (int i = 0; i < x.size(); ++i) {
-    tab[ x[i] ] += 1;
+  for(int i=0; i<initWeight.size();i++){
+    helpIndex =  indexData[i % sizeData];
+    if(initWeight[i]==0 && probAdd[helpIndex]>0){
+      selectAdd[nAdd] = i;
+      probAdd_out[nAdd] = probAdd[helpIndex];
+      nAdd = nAdd+1;
+    }
+    if(initWeight[i]==1 && probRemove[helpIndex]>0){
+      selectRemove[nRemove] = i;
+      probRemove_out[nRemove] = probRemove[helpIndex];
+      nRemove = nRemove+1;
+    }
   }
-  return tab;
+  probAdd_out.resize(nAdd);
+  probRemove_out.resize(nRemove);
+  selectAdd.resize(nAdd);
+  selectRemove.resize(nRemove);
+  
+  
+  return Rcpp::List::create(Rcpp::Named("probAdd") = probAdd_out,
+                            Rcpp::Named("indexAdd") = selectAdd,
+                            Rcpp::Named("probRemove") = probRemove_out,
+                            Rcpp::Named("indexRemove") = selectRemove,
+                            Rcpp::Named("nAdd") = nAdd,
+                            Rcpp::Named("nRemove") = nRemove);
+  
 }
 
-// [[Rcpp::export]]
-IntegerVector csample_num( IntegerVector x,
-                           int size,
-                           bool replace,
-                           NumericVector prob = NumericVector::create()){
-  IntegerVector ret = RcppArmadillo::sample(x, size, replace, prob);
-  return ret;
-}
-
-// [[Rcpp::export]]
-IntegerVector sample_group(IntegerVector x, IntegerVector group_x, IntegerVector group, IntegerVector group_num,bool replace){
-  
-  int n = group.size();
-  IntegerVector out(sum(group_num));
-  int out_pos =0;
-  
-  for(int i=0;i<n;i++){
-   // sample integer values
-   IntegerVector sample_i = csample_num(x[group_x==group[i]],group_num[i],replace);
-   
-   for(int j=0;j<sample_i.size();j++){
-     out[j+out_pos] = sample_i[j];
-   }
-   out_pos = out_pos+sample_i.size();
-  }
-  return out;
-}
