@@ -138,6 +138,29 @@ Rcpp::List splitVector(Rcpp::IntegerVector &x){
   
 }
 
+// helpfunction to calcualte probabilities for each
+// case
+// called inside c++ function calcProbabilities()
+//
+// [[Rcpp::export]]
+double calcCase(Rcpp::NumericVector &x){
+
+  double probx = 0;
+  if(sum(x)!=0){
+    // if different from 0
+    // calculate mean of x multiplied by weighted sum over sign(x)
+    double meanx = std::abs(mean(x));
+    //Rcpp::NumericVector signx = as<NumericVector>(sign(x));
+    double wmSign = sum(as<NumericVector>(sign(x))*x)/sum(x);
+
+    probx = meanx*wmSign;
+    
+  }
+  
+  return probx;
+  
+}  
+
 // help function to calculate probabilites using x and an index matrix
 // used to calculate sampling probabilities
 // probabilities <- sum(x[indexMat(i,_)])
@@ -159,7 +182,7 @@ Rcpp::List calcProbabilities(Rcpp::IntegerMatrix &indexMat, Rcpp::NumericVector 
   // get probabilites for adding
   for(int i=0;i<nrow;i++){
     helpVec = x[indexMat(i,_)];
-    probAdd[i] = sum(helpVec);
+    probAdd[i] = calcCase(helpVec);
     negIndex[i] = probAdd[i]<=0;
     if(negIndex[i]){
       sumNegatives += probAdd[i];
@@ -178,28 +201,42 @@ Rcpp::List calcProbabilities(Rcpp::IntegerMatrix &indexMat, Rcpp::NumericVector 
   // get probabilites for each index in indexData
   // considering initWeight
   int helpIndex = 0;
+  int kRemove = 0;
+  int kAdd = 0;
   int sizeData = indexData.size();
   int Ones = indexRemove.size();
   int Zeros = indexAdd.size();
   std::vector<double> probAdd_out(Zeros);
   std::vector<double> probRemove_out(Ones);
+  std::vector<int> indexRemoveNew(Ones);
+  std::vector<int> indexAddNew(Zeros);
   
 
   for(int i=0; i<std::max(Ones,Zeros);i++){
     helpIndex =  indexData[i % sizeData];
-    if(i<Zeros){
-      probAdd_out[i] = probAdd[helpIndex];
+    if(i<Zeros && probAdd[helpIndex]>0){
+      indexAddNew[kAdd] = indexAdd[i];
+      probAdd_out[kAdd] = probAdd[helpIndex];
+      kAdd = kAdd +1;
     }
-    if(i<Ones){
-      probRemove_out[i] = probRemove[helpIndex];
+    if(i<Ones && probRemove[helpIndex]>0){
+      indexRemoveNew[kRemove] = indexRemove[i];
+      probRemove_out[kRemove] = probRemove[helpIndex];
+      kRemove = kRemove+1;
     }
   }
+  probRemove_out.resize(kRemove);
+  indexRemoveNew.resize(kRemove);
+  probAdd_out.resize(kAdd);
+  indexAddNew.resize(kAdd);
   
   
   return Rcpp::List::create(Rcpp::Named("probAdd") = probAdd_out,
                             Rcpp::Named("probRemove") = probRemove_out,
-                            Rcpp::Named("nAdd") = Zeros,
-                            Rcpp::Named("nRemove") = Ones);
+                            Rcpp::Named("indexRemove") = indexRemoveNew,
+                            Rcpp::Named("indexAdd") = indexAddNew,
+                            Rcpp::Named("nAdd") = kAdd,
+                            Rcpp::Named("nRemove") = kRemove);
 }
 
 

@@ -104,6 +104,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// calcCase
+double calcCase(Rcpp::NumericVector& x);
+RcppExport SEXP _simPop_calcCase(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(calcCase(x));
+    return rcpp_result_gen;
+END_RCPP
+}
 // calcProbabilities
 Rcpp::List calcProbabilities(Rcpp::IntegerMatrix& indexMat, Rcpp::NumericVector& x, Rcpp::IntegerVector& indexData, Rcpp::IntegerVector& initWeight, Rcpp::IntegerVector& indexAdd, Rcpp::IntegerVector& indexRemove);
 RcppExport SEXP _simPop_calcProbabilities(SEXP indexMatSEXP, SEXP xSEXP, SEXP indexDataSEXP, SEXP initWeightSEXP, SEXP indexAddSEXP, SEXP indexRemoveSEXP) {
