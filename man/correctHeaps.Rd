@@ -4,8 +4,7 @@
 \alias{correctHeaps}
 \title{Correct  age heaping}
 \usage{
-correctHeaps(x, heaps = "10year", method = "lnorm", start = 0,
-  fixed = NULL)
+correctHeaps(x, heaps = "10year", method = "lnorm", start = 0, fixed = NULL)
 }
 \arguments{
 \item{x}{numeric vector}

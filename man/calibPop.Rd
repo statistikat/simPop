@@ -5,13 +5,29 @@
 \alias{calibPop}
 \title{Calibration of 0/1 weights by Simulated Annealing}
 \usage{
-calibPop(inp, split = NULL, splitUpper = NULL, temp = 1,
-  epsP.factor = 0.05, epsH.factor = 0.05, epsMinN = 0,
-  maxiter = 200, temp.cooldown = 0.9, factor.cooldown = 0.85,
-  min.temp = 10^-3, nr_cpus = NULL, sizefactor = 2,
-  choose.temp = TRUE, choose.temp.factor = 0.2, scale.redraw = 0.5,
-  observe.times = 50, observe.break = 0.05, verbose = FALSE,
-  hhTables = NULL, persTables = NULL)
+calibPop(
+  inp,
+  split = NULL,
+  splitUpper = NULL,
+  temp = 1,
+  epsP.factor = 0.05,
+  epsH.factor = 0.05,
+  epsMinN = 0,
+  maxiter = 200,
+  temp.cooldown = 0.9,
+  factor.cooldown = 0.85,
+  min.temp = 10^-3,
+  nr_cpus = NULL,
+  sizefactor = 2,
+  choose.temp = TRUE,
+  choose.temp.factor = 0.2,
+  scale.redraw = 0.5,
+  observe.times = 50,
+  observe.break = 0.05,
+  verbose = FALSE,
+  hhTables = NULL,
+  persTables = NULL
+)
 }
 \arguments{
 \item{inp}{an object of class \code{\linkS4class{simPopObj}} with slot

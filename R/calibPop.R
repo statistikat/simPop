@@ -303,7 +303,7 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
   
   # check persTables
   if(verbose){
-    cat("\nCheck Household-Tables\n")
+    cat("\nCheck Person-Tables\n")
   }
   persTables <- checkTables(persTables,namesData=copy(colnames(data)),split=split,verbose=verbose)
   

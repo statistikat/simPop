@@ -22,6 +22,7 @@ IntegerVector updateVecC(IntegerVector &init_weight,IntegerVector &add_index, In
   IntegerVector add_id(n_add);
   IntegerVector remove_id(n_remove);
   
+  /*
   // transform index_add values and index_remove values
   // define row for removal and adding
   for(int i=0;i<n_ar;i++){
@@ -32,6 +33,7 @@ IntegerVector updateVecC(IntegerVector &init_weight,IntegerVector &add_index, In
       add_id[i] = add_index[i] % n;
     }
   }
+   */
   //return add_id;
   // got through add_index and remove_index
   // and select update init_weight using hhsize and hhid
@@ -40,13 +42,14 @@ IntegerVector updateVecC(IntegerVector &init_weight,IntegerVector &add_index, In
     if(i<n_remove){
       //remove household 
       // select size and id using modulus operator
-      size = hhsize[remove_id[i]];
-      id = hhid[remove_id[i]];
+      id_index = remove_index[i] % n;
+      size = hhsize[id_index];
+      id = hhid[id_index];
       
       j_low = remove_index[i]-(size-1);
-      j_low = std::max(remove_index[i]-remove_index[i]%n,j_low);
+      j_low = std::max(remove_index[i]-id_index,j_low);
       j_high = remove_index[i]+(size-1);
-      j_high = std::min(j_high,remove_index[i]+n-remove_index[i]%n);
+      j_high = std::min(j_high,remove_index[i]+n-id_index);
       
       count_size =0; //set counter to zero
       
@@ -68,17 +71,16 @@ IntegerVector updateVecC(IntegerVector &init_weight,IntegerVector &add_index, In
     if(i<n_add){
       // add household
       // select size and id using modulus operator
-      size = hhsize[add_id[i]];
-      id = hhid[add_id[i]];
+      id_index = add_index[i] % n;
+      size = hhsize[id_index];
+      id = hhid[id_index];
       
       j_low = add_index[i]-(size-1);
-      j_low = std::max(add_index[i]-add_index[i]%n,j_low);
+      j_low = std::max(add_index[i]-id_index,j_low);
       j_high = add_index[i]+(size-1);
-      j_high = std::min(j_high,add_index[i]+n-add_index[i]%n);
-      
+      j_high = std::min(j_high,add_index[i]+n-id_index);
       count_size =0; //set counter to zero
       for(int j=j_low;j<(j_high+1);j++){
-        
         id_index = j % n;
         
         // replace init_weight only if hhid at id_index has same household id
@@ -111,6 +113,30 @@ IntegerVector sumVec(IntegerVector init_weight,int sizefactor){
   return init_hh;
 }
 
+// helpfunction to split vector between 0 and 1
+// [[Rcpp::export]]
+Rcpp::List splitVector(Rcpp::IntegerVector &x){
+  
+  int ones = 0;
+  int zeros = 0;
+  int nOnes = sum(x);
+  Rcpp::IntegerVector xOnes(nOnes);
+  Rcpp::IntegerVector xZeros(x.size()-nOnes);
+  
+  for(int i=0;i<x.size();i++){
+    if(x[i]==1){
+      xOnes[ones] = i;
+      ones += 1;
+    }else{
+      xZeros[zeros] = i;
+      zeros += 1;
+    }
+  }
+  
+  return Rcpp::List::create(Rcpp::Named("indexAdd") = xZeros,
+                            Rcpp::Named("indexRemove") = xOnes);
+  
+}
 
 // help function to calculate probabilites using x and an index matrix
 // used to calculate sampling probabilities
@@ -120,7 +146,8 @@ IntegerVector sumVec(IntegerVector init_weight,int sizefactor){
 // indexMat = matrix containing indices which subset x
 // initWeight = 0-1 vector
 // [[Rcpp::export]]
-Rcpp::List calcProbabilities(Rcpp::IntegerMatrix &indexMat, Rcpp::NumericVector &x, Rcpp::IntegerVector &indexData, Rcpp::IntegerVector &initWeight){
+Rcpp::List calcProbabilities(Rcpp::IntegerMatrix &indexMat, Rcpp::NumericVector &x, Rcpp::IntegerVector &indexData, Rcpp::IntegerVector &initWeight,
+                             Rcpp::IntegerVector &indexAdd, Rcpp::IntegerVector &indexRemove){
   
   int nrow = indexMat.nrow();
   Rcpp::NumericVector probAdd(nrow);
@@ -150,42 +177,29 @@ Rcpp::List calcProbabilities(Rcpp::IntegerMatrix &indexMat, Rcpp::NumericVector 
   
   // get probabilites for each index in indexData
   // considering initWeight
-  int Ones = sum(initWeight==1);
-  int Zeros = sum(initWeight==0);
-  int nAdd = 0;
-  int nRemove = 0;
   int helpIndex = 0;
   int sizeData = indexData.size();
-  std::vector<int> selectRemove(Ones);
-  std::vector<int> selectAdd(Zeros);
+  int Ones = indexRemove.size();
+  int Zeros = indexAdd.size();
   std::vector<double> probAdd_out(Zeros);
   std::vector<double> probRemove_out(Ones);
   
-  for(int i=0; i<initWeight.size();i++){
+
+  for(int i=0; i<std::max(Ones,Zeros);i++){
     helpIndex =  indexData[i % sizeData];
-    if(initWeight[i]==0 && probAdd[helpIndex]>0){
-      selectAdd[nAdd] = i;
-      probAdd_out[nAdd] = probAdd[helpIndex];
-      nAdd = nAdd+1;
+    if(i<Zeros){
+      probAdd_out[i] = probAdd[helpIndex];
     }
-    if(initWeight[i]==1 && probRemove[helpIndex]>0){
-      selectRemove[nRemove] = i;
-      probRemove_out[nRemove] = probRemove[helpIndex];
-      nRemove = nRemove+1;
+    if(i<Ones){
+      probRemove_out[i] = probRemove[helpIndex];
     }
   }
-  probAdd_out.resize(nAdd);
-  probRemove_out.resize(nRemove);
-  selectAdd.resize(nAdd);
-  selectRemove.resize(nRemove);
   
   
   return Rcpp::List::create(Rcpp::Named("probAdd") = probAdd_out,
-                            Rcpp::Named("indexAdd") = selectAdd,
                             Rcpp::Named("probRemove") = probRemove_out,
-                            Rcpp::Named("indexRemove") = selectRemove,
-                            Rcpp::Named("nAdd") = nAdd,
-                            Rcpp::Named("nRemove") = nRemove);
-  
+                            Rcpp::Named("nAdd") = Zeros,
+                            Rcpp::Named("nRemove") = Ones);
 }
+
 

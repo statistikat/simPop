@@ -4,11 +4,24 @@
 \alias{simRelation}
 \title{Simulate categorical variables of population data}
 \usage{
-simRelation(simPopObj, relation = "relate", head = "head",
-  direct = NULL, additional, limit = NULL, censor = NULL,
-  maxit = 500, MaxNWts = 2000, eps = NULL, nr_cpus = NULL,
-  seed = 1, regModel = NULL, verbose = FALSE,
-  method = c("multinom", "ctree", "cforest", "ranger"), by = "strata")
+simRelation(
+  simPopObj,
+  relation = "relate",
+  head = "head",
+  direct = NULL,
+  additional,
+  limit = NULL,
+  censor = NULL,
+  maxit = 500,
+  MaxNWts = 2000,
+  eps = NULL,
+  nr_cpus = NULL,
+  seed = 1,
+  regModel = NULL,
+  verbose = FALSE,
+  method = c("multinom", "ctree", "cforest", "ranger"),
+  by = "strata"
+)
 }
 \arguments{
 \item{simPopObj}{a \code{simPopObj} containing population and household

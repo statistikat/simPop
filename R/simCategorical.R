@@ -101,8 +101,6 @@ generateValues <- function(dataSample, dataPop, params) {
     # local function for sampling from probabilities
     if ( length(ind) == 1 ) {
       resample <- function(k, n, p) rep.int(1, n[k])
-    } else if ( length(ind) == 2 ) {
-      resample <- function(k, n, p) spSample(n[k], c(1-p[k],p[k]))
     } else {
       resample <- function(k, n, p) spSample(n[k], p[k,])
     }

@@ -32,7 +32,7 @@ simulateValues <- function(dataSample, dataPop, params) {
   TF_direct_pop <- dataPop[[relation]] %in% direct
   
 
-    # first step: simulate category of household head
+  # first step: simulate category of household head
   # sample data
   indSampleHead <- which(TF_head_samp)
   dataSampleWork <- dataSample[indSampleHead, ]
@@ -84,9 +84,6 @@ simulateValues <- function(dataSample, dataPop, params) {
   }else if ( meth %in% c("ctree","cforest") ) {
     probs <- predict(mod, newdata=data.table(newdata), type="prob")
     probs <- do.call("rbind",probs)
-    if(ncol(probs)==2){
-      probs <- probs[,2]
-    }
   }else if ( meth %in% c("ranger") ) {
     probs <- predict(mod,data=newdata,type="response")$predictions
   }
@@ -110,8 +107,6 @@ simulateValues <- function(dataSample, dataPop, params) {
   # local function for sampling from probabilities
   if ( length(ind) == 1 ) {
     resample <- function(k, n, p) rep.int(1, n[k])
-  } else if ( length(ind) == 2 ) {
-    resample <- function(k, n, p) spSample(n[k], c(1-p[k],p[k]))
   } else {
     resample <- function(k, n, p) spSample(n[k], p[k,])
   }
@@ -396,7 +391,6 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
   
   dataS <- sampleObj(simPopObj)
   dataP <- popObj(simPopObj)
-  data_pop_o <- copy(popData(simPopObj))
   data_pop <- popData(simPopObj)
   data_sample <- sampleData(simPopObj)
   basic <- simPopObj@basicHHvars
@@ -540,7 +534,7 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
     
     # variables are coerced to factors
     sampWork <- checkFactor(sampWork, unique(c(curStrata, additional)))
-    data_pop <- checkFactor(data_pop_o, unique(c(curStrata)))
+    data_pop <- checkFactor(data_pop, unique(c(curStrata)))
     # components of multinomial model are specified
     levelsResponse <- levels(sampWork[[i]])
     # simulation of variables using a sequence of multinomial models
@@ -671,9 +665,9 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
 
     ## add new categorical variable to data set
     values <- factor(unsplit(values, data_pop[[curStrata]]), levels=levelsResponse)
-    data_pop_o[[i]] <- values
+    data_pop[[i]] <- values
   }
   # return simulated data
-  simPopObj@pop@data <- data_pop_o
+  simPopObj@pop@data <- data_pop
   invisible(simPopObj)
 }

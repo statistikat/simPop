@@ -4,8 +4,15 @@
 \alias{specifyInput}
 \title{create an object of class 'dataObj' required for further processing}
 \usage{
-specifyInput(data, hhid, hhsize = NULL, pid = NULL, weight = NULL,
-  strata = NULL, population = FALSE)
+specifyInput(
+  data,
+  hhid,
+  hhsize = NULL,
+  pid = NULL,
+  weight = NULL,
+  strata = NULL,
+  population = FALSE
+)
 }
 \arguments{
 \item{data}{a \code{data.frame} or \code{data.table} featuring sample data.}
