@@ -251,12 +251,12 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
         ## choose wether to accepts the resample
         diffObj <- objective - objective_new
         changed <- FALSE
-        cat("diffObj=", diffObj,"\n")
-        cat("objective=",objective,"\n")
-        cat("objective_new=",objective_new,"\n")
+        # cat("diffObj=", diffObj,"\n")
+        # cat("objective=",objective,"\n")
+        # cat("objective_new=",objective_new,"\n")
         # diffObj
         if ( diffObj>=0 ) { 
-          cat("solution improved!\n")
+          # cat("solution improved!\n")
           marginTable <- copy(marginTable_new)
           data0[,weight_choose:=weight_choose_new]
           init_weight <- copy(init_weight_new)
@@ -289,7 +289,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
           
           if ( x == 1 ) { 
             
-            cat("new solution accepted!\n")
+            # cat("new solution accepted!\n")
             marginTable <- copy(marginTable_new)
             data0[,weight_choose:=weight_choose_new]
             init_weight <- copy(init_weight_new)
