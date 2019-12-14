@@ -166,14 +166,14 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   
   noChange <- 0
   updatepSet <- TRUE
-  cat(paste0("Starting simulated Annealing for ",split," ",split.level,"\n"))
+  message(paste0("Starting simulated Annealing for ",split," ",split.level,"\n"))
   ######################################
   # apply simulated annealing
   if ( marginTable[,all(eps>=abs(Diff))] ) {
     setkeyv(data0,"sim_ID")
     selectVars <- c(hhid,params[["pid"]],"weight_choose")
     out <- data0[, selectVars, with = FALSE]
-    cat(paste0("Convergence successfull for ",split," ",split.level),"\n")
+    message(paste0("Convergence successfull for ",split," ",split.level),"\n")
   } else {
     
     ## if objective not fullfilled continue with simannealing
@@ -184,21 +184,21 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
       
       while( n<maxiter) {
         
-        # cat("n=",n,"\n")
+        # message("n=",n,"\n")
         # scale redraw for add and remove to keep synthetic totals stable
         
-        # cat("set redrawgap")
+        # message("set redrawgap")
         # redraw_gap <- setRedrawGap(totals0 = totals0,med_hh = med_hh, scale.redraw = scale.redraw)
         redraw_gap <- marginTable[,mean.default(Diff)]*scale.redraw
-        # cat("done")
+        # message("done")
         redraw_add <- max(ceiling(redraw+redraw_gap),1)
         redraw_remove <- max(ceiling(redraw-redraw_gap),1)
         
         #####################################
         # resample
         # get weights for resampling
-        # cat("get probabilities\n")
-        # cat("merge with data0\n")
+        # message("get probabilities\n")
+        # message("merge with data0\n")
         x <- marginTable[,Diff]
         probAdd <- apply(indexMatrix,1,function(z){
           if(sum(x[z+1])==0){
@@ -262,7 +262,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
         # pSet$nAdd <- 10
         # pSet$nRemove <- 10
         # indexdata0[head(pSet$indexAdd[order(pSet$probAdd,decreasing = TRUE)])]
-        # cat("draw sample\n")
+        # message("draw sample\n")
         
         # set.seed(seedX[n])
         add_hh <- pSet[["indexAdd"]][sample_int_crank(pSet[["nAdd"]],
@@ -308,7 +308,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
         # objective
         # marginTable_new[,sum(abs(Diff)^2),by=.(GROUP)][,sqrt(mean(V1))]
         # marginTable[,sum(abs(Diff)^2),by=.(GROUP)]
-        # cat("compare results\n")
+        # message("compare results\n")
         ######################################
         ## if new sample fullfils marginals -> terminate
         if ( marginTable_new[,all(eps>=abs(Diff))] ) {
@@ -318,18 +318,18 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
           break
         }
         # data0[weight_choose_new>weight_choose,.N,by=c(marginNames)][order(N)]
-        # cat("number households to have:",mean(sapply(totals0,function(z){sum(z$Freq)})),"\n")
-        # cat("number households sampled:",data0[!duplicated(hid),sum(weight_choose_new)],"\n")
+        # message("number households to have:",mean(sapply(totals0,function(z){sum(z$Freq)})),"\n")
+        # message("number households sampled:",data0[!duplicated(hid),sum(weight_choose_new)],"\n")
         ######################################
         ## choose wether to accepts the resample
         diffObj <- objective - objective_new
-        # cat("diffObj=", diffObj,"\n")
-        # cat("objective=",objective,"\n")
-        # cat("objective_new=",objective_new,"\n")
+        # message("diffObj=", diffObj,"\n")
+        # message("objective=",objective,"\n")
+        # message("objective_new=",objective_new,"\n")
         
         # diffObj
         if ( diffObj>=0 ) { 
-          # cat("solution improved!\n")
+          # message("solution improved!\n")
           marginTable <- copy(marginTable_new)
           data0[,weight_choose:=weight_choose_new]
           init_weight <- copy(init_weight_new)
@@ -362,7 +362,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
           
           if ( x == 1 ) { 
             
-            # cat("new solution accepted!\n")
+            # message("new solution accepted!\n")
             marginTable <- copy(marginTable_new)
             data0[,weight_choose:=weight_choose_new]
             init_weight <- copy(init_weight_new)
@@ -399,7 +399,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
           break # break if solution does not move
         }
       }
-      cat("cooldown\n")
+      message("cooldown\n")
       ## decrease temp and decrease factor accordingly
       ## decrease temp by a const fraction (simple method used for testing only)
       noChange <- 0
@@ -410,7 +410,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
       }
       cooldown <- cooldown + 1
       if(cooldown%%10==0){
-        cat(paste0("Cooldown number ",cooldown,"\n"))
+        message(paste0("Cooldown number ",cooldown,"\n"))
       }
       if ( marginTable[,all(eps>=abs(Diff))] | cooldown == 500 | redraw<2) {
         break
@@ -419,9 +419,9 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
 
     # check if convergence was successfull
     if(!marginTable[,all(eps>=abs(Diff))]){
-      cat(paste0("Convergence NOT successfull for ",split," ",split.level),"\n")
+      message(paste0("Convergence NOT successfull for ",split," ",split.level),"\n")
     }else{
-      cat(paste0("Convergence successfull for ",split," ",split.level),"\n")
+      message(paste0("Convergence successfull for ",split," ",split.level),"\n")
     }
     setkeyv(data0,"sim_ID")
     selectVars <- c(hhid,params[["pid"]],"weight_choose")
