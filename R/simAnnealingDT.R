@@ -184,7 +184,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
       
       while( n<maxiter) {
         
-        cat("n=",n,"\n")
+        # cat("n=",n,"\n")
         # scale redraw for add and remove to keep synthetic totals stable
         
         # cat("set redrawgap")
