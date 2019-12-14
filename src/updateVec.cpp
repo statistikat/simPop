@@ -151,7 +151,7 @@ double calcCase(Rcpp::NumericVector &x){
     // calculate mean of x multiplied by weighted sum over sign(x)
     double meanx = std::abs(mean(x));
     //Rcpp::NumericVector signx = as<NumericVector>(sign(x));
-    double wmSign = sum(as<NumericVector>(sign(x))*x)/sum(x);
+    double wmSign = sum(abs(x))/sum(x);
 
     probx = meanx*wmSign;
     
@@ -169,7 +169,7 @@ double calcCase(Rcpp::NumericVector &x){
 // indexMat = matrix containing indices which subset x
 // initWeight = 0-1 vector
 // [[Rcpp::export]]
-Rcpp::List calcProbabilities(Rcpp::IntegerMatrix &indexMat, Rcpp::NumericVector &x, Rcpp::IntegerVector &indexData, Rcpp::IntegerVector &initWeight,
+Rcpp::List calcProbabilities(Rcpp::IntegerMatrix &indexMat, Rcpp::NumericVector &x, Rcpp::NumericVector &Npop, Rcpp::IntegerVector &indexData, Rcpp::IntegerVector &initWeight,
                              Rcpp::IntegerVector &indexAdd, Rcpp::IntegerVector &indexRemove){
   
   int nrow = indexMat.nrow();
@@ -182,7 +182,7 @@ Rcpp::List calcProbabilities(Rcpp::IntegerMatrix &indexMat, Rcpp::NumericVector 
   // get probabilites for adding
   for(int i=0;i<nrow;i++){
     helpVec = x[indexMat(i,_)];
-    probAdd[i] = calcCase(helpVec);
+    probAdd[i] = calcCase(helpVec)/Npop[i];
     negIndex[i] = probAdd[i]<=0;
     if(negIndex[i]){
       sumNegatives += probAdd[i];
@@ -206,6 +206,17 @@ Rcpp::List calcProbabilities(Rcpp::IntegerMatrix &indexMat, Rcpp::NumericVector 
   int sizeData = indexData.size();
   int Ones = indexRemove.size();
   int Zeros = indexAdd.size();
+  
+  /*
+  Rcpp::NumericVector probAdd_help = probAdd[indexData][indexAdd % sizeData];
+  Rcpp::NumericVector probRemove_help = probRemove[indexData][indexRemove % sizeData];
+  Rcpp::LogicalVector addPos = probAdd_help>0;
+  Rcpp::LogicalVector removePos = probRemove_help>0;
+  Rcpp::IntegerVector indexAddNew = indexAdd[addPos];
+  Rcpp::IntegerVector indexRemoveNew = indexRemove[removePos];
+  Rcpp::NumericVector probAdd_out = probAdd_help[addPos];
+  Rcpp::NumericVector probRemove_out = probRemove_help[removePos];
+   */
   std::vector<double> probAdd_out(Zeros);
   std::vector<double> probRemove_out(Ones);
   std::vector<int> indexRemoveNew(Ones);
@@ -213,16 +224,21 @@ Rcpp::List calcProbabilities(Rcpp::IntegerMatrix &indexMat, Rcpp::NumericVector 
   
 
   for(int i=0; i<std::max(Ones,Zeros);i++){
-    helpIndex =  indexData[i % sizeData];
-    if(i<Zeros && probAdd[helpIndex]>0){
-      indexAddNew[kAdd] = indexAdd[i];
-      probAdd_out[kAdd] = probAdd[helpIndex];
-      kAdd = kAdd +1;
+    if(i<Zeros){ // && 
+      helpIndex =  indexData[indexAdd[i] % sizeData];
+      if(probAdd[helpIndex]>0){
+        indexAddNew[kAdd] = indexAdd[i];
+        probAdd_out[kAdd] = probAdd[helpIndex];
+        kAdd = kAdd +1;
+      }
     }
-    if(i<Ones && probRemove[helpIndex]>0){
-      indexRemoveNew[kRemove] = indexRemove[i];
-      probRemove_out[kRemove] = probRemove[helpIndex];
-      kRemove = kRemove+1;
+    if(i<Ones){ //
+      helpIndex =  indexData[indexRemove[i] % sizeData];
+      if(probRemove[helpIndex]>0){
+        indexRemoveNew[kRemove] = indexRemove[i];
+        probRemove_out[kRemove] = probRemove[helpIndex];
+        kRemove = kRemove+1;
+      }
     }
   }
   probRemove_out.resize(kRemove);

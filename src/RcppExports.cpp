@@ -116,18 +116,19 @@ BEGIN_RCPP
 END_RCPP
 }
 // calcProbabilities
-Rcpp::List calcProbabilities(Rcpp::IntegerMatrix& indexMat, Rcpp::NumericVector& x, Rcpp::IntegerVector& indexData, Rcpp::IntegerVector& initWeight, Rcpp::IntegerVector& indexAdd, Rcpp::IntegerVector& indexRemove);
-RcppExport SEXP _simPop_calcProbabilities(SEXP indexMatSEXP, SEXP xSEXP, SEXP indexDataSEXP, SEXP initWeightSEXP, SEXP indexAddSEXP, SEXP indexRemoveSEXP) {
+Rcpp::List calcProbabilities(Rcpp::IntegerMatrix& indexMat, Rcpp::NumericVector& x, Rcpp::NumericVector& Npop, Rcpp::IntegerVector& indexData, Rcpp::IntegerVector& initWeight, Rcpp::IntegerVector& indexAdd, Rcpp::IntegerVector& indexRemove);
+RcppExport SEXP _simPop_calcProbabilities(SEXP indexMatSEXP, SEXP xSEXP, SEXP NpopSEXP, SEXP indexDataSEXP, SEXP initWeightSEXP, SEXP indexAddSEXP, SEXP indexRemoveSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::IntegerMatrix& >::type indexMat(indexMatSEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type Npop(NpopSEXP);
     Rcpp::traits::input_parameter< Rcpp::IntegerVector& >::type indexData(indexDataSEXP);
     Rcpp::traits::input_parameter< Rcpp::IntegerVector& >::type initWeight(initWeightSEXP);
     Rcpp::traits::input_parameter< Rcpp::IntegerVector& >::type indexAdd(indexAddSEXP);
     Rcpp::traits::input_parameter< Rcpp::IntegerVector& >::type indexRemove(indexRemoveSEXP);
-    rcpp_result_gen = Rcpp::wrap(calcProbabilities(indexMat, x, indexData, initWeight, indexAdd, indexRemove));
+    rcpp_result_gen = Rcpp::wrap(calcProbabilities(indexMat, x, Npop, indexData, initWeight, indexAdd, indexRemove));
     return rcpp_result_gen;
 END_RCPP
 }
