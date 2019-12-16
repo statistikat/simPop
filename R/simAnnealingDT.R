@@ -143,7 +143,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   
   ######################################
   # evaluate objective
-  objective <- marginTable[eps<abs(Diff),sum(abs(eps-Diff))]
+  objective <- marginTable[eps<abs(Diff),sum(abs(Diff)^2),by=.(GROUP)][,sqrt(mean(V1))]
   
   # define redraw with initial objective value
   redraw <- marginTable[,max(abs(Diff)*2/3)]
@@ -184,7 +184,6 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
       
       while( n<maxiter) {
         
-        # message("n=",n,"\n")
         # scale redraw for add and remove to keep synthetic totals stable
         
         # message("set redrawgap")
@@ -197,16 +196,6 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
         #####################################
         # resample
         # get weights for resampling
-        # message("get probabilities\n")
-        # message("merge with data0\n")
-        x <- marginTable[,Diff]
-        probAdd <- apply(indexMatrix,1,function(z){
-          if(sum(x[z+1])==0){
-            return(0)
-          }else{
-            return(abs(mean(x[z+1]))*sum((sign(x[z+1])*x[z+1]))/sum(x[z+1]))
-          }
-        })
         # probAddC <- apply(indexMatrix,1,function(z){
         #   calcCase(x[z+1])
         # })
@@ -265,12 +254,22 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
         # message("draw sample\n")
         
         # set.seed(seedX[n])
-        add_hh <- pSet[["indexAdd"]][sample_int_crank(pSet[["nAdd"]],
-                                                      min(c(redraw_add,pSet[["nAdd"]])),
-                                                      prob=pSet[["probAdd"]])]
-        remove_hh <- pSet[["indexRemove"]][sample_int_crank(pSet[["nRemove"]],
-                                                                      min(c(redraw_remove,pSet[["nRemove"]])),
-                                                                      prob=pSet[["probRemove"]])]
+        if(pSet[["nAdd"]]>0){
+          add_hh <- pSet[["indexAdd"]][sample_int_crank(pSet[["nAdd"]],
+                                                        min(c(redraw_add,pSet[["nAdd"]])),
+                                                        prob=pSet[["probAdd"]])]
+        }else{
+          add_hh <- sample(indexAddRemove[["indexAdd"]],min(c(redraw_add,length(indexAddRemove[["indexAdd"]]))))
+        }
+
+        if(pSet[["nRemove"]]>0){
+          remove_hh <- pSet[["indexRemove"]][sample_int_crank(pSet[["nRemove"]],
+                                                              min(c(redraw_remove,pSet[["nRemove"]])),
+                                                              prob=pSet[["probRemove"]])]
+        }else{
+          remove_hh <- sample(indexAddRemove[["indexRemove"]],min(c(redraw_add,length(indexAddRemove[["indexRemove"]]))))
+        }
+
         # set.seed(seedX[n])
         # add_hh2 <- indexAdd[sample_int_crank(length(indexAdd),
         #                                     min(c(redraw_add,length(indexAdd))),
@@ -303,7 +302,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
         # marginTable_new[,Diffprob:=Diff/factor_med_hh]
         # marginTable_new[abs(Diff)<eps,Diff:=sign(Diff)*sqrt(abs(Diff))]
         
-        objective_new <- marginTable_new[eps<abs(Diff),sum(abs(eps-Diff))]
+        objective_new <- marginTable_new[eps<abs(Diff),sum(abs(Diff)^2),by=.(GROUP)][,sqrt(mean(V1))]
         # objective_new
         # objective
         # marginTable_new[,sum(abs(Diff)^2),by=.(GROUP)][,sqrt(mean(V1))]
@@ -323,10 +322,6 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
         ######################################
         ## choose wether to accepts the resample
         diffObj <- objective - objective_new
-        # message("diffObj=", diffObj,"\n")
-        # message("objective=",objective,"\n")
-        # message("objective_new=",objective_new,"\n")
-        
         # diffObj
         if ( diffObj>=0 ) { 
           # message("solution improved!\n")
@@ -399,10 +394,10 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
           break # break if solution does not move
         }
       }
-      message("cooldown\n")
       ## decrease temp and decrease factor accordingly
       ## decrease temp by a const fraction (simple method used for testing only)
       noChange <- 0
+      updatepSet <- TRUE
       temp <- temp_cooldown*temp
       redraw <- floor(factor_cooldown*redraw)
       if ( redraw == 0 ) {
