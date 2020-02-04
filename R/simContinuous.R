@@ -829,7 +829,11 @@ simContinuous <- function(simPopObj, additional = "netIncome",
       if ( is.null(upper) && gpd ) {
         upper <- Inf
       }
-      breaks <- getBreaks(additionalS, dataS[[weight]], zeros, lower, upper, equidist, probs)
+      weights <- NULL
+      if(!is.null(weight)){
+        weights <- dataS[[weight]]
+      }
+      breaks <- getBreaks(additionalS, weights=weights, zeros, lower, upper, equidist, probs)
     }
   } else {
     if(method=="lm"){
