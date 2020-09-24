@@ -27,7 +27,7 @@ Imports:
     foreach,
     colorspace,
     VIM,
-    methods,party,EnvStats,fitdistrplus,ranger,wrswoR,
+    methods,party,EnvStats,fitdistrplus,ranger,wrswoR,xgboost,
     data.table
 Suggests:
     haven,
@@ -92,5 +92,5 @@ Collate:
     'whipple.R'
     'dataSets.R'
     'zzz.R'
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.1
 Encoding: UTF-8
