@@ -14,8 +14,12 @@ test_that("xgboost integration tests",{
   simPop <- simCategorical(simPop,
                            additional=c("pl030", "pb220a"),
                            method="xgboost", nr_cpus=1, seed=10)
+  eusilcM <- simContinuous(simPop, additional="netIncome",
+                           method = "xgboost",
+                           regModel = ~rb090+hsize+pl030+pb220a,
+                           upper=200000, equidist=FALSE, nr_cpus=1)
   
-  x1 <- simPop@pop@data
+  x1 <- eusilcM@pop@data
   
   
   expect_gt(nrow(x1), 0,

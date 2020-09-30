@@ -379,6 +379,22 @@ generateValues_binary <- function(dataSample, dataPop, params) {
   unsplit(sim, dataPop, drop=TRUE)
 }
 
+generateValues_xgboost <- function(dataSample, dataPop, params) {
+  excludeLevels <- params$excludeLevels
+  hasNewLevels <- params$hasNewLevels
+  newLevels <- params$newLevels
+  predNames <- params$predNames
+  name <- params$name
+  weight <- params$weight
+  useAux <- params$useAux
+  tol <- params$tol
+  eps <- params$eps
+  
+  # TODO: implement
+  stop("Not implemented : xgboost")
+  
+}
+
 genVals <- function(dataSample, dataPop, params, typ, response) {
   # unify level-set of predictors
   for ( i in params$predNames ) {
@@ -386,7 +402,7 @@ genVals <- function(dataSample, dataPop, params, typ, response) {
     dataPop[[i]] <- cleanFactor(dataPop[[i]])
   }
 
-  if ( !typ %in% c("multinom","lm","binary","poisson") ) {
+  if ( !typ %in% c("multinom","lm","binary","poisson","xgboost") ) {
     stop("unsupported value for argument 'type' in genVals()\n")
   }
   # Check wheter all response values are the same
@@ -402,6 +418,8 @@ genVals <- function(dataSample, dataPop, params, typ, response) {
     res <- generateValues_multinom(dataSample, dataPop, params)
   }else if ( typ=="poisson") {
     res <- generateValues_poisson(dataSample, dataPop, params)
+  }else if ( typ=="xgboost") {
+    res <- generateValues_xgboost(dataSample, dataPop, params)
   }
   res
 }
@@ -468,6 +486,11 @@ runModel <- function(dataS, dataP, params, typ) {
   }
   if ( typ%in%c("poisson","lm") ) {
     valuesCat <- unsplit(valuesCat, dataP[[strata]], drop=FALSE)
+  }
+  if ( typ==c("xgboost") ) {
+    # TODO: implement
+    stop("Not implemented error")
+    valuesCat <- NULL
   }
   return(valuesCat)
 }
@@ -681,7 +704,7 @@ runModel <- function(dataS, dataP, params, typ) {
 #' }
 #'
 simContinuous <- function(simPopObj, additional = "netIncome",
-  method = c("multinom", "lm","poisson"), zeros = TRUE,
+  method = c("multinom", "lm","poisson", "xgboost"), zeros = TRUE,
   breaks = NULL, lower = NULL, upper = NULL,
   equidist = TRUE, probs = NULL, gpd = TRUE,
   threshold = NULL, est = "moments", limit = NULL,
@@ -820,6 +843,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     useLogit <- FALSE
     useLm <- FALSE
     usePoisson <- FALSE
+    useXgboost <- FALSE
     # define break points (if missing)
     if ( haveBreaks ) {
       checkBreaks(breaks)
@@ -839,12 +863,19 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     if(method=="lm"){
       useLm <- TRUE
       usePoisson <- FALSE
+      useXgboost <- FALSE
     }else if(method=="poisson"){
       useLm <- FALSE
       usePoisson <- TRUE
+      useXgboost <- FALSE
+    }else if(method=="xgboost"){
+      useLm <- FALSE
+      usePoisson <- FALSE
+      useXgboost <- TRUE
     }
 
-    if ( log ) {
+    # TODO: log and xgboost
+    if ( log && !useXgboost ) {
       if ( is.null(const) ) {
         ## use log-transformation
         # check for negative values
@@ -880,6 +911,10 @@ simContinuous <- function(simPopObj, additional = "netIncome",
         useLogit <- zeros || any(additionalS == 0)
         useMultinom <- FALSE
       }
+    } else if (useXgboost) {
+      # TODO: implement
+      useLogit <- FALSE
+      useMultinom <- FALSE
     } else {
       # logistic model is used in case of semi-continuous variable
       useLogit <- zeros
@@ -1147,6 +1182,9 @@ simContinuous <- function(simPopObj, additional = "netIncome",
       params$command <- paste("lm(", fstring,", weights=", weight, ", data=dataSample,x=FALSE,y=FALSE,model=FALSE)", sep="")
     }else if(usePoisson){
       params$command <- paste("glm(", fstring,", weights=", weight, ", data=dataSample,family=poisson(),model=FALSE,x=FALSE,y=FALSE)", sep="")
+    }else if(useXgboost){
+      # TODO: generate xgboost command
+      params$command <- ""
     }
     #params$name <- fname
     params$name <- additional
@@ -1168,6 +1206,8 @@ simContinuous <- function(simPopObj, additional = "netIncome",
       valuesTmp <- runModel(dataSample, dataPop, params, typ="lm")
     }else if(usePoisson){
       valuesTmp <- runModel(dataSample, dataPop, params, typ="poisson")
+    }else if(useXgboost){
+      valuesTmp <- runModel(dataSample, dataPop, params, typ="xgboost")
     }
 
     ## put simulated values together

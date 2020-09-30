@@ -516,6 +516,8 @@ simCategorical <- function(simPopObj, additional,
         xgb.weight <- ""
       }
       
+      # TODO: hyperparam tuning
+      
       formula.cmd <- paste(predNames, collapse = "\",\"")
       formula.cmd <- paste0("xgb.DMatrix(data = model.matrix(~.+0,data = setDT(dataSample)[,c(\"",formula.cmd,"\"), with=F]),
                                         label = as.numeric(dataSample$",i,") - 1
