@@ -71,7 +71,9 @@ generateValues <- function(dataSample, dataPop, params) {
     }else if ( meth %in% c("ranger") ) {
       probs <- predict(mod,data=newdata,type="response")$predictions
       colnames(probs) <- mod$forest$levels
-	  }
+    }else if ( meth %in% c("keras") ) {
+      probs <- predict(mod, data=newdata)
+    }
     #if ( meth %in% "naivebayes" ) {
     #  probs <- predict(mod, newdata=newdata, type="raw")
     #}
@@ -184,6 +186,7 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
 #' \code{"ctree"}  for using Classification trees
 #' \code{"cforest"}  for using random forest (implementation in package party)
 #' \code{"ranger"}  for using random forest (implementation in package ranger)
+#' \code{"keras"}  for neural nets (implementation in package keras)
 #' @param limit if \code{method} is \code{"multinom"}, this can be used to
 #' account for structural zeros. If only one additional variable is requested,
 #' a named list of lists should be supplied. The names of the list components
@@ -260,7 +263,7 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
 #' simPop
 #' }
 simCategorical <- function(simPopObj, additional,
-    method=c("multinom", "distribution","ctree","cforest","ranger"),
+    method=c("multinom", "distribution","ctree","cforest","ranger", "keras"),
     limit=NULL, censor=NULL, maxit=500, MaxNWts=1500,
     eps=NULL, nr_cpus=NULL, regModel=NULL, seed=1,
     verbose=FALSE,by="strata") {
@@ -487,7 +490,42 @@ simCategorical <- function(simPopObj, additional,
 		  formula.cmd <- paste0(formula.cmd, ", data=dataSample,probability=TRUE))", sep="")
 	  	if(verbose) cat("we are running random forest (ranger):\n")
 		  if(verbose) cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
-	}
+    }else if ( method == "keras" ) {
+      if(verbose) cat("we are running a neural net (keras):\n")
+      
+      train.data <- paste0("dataSample[,c(\"",
+                           paste0(predNames, collapse = "\",\""),
+                           "\")]")
+      train.labels <- paste0("dataSample$", i)
+      
+      # TODO: handle categorical input names
+      input.shape <- paste0("c(", length(predNames), ", ", 1, ")") 
+      output.shape <- paste0("length(unique(", train.labels, "))")
+      
+      # to categorical or model.matrix
+      
+      formula.cmd <- paste0(c("model <- keras_model_sequential()  \n",
+                              "model %>% layer_flatten(input_shape = ", input.shape,") %>% \n",
+                              "layer_dense(units = 128, activation = 'relu') %>%  \n",
+                              "layer_dense(units = ",output.shape, ", activation = 'softmax') \n"),
+                            collapse = "")
+      
+      formula.cmd <- paste0(formula.cmd,
+                            "model %>% compile(  
+                              optimizer = 'adam', 
+                              loss = 'sparse_categorical_crossentropy',
+                              metrics = c('accuracy') 
+                            )  \n",
+                            collapse = "")
+      
+      # TODO: convert train.data to matrix
+      formula.cmd <- paste0(formula.cmd,
+                            "model %>% fit(", 
+                            train.data, ", ",
+                            train.labels,", epochs = 5, verbose = 2)  \n ",
+                            collapse = " \n ")
+      # TODO: implement
+    }
     #if ( method == "naivebayes" ) {
     #  formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
     #  formula.cmd <- paste("naiveBayes(", formula.cmd, ", data=dataSample, usekernel=TRUE)", sep="")
