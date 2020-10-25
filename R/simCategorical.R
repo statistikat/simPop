@@ -510,7 +510,6 @@ simCategorical <- function(simPopObj, additional,
       xgb.params <- "list(objective = \"multi:softprob\")"
       
       if(!dataS@ispopulation){
-        weights <- paste0("weight = as.integer(dataSample$", dataS@weight, "),")
         xgb.weight <- paste0(", info = list(\"weight\" = as.integer(dataSample$", dataS@weight, "))")
       }else{
         xgb.weight <- ""

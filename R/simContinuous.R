@@ -380,6 +380,8 @@ generateValues_binary <- function(dataSample, dataPop, params) {
 }
 
 generateValues_xgboost <- function(dataSample, dataPop, params) {
+  
+  # TODO: check which one are need
   excludeLevels <- params$excludeLevels
   hasNewLevels <- params$hasNewLevels
   newLevels <- params$newLevels
@@ -389,9 +391,12 @@ generateValues_xgboost <- function(dataSample, dataPop, params) {
   useAux <- params$useAux
   tol <- params$tol
   eps <- params$eps
+  command <- params$command
   
-  # TODO: implement
-  stop("Not implemented : xgboost")
+  mod <- eval(parse(text=command))
+  
+  pred <- predict(mod,
+                  newdata=xgb.DMatrix(data = model.matrix(~.+0,data = dataPop[, ..predNames])))
   
 }
 
@@ -487,11 +492,10 @@ runModel <- function(dataS, dataP, params, typ) {
   if ( typ%in%c("poisson","lm") ) {
     valuesCat <- unsplit(valuesCat, dataP[[strata]], drop=FALSE)
   }
-  if ( typ==c("xgboost") ) {
-    # TODO: implement
-    stop("Not implemented error")
-    valuesCat <- NULL
+  if ( typ=="xgboost"){
+    valuesCat <- unsplit(valuesCat, dataP[[strata]], drop=FALSE)
   }
+  
   return(valuesCat)
 }
 
@@ -836,7 +840,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
   # sample data of variable to be simulated
   additionalS <- dataS[[additional]]
 
-  ## determine which models to fit and do further initializations
+  ## determine which models to fit and do further initialization
   haveBreaks <- !is.null(breaks)
   if ( method == "multinom" ) {
     useMultinom <- TRUE
@@ -1110,7 +1114,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     valuesCat <- runModel(dataS, dataP, params, typ="binary")
   }
 
-  if ( useLm || usePoisson ) {
+  if ( useLm || usePoisson || useXgboost) {
     ## some preparations
     if ( useMultinom ) {
       catLm <- names(tcat)[ncat]  # category for positive values
@@ -1167,6 +1171,9 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     # auxiliary model for all strata (used in case of empty combinations)
     weights <- dataSample[[weight]]
     if(useLm){
+      # TODO{Sironimo}: fix Fehler in `contrasts<-`(`*tmp*`, value = contr.funs[1 + isOF[nn]]) : 
+      # contrasts can be applied only to factors with 2 or more levels
+      # Question{Sironimo}: use of mod and coef? -> Not used at the moment, in my opinion
       mod <- lm(formula, weights=weights, data=dataSample,x=FALSE,y=FALSE,model=FALSE)
       coef <- coef(mod)
     }else if(usePoisson){
@@ -1183,8 +1190,49 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     }else if(usePoisson){
       params$command <- paste("glm(", fstring,", weights=", weight, ", data=dataSample,family=poisson(),model=FALSE,x=FALSE,y=FALSE)", sep="")
     }else if(useXgboost){
-      # TODO: generate xgboost command
-      params$command <- ""
+
+      # simulation via xgboost
+      if(verbose) cat("we are running xgboost:\n")
+      
+      # set xgb verbose level
+      if(verbose){
+        xgb.verbose <- 1
+      }else{
+        xgb.verbose <- 0
+      }
+      
+      # TODO: set eta, subsample, nrounds -> at the moment default values (except nrounds)
+      # -> make cv hyperparameter tuning
+      # TODO{Siro}: Check if weights are needed or not
+      if(TRUE){
+        xgb.weight <- paste0(", info = list(\"weight\" = as.integer(dataSample$", weight, "))")
+      }else{
+        xgb.weight <- ""
+      }
+      
+      # TODO: hyperparam tuning
+      pred.names <- paste(predNames, collapse = "\",\"")
+      train <- paste0("xgb.DMatrix(data = model.matrix(~.+0,data = setDT(dataSample)[,c(\"",pred.names,"\"), with=F]),
+                                        label = dataSample$",additional,"
+                                        ", xgb.weight,")")
+      
+      # TODO{Sironimo}: add test data to watchlist
+      xgb.params <- paste0("nrounds = 500,
+                            watchlist = list(train = ",train,"), 
+                            early_stopping_rounds = 100,
+                            print_every_n = 10,")
+      
+      xgb.hyper.params <- "list(nthread = 6,
+                                eta = 0.1,
+                                max_depth = 1000,
+                                objective = \"reg:tweedie\")"
+      
+      formula.cmd <- paste0("xgb.train(",train, ", ",
+                            xgb.params,
+                            "verbose = ", xgb.verbose, ", ",
+                            "params = ", xgb.hyper.params, ")")
+      
+      params$command <- formula.cmd
     }
     #params$name <- fname
     params$name <- additional
