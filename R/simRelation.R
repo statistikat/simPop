@@ -30,7 +30,7 @@ simulateValues <- function(dataSample, dataPop, params) {
   TF_direct_samp <- dataSample[[relation]] %in% direct
   TF_head_pop <- dataPop[[relation]] %in% head
   TF_direct_pop <- dataPop[[relation]] %in% direct
-  
+
 
   # first step: simulate category of household head
   # sample data
@@ -46,7 +46,7 @@ simulateValues <- function(dataSample, dataPop, params) {
   # to be computed for prediction
   indGrid <- split(1:nrow(dataPopWork), dataPopWork, drop=TRUE)
   grid <- dataPopWork[sapply(indGrid, function(i) i[1])]
-                  
+
   # in sample, observations with NAs have been removed to fit the
   # model, hence population can have additional levels
   # these need to be removed since those probabilities cannot
@@ -78,7 +78,7 @@ simulateValues <- function(dataSample, dataPop, params) {
       newdata[,colnames(newdata)[i]:=factor(as.character(unlist(newdata[,colnames(newdata)[i],with=FALSE])),levels(dataSample[[ind[i]]]))]
     }
   }
-  
+
   if ( meth %in% "multinom" ) {
     probs <- predict(mod, newdata=newdata, type="probs")
   }else if ( meth %in% c("ctree","cforest") ) {
@@ -177,7 +177,7 @@ simulateValues <- function(dataSample, dataPop, params) {
     # command needs to be constructed as string
     # this is actually a pretty ugly way of fitting the model
     mod <- eval(parse(text=formula.cmd))  # fitted model
-    
+
     # predict probabilities
     if ( length(exclude) == 0 ) {
       newdata <- copy(grid)
@@ -190,7 +190,7 @@ simulateValues <- function(dataSample, dataPop, params) {
         newdata[,colnames(newdata)[i]:=factor(as.character(unlist(newdata[,colnames(newdata)[i],with=FALSE])),levels(dataSample[[ind[i]]]))]
       }
     }
-    
+
     if ( meth %in% "multinom" ) {
       probs <- predict(mod, newdata=newdata, type="probs")
     }else if ( meth %in% c("ctree","cforest") ) {
@@ -248,52 +248,48 @@ simulateValues <- function(dataSample, dataPop, params) {
     print(summary(sim))
     stop("NA in return object from simulatevalues")
   }
-    
+
   # return realizations
   return(sim)
 }
 
-
-
-
-
 #' Simulate categorical variables of population data
-#' 
+#'
 #' Simulate categorical variables of population data taking relationships
 #' between household members into account. The household structure of the
 #' population data needs to be simulated beforehand using
-#' \code{\link{simStructure}}.
-#' 
+#' [simStructure()].
+#'
 #' The values of a new variable are simulated in three steps, where the second
 #' step is optional. First, the values of the household heads are simulated
 #' with multinomial log-linear models. Second, individuals directly related to
 #' the corresponding household head (as specified by the argument
-#' \code{direct}) inherit the value of the latter. Third, the values of the
+#' `direct`) inherit the value of the latter. Third, the values of the
 #' remaining individuals are simulated with multinomial log-linear models in
 #' which the value of the respective household head is used as an additional
 #' predictor.
-#' 
+#'
 #' The number of cpus are selected automatically in the following manner. The
 #' number of cpus is equal the number of strata. However, if the number of cpus
 #' is less than the number of strata, the number of cpus - 1 is used by
 #' default.  This should be the best strategy, but the user can also overwrite
 #' this decision.
-#' 
+#'
 #' @name simRelation
-#' @param simPopObj a \code{simPopObj} containing population and household
+#' @param simPopObj a `simPopObj` containing population and household
 #' survey data as well as optionally margins in standardized format.
-#' @param relation a character string specifying the columns of \code{dataS}
-#' and \code{dataP}, respectively, that define the relationships between the
+#' @param relation a character string specifying the columns of `dataS`
+#' and `dataP`, respectively, that define the relationships between the
 #' household members.
 #' @param head a character string specifying the category of the variable given
-#' by \code{relation} that identifies the household head.
+#' by `relation` that identifies the household head.
 #' @param direct a character string specifying categories of the variable given
-#' by \code{relation}. Simulated individuals with those categories directly
+#' by `relation`. Simulated individuals with those categories directly
 #' inherit the values of the additional variables from the household head. The
-#' default is \code{NULL} such that no individuals directly inherit value from
+#' default is `NULL` such that no individuals directly inherit value from
 #' the household head.
 #' @param additional a character vector specifying additional categorical
-#' variables of \code{dataS} that should be simulated for the population data.
+#' variables of `dataS` that should be simulated for the population data.
 #' @param limit this can be used to account for structural zeros. If only one
 #' additional variable is requested, a named list of lists should be supplied.
 #' The names of the list components specify the predictor variables for which
@@ -306,20 +302,20 @@ simulateValues <- function(dataSample, dataPop, params) {
 #' another list, with the component names specifying the respective variables.
 #' @param censor this can be used to account for structural zeros. If only one
 #' additional variable is requested, a named list of lists or
-#' \code{data.frame}s should be supplied. The names of the list components
+#' `data.frame`s should be supplied. The names of the list components
 #' specify the categories that should be censored. For each of these
-#' categories, a list or \code{data.frame} containing levels of the predictor
+#' categories, a list or `data.frame` containing levels of the predictor
 #' variables can be supplied. The probability of the specified categories is
 #' set to 0 for the respective predictor levels. If more than one additional
-#' variable is requested, such a list of lists or \code{data.frame}s can be
+#' variable is requested, such a list of lists or `data.frame`s can be
 #' supplied for each variable as a component of yet another list, with the
 #' component names specifying the respective variables.
 #' @param maxit,MaxNWts control parameters to be passed to
-#' \code{\link[nnet]{multinom}} and \code{\link[nnet]{nnet}}. See the help file
-#' for \code{\link[nnet]{nnet}}.
+#' [nnet::multinom()] and [nnet::nnet()]. See the help file
+#' for [nnet::nnet()].
 #' @param nr_cpus if specified, an integer number defining the number of cpus
 #' that should be used for parallel processing.
-#' @param eps a small positive numeric value, or \code{NULL} (the default). In
+#' @param eps a small positive numeric value, or `NULL` (the default). In
 #' the former case, estimated probabilities smaller than this are assumed to
 #' result from structural zeros and are set to exactly 0.
 #' @param seed optional; an integer value to be used as the seed of the random
@@ -327,50 +323,67 @@ simulateValues <- function(dataSample, dataPop, params) {
 #' number generator to be restored.
 #' @param regModel allows to specify the variables or model that is used when
 #' simulating additional categorical variables. The following choices are
-#' available if different from NULL.  \itemize{ \item'basic'only the basic
-#' household variables (generated with \code{\link{simStructure}}) are used.
-#' \item'available'all available variables (that are common in the sample and
-#' the synthetic population such as previously generated varaibles) excluding
+#' available if different from `NULL`.
+#'
+#' - "basic": only the basic household variables (generated with [simStructure()]
+#' are used.
+#' - "available": all available variables (that are common in the sample and
+#' the synthetic population such as previously generated variables) excluding
 #' id-variables, strata variables and household sizes are used for the
-#' modelling. This parameter should be used with care because all factors are
-#' automatically used as factors internally.  \item formula-objectUsers may also
-#' specify a specifiy formula (class 'formula') that will be used. Checks are
-#' performed that all required variables are available.  } If parameter 'regModel'
-#' is NULL, only basic household variables are used in any case.
-#' @param verbose set to TRUE if additional print output should be shown.
+#' modeling. This parameter should be used with care because all factors are
+#' automatically used as factors internally.
+#' - formula-object: users may also specify a formula (class 'formula') that
+#' will be used. Checks are performed that all required variables are available.
+#' If parameter `regModel` is `NULL`, only basic household variables are used
+#' in any case.
+#' @param verbose set to `TRUE` if additional print output should be shown.
 #' @param method a character string specifying the method to be used for
 #' simulating the additional categorical variables. Accepted values are
-#' \code{"multinom"} (estimation of the conditional probabilities using
+#'
+#' - "multinom": estimation of the conditional probabilities using
 #' multinomial log-linear models and random draws from the resulting
-#' distributions).
-#' \code{"ctree"}  for using Classification trees
-#' \code{"cforest"}  for using random forest (implementation in package party)
-#' \code{"ranger"}  for using random forest (implementation in package ranger)
-#' @param by defining which variable to use as split up variable of the estimation. Defaults to the strata variable.
-#' @return An object of class \code{\linkS4class{simPopObj}} containing survey
+#' distributions
+#' - "ctree": for using Classification trees
+#' - "cforest": for using random forest (implementation in package party)
+#' - "ranger": for using random forest (implementation in package ranger)
+#' @param by defining which variable to use as split up variable of the estimation. Defaults
+#' to the strata variable.
+#' @return An object of class [simPopObj-class] containing survey
 #' data as well as the simulated population data including the categorical
-#' variables specified by \code{additional}.
+#' variables specified by `additional`.
 #' @note The basic household structure needs to be simulated beforehand with
-#' the function \code{\link{simStructure}}.
+#' the function [simStructure()].
 #' @author Andreas Alfons and Bernhard Meindl
 #' @export
-#' @seealso \code{\link{simStructure}}, \code{\link{simCategorical}},
-#' \code{\link{simContinuous}}, \code{\link{simComponents}}
+#' @seealso [simStructure()], [simCategorical()],
+#' [simContinuous()], [simComponents()]
 #' @keywords datagen
+#' @md
 #' @examples
-#' 
 #' data(ghanaS) # load sample data
-#' samp <- specifyInput(data=ghanaS, hhid="hhid", strata="region", weight="weight")
-#' ghanaP <- simStructure(data=samp, method="direct", basicHHvars=c("age", "sex", "relate"))
+#' samp <- specifyInput(
+#'   data = ghanaS,
+#'   hhid = "hhid",
+#'   strata = "region",
+#'   weight = "weight"
+#' )
+#' ghanaP <- simStructure(
+#'   data = samp,
+#'   method = "direct",
+#'   basicHHvars = c("age", "sex", "relate")
+#' )
 #' class(ghanaP)
-#' 
+#'
 #' \dontrun{
-#' ## long computation time ... 
-#' ghanaP <- simRelation(simPopObj=ghanaP, relation="relate", head="head",
-#' additional = c("nation", "ethnic", "religion"))
+#' ## long computation time ...
+#' ghanaP <- simRelation(
+#'   simPopObj = ghanaP,
+#'   relation = "relate",
+#'   head = "head",
+#'   additional = c("nation", "ethnic", "religion")
+#' )
 #' str(ghanaP)
-#' }
-#' 
+#'}
 simRelation <- function(simPopObj, relation = "relate", head = "head",
   direct = NULL, additional,
   limit = NULL, censor = NULL, maxit = 500, MaxNWts = 2000,
@@ -379,16 +392,16 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
   by = "strata") {
 
   V1 <- x <- newAdditionalVarible <- NULL
-  
+
   method <- match.arg(method)
-  
+
   # set seed of random number generator
   if ( !missing(seed) ) {
     set.seed(seed,"L'Ecuyer")  # set seed of random number generator
   }
 
-  
-  
+
+
   dataS <- sampleObj(simPopObj)
   dataP <- popObj(simPopObj)
   data_pop <- popData(simPopObj)
@@ -413,8 +426,8 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
     setkeyv(data_pop,hid)
     data_pop[list(problematicHHpop),c(relation):=makeOneRandom(get(relation),head), by=c(hid)]
   }
-  
-  
+
+
   # parameters for parallel computing
   if(by=="strata"){
     curStrata <- dataS@strata
@@ -427,17 +440,17 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
   if(!curStrata%in%colnames(data_pop)){
     stop(curStrata," is defined as by variable, but not in the population data set.")
   }
-  
+
   # if(nrow(data_sample[,uniqueN(get(curStrata)),by=hid][V1>1])>0){
   #   stop("sample: the by-variable must be the same for the whole HH")
   # }
   # if(nrow(data_pop[,uniqueN(get(curStrata)),by=hid][V1>1])>0){
   #   stop("population: the by-variable must be the same for the whole HH")
   # }
-  
+
   nr_strata <- length(levels(data_sample[[curStrata]]))
   pp <- parallelParameters(nr_cpus=nr_cpus, nr_strata=nr_strata)
-  
+
   parallel <- pp$parallel
   nr_cores <- pp$nr_cores
   have_win <- pp$have_win; rm(pp)
@@ -509,7 +522,7 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
   if( !missing(seed) ) {
     set.seed(seed,"L'Ecuyer")  # set seed of random number generator
   }
-  
+
   # predictor variables
   counter <- 0
   for ( i in additional ) {
@@ -523,7 +536,7 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
     regInput <- regressionInput(simPopObj, additional=additional[counter], regModel=curRegModel)
     # names of predictor variables
     predNames <- setdiff(regInput[[1]]$predNames, c(dataS@hhsize, curStrata, relation))
-    
+
     # observations with missings are excluded from simulation
     exclude <- getExclude.data.table(data_sample[,c(additional,predNames),with=FALSE])
     if ( length(exclude) > 0 ) {
@@ -531,7 +544,7 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
     } else {
       sampWork <- data_sample
     }
-    
+
     # variables are coerced to factors
     sampWork <- checkFactor(sampWork, unique(c(curStrata, additional)))
     data_pop <- checkFactor(data_pop, unique(c(curStrata)))
@@ -551,7 +564,7 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
                             ", maxit=",maxit, ", MaxNWts=", MaxNWts,"))")
       formula.cmd_nd <- paste0(formula.cmd_nd,", data=dataSampleWork, trace=FALSE",
                             ", maxit=",maxit, ", MaxNWts=", MaxNWts,"))")
-      
+
       if(verbose) cat("we are running the following multinom-model:\n")
       if(verbose) cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
     }else if ( method == "ctree" ) {
@@ -654,7 +667,7 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
         cat("Population data:")
         summary(data_pop)
       }
-      
+
       values <- lapply(levels(data_sample[[curStrata]]), function(x) {
         simulateValues(
           dataSample=data_sample[list(x),,on=c(curStrata)],

@@ -25,16 +25,14 @@ setClassUnion('listOrNULL', c('list', 'NULL'))
 #' @importFrom graphics par
 #' @importFrom stats as.formula chisq.test coef cor cov dlogis formula lm mad quantile rexp na.omit
 #' @importFrom utils read.csv2 tail head
-#' @importFrom stats median model.matrix optim plogis ppoints predict rnorm runif uniroot var weighted.mean glm poisson xtabs
-# removed  stats quantilerexp 
+#' @importFrom stats median model.matrix optim plogis ppoints predict rnorm runif uniroot var weighted.mean glm poisson xtabs terms
+# removed  stats quantilerexp
 #' @importFrom plyr revalue
 #' @importFrom EnvStats rlnormTrunc rnormTrunc
 #' @importFrom fitdistrplus fitdist
 #' @importFrom ranger ranger
 #' @importFrom RcppArmadillo armadillo_version
 NULL
-
-
 
 #' Class \code{"dataObj"}
 #'
@@ -288,7 +286,7 @@ setMethod("samp", "simPopObj", function(obj, var=NULL) {
     ww <- paste0(ww, paste(var[is.na(varI)], collapse=" | "))
     warning(ww)
   }
-  
+
   if ( length(var)==1 ) {
     return(sampData[[var]])
   } else {
