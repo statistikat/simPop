@@ -4,7 +4,8 @@
 \name{eusilc13puf}
 \alias{eusilc13puf}
 \title{Synthetic EU-SILC 2013 survey data}
-\format{A data frame with 13513 observations on the following 62 variables.
+\format{
+A data frame with 13513 observations on the following 62 variables.
 \describe{
 \item{db030}{integer; the household ID.}
 \item{hsize}{integer; the number of persons in the household.}
@@ -81,7 +82,8 @@ responsibilities).}
 \item{hy020}{for details, see Eurostat's code book}
 \item{hy022}{for details, see Eurostat's code book}
 \item{hy023}{for details, see Eurostat's code book}
-}}
+}
+}
 \source{
 This is a synthetic data set based on Austrian EU-SILC data from
 2013.  The original sample was provided by Statistics Austria.

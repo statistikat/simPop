@@ -5,11 +5,25 @@
 \alias{calibPop}
 \title{Calibration of 0/1 weights by Simulated Annealing}
 \usage{
-calibPop(inp, split, temp = 1, eps.factor = 0.05, maxiter = 200,
-  temp.cooldown = 0.9, factor.cooldown = 0.85, min.temp = 10^-3,
-  nr_cpus = NULL, sizefactor = 2, memory = TRUE,
-  choose.temp = TRUE, choose.temp.factor = 0.2, scale.redraw = 0.5,
-  observe.times = 50, observe.break = 0.05, verbose = FALSE)
+calibPop(
+  inp,
+  split,
+  temp = 1,
+  eps.factor = 0.05,
+  maxiter = 200,
+  temp.cooldown = 0.9,
+  factor.cooldown = 0.85,
+  min.temp = 10^-3,
+  nr_cpus = NULL,
+  sizefactor = 2,
+  memory = TRUE,
+  choose.temp = TRUE,
+  choose.temp.factor = 0.2,
+  scale.redraw = 0.5,
+  observe.times = 50,
+  observe.break = 0.05,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{inp}{an object of class \code{\linkS4class{simPopObj}} with slot

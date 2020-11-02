@@ -4,10 +4,15 @@
 \alias{simComponents}
 \title{Simulate components of continuous variables of population data}
 \usage{
-simComponents(simPopObj, total = "netIncome", components = c("py010n",
-  "py050n", "py090n", "py100n", "py110n", "py120n", "py130n", "py140n"),
+simComponents(
+  simPopObj,
+  total = "netIncome",
+  components = c("py010n", "py050n", "py090n", "py100n", "py110n", "py120n", "py130n",
+    "py140n"),
   conditional = c(getCatName(total), "pl030"),
-  replaceEmpty = c("sequential", "min"), seed)
+  replaceEmpty = c("sequential", "min"),
+  seed
+)
 }
 \arguments{
 \item{simPopObj}{a \code{\linkS4class{simPopObj}}-object.}

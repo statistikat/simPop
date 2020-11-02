@@ -24,14 +24,14 @@ Multiple approaches and tools have been developed to
 generate synthetic data. These approaches can be 
 categorized into three main groups: 
 synthetic reconstruction, combinatorial optimization, 
-and model-based generation.
+and model-based generation. 
 
 The package:
 \pkg{simPop} is a user-friendly R-package based on a modular object-oriented concept. 
 It provides a highly optimized S4 class implementation 
 of various methods, including calibration by iterative 
 proportional fitting and simulated annealing, and 
-modeling or data fusion by logistic regression.
+modeling or data fusion by logistic regression. 
 
 The following applications further shows the methods and package:   
 We firstly demonstrated the use of \pkg{simPop} by creating 
@@ -40,7 +40,7 @@ European Statistics of Income and Living Conditions (Alfons et al., 2011)
 including the evaluation of the quality of the generated population. 
 In this contribution, the mathematical details of functions \code{simStructure}, \code{simCategorical},
 \code{simContinuous} and \code{simComponents} are given in detail.
-The disclosure risk of this synthetic population has been evaluated in (Templ and Alfons, 2012) using large-scale simulation studies.
+The disclosure risk of this synthetic population has been evaluated in (Templ and Alfons, 2012) using large-scale simulation studies. 
 
 Employer-employee data were created in Templ and Filzmoser (2014) whereby 
 the structure of companies and employees are considered.
@@ -50,6 +50,7 @@ in Templ et al. (2017). In this paper - the main reference to this work -
 all functions and the S4 class 
 structure of the package are described in detail. For beginners, this paper might be 
 the starting point to learn about the methods and package.
+
 
 \tabular{ll}{ Package: \tab simPop\cr Type: \tab Package\cr Version: \tab
 1.0.0\cr Date: \tab 20017-08-07\cr License: \tab GPL (>= 2) \cr }

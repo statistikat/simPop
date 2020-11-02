@@ -11,8 +11,15 @@
 \alias{prepCdf.default}
 \title{Plot weighted cumulative distribution functions}
 \usage{
-spCdfplot(inp, x, cond = NULL, approx = c(FALSE, TRUE), n = 10000,
-  bounds = TRUE, ...)
+spCdfplot(
+  inp,
+  x,
+  cond = NULL,
+  approx = c(FALSE, TRUE),
+  n = 10000,
+  bounds = TRUE,
+  ...
+)
 
 panelSpCdfplot(x, y, approx, bounds = TRUE, ...)
 
