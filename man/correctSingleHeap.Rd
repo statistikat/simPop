@@ -4,8 +4,14 @@
 \alias{correctSingleHeap}
 \title{correctSingleHeap}
 \usage{
-correctSingleHeap(x, heap, before = 2, after = 2, method = "lnorm",
-  fixed = NULL)
+correctSingleHeap(
+  x,
+  heap,
+  before = 2,
+  after = 2,
+  method = "lnorm",
+  fixed = NULL
+)
 }
 \arguments{
 \item{x}{numeric vector representing age in years (integers)}

@@ -6,8 +6,12 @@
 \alias{utilityIndicator}
 \title{Utility measures}
 \usage{
-utility(x, y, type = c("all", "compareColumns", "compareRows",
-  "compareRowsHH", "compareNA"), hhid = NULL)
+utility(
+  x,
+  y,
+  type = c("all", "compareColumns", "compareRows", "compareRowsHH", "compareNA"),
+  hhid = NULL
+)
 
 utilityModal(x, y, varx, vary = NULL)
 

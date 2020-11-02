@@ -4,10 +4,24 @@
 \alias{simRelation}
 \title{Simulate categorical variables of population data}
 \usage{
-simRelation(simPopObj, relation = "relate", head = "head",
-  direct = NULL, additional = c("nation", "ethnic", "religion"),
-  limit = NULL, censor = NULL, maxit = 500, MaxNWts = 2000,
-  eps = NULL, nr_cpus = NULL, seed)
+simRelation(
+  simPopObj,
+  relation = "relate",
+  head = "head",
+  direct = NULL,
+  additional,
+  limit = NULL,
+  censor = NULL,
+  maxit = 500,
+  MaxNWts = 2000,
+  eps = NULL,
+  nr_cpus = NULL,
+  seed = 1,
+  regModel = NULL,
+  verbose = FALSE,
+  method = c("multinom", "ctree", "cforest", "ranger"),
+  by = "strata"
+)
 }
 \arguments{
 \item{simPopObj}{a \code{simPopObj} containing population and household
@@ -52,8 +66,8 @@ supplied for each variable as a component of yet another list, with the
 component names specifying the respective variables.}
 
 \item{maxit, MaxNWts}{control parameters to be passed to
-\code{\link[nnet]{multinom}} and \code{\link[nnet]{nnet}}. See the help file
-for \code{\link[nnet]{nnet}}.}
+\code{\link[nnet:multinom]{nnet::multinom()}} and \code{\link[nnet:nnet]{nnet::nnet()}}. See the help file
+for \code{\link[nnet:nnet]{nnet::nnet()}}.}
 
 \item{eps}{a small positive numeric value, or \code{NULL} (the default). In
 the former case, estimated probabilities smaller than this are assumed to
@@ -65,9 +79,42 @@ that should be used for parallel processing.}
 \item{seed}{optional; an integer value to be used as the seed of the random
 number generator, or an integer vector containing the state of the random
 number generator to be restored.}
+
+\item{regModel}{allows to specify the variables or model that is used when
+simulating additional categorical variables. The following choices are
+available if different from \code{NULL}.
+\itemize{
+\item "basic": only the basic household variables (generated with \code{\link[=simStructure]{simStructure()}}
+are used.
+\item "available": all available variables (that are common in the sample and
+the synthetic population such as previously generated variables) excluding
+id-variables, strata variables and household sizes are used for the
+modeling. This parameter should be used with care because all factors are
+automatically used as factors internally.
+\item formula-object: users may also specify a formula (class 'formula') that
+will be used. Checks are performed that all required variables are available.
+If parameter \code{regModel} is \code{NULL}, only basic household variables are used
+in any case.
+}}
+
+\item{verbose}{set to \code{TRUE} if additional print output should be shown.}
+
+\item{method}{a character string specifying the method to be used for
+simulating the additional categorical variables. Accepted values are
+\itemize{
+\item "multinom": estimation of the conditional probabilities using
+multinomial log-linear models and random draws from the resulting
+distributions
+\item "ctree": for using Classification trees
+\item "cforest": for using random forest (implementation in package party)
+\item "ranger": for using random forest (implementation in package ranger)
+}}
+
+\item{by}{defining which variable to use as split up variable of the estimation. Defaults
+to the strata variable.}
 }
 \value{
-An object of class \code{\linkS4class{simPopObj}} containing survey
+An object of class \linkS4class{simPopObj} containing survey
 data as well as the simulated population data including the categorical
 variables specified by \code{additional}.
 }
@@ -75,7 +122,7 @@ variables specified by \code{additional}.
 Simulate categorical variables of population data taking relationships
 between household members into account. The household structure of the
 population data needs to be simulated beforehand using
-\code{\link{simStructure}}.
+\code{\link[=simStructure]{simStructure()}}.
 }
 \details{
 The values of a new variable are simulated in three steps, where the second
@@ -95,25 +142,37 @@ this decision.
 }
 \note{
 The basic household structure needs to be simulated beforehand with
-the function \code{\link{simStructure}}.
+the function \code{\link[=simStructure]{simStructure()}}.
 }
 \examples{
-
 data(ghanaS) # load sample data
-samp <- specifyInput(data=ghanaS, hhid="hhid", strata="region", weight="weight")
-ghanaP <- simStructure(data=samp, method="direct", basicHHvars=c("age", "sex", "relate"))
+samp <- specifyInput(
+  data = ghanaS,
+  hhid = "hhid",
+  strata = "region",
+  weight = "weight"
+)
+ghanaP <- simStructure(
+  data = samp,
+  method = "direct",
+  basicHHvars = c("age", "sex", "relate")
+)
 class(ghanaP)
 
 \dontrun{
-## long computation time ... 
-ghanaP <- simRelation(simPopObj=ghanaP, relation="relate", head="head")
+## long computation time ...
+ghanaP <- simRelation(
+  simPopObj = ghanaP,
+  relation = "relate",
+  head = "head",
+  additional = c("nation", "ethnic", "religion")
+)
 str(ghanaP)
 }
-
 }
 \seealso{
-\code{\link{simStructure}}, \code{\link{simCategorical}},
-\code{\link{simContinuous}}, \code{\link{simComponents}}
+\code{\link[=simStructure]{simStructure()}}, \code{\link[=simCategorical]{simCategorical()}},
+\code{\link[=simContinuous]{simContinuous()}}, \code{\link[=simComponents]{simComponents()}}
 }
 \author{
 Andreas Alfons and Bernhard Meindl
