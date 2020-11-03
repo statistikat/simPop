@@ -149,7 +149,7 @@ gpdmple <- function(x, threshold, start, ..., std.err.type =
       if(var.cov$rank != ncol(var.cov$qr)){
         warning("observed information matrix is singular; passing std.err.type to ``expected''")
         obs.fish <- FALSE
-        return
+        return()
       }
 
       if (std.err.type == "observed"){
@@ -159,7 +159,7 @@ gpdmple <- function(x, threshold, start, ..., std.err.type =
         if(any(std.err <= 0)){
           warning("observed information matrix is singular; passing std.err.type to ``expected''")
           std.err.type <- "expected"
-          return
+          return()
         }
 
         std.err <- sqrt(std.err)
