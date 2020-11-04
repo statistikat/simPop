@@ -974,7 +974,7 @@ gpdmle <- function(x, threshold, start, ...,
           if(any(std.err <= 0)){
             warning("observed information matrix is singular; passing std.err.type to ``expected''")
             std.err.type <- "expected"
-            return
+            return()
           }
 
           std.err <- sqrt(std.err)
