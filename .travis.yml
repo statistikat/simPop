@@ -4,6 +4,11 @@ r:
   - devel
 cache: packages
 
+before_install:
+  - sudo apt-get update
+  - sudo apt-get -y install libharfbuzz-dev libfribidi-dev
+  
+  
 r_packages:
   - kableExtra
   - covr
@@ -18,7 +23,3 @@ notifications:
     on_success: change
     on_failure: change
 
-deploy:
-  provider: script
-  script: Rscript -e 'pkgdown::deploy_site_github()'
-  skip_cleanup: true
