@@ -382,22 +382,97 @@ generateValues_binary <- function(dataSample, dataPop, params) {
 generateValues_xgboost <- function(dataSample, dataPop, params) {
   
   # TODO: check which one are need
-  excludeLevels <- params$excludeLevels
-  hasNewLevels <- params$hasNewLevels
-  newLevels <- params$newLevels
+  # excludeLevels <- params$excludeLevels
+  # hasNewLevels <- params$hasNewLevels
+  # newLevels <- params$newLevels
   predNames <- params$predNames
   name <- params$name
+  typ <- params$typ
+  formula <- params$formula
+  # name <- params$name
   weight <- params$weight
-  useAux <- params$useAux
-  tol <- params$tol
-  eps <- params$eps
+  # useAux <- params$useAux
+  # tol <- params$tol
+  # eps <- params$eps
   command <- params$command
+  residual <- params$residuals
+  log <- params$log
+  strata <- params$strata
+  add_error <- TRUE # TODO{Sironimo} : get from params -> params$residuals
+  use_lm <- FALSE
+  
+  
+  # remove strata from prediction, because xgboost can not handle factors with only one level
+  predNames <- predNames[predNames != strata]
+  
+  # Check if a factor has only one level
+  check_levels <- sapply (predNames, function(nam) {
+      length(levels(dataSample[[nam]])) == 1
+  })
+  
+  # TODO{Sironimo}: better error message
+  if(any(check_levels)){
+    stop(paste0(predNames[which(check_levels)]), " has only one level")
+  }
   
   mod <- eval(parse(text=command))
-  
+
+  # set sample factor levels to population
+  for ( i in params$predNames ) {
+    levels(dataPop[[i]]) <- levels(dataSample[[i]])
+  }
+
   pred <- predict(mod,
                   newdata=xgb.DMatrix(data = model.matrix(~.+0,data = dataPop[, ..predNames])))
   
+  if(use_lm){
+    lm_mod <- lm(formula = formula, data = dataSample)
+    lm_pred <- predict(lm_mod, newdata=dataPop)
+    
+    pred[lm_pred > pred] <- lm_pred[lm_pred > pred]
+  }  
+  
+  
+  if(add_error){
+    # TODO{Sironimo}: test and get residuals from netIncome Bucket
+    predSample <- predict(mod,
+                          newdata=xgb.DMatrix(data = model.matrix(~.+0, data = dataSample[, ..predNames])))
+    resSample <- cbind(dataSample, predSample)
+    
+    if( log ){
+      resSample[, res := predSample - log(.SD), .SDcols = name]
+      target <- log(resSample[, ..name][[1]])
+    }else{
+      resSample[, res := predSample - .SD, .SDcols = name]
+      target <- resSample[, ..name][[1]]
+    }
+    
+    breaks <- getBreaks(target)
+    start <- min(breaks)
+    
+    # TODO{Sironimo}: implement nicer
+    for (b in breaks) {
+      
+      break_res <- resSample[between(target, start, b),]$res
+      tmp_pred <- pred[between(pred, start, b)]
+      
+      if(length(tmp_pred) > 0 & length(break_res) > 0){
+        error <- sample(break_res, length(tmp_pred), replace = TRUE)
+        pred[between(pred, start, b)] <- tmp_pred + error
+      }
+      
+      start <- b
+      # dataPop[between(pred, start, b), pred := .SD + error, .SDcols = name]
+    }
+    
+    #pred <- resSample$pred # + sample(resSample$res, length(pred), replace = TRUE)
+  }
+  
+  if(log){
+    pred <- exp(pred)
+  }
+  
+  return(pred)
 }
 
 genVals <- function(dataSample, dataPop, params, typ, response) {
@@ -436,65 +511,88 @@ runModel <- function(dataS, dataP, params, typ) {
   indStrata <- params$indStrata
   predNames <- params$predNames
   additional <- unique(c(params$additional, params$name, params$weight))
-  if ( pp$parallel ) {
-    # windows
-    if ( pp$have_win ) {
-      cl <- makePSOCKcluster(pp$nr_cores)
-      registerDoParallel(cl,cores=pp$nr_cores)
-      valuesCat <- foreach(x=levels(dataS[[strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
-        genVals(
-          dataSample=dataS[dataS[[strata]] == x,],
-          dataPop=dataP[indStrata[[x]], predNames, with=FALSE],
-          params,response=dataS[dataS[[strata]] == x,eval(parse(text=params$name))],
-          typ=typ)
+  by <- params$by
+  
+  if(is.null(by) |  by != "none"){
+    if ( pp$parallel ) {
+      # windows
+      if ( pp$have_win ) {
+        cl <- makePSOCKcluster(pp$nr_cores)
+        registerDoParallel(cl,cores=pp$nr_cores)
+        valuesCat <- foreach(x=levels(dataS[[strata]]), .options.snow=list(preschedule=TRUE)) %dopar% {
+          genVals(
+            dataSample=dataS[dataS[[strata]] == x,],
+            dataPop=dataP[indStrata[[x]], predNames, with=FALSE],
+            params,response=dataS[dataS[[strata]] == x,eval(parse(text=params$name))],
+            typ=typ)
+        }
+        stopCluster(cl)
       }
-      stopCluster(cl)
-    }
-    # linux/mac
-    if ( !pp$have_win ) {
-      valuesCat <- mclapply(levels(dataS[[strata]]), function(x) {
+      # linux/mac
+      if ( !pp$have_win ) {
+        valuesCat <- mclapply(levels(dataS[[strata]]), function(x) {
+          genVals(
+            dataSample=dataS[dataS[[strata]] == x,],
+            dataPop=dataP[indStrata[[x]], predNames, with=FALSE],
+  		  params,response=dataS[dataS[[strata]] == x,eval(parse(text=params$name))],
+            typ=typ)
+        },mc.cores=pp$nr_cores)
+      }
+    } else {
+      if(params$verbose){
+        cat("All values of the by group:","\n")
+        print(levels(dataS[[strata]]))
+      }
+      valuesCat <- lapply(levels(dataS[[strata]]), function(x) {
+         if(params$verbose){
+           cat("Current by group for the binary model:",x,"\n")
+         }
         genVals(
-          dataSample=dataS[dataS[[strata]] == x,],
+          dataSample=dataS[dataS[[strata]] == x,c(predNames, additional), with=FALSE],
           dataPop=dataP[indStrata[[x]], predNames, with=FALSE],
-		  params,response=dataS[dataS[[strata]] == x,eval(parse(text=params$name))],
+  		params,response=dataS[dataS[[strata]] == x,eval(parse(text=params$name))],
           typ=typ)
-      },mc.cores=pp$nr_cores)
+      })
     }
-  } else {
-    if(params$verbose){
-      cat("All values of the by group:","\n")
-      print(levels(dataS[[strata]]))
+    
+    res <- sapply(valuesCat, class)
+    if ( any(res=="try-error") ) {
+      stop(paste0("Error in estimating the linear model. Try to specify a more simple model!\n"))
     }
-    valuesCat <- lapply(levels(dataS[[strata]]), function(x) {
-       if(params$verbose){
-         cat("Current by group for the binary model:",x,"\n")
-       }
-      genVals(
-        dataSample=dataS[dataS[[strata]] == x,c(predNames, additional), with=FALSE],
-        dataPop=dataP[indStrata[[x]], predNames, with=FALSE],
-		params,response=dataS[dataS[[strata]] == x,eval(parse(text=params$name))],
-        typ=typ)
-    })
+    if ( typ=="multinom" ) {
+      response <- dataS[[params$name]]
+      valuesCat <- factor(unsplit(valuesCat, dataP[[strata]]), levels=levels(response))
+    }
+    if ( typ=="binary" ) {
+      valuesCat <- unsplit(valuesCat, dataP[[strata]], drop=FALSE)
+    }
+    if ( typ%in%c("poisson","lm") ) {
+      valuesCat <- unsplit(valuesCat, dataP[[strata]], drop=FALSE)
+    }
+    if ( typ=="xgboost"){
+      valuesCat <- unsplit(valuesCat, dataP[[strata]], drop=FALSE)
+    }
+    
+  }else{
+    
+    valuesCat <- genVals(dataSample=dataS,
+                         dataPop=dataP,
+                         params,
+                         response=dataS[, eval(parse(text=params$name))],
+                         typ=typ)
+    
+    res <- sapply(valuesCat, class)
+    if ( any(res=="try-error") ) {
+      stop(paste0("Error in estimating the linear model. Try to specify a more simple model!\n"))
+    }
+    if (!typ %in% "xgboost"){
+      stop(paste0("Strata with type ", strata, "only implemented for typ xgboost, not",
+                  typ))
+    }
   }
 
   # check for errors
-  res <- sapply(valuesCat, class)
-  if ( any(res=="try-error") ) {
-    stop(paste0("Error in estimating the linear model. Try to specify a more simple model!\n"))
-  }
-  if ( typ=="multinom" ) {
-    response <- dataS[[params$name]]
-    valuesCat <- factor(unsplit(valuesCat, dataP[[strata]]), levels=levels(response))
-  }
-  if ( typ=="binary" ) {
-    valuesCat <- unsplit(valuesCat, dataP[[strata]], drop=FALSE)
-  }
-  if ( typ%in%c("poisson","lm") ) {
-    valuesCat <- unsplit(valuesCat, dataP[[strata]], drop=FALSE)
-  }
-  if ( typ=="xgboost"){
-    valuesCat <- unsplit(valuesCat, dataP[[strata]], drop=FALSE)
-  }
+
   
   return(valuesCat)
 }
@@ -662,7 +760,7 @@ runModel <- function(dataS, dataP, params, typ) {
 #' number generator, or an integer vector containing the state of the random
 #' number generator to be restored.
 #' @param verbose (logical) if \code{TRUE}, additional output is written to the promt
-#' @param by defining which variable to use as split up variable of the estimation. Defaults to the strata variable.
+#' @param by defining which variable to use as split up variable of the estimation. Defaults to the strata variable. TODO: none
 #' @return An object of class \code{\linkS4class{simPopObj}} containing survey
 #' data as well as the simulated population data including the continuous
 #' variable specified by \code{additional} and possibly simulated categories
@@ -717,7 +815,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
   maxit = 500, MaxNWts = 1500,
   tol = .Machine$double.eps^0.5,
   nr_cpus=NULL, eps = NULL, regModel="basic", byHousehold=NULL,
-  imputeMissings=FALSE, seed, verbose=FALSE,by="strata") {
+  imputeMissings=FALSE, seed, verbose=FALSE,by="strata", optional_params=NULL) {
 
   x <- hhid <- vals <- id <- V1 <- randId <- NULL
 
@@ -730,7 +828,10 @@ simContinuous <- function(simPopObj, additional = "netIncome",
   samp <- simPopObj@sample
   pop <- simPopObj@pop
   basic <- simPopObj@basicHHvars
-  if(by=="strata"){
+  if(by %in% c("strata", "none")){
+    if(by == "none" & method != "xgboost"){
+      stop(paste0("by \"none\" not implemented for method ", method))
+    }
     strata <- samp@strata
   }else if(!is.null(by)){
     strata <- by
@@ -878,8 +979,8 @@ simContinuous <- function(simPopObj, additional = "netIncome",
       useXgboost <- TRUE
     }
 
-    # TODO: log and xgboost
-    if ( log && !useXgboost ) {
+    # TODO{Sironimo}: Test log and xgboost
+    if ( log ) {
       if ( is.null(const) ) {
         ## use log-transformation
         # check for negative values
@@ -988,7 +1089,8 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     params$indStrata <- indStrata
     params$predNames <- predNames
     params$additional <- c(additional, weight)
-    params$verbose <- verbose
+    params$verbose <- verbose 
+    params$by <- by
     if(verbose) cat("running multinom with the following model:\n")
     if(verbose) cat(gsub("))",")",gsub("suppressWarnings[(]","",params$command)),"\n")
 
@@ -1109,6 +1211,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     params$par <- par
     params$command <- estimationModel
     params$verbose <- verbose
+    params$by <- by
     # run in parallel if possible
 
     valuesCat <- runModel(dataS, dataP, params, typ="binary")
@@ -1190,50 +1293,79 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     }else if(usePoisson){
       params$command <- paste("glm(", fstring,", weights=", weight, ", data=dataSample,family=poisson(),model=FALSE,x=FALSE,y=FALSE)", sep="")
     }else if(useXgboost){
-
+      
       # simulation via xgboost
       if(verbose) cat("we are running xgboost:\n")
       
       # set xgb verbose level
       if(verbose){
-        xgb.verbose <- 1
+        xgb_verbose <- 1
       }else{
-        xgb.verbose <- 0
+        xgb_verbose <- 0
       }
       
-      # TODO: set eta, subsample, nrounds -> at the moment default values (except nrounds)
-      # -> make cv hyperparameter tuning
+      # TODO: make cv hyperparameter tuning
       # TODO{Siro}: Check if weights are needed or not
       if(TRUE){
-        xgb.weight <- paste0(", info = list(\"weight\" = as.integer(dataSample$", weight, "))")
+        xgb_weight <- paste0(", info = list(\"weight\" = as.integer(dataSample$", weight, "))")
       }else{
-        xgb.weight <- ""
+        xgb_weight <- ""
       }
       
-      # TODO: hyperparam tuning
-      pred.names <- paste(predNames, collapse = "\",\"")
-      train <- paste0("xgb.DMatrix(data = model.matrix(~.+0,data = setDT(dataSample)[,c(\"",pred.names,"\"), with=F]),
-                                        label = dataSample$",additional,"
-                                        ", xgb.weight,")")
+      if( log ){
+        log_transform <- "log"
+      }else{
+        log_transform <- ""
+      }
+      
+      
+      # TODO: hyperparam tuning 
+      pred_names <- paste(predNames[predNames != strata], collapse = "\",\"")
+      train <- paste0("xgb.DMatrix(data = model.matrix(~.+0,data = setDT(dataSample)[,c(\"",pred_names,"\"), with=F]),
+                                        label = ", log_transform, "(dataSample$",additional,")
+                                        ", xgb_weight,")")
+      
+      # Default values
+      nrounds <- 100
+      early_stopping_rounds <- 10
+      xgb_hyper_params <- "list(nthread = 6,
+                                eta = 0.1,
+                                max_depth = 32,
+                                min_child_weight = 0,
+                                gamma = 0,
+                                subsample = 1,
+                                lambda = 0,
+                                objective = \"reg:squarederror\",
+                                eval_metric = \"rmse\")"
+      
+      if(!is.null(optional_params)){
+        
+        xgb_hyper_params <- "params$optional_params"
+        
+        if(!is.null(optional_params$nrounds)){
+          nrounds <- optional_params$nrounds
+        }
+        
+        if(!is.null(optional_params$early_stopping_rounds)){
+          early_stopping_rounds <- optional_params$early_stopping_rounds
+        }
+      }
       
       # TODO{Sironimo}: add test data to watchlist
-      xgb.params <- paste0("nrounds = 500,
-                            watchlist = list(train = ",train,"), 
-                            early_stopping_rounds = 100,
+      xgb_params <- paste0("nrounds = ", nrounds,",
+                            watchlist = list(train = ", train, ",
+                                             test = ", train, "), 
+                            early_stopping_rounds = ", early_stopping_rounds,",
                             print_every_n = 10,")
       
-      xgb.hyper.params <- "list(nthread = 6,
-                                eta = 0.1,
-                                max_depth = 1000,
-                                objective = \"reg:tweedie\")"
+      command <- paste0("xgb.train(",train, ", ",
+                                    xgb_params,
+                                    "verbose = ", xgb_verbose, ", ",
+                                    "params = ", xgb_hyper_params, ")")
       
-      formula.cmd <- paste0("xgb.train(",train, ", ",
-                            xgb.params,
-                            "verbose = ", xgb.verbose, ", ",
-                            "params = ", xgb.hyper.params, ")")
-      
-      params$command <- formula.cmd
+      params$command <- command
     }
+    
     #params$name <- fname
     params$name <- additional
     params$excludeLevels <- excludeLevels
@@ -1250,6 +1382,8 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     params$indStrata <- indStrata
     params$predNames <- predNames
     params$verbose <- verbose
+    params$by <- by
+    params$optional_params <- optional_params
     if(useLm){
       valuesTmp <- runModel(dataSample, dataPop, params, typ="lm")
     }else if(usePoisson){

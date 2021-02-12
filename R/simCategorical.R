@@ -268,7 +268,7 @@ simCategorical <- function(simPopObj, additional,
     method=c("multinom", "distribution","ctree","cforest","ranger","xgboost"),
     limit=NULL, censor=NULL, maxit=500, MaxNWts=1500,
     eps=NULL, nr_cpus=NULL, regModel=NULL, seed=1,
-    verbose=FALSE,by="strata") {
+    verbose=FALSE,by="strata", optional_params=NULL) {
 
   x <- newAdditionalVarible <- NULL
 
@@ -499,33 +499,63 @@ simCategorical <- function(simPopObj, additional,
       
       # set xgb verbose level
       if(verbose){
-        xgb.verbose <- 1
+        xgb_verbose <- 1
       }else{
-        xgb.verbose <- 0
+        xgb_verbose <- 0
       }
+      
+      if(!dataS@ispopulation){
+        xgb_weight <- paste0(", info = list(\"weight\" = as.integer(dataSample$", dataS@weight, "))")
+      }else{
+        xgb_weight <- ""
+      }
+      
+      pred_names <- paste(predNames, collapse = "\",\"")
+      train <- paste0("xgb.DMatrix(data = model.matrix(~.+0,data = setDT(dataSample)[,c(\"", pred_names,"\"), with=F]),
+                                   label = as.numeric(dataSample$",i,") - 1
+                                        ", xgb_weight,")")
       
       # TODO: set eta, subsample, nrounds -> at the moment default values (except nrounds)
       # -> make cv hyperparameter tuning
-      xgb.hyper.params <- "eta = 0.3, subsample = 1, nrounds = 10,"
-      xgb.params <- "list(objective = \"multi:softprob\")"
+      # Default values
+      nrounds <- 100
+      early_stopping_rounds <- 10
+      xgb_hyper_params <- "list(nthread = 6,
+                                eta = 0.1,
+                                max_depth = 32,
+                                min_child_weight = 0,
+                                gamma = 0,
+                                subsample = 1,
+                                lambda = 0,
+                                objective = \"multi:softprob\")"
       
-      if(!dataS@ispopulation){
-        xgb.weight <- paste0(", info = list(\"weight\" = as.integer(dataSample$", dataS@weight, "))")
-      }else{
-        xgb.weight <- ""
+      if(!is.null(optional_params)){
+        
+        xgb_hyper_params <- "params$optional_params"
+        
+        if(!is.null(optional_params$nrounds)){
+          nrounds <- optional_params$nrounds
+        }
+        
+        if(!is.null(optional_params$early_stopping_rounds)){
+          early_stopping_rounds <- optional_params$early_stopping_rounds
+        }
       }
       
-      # TODO: hyperparam tuning
+      xgb_params <- paste0("nrounds = ", nrounds,",
+                            watchlist = list(train = ", train, ",
+                                             test = ", train, "), 
+                            early_stopping_rounds = ", early_stopping_rounds,",
+                            print_every_n = 10,")
       
-      formula.cmd <- paste(predNames, collapse = "\",\"")
-      formula.cmd <- paste0("xgb.DMatrix(data = model.matrix(~.+0,data = setDT(dataSample)[,c(\"",formula.cmd,"\"), with=F]),
-                                        label = as.numeric(dataSample$",i,") - 1
-                                        ", xgb.weight,")")
-      formula.cmd <- paste0("xgb.train(",formula.cmd, ", ",
-                                        xgb.hyper.params,
-                                        "num_class = ", length(levelsResponse), ", ",
-                                        "verbose = ", xgb.verbose, ", ",
-                                        "params = ", xgb.params, ")")
+      # TODO: hyperparam tuning
+      command <- paste0("xgb.train(",train, ", ",
+                                    xgb_params,
+                                    "num_class = ", length(levelsResponse), ", ",
+                                    "verbose = ", xgb_verbose, ", ",
+                                    "params = ", xgb_hyper_params, ")")
+      
+      formula.cmd <- command
       
     }
     #if ( method == "naivebayes" ) {
@@ -556,7 +586,10 @@ simCategorical <- function(simPopObj, additional,
     params$limit <- limit
     params$censor <- censor
     params$levelsResponse <- levelsResponse
+    params$optional_params <- optional_params
 
+    # TODO{Sironimo}: by == "none"
+    
     # windows
     if ( parallel ) {
       if ( have_win ) {

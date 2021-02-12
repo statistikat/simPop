@@ -194,6 +194,8 @@ setMethod("calibSample", c(inp="df_or_dataObj_or_simPopObj", totals="dataFrame_o
   totals <- freqs
 
   # g-weights
+  # TODO: fix error Fehler in while (!any(is.na(g)) && tolNotReached(X, w, totals, tol) &&  : 
+  # Fehlender Wert, wo TRUE/FALSE nötig ist
   g_weights <- calibSample_work(X, d=w, totals=totals, q=q, method=method, bounds=bounds, maxit=maxit, tol=tol, eps=eps)
 
   # final-weights
