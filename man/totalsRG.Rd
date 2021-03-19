@@ -45,17 +45,13 @@ Population totals Region times Gender for Austria 2006
 Population characteristics Region times Gender from Austria.
 }
 \examples{
-
 data(totalsRG)
 totalsRG
 data(totalsRGtab)
 totalsRGtab
-
-
 data(totalsRG)
 totalsRG
 data(totalsRGtab)
 totalsRGtab
-
 }
 \keyword{datasets}

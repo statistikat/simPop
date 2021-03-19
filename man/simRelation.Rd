@@ -159,7 +159,7 @@ ghanaP <- simStructure(
 )
 class(ghanaP)
 
-\dontrun{
+\donttest{
 ## long computation time ...
 ghanaP <- simRelation(
   simPopObj = ghanaP,

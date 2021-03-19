@@ -77,7 +77,7 @@ the sum of all weights\eqn{\ ( w_{i} / \sum_{j = 1}^{n} w_{j} ).}{.}
 
 set.seed(1234)  # for reproducibility
 data(eusilcS)   # load sample data
-\dontrun{
+\donttest{
 ## approx. 20 seconds computation time
 inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize",
   strata="db040", weight="db090")

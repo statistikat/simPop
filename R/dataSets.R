@@ -17,12 +17,10 @@
 #' \url{http://www.statistik.at}
 #' @keywords datasets
 #' @examples
-#'
 #' data(totalsRG)
 #' totalsRG
 #' data(totalsRGtab)
 #' totalsRGtab
-#'
 NULL
 
 
@@ -98,10 +96,8 @@ NULL
 #' 2006.  The original sample was provided by Statistics Austria.
 #' @keywords datasets
 #' @examples
-#'
 #' data(eusilcP)
 #' summary(eusilcP)
-#'
 NULL
 
 
@@ -163,10 +159,8 @@ NULL
 #' 2006.  The original sample was provided by Statistics Austria.
 #' @keywords datasets
 #' @examples
-#'
 #' data(eusilcS)
 #' summary(eusilcS)
-#'
 NULL
 
 
@@ -343,10 +337,8 @@ NULL
 #' original sample was provided by Ghana Statistical Service.
 #' @keywords datasets
 #' @examples
-#'
 #' data(ghanaS)
 #' summary(ghanaS)
-#'
 NULL
 
 
@@ -385,10 +377,8 @@ NULL
 #' \url{http://www.statistik.at/}
 #' @keywords datasets
 #' @examples
-#'
 #' data(totalsRG)
 #' totalsRG
 #' data(totalsRGtab)
 #' totalsRGtab
-#'
 NULL

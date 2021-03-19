@@ -115,7 +115,7 @@ this decision.
 \examples{
 data(eusilcS) # load sample data
 data(eusilcP) # population data
-\dontrun{
+\donttest{
 ## approx. 20 seconds computation time
 inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
 simPop <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090"))
@@ -126,10 +126,12 @@ margins <- as.data.frame(
   xtabs(rep(1, nrow(eusilcP)) ~ eusilcP$region + eusilcP$gender + eusilcP$citizenship))
 colnames(margins) <- c("db040", "rb090", "pb220a", "freq")
 simPop <- addKnownMargins(simPop, margins)
-simPop_adj2 <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1,memory=TRUE)
+simPop_adj2 <- calibPop(simPop, split="db040", 
+  temp=1, eps.factor=0.1,
+  memory=TRUE, nr_cpus = 1)
 }
 # apply simulated annealing
-\dontrun{
+\donttest{
 ## long computation time
 simPop_adj <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1,memory=FALSE)
 }

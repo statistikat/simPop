@@ -58,10 +58,8 @@ agencies.  Furthermore, the variables \code{hsize}, \code{age} and
 data, but have been derived from other variables for convenience.
 }
 \examples{
-
 data(eusilcS)
 summary(eusilcS)
-
 }
 \references{
 Eurostat (2004) Description of target variables: Cross-sectional

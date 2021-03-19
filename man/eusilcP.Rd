@@ -74,10 +74,8 @@ equivalized household income is computed from the available income
 components.
 }
 \examples{
-
 data(eusilcP)
 summary(eusilcP)
-
 }
 \references{
 Eurostat (2004) Description of target variables: Cross-sectional

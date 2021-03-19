@@ -109,7 +109,7 @@
 #' 
 #' data(eusilcS) # load sample data
 #' 
-#' \dontrun{
+#' \donttest{
 #' ## long computation time
 #' # multinomial model with random draws
 #' eusilcM <- simEUSILC(eusilcS, upper = 200000, equidist = FALSE)

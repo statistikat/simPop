@@ -1,4 +1,7 @@
 Changes in simPop version 1.2.0
+  * simRelation now works with sp-called basic variables
+
+Changes in simPop version 1.2.0
   * the function ipu2 is only a wrapper to surveysd::ipf and set as deprecated
   
 Changes in simPop version 0.6.2

@@ -38,7 +38,7 @@ colnames(pop)[3] <- "hhsize"
 
 system.time(x1 <- sampHH(pop, strata="region", hsize="hhsize"))
 dim(x1)
-\dontrun{
+\donttest{
 ## approx. 10 second computation time ...
 system.time(x1 <- sampHH(pop, sizefactor=4, strata="region", hsize="hhsize"))
 dim(x1)

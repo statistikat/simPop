@@ -67,10 +67,8 @@ variables due to the large number of possible outcomes in the original
 survey data.
 }
 \examples{
-
 data(ghanaS)
 summary(ghanaS)
-
 }
 \references{
 Ghana Statistical Service (2008) Ghana Living Standards Survey:

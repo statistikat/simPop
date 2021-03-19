@@ -374,7 +374,7 @@ simulateValues <- function(dataSample, dataPop, params) {
 #' )
 #' class(ghanaP)
 #'
-#' \dontrun{
+#' \donttest{
 #' ## long computation time ...
 #' ghanaP <- simRelation(
 #'   simPopObj = ghanaP,
@@ -489,8 +489,13 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
     print(regModel)
     message("------------------------------ \n")
   }
-  varNames <- unique(c(hid=hid, w=w, curStrata, basic,
+  if(regModel[[1]] == "basic"){
+    varNames <- unique(c(hid=hid, w=w, curStrata, basic,
+                         relation=relation, additional, basic))
+  } else{
+    varNames <- unique(c(hid=hid, w=w, curStrata, basic,
                 relation=relation, additional,labels(terms(regModel[[1]]))))
+    }
   # check data
   if ( all(varNames %in% names(data_sample)) ) {
     data_sample <- data_sample[, varNames, with=F]
