@@ -164,7 +164,6 @@ simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), 
   ind <- rownames(grid[grid[,1]==4,])
   
   indices <- lapply(1:ncomb, function(i) {
-    cat(i,"\n")
     pn <- which(hid %in% hidH[split[[i]]])
     pnM  <- matrix(pn, nrow=as.numeric(grid[i, 1]))
     c(pnM[, numbers[[i]]])
