@@ -17,6 +17,7 @@ Depends:
     lattice,
     vcd
 Imports:
+    data.table,
     laeken,
     plyr,
     MASS,
@@ -95,5 +96,6 @@ Collate:
     'whipple.R'
     'dataSets.R'
     'zzz.R'
+
 RoxygenNote: 7.1.1
 Encoding: UTF-8

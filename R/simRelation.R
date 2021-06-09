@@ -323,6 +323,7 @@ simulateValues <- function(dataSample, dataPop, params) {
 #' number generator to be restored.
 #' @param regModel allows to specify the variables or model that is used when
 #' simulating additional categorical variables. The following choices are
+
 #' available if different from `NULL`.
 #'
 #' - "basic": only the basic household variables (generated with [simStructure()]
@@ -391,15 +392,15 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
   method=c("multinom", "ctree","cforest","ranger"),
   by = "strata") {
 
+
   V1 <- x <- newAdditionalVarible <- NULL
 
   method <- match.arg(method)
-
+  
   # set seed of random number generator
   if ( !missing(seed) ) {
     set.seed(seed,"L'Ecuyer")  # set seed of random number generator
   }
-
 
 
   dataS <- sampleObj(simPopObj)
@@ -427,7 +428,6 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
     data_pop[list(problematicHHpop),c(relation):=makeOneRandom(get(relation),head), by=c(hid)]
   }
 
-
   # parameters for parallel computing
   if(by=="strata"){
     curStrata <- dataS@strata
@@ -447,6 +447,7 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
   # if(nrow(data_pop[,uniqueN(get(curStrata)),by=hid][V1>1])>0){
   #   stop("population: the by-variable must be the same for the whole HH")
   # }
+
 
   nr_strata <- length(levels(data_sample[[curStrata]]))
   pp <- parallelParameters(nr_cpus=nr_cpus, nr_strata=nr_strata)
@@ -489,6 +490,7 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
     print(regModel)
     message("------------------------------ \n")
   }
+
   if(regModel[[1]] == "basic"){
     varNames <- unique(c(hid=hid, w=w, curStrata, basic,
                          relation=relation, additional, basic))
@@ -496,6 +498,7 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
     varNames <- unique(c(hid=hid, w=w, curStrata, basic,
                 relation=relation, additional,labels(terms(regModel[[1]]))))
     }
+
   # check data
   if ( all(varNames %in% names(data_sample)) ) {
     data_sample <- data_sample[, varNames, with=F]

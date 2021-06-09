@@ -7,9 +7,12 @@
 \usage{
 calibPop(
   inp,
-  split,
+  split = NULL,
+  splitUpper = NULL,
   temp = 1,
-  eps.factor = 0.05,
+  epsP.factor = 0.05,
+  epsH.factor = 0.05,
+  epsMinN = 0,
   maxiter = 200,
   temp.cooldown = 0.9,
   factor.cooldown = 0.85,
@@ -22,7 +25,9 @@ calibPop(
   scale.redraw = 0.5,
   observe.times = 50,
   observe.break = 0.05,
-  verbose = FALSE
+  verbose = FALSE,
+  hhTables = NULL,
+  persTables = NULL
 )
 }
 \arguments{
@@ -31,15 +36,30 @@ calibPop(
 
 \item{split}{given strata in which the problem will be split. Has to
 correspond to a column population data (slot 'pop' of input argument 'inp')
-. For example \code{split = c("region")}, problem will be split for
+. For example \code{split = (c("region")}, problem will be split for
 different regions. Parallel computing is performed automatically, if
 possible.}
 
+\item{splitUpper}{optional column in the population for which decides the part
+of the population from which to sample for each entry in \code{split}.
+Has to correspond to a column population data (slot 'pop' of input argument 'inp').
+For example \code{split = c("region"), splitUpper = c("Country")}
+all units from the country are eligable for donor sample when problem is split
+into regions. Is usefull if \code{simInitSpatial()} was used and the variable to split
+the problem into results in very small groups (~couple of houndres to thousands).}
+
 \item{temp}{starting temperatur for simulated annealing algorithm}
 
-\item{eps.factor}{a factor (between 0 and 1) specifying the acceptance
-error. For example eps.factor = 0.05 results in an acceptance error for the
-objective function of \code{0.05*sum(totals)}.}
+\item{epsP.factor}{a factor (between 0 and 1) specifying the acceptance
+error for contingency table on individual level. For example epsP.factor = 0.05 results in an acceptance error for the
+objective function of \code{0.05*sum(People)}.}
+
+\item{epsH.factor}{a factor (between 0 and 1) specifying the acceptance
+error for contingency table on household level. For example epsH.factor = 0.05 results in an acceptance error for the
+objective function of \code{0.05*sum(Households)}.}
+
+\item{epsMinN}{integer specifying the minimum number of units from which the synthetic populatin can deviate from cells in contingency tables.
+This overwrites \code{epsP.factor} and \code{epsH.factor}. Is especially usefull if cells in \code{hhTables} and \code{persTables} are very small, e.g. <10.}
 
 \item{maxiter}{maximum iterations during a temperature step.}
 
@@ -56,8 +76,6 @@ reduced in each step.}
 that should be used for parallel processing.}
 
 \item{sizefactor}{the factor for inflating the population before applying 0/1 weights}
-
-\item{memory}{if TRUE simulated annealing is applied in less memory intensive way. Is especially usefull if factor or population is large. For this option simulated annealing is not entirely implemented in C++, therefore it might be slower than option \code{memory=FALSE}.}
 
 \item{choose.temp}{if TRUE \code{temp} will be rescaled according to \code{eps} and \code{choose.temp.factor}. \code{eps} is defined by the product between \code{eps_factore} and the sum over the target population margins, see \code{\link{addKnownMargins}}. Only used if \code{memory=TRUE}.}
 
@@ -78,6 +96,10 @@ simmulated annealing terminates. This repeats for each new set of \code{observe.
 \item{verbose}{boolean variable; if TRUE some additional verbose output is
 provided, however only if \code{split} is NULL. Otherwise the computation is
 performed in parallel and no useful output can be provided.}
+
+\item{hhTables}{information on population margins for households}
+
+\item{persTables}{information on population margins for persons}
 }
 \value{
 Returns an object of class \code{\linkS4class{simPopObj}} with an

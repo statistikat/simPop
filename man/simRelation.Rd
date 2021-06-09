@@ -82,6 +82,7 @@ number generator to be restored.}
 
 \item{regModel}{allows to specify the variables or model that is used when
 simulating additional categorical variables. The following choices are
+
 available if different from \code{NULL}.
 \itemize{
 \item "basic": only the basic household variables (generated with \code{\link[=simStructure]{simStructure()}}
@@ -112,6 +113,7 @@ distributions
 
 \item{by}{defining which variable to use as split up variable of the estimation. Defaults
 to the strata variable.}
+
 }
 \value{
 An object of class \linkS4class{simPopObj} containing survey
@@ -158,6 +160,7 @@ ghanaP <- simStructure(
   basicHHvars = c("age", "sex", "relate")
 )
 class(ghanaP)
+
 
 \donttest{
 ## long computation time ...
