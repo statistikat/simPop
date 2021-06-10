@@ -17,7 +17,7 @@ generateValues <- function(dataSample, dataPop, params) {
     invisible(unlist(head(dataSample[,cur.var,with=FALSE],1)))
   }else{
     # temporarily recode response vector
-    dataSample[,(cur.var):=cleanFactor(.SD),.SDcols=cur.var]
+    dataSample[,c(cur.var):=lapply(.SD,cleanFactor),.SDcols=c(cur.var)]
     levelsResponse <- levels(unlist(dataSample[,cur.var,with=FALSE]))
 
     #indices for unique occurence
