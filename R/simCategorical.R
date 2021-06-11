@@ -72,7 +72,7 @@ generateValues <- function(dataSample, dataPop, params) {
       probs <- predict(mod,data=newdata,type="response")$predictions
       colnames(probs) <- mod$forest$levels
     }else if ( meth %in% c("xgboost") ) {
-      probs <- predict(mod,newdata=xgb.DMatrix(data = model.matrix(~.+0,data = setDT(newdata))))
+      probs <- predict(mod, newdata=xgb.DMatrix(data = model.matrix(~.+0,data = setDT(newdata))))
       # create matrix from prediction array
       probs <- matrix(probs, nrow = nrow(newdata), ncol = mod[["params"]][["num_class"]], byrow = T)
     }
@@ -110,6 +110,10 @@ generateValues <- function(dataSample, dataPop, params) {
     }
     # generate realizations for each combination
 
+    if(meth == c("xgboost")) {
+      ind <- 1:length(levelsResponse)
+    }
+    
     if ( length(exclude) == 0 ) {
       ncomb <- as.integer(sapply(indGrid, length))
       sim <- lapply(1:length(ncomb), resample, ncomb, probs)
@@ -477,7 +481,7 @@ simCategorical <- function(simPopObj, additional,
       formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
       formula.cmd <- paste("suppressWarnings(cforest(", formula.cmd)
       if(!dataS@ispopulation){
-        formula.cmd <- paste0(formula.cmd,", weights=as.integer(dataSample$", dataS@weight,")")
+        formula.cmd <- paste0(formula.cmd,", weights=as.numeric(dataSample$", dataS@weight,")")
       }
       formula.cmd <- paste0(formula.cmd,", data=dataSample))")
       if(verbose) cat("we are running random forest classification (cforest):\n")
@@ -505,7 +509,11 @@ simCategorical <- function(simPopObj, additional,
       }
       
       if(!dataS@ispopulation){
-        xgb_weight <- paste0(", info = list(\"weight\" = as.integer(dataSample$", dataS@weight, "))")
+        weight_str <- paste0("as.numeric(dataSample$", dataS@weight, ")")
+        # xgb_weight <- paste0(", info = list(\"weight\" = (",weight_str," - min(", weight_str, "))
+        #                      / (max(", weight_str, ") - min(", weight_str, ")))")
+        # xgb_weight <- paste0(", info = list(\"weight\" = (",weight_str," / max(", weight_str, ")))")
+        xgb_weight <- paste0(", info = list(\"weight\" = (",weight_str,"))")
       }else{
         xgb_weight <- ""
       }
@@ -515,19 +523,17 @@ simCategorical <- function(simPopObj, additional,
                                    label = as.numeric(dataSample$",i,") - 1
                                         ", xgb_weight,")")
       
-      # TODO: set eta, subsample, nrounds -> at the moment default values (except nrounds)
-      # -> make cv hyperparameter tuning
       # Default values
       nrounds <- 100
       early_stopping_rounds <- 10
       xgb_hyper_params <- "list(nthread = 6,
-                                eta = 0.1,
+                                eta = 0.3,
                                 max_depth = 32,
-                                min_child_weight = 0,
+                                min_child_weight = 1,
                                 gamma = 0,
                                 subsample = 1,
-                                lambda = 0,
-                                objective = \"multi:softprob\")"
+                                objective = \"multi:softprob\",
+                                eval_metric = \"mlogloss\")"
       
       if(!is.null(optional_params)){
         
@@ -548,7 +554,6 @@ simCategorical <- function(simPopObj, additional,
                             early_stopping_rounds = ", early_stopping_rounds,",
                             print_every_n = 10,")
       
-      # TODO: hyperparam tuning
       command <- paste0("xgb.train(",train, ", ",
                                     xgb_params,
                                     "num_class = ", length(levelsResponse), ", ",
@@ -588,8 +593,6 @@ simCategorical <- function(simPopObj, additional,
     params$levelsResponse <- levelsResponse
     params$optional_params <- optional_params
 
-    # TODO{Sironimo}: by == "none"
-    
     # windows
     if ( parallel ) {
       if ( have_win ) {

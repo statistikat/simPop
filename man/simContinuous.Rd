@@ -4,15 +4,39 @@
 \alias{simContinuous}
 \title{Simulate continuous variables of population data}
 \usage{
-simContinuous(simPopObj, additional = "netIncome",
-  method = c("multinom", "lm", "poisson"), zeros = TRUE,
-  breaks = NULL, lower = NULL, upper = NULL, equidist = TRUE,
-  probs = NULL, gpd = TRUE, threshold = NULL, est = "moments",
-  limit = NULL, censor = NULL, log = TRUE, const = NULL,
-  alpha = 0.01, residuals = TRUE, keep = TRUE, maxit = 500,
-  MaxNWts = 1500, tol = .Machine$double.eps^0.5, nr_cpus = NULL,
-  eps = NULL, regModel = "basic", byHousehold = NULL,
-  imputeMissings = FALSE, seed, verbose = FALSE, by = "strata")
+simContinuous(
+  simPopObj,
+  additional = "netIncome",
+  method = c("multinom", "lm", "poisson", "xgboost"),
+  zeros = TRUE,
+  breaks = NULL,
+  lower = NULL,
+  upper = NULL,
+  equidist = TRUE,
+  probs = NULL,
+  gpd = TRUE,
+  threshold = NULL,
+  est = "moments",
+  limit = NULL,
+  censor = NULL,
+  log = TRUE,
+  const = NULL,
+  alpha = 0.01,
+  residuals = TRUE,
+  keep = TRUE,
+  maxit = 500,
+  MaxNWts = 1500,
+  tol = .Machine$double.eps^0.5,
+  nr_cpus = NULL,
+  eps = NULL,
+  regModel = "basic",
+  byHousehold = NULL,
+  imputeMissings = FALSE,
+  seed,
+  verbose = FALSE,
+  by = "strata",
+  optional_params = NULL
+)
 }
 \arguments{
 \item{simPopObj}{a \code{\linkS4class{simPopObj}} holding household survey
@@ -26,7 +50,7 @@ Currently, only one additional variable can be simulated at a time.}
 simulating the continuous variable. Accepted values are \code{"multinom"},
 for using multinomial log-linear models combined with random draws from the
 resulting categories, \code{"lm"}, for using (two-step) regression
-models combined with random error terms and \code{"poisson"} for using Poisson regression for count variables.}
+models combined with random error terms, \code{"poisson"} for using Poisson regression for count variables, and \code{"xgboost"} for using XGBoost.}
 
 \item{zeros}{a logical indicating whether the variable specified by
 \code{additional} is semi-continuous, i.e., contains a considerable amount

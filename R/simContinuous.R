@@ -381,25 +381,14 @@ generateValues_binary <- function(dataSample, dataPop, params) {
 
 generateValues_xgboost <- function(dataSample, dataPop, params) {
   
-  # TODO: check which one are need
-  # excludeLevels <- params$excludeLevels
-  # hasNewLevels <- params$hasNewLevels
-  # newLevels <- params$newLevels
   predNames <- params$predNames
   name <- params$name
   typ <- params$typ
   formula <- params$formula
-  # name <- params$name
   weight <- params$weight
-  # useAux <- params$useAux
-  # tol <- params$tol
-  # eps <- params$eps
   command <- params$command
   residual <- params$residuals
-  log <- params$log
   strata <- params$strata
-  add_error <- TRUE # TODO{Sironimo} : get from params -> params$residuals
-  use_lm <- FALSE
   
   
   # remove strata from prediction, because xgboost can not handle factors with only one level
@@ -410,77 +399,51 @@ generateValues_xgboost <- function(dataSample, dataPop, params) {
       length(levels(dataSample[[nam]])) == 1
   })
   
-  # TODO{Sironimo}: better error message
   if(any(check_levels)){
-    stop(paste0(predNames[which(check_levels)]), " has only one level")
+    stop(paste0(predNames[which(check_levels)]),
+         " has only one level, XGBoost can't work with categorical variables with one level")
   }
   
   mod <- eval(parse(text=command))
 
   # set sample factor levels to population
-  for ( i in params$predNames ) {
-    levels(dataPop[[i]]) <- levels(dataSample[[i]])
+  ind <- match(colnames(dataPop), colnames(dataSample))
+  for ( i in 1:length(ind) ) {
+    if (is.factor(unlist(dataPop[,i,with=FALSE]))) {
+      dataPop[,colnames(dataPop)[i]:=factor(as.character(unlist(dataPop[,colnames(dataPop)[i],with=FALSE])),levels(dataSample[[ind[i]]]))]
+    }
   }
 
+  new_data <- xgb.DMatrix(data = model.matrix(~.+0, data = model.frame(dataPop[, ..predNames],  na.action=na.pass)), missing = NA)
   pred <- predict(mod,
-                  newdata=xgb.DMatrix(data = model.matrix(~.+0,data = dataPop[, ..predNames])))
+                  newdata=new_data)
   
-  if(use_lm){
-    lm_mod <- lm(formula = formula, data = dataSample)
-    lm_pred <- predict(lm_mod, newdata=dataPop)
-    
-    pred[lm_pred > pred] <- lm_pred[lm_pred > pred]
-  }  
-  
-  
-  if(add_error){
-    # TODO{Sironimo}: test and get residuals from netIncome Bucket
+  # if residuals is true, calculate in-sample residuals and add an error term to the predictions
+  if(residual){
     predSample <- predict(mod,
-                          newdata=xgb.DMatrix(data = model.matrix(~.+0, data = dataSample[, ..predNames])))
+                          newdata=xgb.DMatrix(data = model.matrix(~.+0, data = model.frame(dataSample[, ..predNames],  na.action=na.pass)),
+                                              missing = NA,
+                                              info = list(weight = as.numeric(dataSample[,..weight]))))
     resSample <- cbind(dataSample, predSample)
     
-    if( log ){
-      resSample[, res := predSample - log(.SD), .SDcols = name]
-      target <- log(resSample[, ..name][[1]])
-    }else{
-      resSample[, res := predSample - .SD, .SDcols = name]
-      target <- resSample[, ..name][[1]]
-    }
+    resSample[, res := predSample - .SD, .SDcols = name]
+    target <- resSample[, ..name][[1]]
     
-    breaks <- getBreaks(target)
-    start <- min(breaks)
-    
-    # TODO{Sironimo}: implement nicer
-    for (b in breaks) {
-      
-      break_res <- resSample[between(target, start, b),]$res
-      tmp_pred <- pred[between(pred, start, b)]
-      
-      if(length(tmp_pred) > 0 & length(break_res) > 0){
-        error <- sample(break_res, length(tmp_pred), replace = TRUE)
-        pred[between(pred, start, b)] <- tmp_pred + error
-      }
-      
-      start <- b
-      # dataPop[between(pred, start, b), pred := .SD + error, .SDcols = name]
-    }
-    
-    #pred <- resSample$pred # + sample(resSample$res, length(pred), replace = TRUE)
-  }
-  
-  if(log){
-    pred <- exp(pred)
+    error <- sample(resSample$res, nrow(resSample), replace = TRUE)
+    pred <- pred + error
   }
   
   return(pred)
 }
 
 genVals <- function(dataSample, dataPop, params, typ, response) {
+  
   # unify level-set of predictors
   for ( i in params$predNames ) {
     dataSample[[i]] <- cleanFactor(dataSample[[i]])
     dataPop[[i]] <- cleanFactor(dataPop[[i]])
   }
+
 
   if ( !typ %in% c("multinom","lm","binary","poisson","xgboost") ) {
     stop("unsupported value for argument 'type' in genVals()\n")
@@ -566,10 +529,7 @@ runModel <- function(dataS, dataP, params, typ) {
     if ( typ=="binary" ) {
       valuesCat <- unsplit(valuesCat, dataP[[strata]], drop=FALSE)
     }
-    if ( typ%in%c("poisson","lm") ) {
-      valuesCat <- unsplit(valuesCat, dataP[[strata]], drop=FALSE)
-    }
-    if ( typ=="xgboost"){
+    if ( typ%in%c("poisson","lm","xgboost") ) {
       valuesCat <- unsplit(valuesCat, dataP[[strata]], drop=FALSE)
     }
     
@@ -651,7 +611,7 @@ runModel <- function(dataS, dataP, params, typ) {
 #' simulating the continuous variable. Accepted values are \code{"multinom"},
 #' for using multinomial log-linear models combined with random draws from the
 #' resulting categories, \code{"lm"}, for using (two-step) regression
-#' models combined with random error terms and \code{"poisson"} for using Poisson regression for count variables.
+#' models combined with random error terms, \code{"poisson"} for using Poisson regression for count variables, and \code{"xgboost"} for using XGBoost.
 #' @param zeros a logical indicating whether the variable specified by
 #' \code{additional} is semi-continuous, i.e., contains a considerable amount
 #' of zeros. If \code{TRUE} and \code{method} is \code{"multinom"}, a separate
@@ -760,7 +720,7 @@ runModel <- function(dataS, dataP, params, typ) {
 #' number generator, or an integer vector containing the state of the random
 #' number generator to be restored.
 #' @param verbose (logical) if \code{TRUE}, additional output is written to the promt
-#' @param by defining which variable to use as split up variable of the estimation. Defaults to the strata variable. TODO: none
+#' @param by defining which variable to use as split up variable of the estimation. Defaults to the strata variable.
 #' @return An object of class \code{\linkS4class{simPopObj}} containing survey
 #' data as well as the simulated population data including the continuous
 #' variable specified by \code{additional} and possibly simulated categories
@@ -870,13 +830,13 @@ simContinuous <- function(simPopObj, additional = "netIncome",
   method <- match.arg(method)
   zeros <- isTRUE(zeros)
   log <- isTRUE(log)
-  if(log&&method=="poisson"){
+  if(log&&method %in% c("poisson", "xgboost")){
     log <- FALSE
-    warning("For Poisson regression the log=TRUE parameter is ignored and the numeric variable is not transformed.")
+    warning(paste0("For ", method," regression the log=TRUE parameter is ignored and the numeric variable is not transformed."))
   }
-  if(!is.null(alpha)&&method=="poisson"){
+  if(!is.null(alpha) && method %in% c("poisson", "xgboost")){
     alpha <- NULL
-    warning("For Poisson regression the alpha!=NULL is not yet implemented and therefore set to NULL.")
+    warning(paste0("For ", method ," regression the alpha!=NULL is not yet implemented and therefore set to NULL."))
   }
   if ( is.numeric(alpha) && length(alpha) > 0 ) {
     alpha <- rep(alpha, length.out=2)
@@ -974,12 +934,13 @@ simContinuous <- function(simPopObj, additional = "netIncome",
       usePoisson <- TRUE
       useXgboost <- FALSE
     }else if(method=="xgboost"){
+      useMultinom <- FALSE
       useLm <- FALSE
       usePoisson <- FALSE
       useXgboost <- TRUE
     }
 
-    # TODO{Sironimo}: Test log and xgboost
+    
     if ( log ) {
       if ( is.null(const) ) {
         ## use log-transformation
@@ -1015,9 +976,8 @@ simContinuous <- function(simPopObj, additional = "netIncome",
         # set control parameters
         useLogit <- zeros || any(additionalS == 0)
         useMultinom <- FALSE
-      }
-    } else if (useXgboost) {
-      # TODO: implement
+      } 
+    } else if (method == "xgboost") {
       useLogit <- FALSE
       useMultinom <- FALSE
     } else {
@@ -1304,10 +1264,8 @@ simContinuous <- function(simPopObj, additional = "netIncome",
         xgb_verbose <- 0
       }
       
-      # TODO: make cv hyperparameter tuning
-      # TODO{Siro}: Check if weights are needed or not
       if(TRUE){
-        xgb_weight <- paste0(", info = list(\"weight\" = as.integer(dataSample$", weight, "))")
+        xgb_weight <- paste0(", info = list(\"weight\" = as.numeric(dataSample$", weight, "))")
       }else{
         xgb_weight <- ""
       }
@@ -1317,12 +1275,10 @@ simContinuous <- function(simPopObj, additional = "netIncome",
       }else{
         log_transform <- ""
       }
-      
-      
-      # TODO: hyperparam tuning 
+
       pred_names <- paste(predNames[predNames != strata], collapse = "\",\"")
-      train <- paste0("xgb.DMatrix(data = model.matrix(~.+0,data = setDT(dataSample)[,c(\"",pred_names,"\"), with=F]),
-                                        label = ", log_transform, "(dataSample$",additional,")
+      train <- paste0("xgb.DMatrix(data = model.matrix(~.+0,data = model.frame(setDT(dataSample)[,c(\"",pred_names,"\"), with=F],  na.action=na.pass)),
+                                         missing = NA, label = ", log_transform, "(dataSample$",additional,")
                                         ", xgb_weight,")")
       
       # Default values
@@ -1351,7 +1307,6 @@ simContinuous <- function(simPopObj, additional = "netIncome",
         }
       }
       
-      # TODO{Sironimo}: add test data to watchlist
       xgb_params <- paste0("nrounds = ", nrounds,",
                             watchlist = list(train = ", train, ",
                                              test = ", train, "), 
