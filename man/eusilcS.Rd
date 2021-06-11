@@ -4,7 +4,8 @@
 \name{eusilcS}
 \alias{eusilcS}
 \title{Synthetic EU-SILC survey data}
-\format{A data frame with 11725 observations on the following 18 variables.
+\format{
+A data frame with 11725 observations on the following 18 variables.
 \describe{ \item{db030}{integer; the household ID.}
 \item{hsize}{integer; the number of persons in the household.}
 \item{db040}{factor; the federal state in which the household is
@@ -31,7 +32,8 @@ responsibilities).} \item{pb220a}{factor; the person's citizenship
 \item{py130n}{numeric; disability benefits (net).}
 \item{py140n}{numeric; education-related allowances (net).}
 \item{db090}{numeric; the household sample weights.}
-\item{rb050}{numeric; the personal sample weights.} }}
+\item{rb050}{numeric; the personal sample weights.} }
+}
 \source{
 This is a synthetic data set based on Austrian EU-SILC data from
 2006.  The original sample was provided by Statistics Austria.
@@ -56,10 +58,8 @@ agencies.  Furthermore, the variables \code{hsize}, \code{age} and
 data, but have been derived from other variables for convenience.
 }
 \examples{
-
 data(eusilcS)
 summary(eusilcS)
-
 }
 \references{
 Eurostat (2004) Description of target variables: Cross-sectional

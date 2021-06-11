@@ -4,10 +4,15 @@
 \alias{simComponents}
 \title{Simulate components of continuous variables of population data}
 \usage{
-simComponents(simPopObj, total = "netIncome", components = c("py010n",
-  "py050n", "py090n", "py100n", "py110n", "py120n", "py130n", "py140n"),
+simComponents(
+  simPopObj,
+  total = "netIncome",
+  components = c("py010n", "py050n", "py090n", "py100n", "py110n", "py120n", "py130n",
+    "py140n"),
   conditional = c(getCatName(total), "pl030"),
-  replaceEmpty = c("sequential", "min"), seed)
+  replaceEmpty = c("sequential", "min"),
+  seed
+)
 }
 \arguments{
 \item{simPopObj}{a \code{\linkS4class{simPopObj}}-object.}
@@ -56,7 +61,7 @@ the functions \code{\link{simStructure}}, \code{\link{simCategorical}} and
 }
 \examples{
 data(eusilcS)
-\dontrun{
+\donttest{
 ## approx. 20 seconds computation time
 inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize",
   strata="db040", weight="db090")

@@ -5,11 +5,25 @@
 \alias{calibPop}
 \title{Calibration of 0/1 weights by Simulated Annealing}
 \usage{
-calibPop(inp, split, temp = 1, eps.factor = 0.05, maxiter = 200,
-  temp.cooldown = 0.9, factor.cooldown = 0.85, min.temp = 10^-3,
-  nr_cpus = NULL, sizefactor = 2, memory = TRUE,
-  choose.temp = TRUE, choose.temp.factor = 0.2, scale.redraw = 0.5,
-  observe.times = 50, observe.break = 0.05, verbose = FALSE)
+calibPop(
+  inp,
+  split,
+  temp = 1,
+  eps.factor = 0.05,
+  maxiter = 200,
+  temp.cooldown = 0.9,
+  factor.cooldown = 0.85,
+  min.temp = 10^-3,
+  nr_cpus = NULL,
+  sizefactor = 2,
+  memory = TRUE,
+  choose.temp = TRUE,
+  choose.temp.factor = 0.2,
+  scale.redraw = 0.5,
+  observe.times = 50,
+  observe.break = 0.05,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{inp}{an object of class \code{\linkS4class{simPopObj}} with slot
@@ -101,7 +115,7 @@ this decision.
 \examples{
 data(eusilcS) # load sample data
 data(eusilcP) # population data
-\dontrun{
+\donttest{
 ## approx. 20 seconds computation time
 inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
 simPop <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090"))
@@ -112,10 +126,12 @@ margins <- as.data.frame(
   xtabs(rep(1, nrow(eusilcP)) ~ eusilcP$region + eusilcP$gender + eusilcP$citizenship))
 colnames(margins) <- c("db040", "rb090", "pb220a", "freq")
 simPop <- addKnownMargins(simPop, margins)
-simPop_adj2 <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1,memory=TRUE)
+simPop_adj2 <- calibPop(simPop, split="db040", 
+  temp=1, eps.factor=0.1,
+  memory=TRUE, nr_cpus = 1)
 }
 # apply simulated annealing
-\dontrun{
+\donttest{
 ## long computation time
 simPop_adj <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1,memory=FALSE)
 }

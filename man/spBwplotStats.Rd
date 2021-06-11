@@ -4,8 +4,7 @@
 \alias{spBwplotStats}
 \title{Weighted box plot statistics}
 \usage{
-spBwplotStats(x, weights = NULL, coef = 1.5, zeros = TRUE,
-  do.out = TRUE)
+spBwplotStats(x, weights = NULL, coef = 1.5, zeros = TRUE, do.out = TRUE)
 }
 \arguments{
 \item{x}{a numeric vector.}

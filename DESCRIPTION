@@ -1,8 +1,9 @@
 Package: simPop
 Type: Package
-Title: Simulation of Synthetic Populations for Survey Data Considering Auxiliary
+Title: Simulation of Complex Synthetic Data
     Information
-Version: 1.2.1
+Version: 1.2.2
+Date: 2020-11-02
 Authors@R: c(
   person("Matthias", "Templ", email = "matthias.templ@gmail.com", role = c("aut","cre")),
   person("Alexander", "Kowarik", email = "alexander.kowarik@statistik.gv.at", role = c("aut"), comment=c(ORCID="0000-0001-8598-4130")),
@@ -34,11 +35,13 @@ Suggests:
     microbenchmark,
     stringr,
     testthat,
-    surveysd
+    surveysd,
+    sampling
 LinkingTo: Rcpp,RcppArmadillo
 Description: Tools and methods to simulate populations for surveys based
     on auxiliary data. The tools include model-based methods, calibration and
-    combinatorial optimization algorithms. The package was developed with support of
+    combinatorial optimization algorithms, see Templ, Kowarik and Meindl (2017) <doi:10.18637/jss.v079.i10>) and
+    Templ (2017) <doi:10.1007/978-3-319-50272-4>. The package was developed with support of
     the International Household Survey Network, DFID Trust Fund TF011722 and funds
     from the World bank.
 License: GPL (>= 2)

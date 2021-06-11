@@ -9,11 +9,19 @@
 \alias{prepBwplotStats}
 \title{Weighted box plots}
 \usage{
-spBwplot(inp, x, cond = NULL, horizontal = TRUE, coef = 1.5,
-  zeros = TRUE, minRatio = NULL, do.out = FALSE, ...)
+spBwplot(
+  inp,
+  x,
+  cond = NULL,
+  horizontal = TRUE,
+  coef = 1.5,
+  zeros = TRUE,
+  minRatio = NULL,
+  do.out = FALSE,
+  ...
+)
 
-panelSpBwplot(x, y, coef = 1.5, zeros = TRUE, ratio, outliers,
-  subscripts, ...)
+panelSpBwplot(x, y, coef = 1.5, zeros = TRUE, ratio, outliers, subscripts, ...)
 
 getBwplotStats(x, weights = NULL, cond = NULL, data, ..., name = "")
 
@@ -77,7 +85,7 @@ extracted from the input object \code{inp}.
 
 set.seed(1234)  # for reproducibility
 data(eusilcS)   # load sample data
-\dontrun{
+\donttest{
 ## approx. 20 seconds computation time
 inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize",
   strata="db040", weight="db090")

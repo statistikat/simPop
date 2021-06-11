@@ -4,7 +4,8 @@
 \name{ghanaS}
 \alias{ghanaS}
 \title{Synthetic GLSS survey data}
-\format{A data frame with 36970 observations on the following 14 variables.
+\format{
+A data frame with 36970 observations on the following 14 variables.
 \describe{ \item{hhid}{integer; the household ID.}
 \item{hsize}{integer; the number of persons in the household.}
 \item{region}{factor; the region in which the household is located
@@ -42,7 +43,8 @@ managers}, \code{none}, \code{plant and machine operators and assemblers},
 workers}, \code{skilled agricultural and fishery workers}, and
 \code{technicians and associate professionals}).}
 \item{income}{numeric; the person's annual income.}
-\item{weight}{numeric; the sample weights.} }}
+\item{weight}{numeric; the sample weights.} }
+}
 \source{
 This is a synthetic data set based on GLSS data from 2006.  The
 original sample was provided by Ghana Statistical Service.
@@ -65,10 +67,8 @@ variables due to the large number of possible outcomes in the original
 survey data.
 }
 \examples{
-
 data(ghanaS)
 summary(ghanaS)
-
 }
 \references{
 Ghana Statistical Service (2008) Ghana Living Standards Survey:

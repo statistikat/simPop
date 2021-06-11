@@ -4,10 +4,22 @@ r:
   - devel
 cache: packages
 
-after_success:
-  - Rscript -e 'install.packages("covr");library(covr);coveralls()'
+before_install:
+  - sudo apt-get update
+  - sudo apt-get -y install libharfbuzz-dev libfribidi-dev
   
+  
+r_packages:
+  - kableExtra
+  - covr
+  - pkgdown
+
+after_success:
+  - Rscript -e 'covr::coveralls()'
+
+
 notifications:
   email:
     on_success: change
     on_failure: change
+

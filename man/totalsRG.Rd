@@ -5,13 +5,23 @@
 \alias{totalsRG}
 \alias{totalsRGtab}
 \title{Population totals Region times Gender for Austria 2006}
-\format{totalsRG: A data frame with 18 observations on the following 3
+\format{
+totalsRG: A data frame with 18 observations on the following 3
 variables.  \describe{ \item{list("rb090")}{gender; a factor with levels
 \code{female} \code{male}} \item{list("db040")}{region; a factor with levels
 \code{Burgenland} \code{Carinthia} \code{Lower Austria,} \code{Salzburg}
 \code{Styria} \code{Tyrol} \code{Upper Austria} \code{Vienna}
 \code{Vorarlberg}} \item{list("Freq")}{totals; a numeric vector} }
-totalsRGtab: a two-dimensional table holding the same information}
+totalsRGtab: a two-dimensional table holding the same information
+
+totalsRG: A data frame with 18 observations on the following 3
+variables.  \describe{ \item{list("rb090")}{gender; a factor with levels
+\code{female} \code{male}} \item{list("db040")}{region; a factor with levels
+\code{Burgenland} \code{Carinthia} \code{Lower Austria,} \code{Salzburg}
+\code{Styria} \code{Tyrol} \code{Upper Austria} \code{Vienna}
+\code{Vorarlberg}} \item{list("Freq")}{totals; a numeric vector} }
+totalsRGtab: a two-dimensional table holding the same information
+}
 \source{
 StatCube - statistical data base,
 \url{http://www.statistik.at}
@@ -35,17 +45,13 @@ Population totals Region times Gender for Austria 2006
 Population characteristics Region times Gender from Austria.
 }
 \examples{
-
 data(totalsRG)
 totalsRG
 data(totalsRGtab)
 totalsRGtab
-
-
 data(totalsRG)
 totalsRG
 data(totalsRGtab)
 totalsRGtab
-
 }
 \keyword{datasets}

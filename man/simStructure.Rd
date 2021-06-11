@@ -4,8 +4,12 @@
 \alias{simStructure}
 \title{Simulate the household structure of population data}
 \usage{
-simStructure(dataS, method = c("direct", "multinom", "distribution"),
-  basicHHvars, seed = 1)
+simStructure(
+  dataS,
+  method = c("direct", "multinom", "distribution"),
+  basicHHvars,
+  seed = 1
+)
 }
 \arguments{
 \item{dataS}{an object of class \code{dataObj} containing household survey

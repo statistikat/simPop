@@ -5,9 +5,18 @@
 \title{Generation of smaller regions given an existing spatial variable and a
 table.}
 \usage{
-simInitSpatial(simPopObj, additional, region, tspatialP = NULL,
-  tspatialHH = NULL, eps = 0.05, maxIter = 100, nr_cpus = NULL,
-  seed = 1, verbose = FALSE)
+simInitSpatial(
+  simPopObj,
+  additional,
+  region,
+  tspatialP = NULL,
+  tspatialHH = NULL,
+  eps = 0.05,
+  maxIter = 100,
+  nr_cpus = NULL,
+  seed = 1,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{simPopObj}{an object of class \code{\linkS4class{simPopObj}}.}
@@ -104,18 +113,18 @@ setnames(eusilcP,"region","db040")
 setnames(eusilcP,"hid","db030")
 inp <- specifyInput(data=eusilcP, hhid="db030", hhsize="hsize", strata="db040",population=TRUE)
 simPopObj <- simStructure(data=inp, method="direct", basicHHvars=c("age", "gender"))
-\dontrun{
+\donttest{
 # use only HH counts
 simPopObj1 <- simInitSpatial(simPopObj, additional="district", region="db040", tspatialHH=tabHH,
-tspatialP=NULL)
+tspatialP=NULL, nr_cpus=1)
 
 # use only P counts
 simPopObj2 <- simInitSpatial(simPopObj, additional="district", region="db040", tspatialHH=NULL,
-tspatialP=tabP)
+tspatialP=tabP, nr_cpus = 1)
 
 # use P and HH counts
 simPopObj3 <- simInitSpatial(simPopObj, additional="district", region="db040", tspatialHH=tabHH,
-tspatialP=tabP)
+tspatialP=tabP, nr_cpus = 1)
 }
 
 }
