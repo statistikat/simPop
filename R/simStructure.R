@@ -151,7 +151,6 @@ simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), 
   numbers <- lapply(1:ncomb, function(i) {
     n <- households[grid[i, 1], grid[i, 2]]
     w <- wH[split[[i]]]
-    n <- min(w,n)
     p <- w / sum(w)  # probability weights
     spSample(n, p)
   })
@@ -161,8 +160,7 @@ simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), 
   # the sampled household numbers in list 'numbers' are transformed to
   # indices of data frame 'dataS' and stored in vector 'indices'
   hidH <- hid[hfirst]
-  ind <- rownames(grid[grid[,1]==4,])
-  
+
   indices <- lapply(1:ncomb, function(i) {
     pn <- which(hid %in% hidH[split[[i]]])
     pnM  <- matrix(pn, nrow=as.numeric(grid[i, 1]))
