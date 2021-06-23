@@ -671,7 +671,7 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
             dataSample=data_sample[data_sample[[curStrata]]==x,],
             dataPop=data_pop[indStrata[[x]], c(predNames, simPopObj@pop@hhid, relation), with=FALSE], params
           )
-        }, mc.cores = max(nr_cores,length(levels(data_sample[[curStrata]]))))
+        }, mc.cores = min(nr_cores,length(levels(data_sample[[curStrata]]))))
       }
     } else {
       if (verbose) {
