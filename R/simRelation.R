@@ -322,6 +322,7 @@ simulateValues <- function(dataSample, dataPop, params) {
 #' number generator to be restored.
 #' @param regModel allows to specify the variables or model that is used when
 #' simulating additional categorical variables. The following choices are
+
 #' available if different from `NULL`.
 #'
 #' - "basic": only the basic household variables (generated with [simStructure()]
@@ -390,9 +391,10 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
   method=c("multinom", "ctree","cforest","ranger"),
   by = "strata") {
 
+
   V1 <- x <- newAdditionalVarible <- NULL
   method <- match.arg(method)
-
+  
   # set seed of random number generator
   if (!missing(seed)) {
     set.seed(seed, "L'Ecuyer")  # set seed of random number generator
@@ -434,6 +436,7 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
   if (!curStrata %in% colnames(data_pop)) {
     stop(curStrata, " is defined as by variable, but not in the population data set.")
   }
+
 
   nr_strata <- length(levels(data_sample[[curStrata]]))
   pp <- parallelParameters(nr_cpus=nr_cpus, nr_strata=nr_strata)
@@ -477,6 +480,7 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
     print(regModel)
     message("------------------------------ \n")
   }
+
   if (regModel[[1]] == "basic") {
     varNames <- unique(c(
       hid = hid,

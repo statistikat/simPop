@@ -17,6 +17,7 @@ Depends:
     lattice,
     vcd
 Imports:
+    data.table,
     laeken,
     plyr,
     MASS,

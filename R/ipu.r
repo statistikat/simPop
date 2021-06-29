@@ -17,6 +17,7 @@
 #' @author Bernhard Meindl
 #' @keywords method
 #' @examples
+#' library(data.table)
 #' # basic example
 #' inp <- as.data.frame(matrix(0, nrow=8, ncol=6))
 #' colnames(inp) <- c("hhid","hh1","hh2","p1","p2","p3")
