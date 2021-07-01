@@ -9,9 +9,9 @@ dteval <- function(...,envir=parent.frame()){
 
 # helpfunction to estimate group totals
 helpGrouping <- function(x,varSets,varName="weight_choose"){
-  
+  firstPersonInHousehold <- NULL
   rbindlist(lapply(varSets,function(z){
-    x[,.(FreqPopPers=sum(get(varName)),FreqPopHH=sum(get(varName)[firstPersonInHousehold])),by=c(z)]
+    x[,list(FreqPopPers=sum(get(varName)),FreqPopHH=sum(get(varName)[firstPersonInHousehold])),by=c(z)]
   }),use.names=TRUE,fill=TRUE)
   
 }
@@ -30,8 +30,11 @@ compareObjectives <- function(objective,objective_new,med_hh){
 simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
                            choose.temp=FALSE,choose.temp.factor=0.2,
                            scale.redraw=.5,split=NULL,split.level=NULL,
-                           observe.times=50,observe.break=0.05,n.forceCooldown=10){
+                           observe.times=50,observe.break=0.05,
+                           n.forceCooldown=10){
   N <- V1 <- sim_ID <- weight_choose <- weight_choose_new <- NULL
+  FreqType <- factor_med_hh <- Freq <- FreqPopPers <- FreqPopHH <- FreqPers <- 
+    Diff <- RowIndex <- MARGININDEX <- GROUP <- NULL
   ######################################
   ## define variables from param
   # totals0 <- totals0[grepl("hh",names(totals0))]
@@ -118,9 +121,9 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   
 
   popGrouped <- helpGrouping(x=data0[weight_choose>0],varSets=marginSets)
-  marginTable[popGrouped,c("FreqPers","FreqHH"):=.(FreqPopPers,FreqPopHH),on=c(marginNames)]
+  marginTable[popGrouped,c("FreqPers","FreqHH"):=list(FreqPopPers,FreqPopHH),on=c(marginNames)]
   marginTable[is.na(FreqPers),c("FreqPers","FreqHH"):=0]
-  marginTable[,Diff:=(Freq-get(unlist(.BY))),by=.(FreqType)]
+  marginTable[,Diff:=(Freq-get(unlist(.BY))),by=list(FreqType)]
   # marginTable[abs(Diff)<eps,Diff:=sign(Diff)*sqrt(abs(Diff))]
   # marginTable[,Diffprob:=Diff/factor_med_hh]
   marginTable[,RowIndex:=.I-1]
@@ -128,7 +131,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   ######################################
   # initialize unique groups in data0
   # for efficient calculation of sampling probabilities
-  data0Unique <- data0[,.(Npop=.N),by=c(marginNames)]
+  data0Unique <- data0[,list(Npop=.N),by=c(marginNames)]
   data0Unique[,MARGININDEX:=.I-1]
   
   for(i in 1:length(marginSets)){
@@ -138,12 +141,12 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   }
   rowIndices <- colnames(data0Unique)[grepl("RowIndex",colnames(data0Unique))]
   
-  indexMatrix <- as.matrix(data0Unique[,..rowIndices])
+  indexMatrix <- as.matrix(data0Unique[,rowIndices, with = FALSE])
   indexdata0 <- data0Unique[data0,MARGININDEX,on=c(marginNames)]
   
   ######################################
   # evaluate objective
-  objective <- marginTable[eps<abs(Diff),sum(abs(Diff)^2),by=.(GROUP)][,sqrt(mean(V1))]
+  objective <- marginTable[eps<abs(Diff),sum(abs(Diff)^2),by=list(GROUP)][,sqrt(mean(V1))]
   
   # define redraw with initial objective value
   redraw <- marginTable[,max(abs(Diff)*2/3)]
@@ -296,17 +299,17 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
         marginTable_new <- copy(marginTable)
         marginTable_new[,c("FreqPers","FreqHH"):=NULL]
         popGrouped <- helpGrouping(x=data0[weight_choose_new>0],varSets=marginSets,varName = "weight_choose_new")
-        marginTable_new[popGrouped,c("FreqPers","FreqHH"):=.(FreqPopPers,FreqPopHH),on=c(marginNames)]
+        marginTable_new[popGrouped,c("FreqPers","FreqHH"):=list(FreqPopPers,FreqPopHH),on=c(marginNames)]
         marginTable_new[is.na(FreqPers),c("FreqPers","FreqHH"):=0]
-        marginTable_new[,Diff:=(Freq-get(unlist(.BY))),by=.(FreqType)]
+        marginTable_new[,Diff:=(Freq-get(unlist(.BY))),by=list(FreqType)]
         # marginTable_new[,Diffprob:=Diff/factor_med_hh]
         # marginTable_new[abs(Diff)<eps,Diff:=sign(Diff)*sqrt(abs(Diff))]
         
-        objective_new <- marginTable_new[eps<abs(Diff),sum(abs(Diff)^2),by=.(GROUP)][,sqrt(mean(V1))]
+        objective_new <- marginTable_new[eps<abs(Diff),sum(abs(Diff)^2),by=list(GROUP)][,sqrt(mean(V1))]
         # objective_new
         # objective
-        # marginTable_new[,sum(abs(Diff)^2),by=.(GROUP)][,sqrt(mean(V1))]
-        # marginTable[,sum(abs(Diff)^2),by=.(GROUP)]
+        # marginTable_new[,sum(abs(Diff)^2),by=list(GROUP)][,sqrt(mean(V1))]
+        # marginTable[,sum(abs(Diff)^2),by=list(GROUP)]
         # message("compare results\n")
         ######################################
         ## if new sample fullfils marginals -> terminate

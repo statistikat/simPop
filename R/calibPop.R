@@ -263,13 +263,14 @@ makeFactors <- function(totals,dat,split){
 #' colnames(margins) <- c("db040", "rb090", "pb220a", "freq")
 #' simPop <- addKnownMargins(simPop, margins)
 #' simPop_adj2 <- calibPop(simPop, split="db040", 
-#'   temp=1, eps.factor=0.1,
-#'   memory=TRUE, nr_cpus = 1)
+#'   temp=1, epsP.factor=0.1, epsH.factor = 0.1,
+#'  nr_cpus = 1)
 #' }
 #' # apply simulated annealing
 #' \donttest{
 #' ## long computation time
-#' simPop_adj <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1,memory=FALSE)
+#' simPop_adj <- calibPop(simPop, split="db040", temp=1,
+#' epsP.factor=0.1, epsH.factor=0.1)
 #' }
 calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0.05, epsH.factor = 0.05, epsMinN=0, maxiter=200,
   temp.cooldown = 0.9, factor.cooldown = 0.85, min.temp = 10^-3,
@@ -302,21 +303,28 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
   pid <- popObj(inp)@pid
   hhsize <- popObj(inp)@hhsize
   
-  
-  # check persTables
-  if(verbose){
-    cat("\nCheck Person-Tables\n")
+  if(is.null(persTables)&&is.null(hhTables)){
+    totals <- tableObj(inp) 
+  }else{
+    # check persTables
+    if(verbose){
+      cat("\nCheck Person-Tables\n")
+    }
+    persTables <- checkTables(persTables,namesData=copy(colnames(data)),split=split,verbose=verbose)
+    
+    # check hhTables
+    if(verbose){
+      cat("\nCheck Household-Tables\n")
+    }
+    hhTables <- checkTables(hhTables,namesData=copy(colnames(data)),split=split,verbose=verbose,namesTabs="hh")
+    
+    totals <- c(persTables,hhTables)  
+    totals <- totals[!sapply(totals,is.null)]
   }
-  persTables <- checkTables(persTables,namesData=copy(colnames(data)),split=split,verbose=verbose)
   
-  # check hhTables
-  if(verbose){
-    cat("\nCheck Household-Tables\n")
-  }
-  hhTables <- checkTables(hhTables,namesData=copy(colnames(data)),split=split,verbose=verbose,namesTabs="hh")
-  totals <- c(persTables,hhTables)
-  totals <- totals[!sapply(totals,is.null)]
+
   
+
   # check some params
   if(!is.numeric(choose.temp.factor)){
     stop("choose.temp.factor must be numeric!")

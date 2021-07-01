@@ -30,7 +30,6 @@ Imports:
     colorspace,
     VIM,
     methods,party,EnvStats,fitdistrplus,ranger,wrswoR,
-    data.table,
     matrixStats
 Suggests:
     haven,

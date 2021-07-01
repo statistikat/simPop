@@ -19,7 +19,6 @@ calibPop(
   min.temp = 10^-3,
   nr_cpus = NULL,
   sizefactor = 2,
-  memory = TRUE,
   choose.temp = TRUE,
   choose.temp.factor = 0.2,
   scale.redraw = 0.5,
@@ -145,17 +144,18 @@ simPop <- simCategorical(simPop, additional=c("pl030", "pb220a"), method="multin
 
 # add margins
 margins <- as.data.frame(
-  xtabs(rep(1, nrow(eusilcP)) ~ eusilcP$region + eusilcP$gender + eusilcP$citizenship))
+  xtabs(rep(1, nrow(eusilcP)) ~ eusilcP$region + eusilcP$gender + eusilcP$citizenship), stringsAsFactors = TRUE)
 colnames(margins) <- c("db040", "rb090", "pb220a", "freq")
 simPop <- addKnownMargins(simPop, margins)
 simPop_adj2 <- calibPop(simPop, split="db040", 
-  temp=1, eps.factor=0.1,
-  memory=TRUE, nr_cpus = 1)
+  temp=1, epsP.factor=0.1, epsH.factor = 0.1,
+ nr_cpus = 1)
 }
 # apply simulated annealing
 \donttest{
 ## long computation time
-simPop_adj <- calibPop(simPop, split="db040", temp=1, eps.factor=0.1,memory=FALSE)
+simPop_adj <- calibPop(simPop, split="db040", temp=1,
+epsP.factor=0.1, epsH.factor=0.1)
 }
 }
 \references{
