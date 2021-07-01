@@ -60,32 +60,40 @@ simulateValues <- function(dataSample, dataPop, params) {
   } else {
     exclude <- integer()
   }
-  # fit multinomial model
-  # command needs to be constructed as string
-  # this is actually a pretty ugly way of fitting the model
-  mod <- eval(parse(text=formula.cmd))  # fitted model
-
-  # predict probabilities
   if (length(exclude) == 0) {
     newdata <- copy(grid)
   } else {
     newdata <- copy(grid[-exclude])
   }
-  ind <- match(colnames(newdata), colnames(dataSample))
-  for (i in 1:length(ind)) {
-    if (is.factor(unlist(newdata[, i, with = FALSE]))) {
-      newdata[,colnames(newdata)[i] := factor(as.character(unlist(newdata[,colnames(newdata)[i],with=FALSE])),levels(dataSample[[ind[i]]]))]
+  # fit multinomial model
+  # command needs to be constructed as string
+  # this is actually a pretty ugly way of fitting the model
+  if(length(unique(dataSampleWork[[cur.var]]))>1){
+    mod <- eval(parse(text=formula.cmd))  # fitted model
+    # predict probabilities
+    
+    ind <- match(colnames(newdata), colnames(dataSample))
+    for (i in 1:length(ind)) {
+      if (is.factor(unlist(newdata[, i, with = FALSE]))) {
+        newdata[,colnames(newdata)[i] := factor(as.character(unlist(newdata[,colnames(newdata)[i],with=FALSE])),levels(dataSample[[ind[i]]]))]
+      }
     }
+    if (meth %in% "multinom") {
+      probs <- predict(mod, newdata = newdata, type = "probs")
+    } else if ( meth %in% c("ctree","cforest") ) {
+      probs <- predict(mod, newdata = data.table(newdata), type = "prob")
+      probs <- do.call("rbind", probs)
+    } else if (meth %in% c("ranger")) {
+      probs <- predict(mod, data = newdata, type="response")$predictions
+    }
+  }else{
+    probs <- rep(1L,length(newdata))
   }
+  
 
-  if (meth %in% "multinom") {
-    probs <- predict(mod, newdata = newdata, type = "probs")
-  } else if ( meth %in% c("ctree","cforest") ) {
-    probs <- predict(mod, newdata = data.table(newdata), type = "prob")
-    probs <- do.call("rbind", probs)
-  } else if (meth %in% c("ranger")) {
-    probs <- predict(mod, data = newdata, type="response")$predictions
-  }
+  
+
+  
   # set too small probabilities to exactly 0
   if (!is.null(eps)) {
     probs[probs < eps] <- 0
@@ -172,36 +180,43 @@ simulateValues <- function(dataSample, dataPop, params) {
     } else {
       exclude <- integer()
     }
-    # fit multinomial model
-    # command needs to be constructed as string
-    # this is actually a pretty ugly way of fitting the model
-    mod <- eval(parse(text=formula.cmd))  # fitted model
-
-    # predict probabilities
     if (length(exclude) == 0) {
       newdata <- copy(grid)
     } else {
       newdata <- copy(grid[-exclude])
     }
-    ind <- match(colnames(newdata), colnames(dataSample))
-    for (i in 1:length(ind)) {
-      if (is.factor(unlist(newdata[[i]]))) {
-        newdata[,colnames(newdata)[i] := factor(as.character(unlist(newdata[,colnames(newdata)[i],with=FALSE])),levels(dataSample[[ind[i]]]))]
+    # fit multinomial model
+    # command needs to be constructed as string
+    # this is actually a pretty ugly way of fitting the model
+    if(length(unique(dataSampleWork[[cur.var]]))>1){
+      mod <- eval(parse(text=formula.cmd))  # fitted model 
+      # predict probabilities
+      
+      ind <- match(colnames(newdata), colnames(dataSample))
+      for (i in 1:length(ind)) {
+        if (is.factor(unlist(newdata[[i]]))) {
+          newdata[,colnames(newdata)[i] := factor(as.character(unlist(newdata[,colnames(newdata)[i],with=FALSE])),levels(dataSample[[ind[i]]]))]
+        }
       }
+      
+      if (meth %in% "multinom" ) {
+        probs <- predict(mod, newdata = newdata, type = "probs")
+      } else if ( meth %in% c("ctree","cforest") ) {
+        probs <- predict(mod, newdata = data.table(newdata), type = "prob")
+        probs <- do.call("rbind", probs)
+        if (ncol(probs) == 2) {
+          probs <- probs[, 2]
+        }
+      } else if (meth %in% c("ranger")) {
+        probs <- predict(mod, data = newdata, type = "response")$predictions
+        colnames(probs) <- mod$forest$levels
+      }
+    }else{
+      probs <- rep(1L,length(newdata))
     }
+    
 
-    if (meth %in% "multinom" ) {
-      probs <- predict(mod, newdata = newdata, type = "probs")
-    } else if ( meth %in% c("ctree","cforest") ) {
-      probs <- predict(mod, newdata = data.table(newdata), type = "prob")
-      probs <- do.call("rbind", probs)
-      if (ncol(probs) == 2) {
-        probs <- probs[, 2]
-      }
-    } else if (meth %in% c("ranger")) {
-      probs <- predict(mod, data = newdata, type = "response")$predictions
-      colnames(probs) <- mod$forest$levels
-    }
+    
     # set too small probabilities to exactly 0
     if (!is.null(eps)) {
       probs[probs < eps] <- 0
