@@ -7,236 +7,400 @@ dteval <- function(...,envir=parent.frame()){
   eval(parse(text=paste0(...)), envir=envir)
 }
 
+# helpfunction to estimate group totals
+helpGrouping <- function(x,varSets,varName="weight_choose"){
+  firstPersonInHousehold <- NULL
+  rbindlist(lapply(varSets,function(z){
+    x[,list(FreqPopPers=sum(get(varName)),FreqPopHH=sum(get(varName)[firstPersonInHousehold])),by=c(z)]
+  }),use.names=TRUE,fill=TRUE)
+  
+}
+
+# compare different objectives
+compareObjectives <- function(objective,objective_new,med_hh){
+  namesPos <- grepl("pers",names(objective))
+  
+  diffPers <- objective[namesPos]-objective_new[namesPos]
+  diffHH <- objective[!namesPos]-objective_new[!namesPos]
+  diffHH <- diffHH*med_hh
+  diffAll <- c(diffPers,diffHH)
+  return(mean(diffAll)) 
+}
+
 simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
-                           sample.prob=TRUE,choose.temp=FALSE,choose.temp.factor=0.2,
-                           scale.redraw=.5,split.level=NULL,observe.times=50,observe.break=0.05){
-  ID_GRP <- N <- V1 <- sim_ID <- weight_choose <- weight_choose_new <- NULL
+                           choose.temp=FALSE,choose.temp.factor=0.2,
+                           scale.redraw=.5,split=NULL,split.level=NULL,
+                           observe.times=50,observe.break=0.05,
+                           n.forceCooldown=10){
+  N <- V1 <- sim_ID <- weight_choose <- weight_choose_new <- NULL
+  FreqType <- factor_med_hh <- Freq <- FreqPopPers <- FreqPopHH <- FreqPers <- 
+    Diff <- RowIndex <- MARGININDEX <- GROUP <- NULL
   ######################################
   ## define variables from param
-  eps <- params[["eps_factor"]]*totals0[,sum(N)]
+  # totals0 <- totals0[grepl("hh",names(totals0))]
+
+  indTabPers <- grepl("pers",names(totals0))
+  indTabHH <- grepl("hh",names(totals0))
+  
+  epsP <- params[["epsP_factor"]]
+  epsH <- params[["epsH_factor"]]
   nd <- nrow(data0)
   hhid <- params[["hhid"]]
   min_temp <- params[["min_temp"]]
   factor_cooldown <- params[["factor_cooldown"]]
   temp_cooldown <- params[["temp_cooldown"]]
   maxiter <- params[["maxiter"]]
-  eps_factor <- params[["eps_factor"]]
   temp <- params[["temp"]]
   hhsize <- params[["hhsize"]]
   parameter <- params[["parameter"]]
+  epsMinN <- params[["epsMinN"]]
+  npers <- sum(indTabPers)
+  nhh <- sum(indTabHH)
   
   # parameters used for c++ code
   # set index for original order
+  dteval("data0[,firstPersonInHousehold:=!duplicated(",hhid,")]")
+  # data0[,firstPersonInHousehold:=TRUE]
   data0[,sim_ID:=.I]
   
-  ## initialize other parameter
+  # initialize other parameter
   size_all <- sizefactor+1
   max_n <- size_all* nd
   med_hh <- dteval("data0[!duplicated(",hhid,"),median(as.numeric(as.character(",hhsize,")))]")
-  init_n <- round(totals0[,sum(N)/med_hh])
-  redraw <- ceiling(med_hh/5 *init_n)
+  
   cooldown <- 0 
-  totals0[,ID_GRP:=.GRP,by=c(parameter)]
-  data0 <- merge(data0,unique(subset(totals0,select=c("ID_GRP",parameter))),by=c(parameter),all.x=TRUE)
   setkeyv(data0,hhid)
   id <- dteval("data0[,",hhid,"]")
   size <- dteval("as.numeric(as.character(data0[,",hhsize,"]))")
-  
-  if(sample.prob==TRUE){
-    init_group <- rep(data0[,ID_GRP],size_all)# used for internal loop
-  }
+  # size <- rep(1,length(size))
   
   # choose starting temperatur as percentage of objective function
   if(choose.temp){
-    temp <- max(temp,eps*choose.temp.factor)
-    #min_temp <- temp*temp_cooldown^50
+    eps <- sapply(totals0,`[[`,"Freq")
+    eps <- c(unlist(eps[indTabPers])*epsP,
+             unlist(eps[indTabHH])*epsH)
+    eps <- eps[eps>0]
+    temp <- max(temp,mean(eps)*choose.temp.factor)
   }
   
   ######################################
   # initialize weights
-  init_weight <- c(rep(1L,nd),rep(0L,max_n-nd))
-  # init_weight <- sample(c(rep(1L,init_n),rep(0L,max_n-init_n)))
-  choose_hh <- matrix(init_weight,nrow=nd,ncol=size_all)
+  data0[,weight_choose:=0]
+  data0[list(split.level),weight_choose:=1,on=c(split)]
+  init_index <- data0[weight_choose==1,which=TRUE]
+  init_weight <- rep(0L,max_n)
+  init_weight[init_index] <- 1
   
-  # adjust choose_hh and select all householdmembers
-  dteval("choose_hh[data0[,",hhid,"%in%data0[choose_hh[,",1:size_all,"]>0,",hhid,"]],",1:size_all,"] <- 1L")
-  data0[,weight_choose:=rowSums(choose_hh)]
+  indexAddRemove <- splitVector(init_weight)
+  
+  
+  marginTable <- copy(totals0)
+  marginSets <- list()
+  for(i in seq_along(marginTable)){
+    
+    marginSets[[i]] <- colnames(marginTable[[i]])[colnames(marginTable[[i]])!="Freq"]
+    if(indTabHH[i]){
+      newName <- "FreqHH"
+      factor_i <- med_hh
+      eps_i <- epsH
+    }else{
+      newName <- "FreqPers"
+      factor_i <- 1
+      eps_i <- epsP
+    }
+    marginTable[[i]][,FreqType:=newName]
+    marginTable[[i]][,factor_med_hh:=factor_i]
+    marginTable[[i]][,eps:=pmax(eps_i*Freq,epsMinN)]
+    
+  }
+  names(marginSets) <- names(totals0)
+  marginNames <- unique(unlist(marginSets))
+  marginTable <- rbindlist(marginTable,use.names=TRUE,fill=TRUE,idcol = "GROUP")
+  setcolorder(marginTable,marginNames)
+  setkeyv(marginTable,marginNames)
+  
+
+  popGrouped <- helpGrouping(x=data0[weight_choose>0],varSets=marginSets)
+  marginTable[popGrouped,c("FreqPers","FreqHH"):=list(FreqPopPers,FreqPopHH),on=c(marginNames)]
+  marginTable[is.na(FreqPers),c("FreqPers","FreqHH"):=0]
+  marginTable[,Diff:=(Freq-get(unlist(.BY))),by=list(FreqType)]
+  # marginTable[abs(Diff)<eps,Diff:=sign(Diff)*sqrt(abs(Diff))]
+  # marginTable[,Diffprob:=Diff/factor_med_hh]
+  marginTable[,RowIndex:=.I-1]
+  
+  ######################################
+  # initialize unique groups in data0
+  # for efficient calculation of sampling probabilities
+  data0Unique <- data0[,list(Npop=.N),by=c(marginNames)]
+  data0Unique[,MARGININDEX:=.I-1]
+  
+  for(i in 1:length(marginSets)){
+    newName <- paste0(names(marginSets)[i],"RowIndex")
+    margin.i <- marginTable[GROUP==names(marginSets)[i]]
+    data0Unique[margin.i,c(newName):=RowIndex,on=c(marginSets[[i]])]
+  }
+  rowIndices <- colnames(data0Unique)[grepl("RowIndex",colnames(data0Unique))]
+  
+  indexMatrix <- as.matrix(data0Unique[,rowIndices, with = FALSE])
+  indexdata0 <- data0Unique[data0,MARGININDEX,on=c(marginNames)]
   
   ######################################
   # evaluate objective
-  totals_diff <- merge(totals0,data0[,sum(weight_choose),by=ID_GRP],by="ID_GRP")
-  totals_diff[is.na(V1),V1:=NA]
-  totals_diff[,diff:=V1-N]
-  
-  objective <- totals_diff[,sum(abs(diff))]
+  objective <- marginTable[eps<abs(Diff),sum(abs(Diff)^2),by=list(GROUP)][,sqrt(mean(V1))]
   
   # define redraw with initial objective value
-  redraw <- ceiling(objective/med_hh*2/3)
+  redraw <- marginTable[,max(abs(Diff)*2/3)]
+  redrawMax <- sapply(totals0,function(z){
+    sum(z[["Freq"]])
+  })
+  redrawMax[indTabPers] <- redrawMax[indTabPers]/med_hh
+  redrawMax <- round(max(redrawMax*0.025))
+  redraw <- min(redraw,redrawMax)
+  
   
   # observe updating of objective function
   # if solution does not improve -> terminate
   # observe only if observe.times>0 and observe.break>0
-  observe.count <- 1
+  observe.count <- 0
   do.observe <- observe.times>0&observe.break>0
   if(do.observe){
-    observe.obj <- rep(objective,observe.times)
+    observe.obj <- matrix(0,ncol=npers+nhh,nrow=observe.times)
   }
-
   
-  cat(paste0("Starting simulated Annealing for ",split.level,"\n"))
+  noChange <- 0
+  updatepSet <- TRUE
+  message(paste0("Starting simulated Annealing for ",split," ",split.level,"\n"))
   ######################################
   # apply simulated annealing
-  if ( objective <= eps ) { 
-    out <- rowSums(choose_hh)
-    cat(paste0("Convergence successfull for ",split.level),"\n")
+  if ( marginTable[,all(eps>=abs(Diff))] ) {
+    setkeyv(data0,"sim_ID")
+    selectVars <- c(hhid,params[["pid"]],"weight_choose")
+    out <- data0[, selectVars, with = FALSE]
+    message(paste0("Convergence successfull for ",split," ",split.level),"\n")
   } else {
     
     ## if objective not fullfilled continue with simannealing
     ## if temperature falls below minimal temp -> terminate
     while( temp > min_temp ) {      
       n <- 1
-      while( n<maxiter ) {
+      # seedX <- sample(1:10000,maxiter)
+      
+      while( n<maxiter) {
         
         # scale redraw for add and remove to keep synthetic totals stable
-        redraw_gap <- totals_diff[,c(sum(V1)-sum(N))/med_hh]*scale.redraw
         
-        #if(abs(redraw_gap)<redraw){
-        redraw_add <- max(ceiling(redraw-redraw_gap),1)
-        redraw_remove <- max(ceiling(redraw+redraw_gap),1)
-        #}else{
-        #  redraw_add <- redraw_remove <- redraw
-        #}
+        # message("set redrawgap")
+        # redraw_gap <- setRedrawGap(totals0 = totals0,med_hh = med_hh, scale.redraw = scale.redraw)
+        redraw_gap <- marginTable[,mean.default(Diff)]*scale.redraw
+        # message("done")
+        redraw_add <- max(ceiling(redraw+redraw_gap),1)
+        redraw_remove <- max(ceiling(redraw-redraw_gap),1)
         
+        #####################################
+        # resample
+        # get weights for resampling
+        # probAddC <- apply(indexMatrix,1,function(z){
+        #   calcCase(x[z+1])
+        # })
+        # if(any(abs(probAddC-probAdd)>1e-10)){
+        #   stop()
+        # }
+        # 
+        # probAdd <- probAdd/data0Unique[["Npop"]]
+        # probRemove <- probAdd*-1
+        # probAdd[probAdd<=0] <- exp(sum(probAdd[probAdd<=0]))
+        # probRemove[probRemove<=0] <- exp(sum(probRemove[probRemove<=0]))
         
-        if(sample.prob){
-          # get weights for resampling
-          totals_diff[,prob_add:=diff*-1]
-          totals_diff[prob_add<=0,prob_add:=exp(sum(prob_add))]
-          totals_diff[,prob_remove:=diff]
-          totals_diff[prob_remove<=0,prob_remove:=exp(sum(prob_remove))]
-          
-          #sample_add <- sample(totals_diff[,ID_GRP],redraw,prob=totals_diff[,prob_add],replace=TRUE)
-          #sample_remove <- sample(totals_diff[,ID_GRP],redraw,prob=totals_diff[,prob_remove],replace=TRUE)
-          
-          #####################################
-          # resample
-          select_01 <- select_equal(x=init_weight,val1=0,val2=1)
-          select_add <- select_01[[1]]+1
-          select_remove <- select_01[[2]]+1
-          prob_add <- totals_diff[list(init_group[select_add]),prob_add]
-          prob_remove <- totals_diff[list(init_group[select_remove]),prob_remove]
-          
-          select_add <- select_add[prob_add>0]
-          select_remove <- select_remove[prob_remove>0]
-          n_add <- length(select_add)
-          n_remove <- length(select_remove)
-          if(n_add>0){
-            add_hh <- select_add[sample_int_crank(n_add,
-                                                  min(c(redraw_add,n_add)),
-                                                  prob=prob_add[prob_add>0])]-1
-          }else{
-            add_hh <- sample(select_01[[1]],redraw_add)
-            
-          }
-          if(n_remove>0){
-            remove_hh <- select_remove[sample_int_crank(n_remove,
-                                                        min(c(redraw_remove,n_remove)),
-                                                        prob=prob_remove[prob_remove>0])]-1
-          }else{
-            remove_hh <- sample(select_01[[2]],redraw_remove)
-          }
-          #add_hh <- sample(select_add,redraw_add)-1
-          #remove_hh <- sample(select_remove,redraw_remove)-1
-        }else{
-          prob_remove <- prob_add <- NULL
-          
-          ######################################
-          # resample
-          select_01 <- select_equal(x=init_weight,val1=0,val2=1)
-          
-          add_hh <- sample(select_01[[1]],redraw_add,prob=prob_add)
-          remove_hh <- sample(select_01[[2]],redraw_remove,prob=prob_remove)
+        if(updatepSet){
+          pSet <- calcProbabilities(indexMat=indexMatrix,x=marginTable[["Diff"]],Npop=data0Unique[["Npop"]],
+                                    indexData = indexdata0,initWeight = init_weight,
+                                    indexAdd = indexAddRemove[["indexAdd"]],
+                                    indexRemove = indexAddRemove[["indexRemove"]])
+          updatepSet <- FALSE
         }
+ 
+          
+        # data0Unique[,probAdd0:=probAdd]
+        # data0Unique[,probRemove0:=probRemove]
+        # probAdd <- probAdd[indexdata0+1]
+        # probAdd <- probAdd[(indexAddRemove[["indexAdd"]]%%nrow(data0))+1]
+        # indexAdd <- indexAddRemove[["indexAdd"]][probAdd>0]
+        # probAdd <- probAdd[probAdd>0]
+        # 
+        # probAdd2 <- pSet$probAdd
+        # indexAdd2 <- pSet$indexAdd
+        # 
+        # probRemove <- probRemove[indexdata0+1]
+        # probRemove <- probRemove[(indexAddRemove[["indexRemove"]]%%nrow(data0))+1]
+        # indexRemove <- indexAddRemove[["indexRemove"]][probRemove>0]
+        # probRemove <- probRemove[probRemove>0]
+        # 
+        # probRemove2 <- pSet$probRemove
+        # indexRemove2 <- pSet$indexRemove
+        # 
+        # if(any(abs(probAdd2-probAdd)>1e-10)){
+        #   stop()
+        # }
+        # if(any(abs(probRemove2-probRemove)>1e-10)){
+        #   stop()
+        # }
+        # if(!all.equal(indexAdd2,indexAdd)){
+        #   stop()
+        # }
+        # if(!all.equal(indexRemove2,indexRemove)){
+        #   stop()
+        # }
+        # all(abs(probRemove-pSet$probRemove)<1e-10)
+        # pSet$nAdd <- 10
+        # pSet$nRemove <- 10
+        # indexdata0[head(pSet$indexAdd[order(pSet$probAdd,decreasing = TRUE)])]
+        # message("draw sample\n")
         
+        # set.seed(seedX[n])
+        if(pSet[["nAdd"]]>0){
+          add_hh <- pSet[["indexAdd"]][sample_int_crank(pSet[["nAdd"]],
+                                                        min(c(redraw_add,pSet[["nAdd"]])),
+                                                        prob=pSet[["probAdd"]])]
+        }else{
+          add_hh <- sample(indexAddRemove[["indexAdd"]],min(c(redraw_add,length(indexAddRemove[["indexAdd"]]))))
+        }
+
+        if(pSet[["nRemove"]]>0){
+          remove_hh <- pSet[["indexRemove"]][sample_int_crank(pSet[["nRemove"]],
+                                                              min(c(redraw_remove,pSet[["nRemove"]])),
+                                                              prob=pSet[["probRemove"]])]
+        }else{
+          remove_hh <- sample(indexAddRemove[["indexRemove"]],min(c(redraw_add,length(indexAddRemove[["indexRemove"]]))))
+        }
+
+        # set.seed(seedX[n])
+        # add_hh2 <- indexAdd[sample_int_crank(length(indexAdd),
+        #                                     min(c(redraw_add,length(indexAdd))),
+        #                                     prob=probAdd)]
+        # # probAdd[which(indexAdd%in%add_hh)]
+        # remove_hh2 <- indexRemove[sample_int_crank(length(indexRemove),
+        #                                     min(c(redraw_remove,length(indexRemove))),
+        #                                     prob=probRemove)]
+        # if(!all.equal( add_hh2, add_hh)){
+        #   stop()
+        # } 
+        # if(!all.equal(remove_hh2,remove_hh)){
+        #   stop()
+        # }
         ####################################
         ## create new composition
         init_weight_new <- copy(init_weight)
         init_weight_new <-  updateVecC(init_weight_new,add_index=add_hh, remove_index=remove_hh, hhsize=size, hhid=id, sizefactor=size_all)
+        set(data0,i=NULL,j="weight_choose_new",value=sumVec(init_weight_new,size_all))
         
-        data0[ ,weight_choose_new:=sumVec(init_weight_new,size_all)]
+        
         ######################################
-        # calculate objective
-        totals_diff_new <- merge(totals0,data0[,sum(weight_choose_new),by="ID_GRP"],by="ID_GRP",all.x=TRUE)
-        totals_diff_new[is.na(V1),V1:=0]
-        totals_diff_new[,diff:=V1-N]
-        objective.new <- totals_diff_new[,sum(abs(diff))]
+        # calculate new margins 
+        marginTable_new <- copy(marginTable)
+        marginTable_new[,c("FreqPers","FreqHH"):=NULL]
+        popGrouped <- helpGrouping(x=data0[weight_choose_new>0],varSets=marginSets,varName = "weight_choose_new")
+        marginTable_new[popGrouped,c("FreqPers","FreqHH"):=list(FreqPopPers,FreqPopHH),on=c(marginNames)]
+        marginTable_new[is.na(FreqPers),c("FreqPers","FreqHH"):=0]
+        marginTable_new[,Diff:=(Freq-get(unlist(.BY))),by=list(FreqType)]
+        # marginTable_new[,Diffprob:=Diff/factor_med_hh]
+        # marginTable_new[abs(Diff)<eps,Diff:=sign(Diff)*sqrt(abs(Diff))]
         
+        objective_new <- marginTable_new[eps<abs(Diff),sum(abs(Diff)^2),by=list(GROUP)][,sqrt(mean(V1))]
+        # objective_new
+        # objective
+        # marginTable_new[,sum(abs(Diff)^2),by=list(GROUP)][,sqrt(mean(V1))]
+        # marginTable[,sum(abs(Diff)^2),by=list(GROUP)]
+        # message("compare results\n")
         ######################################
         ## if new sample fullfils marginals -> terminate
-        if ( objective.new <= eps ) {
-          objective <- objective.new
+        if ( marginTable_new[,all(eps>=abs(Diff))] ) {
+          objective <- objective_new
+          marginTable <-  copy(marginTable_new)
           data0[,weight_choose:=weight_choose_new]
-          totals_diff <- copy(totals_diff_new)
-          init_weight <- init_weight_new
           break
         }
-        
+        # data0[weight_choose_new>weight_choose,.N,by=c(marginNames)][order(N)]
+        # message("number households to have:",mean(sapply(totals0,function(z){sum(z$Freq)})),"\n")
+        # message("number households sampled:",data0[!duplicated(hid),sum(weight_choose_new)],"\n")
         ######################################
         ## choose wether to accepts the resample
-        if ( objective.new <= objective ) { 
-          objective <- objective.new
+        diffObj <- objective - objective_new
+        # diffObj
+        if ( diffObj>=0 ) { 
+          # message("solution improved!\n")
+          marginTable <- copy(marginTable_new)
           data0[,weight_choose:=weight_choose_new]
-          totals_diff <- copy(totals_diff_new)
-          init_weight <- init_weight_new
-          
+          init_weight <- copy(init_weight_new)
+          indexAddRemove <- splitVector(init_weight)
+          objective <- objective_new
+          updatepSet <- TRUE
           # update observe variables
           if(do.observe){
             observe.count <- observe.count +1
-            if(observe.count>observe.times){
-              if(sd(observe.obj)/mean(observe.obj)< observe.break){
+            if(observe.count>=observe.times){
+              breakCond <- colSds(observe.obj)/colMeans2(observe.obj)
+              breakCond <- max(breakCond)
+              if(breakCond< observe.break){
                 break # if objective doesnt move anymore break up loop
               }else{
                 observe.count <- 1
-                observe.obj[observe.count] <- objective
+                observe.obj[observe.count,] <- objective
               }
             }else{
-              observe.obj[observe.count] <- objective
+              observe.obj[observe.count,] <- objective
             }
           }
         }
         
         ######################################
         # accept if solution got worse with small probability
-        if ( objective.new > objective ) {      
-          prob <- exp(-(objective.new-objective)/temp)
+        if ( diffObj < 0 ) {  
+          prob <- exp(diffObj/temp)
           x <- sample(c(0,1), 1,prob=c(1-prob,prob))
           
           if ( x == 1 ) { 
-            objective <- objective.new
-            data0[,weight_choose:=weight_choose_new]
-            totals_diff <- copy(totals_diff_new)
-            init_weight <- init_weight_new
             
+            # message("new solution accepted!\n")
+            marginTable <- copy(marginTable_new)
+            data0[,weight_choose:=weight_choose_new]
+            init_weight <- copy(init_weight_new)
+            indexAddRemove <- splitVector(init_weight)
+            objective <- objective_new
+            updatepSet <- TRUE
             # update observe variables
             if(do.observe){
               observe.count <- observe.count +1
-              if(observe.count>observe.times){
-                if(sd(observe.obj)/mean(observe.obj)< observe.break){
+              if(observe.count>=observe.times){
+                breakCond <- colSds(observe.obj)/colMeans2(observe.obj)
+                breakCond <- max(breakCond)
+                if(breakCond< observe.break){
                   break # if objective doesnt move anymore break up loop
                 }else{
                   observe.count <- 1
-                  observe.obj[observe.count] <- objective
+                  observe.obj[observe.count,] <- objective
                 }
               }else{
-                observe.obj[observe.count] <- objective
+                observe.obj[observe.count,] <- objective
               }
             }
           }
         }    
         n <- n+1
+        
+        # break inner loop if 
+        if(updatepSet){
+          noChange <- 0
+        }else{
+          noChange <- noChange + 1
+        }
+        if(noChange>n.forceCooldown){
+          break # break if solution does not move
+        }
       }
       ## decrease temp and decrease factor accordingly
       ## decrease temp by a const fraction (simple method used for testing only)
+      noChange <- 0
+      updatepSet <- TRUE
       temp <- temp_cooldown*temp
       redraw <- floor(factor_cooldown*redraw)
       if ( redraw == 0 ) {
@@ -244,19 +408,25 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
       }
       cooldown <- cooldown + 1
       if(cooldown%%10==0){
-        cat(paste0("Cooldown number ",cooldown,"\n"))
+        message(paste0("Cooldown number ",cooldown,"\n"))
       }
-      if ( objective.new <= eps | cooldown == 500 | redraw<2) {
+      if ( marginTable[,all(eps>=abs(Diff))] | cooldown == 500 | redraw<2) {
         break
-      }  
+      }
     }
-    if(objective>eps){
-      cat(paste0("Convergence NOT successfull for ",split.level),"\n")
+
+    # check if convergence was successfull
+    if(!marginTable[,all(eps>=abs(Diff))]){
+      message(paste0("Convergence NOT successfull for ",split," ",split.level),"\n")
     }else{
-      cat(paste0("Convergence successfull for ",split.level),"\n")
+      message(paste0("Convergence successfull for ",split," ",split.level),"\n")
     }
     setkeyv(data0,"sim_ID")
-    out <- data0[,weight_choose]  
-  }  
+    selectVars <- c(hhid,params[["pid"]],"weight_choose")
+    out <- data0[, selectVars, with = FALSE]
+  }
+  
+  out[,c(split):=split.level]
+  
   return(out)
 }

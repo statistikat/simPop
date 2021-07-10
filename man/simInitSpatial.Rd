@@ -72,6 +72,7 @@ holds combinations of characteristics of the broader region and the smaller
 regions as well as population counts (which may be available from a census).
 }
 \examples{
+library(data.table)
 data(eusilcS)
 data(eusilcP)
 library(data.table)

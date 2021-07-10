@@ -23,7 +23,7 @@ setClassUnion('listOrNULL', c('list', 'NULL'))
 #' @importFrom colorspace heat_hcl
 #' @importFrom VIM hotdeck
 #' @importFrom graphics par
-#' @importFrom stats as.formula chisq.test coef cor cov dlogis formula lm mad quantile rexp na.omit
+#' @importFrom stats as.formula chisq.test coef cor cov dlogis formula lm mad quantile rexp na.omit terms
 #' @importFrom utils read.csv2 tail head
 #' @importFrom stats median model.matrix optim plogis ppoints predict rnorm runif uniroot var weighted.mean glm poisson xtabs terms
 # removed  stats quantilerexp
@@ -33,6 +33,7 @@ setClassUnion('listOrNULL', c('list', 'NULL'))
 #' @importFrom ranger ranger
 #' @importFrom xgboost xgb.train xgb.DMatrix
 #' @importFrom RcppArmadillo armadillo_version
+#' @importFrom matrixStats colSds colMeans2
 NULL
 
 #' Class \code{"dataObj"}

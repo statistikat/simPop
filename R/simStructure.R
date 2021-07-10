@@ -72,7 +72,7 @@ simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), 
   if ( is.null(dataS@pid) ) {
     setkeyv(dataS@data, dataS@hhid)
   } else {
-    setkeyv(dataS@data, dataS@pid)
+    setkeyv(dataS@data, c(dataS@hhid,dataS@pid))
   }
 
   # extract variables
@@ -160,6 +160,7 @@ simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), 
   # the sampled household numbers in list 'numbers' are transformed to
   # indices of data frame 'dataS' and stored in vector 'indices'
   hidH <- hid[hfirst]
+
   indices <- lapply(1:ncomb, function(i) {
     pn <- which(hid %in% hidH[split[[i]]])
     pnM  <- matrix(pn, nrow=as.numeric(grid[i, 1]))

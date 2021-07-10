@@ -25,19 +25,15 @@ sumVec <- function(init_weight, sizefactor) {
     .Call('_simPop_sumVec', PACKAGE = 'simPop', init_weight, sizefactor)
 }
 
-select_equal <- function(x, val1, val2) {
-    .Call('_simPop_select_equal', PACKAGE = 'simPop', x, val1, val2)
+splitVector <- function(x) {
+    .Call('_simPop_splitVector', PACKAGE = 'simPop', x)
 }
 
-tableC <- function(x) {
-    .Call('_simPop_tableC', PACKAGE = 'simPop', x)
+calcCase <- function(x) {
+    .Call('_simPop_calcCase', PACKAGE = 'simPop', x)
 }
 
-csample_num <- function(x, size, replace, prob = as.numeric( c())) {
-    .Call('_simPop_csample_num', PACKAGE = 'simPop', x, size, replace, prob)
-}
-
-sample_group <- function(x, group_x, group, group_num, replace) {
-    .Call('_simPop_sample_group', PACKAGE = 'simPop', x, group_x, group, group_num, replace)
+calcProbabilities <- function(indexMat, x, Npop, indexData, initWeight, indexAdd, indexRemove) {
+    .Call('_simPop_calcProbabilities', PACKAGE = 'simPop', indexMat, x, Npop, indexData, initWeight, indexAdd, indexRemove)
 }
 
