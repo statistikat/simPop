@@ -390,6 +390,8 @@ generateValues_xgboost <- function(dataSample, dataPop, params) {
   residual <- params$residuals
   strata <- params$strata
   
+  ..predNames <- ..name <- ..weight <- res <- NULL
+  
   
   # remove strata from prediction, because xgboost can not handle factors with only one level
   predNames <- predNames[predNames != strata]
@@ -429,7 +431,7 @@ generateValues_xgboost <- function(dataSample, dataPop, params) {
     resSample[, res := predSample - .SD, .SDcols = name]
     target <- resSample[, ..name][[1]]
     
-    error <- sample(resSample$res, nrow(resSample), replace = TRUE)
+    error <- sample(resSample$res, nrow(dataPop), replace = TRUE)
     pred <- pred + error
   }
   
@@ -721,6 +723,7 @@ runModel <- function(dataS, dataP, params, typ) {
 #' number generator to be restored.
 #' @param verbose (logical) if \code{TRUE}, additional output is written to the promt
 #' @param by defining which variable to use as split up variable of the estimation. Defaults to the strata variable.
+#' @param optional_params adding optional parameter to the model, at the moment only implemented for xgboost hyperparameters
 #' @return An object of class \code{\linkS4class{simPopObj}} containing survey
 #' data as well as the simulated population data including the continuous
 #' variable specified by \code{additional} and possibly simulated categories
@@ -728,7 +731,7 @@ runModel <- function(dataS, dataP, params, typ) {
 #' @note The basic household structure and any other categorical predictors
 #' need to be simulated beforehand with the functions
 #' \code{\link{simStructure}} and \code{\link{simCategorical}}, respectively.
-#' @author Bernhard Meindl, Andreas Alfons, Alexander Kowarik (based on code by Stefan Kraft)
+#' @author Bernhard Meindl, Andreas Alfons, Alexander Kowarik (based on code by Stefan Kraft), Siro Fritzmann
 #' @references 
 #' B. Meindl, M. Templ, A. Kowarik, O. Dupriez (2017) Simulation of Synthetic Populations for Survey Data Considering Auxiliary
 #' Information. \emph{Journal of Statistical Survey}, \strong{79} (10), 1--38. \doi{10.18637/jss.v079.i10}

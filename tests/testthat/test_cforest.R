@@ -25,7 +25,8 @@ test_that("cforest integration tests",{
   
   simPop <- simCategorical(simPop,
                            additional=c("pl031", "pb220a"),
-                           method="cforest")
+                           method="cforest",
+                           nr_cpus = 1)
   
   expect_gt(nrow(simPop@pop@data), 0,
             "Expected generated synthetic population to have some rows")

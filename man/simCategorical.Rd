@@ -97,6 +97,8 @@ number generator to be restored.}
 \item{verbose}{set to TRUE if additional print output should be shown.}
 
 \item{by}{defining which variable to use as split up variable of the estimation. Defaults to the strata variable.}
+
+\item{optional_params}{adding optional parameter to the model, at the moment only implemented for xgboost hyperparameters}
 }
 \value{
 An object of class \code{\linkS4class{simPopObj}} containing survey
@@ -141,6 +143,6 @@ A. Alfons, M. Templ (2011) Simulation of close-to-reality population data for ho
 \code{\link{simContinuous}}, \code{\link{simComponents}}
 }
 \author{
-Bernhard Meindl, Andreas Alfons, Stefan Kraft, Alexander Kowarik, Matthias Templ
+Bernhard Meindl, Andreas Alfons, Stefan Kraft, Alexander Kowarik, Matthias Templ, Siro Fritzmann
 }
 \keyword{datagen}

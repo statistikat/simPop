@@ -25,13 +25,17 @@ test_that("xgboost integration tests",{
   
   simPop <- simCategorical(simPop,
                            additional=c("pl031", "pb220a"),
-                           method="xgboost")
+                           method="xgboost",
+                           nr_cpus = 1)
   
   simPop <- simContinuous(simPop, 
                            additional="hgrossminus",
                            method = "xgboost",
                            regModel = "available",
-                           by = "db040")
+                           by = "db040",
+                           log = FALSE,
+                           alpha = NULL,
+                           nr_cpus = 1)
 
   expect_gt(nrow(simPop@pop@data), 0,
             "Expected generated synthetic population to have some rows")
@@ -45,7 +49,8 @@ test_that("xgboost integration tests",{
   expect_output({simPop <- simCategorical(simPop,
                                           additional=c("pl031", "pb220a"),
                                           method="xgboost",
-                                          verbose = TRUE)},
+                                          verbose = TRUE,
+                                          nr_cpus = 1)},
                 "are running xgboost",
                 "Expected commandline output when verbose is true")
 
@@ -54,7 +59,10 @@ test_that("xgboost integration tests",{
                                          method = "xgboost",
                                          regModel = "available",
                                          verbose = TRUE,
-                                         by = "db040")},
+                                         by = "db040",
+                                         log = FALSE,
+                                         alpha = NULL,
+                                         nr_cpus = 1)},
                 "are running xgboost",
                 "Expected commandline output when verbose is true")
 })

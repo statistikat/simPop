@@ -242,12 +242,13 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
 #' number generator to be restored.
 #' @param verbose set to TRUE if additional print output should be shown.
 #' @param by defining which variable to use as split up variable of the estimation. Defaults to the strata variable.
+#' @param optional_params adding optional parameter to the model, at the moment only implemented for xgboost hyperparameters
 #' @return An object of class \code{\linkS4class{simPopObj}} containing survey
 #' data as well as the simulated population data including the categorical
 #' variables specified by argument \code{additional}.
 #' @note The basic household structure needs to be simulated beforehand with
 #' the function \code{\link{simStructure}}.
-#' @author Bernhard Meindl, Andreas Alfons, Stefan Kraft, Alexander Kowarik, Matthias Templ
+#' @author Bernhard Meindl, Andreas Alfons, Stefan Kraft, Alexander Kowarik, Matthias Templ, Siro Fritzmann
 #' @references 
 #' B. Meindl, M. Templ, A. Kowarik, O. Dupriez (2017) Simulation of Synthetic Populations for Survey Data Considering Auxiliary
 #' Information. \emph{Journal of Statistical Survey}, \strong{79} (10), 1--38. \doi{10.18637/jss.v079.i10}
