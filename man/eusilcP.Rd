@@ -4,7 +4,8 @@
 \name{eusilcP}
 \alias{eusilcP}
 \title{Synthetic EU-SILC data}
-\format{A \code{data.frame} with 58 654 observations on the following 28
+\format{
+A \code{data.frame} with 58 654 observations on the following 28
 variables: \describe{ \item{hid}{integer; the household ID.}
 \item{region}{factor; the federal state in which the household is
 located (levels \code{Burgenland}, \code{Carinthia}, \code{Lower Austria},
@@ -45,7 +46,8 @@ from capital investments in unincorporated business (net).}
 (net).} \item{hy130n}{numeric; regular inter-household cash transfer
 paid (net).} \item{hy145n}{numeric; repayments/receipts for tax
 adjustment (net).} \item{main}{logical; indicates the main income
-holder (i.e., the person with the highest income) of each household.} }}
+holder (i.e., the person with the highest income) of each household.} }
+}
 \source{
 This is a synthetic data set based on Austrian EU-SILC data from
 2006.  The original sample was provided by Statistics Austria.

@@ -9,19 +9,29 @@
 \alias{loadSILC}
 \title{Utility functions for EU-SILC data}
 \usage{
-loadSILC(file = NULL, filed = NULL, filer = NULL, filep = NULL,
-  fileh = NULL, year = 2013, country = "Austria")
+loadSILC(
+  file = NULL,
+  filed = NULL,
+  filer = NULL,
+  filep = NULL,
+  fileh = NULL,
+  year = 2013,
+  country = "Austria"
+)
 
 mergeSILC(filed, filer, fileh, filep)
 
 checkCol(x, y)
 
-chooseSILCvars(x, vars = c("db030", "db040", "rb030", "rb080", "rb090",
-  "pl031", "pb220a", "py010g", "py021g", "py050g", "py080g", "py090g",
-  "py100g", "py110g", "py120g", "py130g", "py140g", "hy040g", "hy050g",
-  "hy060g", "hy070g", "hy080g", "hy090g", "hy100g", "hy110g", "hy120g",
-  "hy130g", "hy140g", "db090", "rb050", "pb190", "pe040", "pl051", "pl111",
-  "rb010"), country = NULL)
+chooseSILCvars(
+  x,
+  vars = c("db030", "db040", "rb030", "rb080", "rb090", "pl031", "pb220a", "py010g",
+    "py021g", "py050g", "py080g", "py090g", "py100g", "py110g", "py120g", "py130g",
+    "py140g", "hy040g", "hy050g", "hy060g", "hy070g", "hy080g", "hy090g", "hy100g",
+    "hy110g", "hy120g", "hy130g", "hy140g", "db090", "rb050", "pb190", "pe040", "pl051",
+    "pl111", "rb010"),
+  country = NULL
+)
 
 modifySILC(x, country = "Austria")
 }

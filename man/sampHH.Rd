@@ -4,8 +4,7 @@
 \alias{sampHH}
 \title{Sample households from given microdata.}
 \usage{
-sampHH(pop, sizefactor = 1, hid = "hid", strata = "region",
-  hsize = NULL)
+sampHH(pop, sizefactor = 1, hid = "hid", strata = "region", hsize = NULL)
 }
 \arguments{
 \item{pop}{data frame containing households and persons}

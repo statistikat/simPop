@@ -72,7 +72,10 @@ generateValues <- function(dataSample, dataPop, params) {
       probs <- predict(mod,data=newdata,type="response")$predictions
       colnames(probs) <- mod$forest$levels
     }else if ( meth %in% c("keras") ) {
-      probs <- predict(mod, data=newdata)
+      newDataMatrix <- model.matrix(~.+0,data = newdata)
+      newDataMatrix <- array_reshape(newDataMatrix, c(nrow(newDataMatrix), ncol(newDataMatrix)))
+      
+      probs <- predict(model, newDataMatrix)
     }
     #if ( meth %in% "naivebayes" ) {
     #  probs <- predict(mod, newdata=newdata, type="raw")
@@ -493,38 +496,46 @@ simCategorical <- function(simPopObj, additional,
     }else if ( method == "keras" ) {
       if(verbose) cat("we are running a neural net (keras):\n")
       
-      train.data <- paste0("dataSample[,c(\"",
-                           paste0(predNames, collapse = "\",\""),
-                           "\")]")
       train.labels <- paste0("dataSample$", i)
       
-      # TODO: handle categorical input names
-      input.shape <- paste0("c(", length(predNames), ", ", 1, ")") 
-      output.shape <- paste0("length(unique(", train.labels, "))")
+      # verbose in kerase has 3 levels, 0 = silent, 1 = progress bar, 2 = one line per epoch
+      # only 0 and 1 are implemented here, verbose = false -> 0, true -> 1
+      keras_verbose <- sum(verbose)
       
-      # to categorical or model.matrix
       
-      formula.cmd <- paste0(c("model <- keras_model_sequential()  \n",
-                              "model %>% layer_flatten(input_shape = ", input.shape,") %>% \n",
-                              "layer_dense(units = 128, activation = 'relu') %>%  \n",
-                              "layer_dense(units = ",output.shape, ", activation = 'softmax') \n"),
-                            collapse = "")
+      # TODO: add sample weights
+      formula.cmd <- paste0("modelMatrix <- model.matrix(~.+0,data = setDT(dataSample)[,c(\"",paste0(predNames, collapse = "\",\""),"\"), with=F])
+                            
+                            x_train <- array_reshape(modelMatrix, c(nrow(modelMatrix), ncol(modelMatrix)))
+                            # TODO: test if converting factors to numeric and substracting one, as to_categorical expects index from 0 to (num_classes -1) works for all cases
+                            y_train <- to_categorical(as.numeric(",train.labels,") - 1, length(unique(",train.labels,")))
+                            
+                            
+                            input_dim <- ncol(x_train)
+                            output_dim <- ncol(y_train)
+                            
+                            
+                            model <-
+                              keras_model_sequential() %>%
+                              layer_dense(units = 256, activation = 'relu', input_shape = c(input_dim)) %>% 
+                              layer_dropout(rate = 0.4) %>% 
+                              layer_dense(units = 128, activation = 'relu') %>%
+                              layer_dropout(rate = 0.3) %>%
+                              layer_dense(units = 56, activation = 'relu') %>%
+                              layer_dropout(rate = 0.1) %>%
+                              layer_dense(units = output_dim, activation = 'softmax') %>%
+                              compile(optimizer = 'adam',
+                                      loss = 'categorical_crossentropy',
+                                      metrics = c('categorical_accuracy', 'accuracy'))
+                            
+                            model %>% keras::fit(x_train,
+                                                 y_train,
+                                                 epochs = 20,
+                                                 verbose = ",keras_verbose,",
+                                                 batch_size = 128, 
+                                                 validation_split = 0.2)")
       
-      formula.cmd <- paste0(formula.cmd,
-                            "model %>% compile(  
-                              optimizer = 'adam', 
-                              loss = 'sparse_categorical_crossentropy',
-                              metrics = c('accuracy') 
-                            )  \n",
-                            collapse = "")
       
-      # TODO: convert train.data to matrix
-      formula.cmd <- paste0(formula.cmd,
-                            "model %>% fit(", 
-                            train.data, ", ",
-                            train.labels,", epochs = 5, verbose = 2)  \n ",
-                            collapse = " \n ")
-      # TODO: implement
     }
     #if ( method == "naivebayes" ) {
     #  formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))

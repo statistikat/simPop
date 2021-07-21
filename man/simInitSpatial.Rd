@@ -5,9 +5,18 @@
 \title{Generation of smaller regions given an existing spatial variable and a
 table.}
 \usage{
-simInitSpatial(simPopObj, additional, region, tspatialP = NULL,
-  tspatialHH = NULL, eps = 0.05, maxIter = 100, nr_cpus = NULL,
-  seed = 1, verbose = FALSE)
+simInitSpatial(
+  simPopObj,
+  additional,
+  region,
+  tspatialP = NULL,
+  tspatialHH = NULL,
+  eps = 0.05,
+  maxIter = 100,
+  nr_cpus = NULL,
+  seed = 1,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{simPopObj}{an object of class \code{\linkS4class{simPopObj}}.}

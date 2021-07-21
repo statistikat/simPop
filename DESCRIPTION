@@ -27,7 +27,7 @@ Imports:
     foreach,
     colorspace,
     VIM,
-    methods,party,EnvStats,fitdistrplus,ranger,wrswoR,keras,
+    methods,party,EnvStats,fitdistrplus,ranger,wrswoR,keras,dplyr,
     data.table
 Suggests:
     haven,

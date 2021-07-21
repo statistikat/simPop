@@ -4,11 +4,21 @@
 \alias{simCategorical}
 \title{Simulate categorical variables of population data}
 \usage{
-simCategorical(simPopObj, additional, method = c("multinom",
-  "distribution", "ctree", "cforest", "ranger"), limit = NULL,
-  censor = NULL, maxit = 500, MaxNWts = 1500, eps = NULL,
-  nr_cpus = NULL, regModel = NULL, seed = 1, verbose = FALSE,
-  by = "strata")
+simCategorical(
+  simPopObj,
+  additional,
+  method = c("multinom", "distribution", "ctree", "cforest", "ranger", "keras"),
+  limit = NULL,
+  censor = NULL,
+  maxit = 500,
+  MaxNWts = 1500,
+  eps = NULL,
+  nr_cpus = NULL,
+  regModel = NULL,
+  seed = 1,
+  verbose = FALSE,
+  by = "strata"
+)
 }
 \arguments{
 \item{simPopObj}{a \code{simPopObj} containing population and household
@@ -26,7 +36,8 @@ distributions) or \code{"distribution"} (random draws from the observed
 conditional distributions of their multivariate realizations).
 \code{"ctree"}  for using Classification trees
 \code{"cforest"}  for using random forest (implementation in package party)
-\code{"ranger"}  for using random forest (implementation in package ranger)}
+\code{"ranger"}  for using random forest (implementation in package ranger)
+\code{"keras"}  for neural nets (implementation in package keras)}
 
 \item{limit}{if \code{method} is \code{"multinom"}, this can be used to
 account for structural zeros. If only one additional variable is requested,

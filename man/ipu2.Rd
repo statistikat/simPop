@@ -4,11 +4,25 @@
 \alias{ipu2}
 \title{Iterative Proportional Updating}
 \usage{
-ipu2(dat, hid = NULL, conP = NULL, conH = NULL, epsP = 1e-06,
-  epsH = 0.01, verbose = FALSE, w = NULL, bound = 4,
-  maxIter = 200, meanHH = TRUE, allPthenH = TRUE, returnNA = TRUE,
-  looseH = FALSE, numericalWeighting = NULL, check_hh_vars = TRUE,
-  conversion_messages = FALSE)
+ipu2(
+  dat,
+  hid = NULL,
+  conP = NULL,
+  conH = NULL,
+  epsP = 1e-06,
+  epsH = 0.01,
+  verbose = FALSE,
+  w = NULL,
+  bound = 4,
+  maxIter = 200,
+  meanHH = TRUE,
+  allPthenH = TRUE,
+  returnNA = TRUE,
+  looseH = FALSE,
+  numericalWeighting = NULL,
+  check_hh_vars = TRUE,
+  conversion_messages = FALSE
+)
 }
 \arguments{
 \item{dat}{a \code{data.table} containing household ids (optionally), base
