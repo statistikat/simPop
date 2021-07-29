@@ -233,6 +233,7 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
 #' number generator to be restored.
 #' @param verbose set to TRUE if additional print output should be shown.
 #' @param by defining which variable to use as split up variable of the estimation. Defaults to the strata variable.
+#' @param model_params NULL or a named list which can contain model specific parameters which will be passed onto the function call for the respective model. 
 #' @return An object of class \code{\linkS4class{simPopObj}} containing survey
 #' data as well as the simulated population data including the categorical
 #' variables specified by argument \code{additional}.
@@ -263,7 +264,7 @@ simCategorical <- function(simPopObj, additional,
     method=c("multinom", "distribution","ctree","cforest","ranger"),
     limit=NULL, censor=NULL, maxit=500, MaxNWts=1500,
     eps=NULL, nr_cpus=NULL, regModel=NULL, seed=1,
-    verbose=FALSE,by="strata") {
+    verbose=FALSE,by="strata",model_params=NULL) {
 
   x <- newAdditionalVarible <- NULL
 
@@ -315,6 +316,27 @@ simCategorical <- function(simPopObj, additional,
     if ( is.null(regModel) ) {
       regModel <- rep("basic", length(additional))
     }
+    param.cmd <- NULL
+    if(!is.null(model_params)){
+      if(!(is.list(model_params) & !is.null(names(model_params)))){
+        stop("Parameter model_params must be a named list where each entry refers to a parameter of the model chosen by `method`")
+      }
+     
+      all_model_params <- as.list(args(get(method)))
+      
+      names_params <- names(model_params)
+      names_all <- names(all_model_params)
+      if(any(!names_params %in% names_all)){
+        stop("The following are not parameters of method ",method,"\n ",paste(names_params[!names_params %in% names_all],collapse=", "))
+      }
+      
+      # build parameter call for model
+      param.cmd <- paste(names_params,paste0("params$model_extra$",names_params),sep="=",collapse=", ")
+    }
+    
+    
+    
+    
   }
   # parameters for parallel computing
   if(by=="strata"){
@@ -451,6 +473,10 @@ simCategorical <- function(simPopObj, additional,
       if(!dataS@ispopulation){
         formula.cmd <- paste0(formula.cmd,", weights=", dataS@weight)
       }
+      if(!is.null(param.cmd)){
+        formula.cmd <- paste0(formula.cmd,", ",param.cmd)
+      }
+      
       formula.cmd <- paste0(formula.cmd,", data=dataSample, trace=FALSE",
                             ", maxit=",maxit, ", MaxNWts=", MaxNWts,"))")
       
@@ -463,6 +489,9 @@ simCategorical <- function(simPopObj, additional,
       if(!dataS@ispopulation){
         formula.cmd <- paste0(formula.cmd,", weights=as.integer(dataSample$", dataS@weight,")")
       }
+      if(!is.null(param.cmd)){
+        formula.cmd <- paste0(formula.cmd,", ",param.cmd)
+      }
       formula.cmd <- paste0(formula.cmd,
                            ", data=dataSample))")
       if(verbose) cat("we are running recursive partitioning:\n")
@@ -474,6 +503,9 @@ simCategorical <- function(simPopObj, additional,
       if(!dataS@ispopulation){
         formula.cmd <- paste0(formula.cmd,", weights=as.integer(dataSample$", dataS@weight,")")
       }
+      if(!is.null(param.cmd)){
+        formula.cmd <- paste0(formula.cmd,", ",param.cmd)
+      }
       formula.cmd <- paste0(formula.cmd,", data=dataSample))")
       if(verbose) cat("we are running random forest classification (cforest):\n")
       if(verbose) cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
@@ -483,7 +515,10 @@ simCategorical <- function(simPopObj, additional,
 		  formula.cmd <- paste("suppressWarnings(ranger(", formula.cmd)
 		  if(!dataS@ispopulation){
   		  formula.cmd <- paste0(formula.cmd,", case.weights=dataSample$", dataS@weight)
-	  	}
+		  }
+		  if(!is.null(param.cmd)){
+		    formula.cmd <- paste0(formula.cmd,", ",param.cmd)
+		  }
 		  formula.cmd <- paste0(formula.cmd, ", data=dataSample,probability=TRUE))", sep="")
 	  	if(verbose) cat("we are running random forest (ranger):\n")
 		  if(verbose) cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
@@ -516,7 +551,8 @@ simCategorical <- function(simPopObj, additional,
     params$limit <- limit
     params$censor <- censor
     params$levelsResponse <- levelsResponse
-
+    params$model_extra <- model_params
+    
     # windows
     if ( parallel ) {
       if ( have_win ) {
