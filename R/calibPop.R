@@ -71,7 +71,7 @@ subsetList <- function(totals,split,x){
 
 
 # check list of contingency tables 
-checkTables <- function(tabs,namesData,split=NULL,verbose=FALSE,namesTabs="pers"){
+checkTables <- function(tabs,data,split=NULL,verbose=FALSE,namesTabs="pers"){
   
   if(is.null(tabs)){
     return(NULL)
@@ -80,6 +80,8 @@ checkTables <- function(tabs,namesData,split=NULL,verbose=FALSE,namesTabs="pers"
   if(!is.list(tabs)){
     tabs <- list(tabs)
   }
+  
+  namesData <- copy(colnames(data))
   
   tabs <- lapply(tabs,function(z){
     
@@ -112,6 +114,22 @@ checkTables <- function(tabs,namesData,split=NULL,verbose=FALSE,namesTabs="pers"
       cat("\n")
     })
   }
+  
+  if(verbose){
+    cat("\nCheck if values in tables and data match\n")
+    lapply(tabs,function(z,data){
+      check_values <- colnames(z)
+      check_values <- check_values[check_values!="Freq"]
+      tab_data <- data[,.N,by=c(check_values)]
+      z_both <- merge(z,tab_data,by=c(check_values),all=TRUE)
+      if(nrow(z_both[is.na(Freq) | is.na(N)])>0){
+        stop("Values in columns ",paste(check_values,collapse=" and ")," do not agree between the synthetic population and the supplied population margins")
+      }
+    },data=data)
+  }
+
+  
+  
   return(tabs)
 }
 
@@ -129,6 +147,9 @@ makeFactors <- function(totals,dat,split){
     return(output)
   })
   facLevels <- unlist(facLevels,recursive = FALSE)
+  if(length(facLevels)==0){
+    return(dat)
+  }
   names(facLevels) <- gsub("^.*\\.","",names(facLevels))
   
   checkSplit <- facLevels[names(facLevels)==split]
@@ -204,7 +225,7 @@ makeFactors <- function(totals,dat,split){
 #' For example \code{split = c("region"), splitUpper = c("Country")}
 #' all units from the country are eligable for donor sample when problem is split
 #' into regions. Is usefull if \code{simInitSpatial()} was used and the variable to split
-#' the problem into results in very small groups (~couple of houndres to thousands). 
+#' the problem into results in very small groups (~couple of hundreds to thousands). 
 #' @param temp starting temperatur for simulated annealing algorithm
 #' @param epsP.factor a factor (between 0 and 1) specifying the acceptance
 #' error for contingency table on individual level. For example epsP.factor = 0.05 results in an acceptance error for the
@@ -264,7 +285,7 @@ makeFactors <- function(totals,dat,split){
 #' simPop <- addKnownMargins(simPop, margins)
 #' simPop_adj2 <- calibPop(simPop, split="db040", 
 #'   temp=1, epsP.factor=0.1, epsH.factor = 0.1,
-#'  nr_cpus = 1)
+#'  epsMinN=10, nr_cpus = 1)
 #' }
 #' # apply simulated annealing
 #' \donttest{
@@ -275,7 +296,7 @@ makeFactors <- function(totals,dat,split){
 calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0.05, epsH.factor = 0.05, epsMinN=0, maxiter=200,
   temp.cooldown = 0.9, factor.cooldown = 0.85, min.temp = 10^-3,
   nr_cpus=NULL, sizefactor=2, 
-  choose.temp=TRUE,choose.temp.factor=0.2,scale.redraw=.5,observe.times=50,observe.break=0.05,
+  choose.temp=TRUE,choose.temp.factor=0.2,scale.redraw=.5,observe.times=50,observe.break=0.05,n.forceCooldown=30,
   verbose=FALSE,hhTables=NULL,persTables=NULL) {
   
   if(verbose){
@@ -304,26 +325,26 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
   hhsize <- popObj(inp)@hhsize
   
   if(is.null(persTables)&&is.null(hhTables)){
-    totals <- tableObj(inp) 
-  }else{
-    # check persTables
-    if(verbose){
-      cat("\nCheck Person-Tables\n")
+    persTables <- tableObj(inp)
+    if("N" %in% colnames(persTables)){
+      setnames(persTables,"N","Freq")
     }
-    persTables <- checkTables(persTables,namesData=copy(colnames(data)),split=split,verbose=verbose)
-    
-    # check hhTables
-    if(verbose){
-      cat("\nCheck Household-Tables\n")
-    }
-    hhTables <- checkTables(hhTables,namesData=copy(colnames(data)),split=split,verbose=verbose,namesTabs="hh")
-    
-    totals <- c(persTables,hhTables)  
-    totals <- totals[!sapply(totals,is.null)]
+    persTables <- list(persTables)
   }
-  
-
-  
+  # check persTables
+  if(verbose){
+    cat("\nCheck Person-Tables\n")
+  }
+  persTables <- checkTables(persTables,data=data,split=split,verbose=verbose)
+    
+  # check hhTables
+  if(verbose){
+    cat("\nCheck Household-Tables\n")
+  }
+  hhTables <- checkTables(hhTables,data=data,split=split,verbose=verbose,namesTabs="hh")
+    
+  totals <- c(persTables,hhTables)  
+  totals <- totals[!sapply(totals,is.null)]
 
   # check some params
   if(!is.numeric(choose.temp.factor)){
@@ -378,7 +399,7 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
   
   # make factor variables
   # and check if factor in totals coincide with factors in data
-  data <- makeFactors(totals,data,split)
+  data <- makeFactors(list(totals),data,split)
 
   ## split the problem by "split"-factor
   setkeyv(data,split)
@@ -400,7 +421,8 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
           totals0=totals0,
           params=params,sizefactor=sizefactor,choose.temp=choose.temp,
           choose.temp.factor=choose.temp.factor,scale.redraw=scale.redraw,split=split,
-          split.level=split.level,observe.times=observe.times,observe.break=observe.break)
+          split.level=split.level,observe.times=observe.times,observe.break=observe.break,
+          n.forceCooldown=n.forceCooldown)
       }
       stopCluster(cl)
     }else if ( !have_win ) {# linux/mac
@@ -414,7 +436,8 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
           totals0=totals0,
           params=params,sizefactor=sizefactor,choose.temp=choose.temp,
           choose.temp.factor=choose.temp.factor,scale.redraw=scale.redraw,split=split,
-          split.level=split.level,observe.times=observe.times,observe.break=observe.break)
+          split.level=split.level,observe.times=observe.times,observe.break=observe.break,
+          n.forceCooldown=n.forceCooldown)
         
       }, mc.cores = nr_cores, mc.preschedule = FALSE)
     }
@@ -429,14 +452,17 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
         totals0=totals0,
         params=params,sizefactor=sizefactor,choose.temp=choose.temp,
         choose.temp.factor=choose.temp.factor,scale.redraw=scale.redraw,split=split,
-        split.level=split.level,observe.times=observe.times,observe.break=observe.break)
+        split.level=split.level,observe.times=observe.times,observe.break=observe.break,
+        n.forceCooldown=n.forceCooldown)
     })
   }
     
   # return dataset with new weights
   final_weights <- rbindlist(final_weights)
   final_weights <- final_weights[weight_choose>0]
-  final_weights <- rbind(final_weights[weight_choose==1],final_weights[weight_choose>1,.SD[rep(1:.N,weight_choose)]])
+  if(final_weights[,any(weight_choose>1)]){
+    final_weights <- rbind(final_weights[weight_choose==1],final_weights[weight_choose>1,.SD[rep(1:.N,weight_choose)]])
+  }
   final_weights[,doub:=1:.N,by=c(params[["pid"]],params[["hhid"]],params[["split"]])]
   final_weights[,hid_help:=paste(get(params[["hhid"]]),get(split),doub,sep="_")]
   final_weights[,c(paste0(params[["hhid"]],"_new")):=.GRP,by=hid_help]

@@ -122,7 +122,7 @@ Rcpp::List splitVector(Rcpp::IntegerVector &x){
   int nOnes = sum(x);
   Rcpp::IntegerVector xOnes(nOnes);
   Rcpp::IntegerVector xZeros(x.size()-nOnes);
-  
+
   for(int i=0;i<x.size();i++){
     if(x[i]==1){
       xOnes[ones] = i;
@@ -161,6 +161,21 @@ double calcCase(Rcpp::NumericVector &x){
   
 }  
 
+// helpfunction to calcualte probabilities for each
+// case
+// called inside c++ function calcProbabilities()
+//
+// [[Rcpp::export]]
+double calcCase2(Rcpp::NumericVector &x){
+  
+  Rcpp::NumericVector x_2 = as<NumericVector>(sign(x)) * pow(x,2.0);
+  double probx = sum(x_2);
+  probx = sqrt(abs(probx)) * std::copysign(1.0,probx);
+  
+  return(probx);
+  
+}  
+
 // help function to calculate probabilites using x and an index matrix
 // used to calculate sampling probabilities
 // probabilities <- sum(x[indexMat(i,_)])
@@ -182,7 +197,7 @@ Rcpp::List calcProbabilities(Rcpp::IntegerMatrix &indexMat, Rcpp::NumericVector 
   // get probabilites for adding
   for(int i=0;i<nrow;i++){
     helpVec = x[indexMat(i,_)];
-    probAdd[i] = calcCase(helpVec)/Npop[i];
+    probAdd[i] = calcCase(helpVec);
     negIndex[i] = probAdd[i]<=0;
     if(negIndex[i]){
       sumNegatives += probAdd[i];
@@ -197,6 +212,14 @@ Rcpp::List calcProbabilities(Rcpp::IntegerMatrix &indexMat, Rcpp::NumericVector 
   // addjust probabilities for negative differences
   probAdd[negIndex] = exp(sumNegatives);
   probRemove[!negIndex] = exp(-1*sumPositives);
+
+  // for(int i=0;i<probAdd.size();i++){
+  //   std::cout<<"probAdd"<<probAdd[i]<<"\n";
+  // }
+  // 
+  // for(int i=0;i<probRemove.size();i++){
+  //   std::cout<<"probRemove"<<probRemove[i]<<"\n";
+  // }
   
   // get probabilites for each index in indexData
   // considering initWeight
@@ -221,8 +244,27 @@ Rcpp::List calcProbabilities(Rcpp::IntegerMatrix &indexMat, Rcpp::NumericVector 
   std::vector<double> probRemove_out(Ones);
   std::vector<int> indexRemoveNew(Ones);
   std::vector<int> indexAddNew(Zeros);
+  std::vector<int> count_group_add(nrow);
+  std::vector<int> count_group_remove(nrow);
   
-
+  // loop through vectors to add and remove to get number of units in each group
+  for(int i=0; i<std::max(Ones,Zeros);i++){
+    if(i<Zeros){ // && 
+      helpIndex =  indexData[indexAdd[i] % sizeData];
+      count_group_add[helpIndex]++;
+    }
+    if(i<Ones){ //
+      helpIndex =  indexData[indexRemove[i] % sizeData];
+      count_group_remove[helpIndex]++;
+    }
+  }
+  // adjust probabilites to the population size
+  for(int i=0;i<nrow;i++){
+    probAdd[i] = probAdd[i]/count_group_add[i];
+    probRemove[i] = probRemove[i]/count_group_remove[i];
+  }
+  
+  // create vector with sampe probabilites for whole possible sampel size
   for(int i=0; i<std::max(Ones,Zeros);i++){
     if(i<Zeros){ // && 
       helpIndex =  indexData[indexAdd[i] % sizeData];
