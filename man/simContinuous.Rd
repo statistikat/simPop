@@ -7,7 +7,7 @@
 simContinuous(
   simPopObj,
   additional = "netIncome",
-  method = c("multinom", "lm", "poisson"),
+  method = c("multinom", "lm", "poisson", "xgboost"),
   zeros = TRUE,
   breaks = NULL,
   lower = NULL,
@@ -34,7 +34,8 @@ simContinuous(
   imputeMissings = FALSE,
   seed,
   verbose = FALSE,
-  by = "strata"
+  by = "strata",
+  optional_params = NULL
 )
 }
 \arguments{
@@ -49,7 +50,7 @@ Currently, only one additional variable can be simulated at a time.}
 simulating the continuous variable. Accepted values are \code{"multinom"},
 for using multinomial log-linear models combined with random draws from the
 resulting categories, \code{"lm"}, for using (two-step) regression
-models combined with random error terms and \code{"poisson"} for using Poisson regression for count variables.}
+models combined with random error terms, \code{"poisson"} for using Poisson regression for count variables, and \code{"xgboost"} for using XGBoost.}
 
 \item{zeros}{a logical indicating whether the variable specified by
 \code{additional} is semi-continuous, i.e., contains a considerable amount
@@ -184,6 +185,8 @@ number generator to be restored.}
 \item{verbose}{(logical) if \code{TRUE}, additional output is written to the promt}
 
 \item{by}{defining which variable to use as split up variable of the estimation. Defaults to the strata variable.}
+
+\item{optional_params}{adding optional parameter to the model, at the moment only implemented for xgboost hyperparameters}
 }
 \value{
 An object of class \code{\linkS4class{simPopObj}} containing survey
@@ -278,6 +281,6 @@ A. Alfons, M. Templ (2011) Simulation of close-to-reality population data for ho
 \code{\link{simComponents}}, \code{\link{simEUSILC}}
 }
 \author{
-Bernhard Meindl, Andreas Alfons, Alexander Kowarik (based on code by Stefan Kraft)
+Bernhard Meindl, Andreas Alfons, Alexander Kowarik (based on code by Stefan Kraft), Siro Fritzmann
 }
 \keyword{datagen}

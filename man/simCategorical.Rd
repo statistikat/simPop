@@ -7,7 +7,7 @@
 simCategorical(
   simPopObj,
   additional,
-  method = c("multinom", "distribution", "ctree", "cforest", "ranger"),
+  method = c("multinom", "distribution", "ctree", "cforest", "ranger", "xgboost"),
   limit = NULL,
   censor = NULL,
   maxit = 500,
@@ -17,7 +17,8 @@ simCategorical(
   regModel = NULL,
   seed = 1,
   verbose = FALSE,
-  by = "strata"
+  by = "strata",
+  optional_params = NULL
 )
 }
 \arguments{
@@ -36,7 +37,8 @@ distributions) or \code{"distribution"} (random draws from the observed
 conditional distributions of their multivariate realizations).
 \code{"ctree"}  for using Classification trees
 \code{"cforest"}  for using random forest (implementation in package party)
-\code{"ranger"}  for using random forest (implementation in package ranger)}
+\code{"ranger"}  for using random forest (implementation in package ranger)
+\code{"xgboost"}  for using xgboost (implementation in package xgboost)}
 
 \item{limit}{if \code{method} is \code{"multinom"}, this can be used to
 account for structural zeros. If only one additional variable is requested,
@@ -95,6 +97,8 @@ number generator to be restored.}
 \item{verbose}{set to TRUE if additional print output should be shown.}
 
 \item{by}{defining which variable to use as split up variable of the estimation. Defaults to the strata variable.}
+
+\item{optional_params}{adding optional parameter to the model, at the moment only implemented for xgboost hyperparameters}
 }
 \value{
 An object of class \code{\linkS4class{simPopObj}} containing survey
@@ -139,6 +143,6 @@ A. Alfons, M. Templ (2011) Simulation of close-to-reality population data for ho
 \code{\link{simContinuous}}, \code{\link{simComponents}}
 }
 \author{
-Bernhard Meindl, Andreas Alfons, Stefan Kraft, Alexander Kowarik, Matthias Templ
+Bernhard Meindl, Andreas Alfons, Stefan Kraft, Alexander Kowarik, Matthias Templ, Siro Fritzmann
 }
 \keyword{datagen}

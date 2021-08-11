@@ -71,7 +71,11 @@ generateValues <- function(dataSample, dataPop, params) {
     }else if ( meth %in% c("ranger") ) {
       probs <- predict(mod,data=newdata,type="response")$predictions
       colnames(probs) <- mod$forest$levels
-	  }
+    }else if ( meth %in% c("xgboost") ) {
+      probs <- predict(mod, newdata=xgb.DMatrix(data = model.matrix(~.+0,data = setDT(newdata))))
+      # create matrix from prediction array
+      probs <- matrix(probs, nrow = nrow(newdata), ncol = mod[["params"]][["num_class"]], byrow = T)
+    }
     #if ( meth %in% "naivebayes" ) {
     #  probs <- predict(mod, newdata=newdata, type="raw")
     #}
@@ -106,6 +110,10 @@ generateValues <- function(dataSample, dataPop, params) {
     }
     # generate realizations for each combination
 
+    if(meth == c("xgboost")) {
+      ind <- 1:length(levelsResponse)
+    }
+    
     if ( length(exclude) == 0 ) {
       ncomb <- as.integer(sapply(indGrid, length))
       sim <- lapply(1:length(ncomb), resample, ncomb, probs)
@@ -184,6 +192,7 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
 #' \code{"ctree"}  for using Classification trees
 #' \code{"cforest"}  for using random forest (implementation in package party)
 #' \code{"ranger"}  for using random forest (implementation in package ranger)
+#' \code{"xgboost"}  for using xgboost (implementation in package xgboost)
 #' @param limit if \code{method} is \code{"multinom"}, this can be used to
 #' account for structural zeros. If only one additional variable is requested,
 #' a named list of lists should be supplied. The names of the list components
@@ -239,7 +248,7 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
 #' variables specified by argument \code{additional}.
 #' @note The basic household structure needs to be simulated beforehand with
 #' the function \code{\link{simStructure}}.
-#' @author Bernhard Meindl, Andreas Alfons, Stefan Kraft, Alexander Kowarik, Matthias Templ
+#' @author Bernhard Meindl, Andreas Alfons, Stefan Kraft, Alexander Kowarik, Matthias Templ, Siro Fritzmann
 #' @references 
 #' B. Meindl, M. Templ, A. Kowarik, O. Dupriez (2017) Simulation of Synthetic Populations for Survey Data Considering Auxiliary
 #' Information. \emph{Journal of Statistical Survey}, \strong{79} (10), 1--38. \doi{10.18637/jss.v079.i10}
@@ -261,10 +270,10 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
 #' simPop
 #' }
 simCategorical <- function(simPopObj, additional,
-    method=c("multinom", "distribution","ctree","cforest","ranger"),
-    limit=NULL, censor=NULL, maxit=500, MaxNWts=1500,
-    eps=NULL, nr_cpus=NULL, regModel=NULL, seed=1,
-    verbose=FALSE,by="strata",model_params=NULL) {
+    method = c("multinom", "distribution","ctree","cforest","ranger","xgboost"),
+    limit = NULL, censor = NULL, maxit = 500, MaxNWts = 1500,
+    eps = NULL, nr_cpus = NULL, regModel = NULL, seed = 1,
+    verbose = FALSE,by = "strata",model_params = NULL) {
 
   x <- newAdditionalVarible <- NULL
 
@@ -501,7 +510,7 @@ simCategorical <- function(simPopObj, additional,
       formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
       formula.cmd <- paste("suppressWarnings(cforest(", formula.cmd)
       if(!dataS@ispopulation){
-        formula.cmd <- paste0(formula.cmd,", weights=as.integer(dataSample$", dataS@weight,")")
+        formula.cmd <- paste0(formula.cmd,", weights=as.numeric(dataSample$", dataS@weight,")")
       }
       if(!is.null(param.cmd)){
         formula.cmd <- paste0(formula.cmd,", ",param.cmd)
@@ -522,7 +531,73 @@ simCategorical <- function(simPopObj, additional,
 		  formula.cmd <- paste0(formula.cmd, ", data=dataSample,probability=TRUE))", sep="")
 	  	if(verbose) cat("we are running random forest (ranger):\n")
 		  if(verbose) cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
-	}
+    }else if ( method == "xgboost" ) {
+      
+      # simulation via xgboost
+      if(verbose) cat("we are running xgboost:\n")
+      
+      # set xgb verbose level
+      if(verbose){
+        xgb_verbose <- 1
+      }else{
+        xgb_verbose <- 0
+      }
+      
+      if(!dataS@ispopulation){
+        weight_str <- paste0("as.numeric(dataSample$", dataS@weight, ")")
+        # xgb_weight <- paste0(", info = list(\"weight\" = (",weight_str," - min(", weight_str, "))
+        #                      / (max(", weight_str, ") - min(", weight_str, ")))")
+        # xgb_weight <- paste0(", info = list(\"weight\" = (",weight_str," / max(", weight_str, ")))")
+        xgb_weight <- paste0(", info = list(\"weight\" = (",weight_str,"))")
+      }else{
+        xgb_weight <- ""
+      }
+      
+      pred_names <- paste(predNames, collapse = "\",\"")
+      train <- paste0("xgb.DMatrix(data = model.matrix(~.+0,data = setDT(dataSample)[,c(\"", pred_names,"\"), with=F]),
+                                   label = as.numeric(dataSample$",i,") - 1
+                                        ", xgb_weight,")")
+      
+      # Default values
+      nrounds <- 100
+      early_stopping_rounds <- 10
+      xgb_hyper_params <- "list(nthread = 6,
+                                eta = 0.3,
+                                max_depth = 32,
+                                min_child_weight = 1,
+                                gamma = 0,
+                                subsample = 1,
+                                objective = \"multi:softprob\",
+                                eval_metric = \"mlogloss\")"
+      
+      if(!is.null(optional_params)){
+        
+        xgb_hyper_params <- "params$optional_params"
+        
+        if(!is.null(optional_params$nrounds)){
+          nrounds <- optional_params$nrounds
+        }
+        
+        if(!is.null(optional_params$early_stopping_rounds)){
+          early_stopping_rounds <- optional_params$early_stopping_rounds
+        }
+      }
+      
+      xgb_params <- paste0("nrounds = ", nrounds,",
+                            watchlist = list(train = ", train, ",
+                                             test = ", train, "), 
+                            early_stopping_rounds = ", early_stopping_rounds,",
+                            print_every_n = 10,")
+      
+      command <- paste0("xgb.train(",train, ", ",
+                                    xgb_params,
+                                    "num_class = ", length(levelsResponse), ", ",
+                                    "verbose = ", xgb_verbose, ", ",
+                                    "params = ", xgb_hyper_params, ")")
+      
+      formula.cmd <- command
+      
+    }
     #if ( method == "naivebayes" ) {
     #  formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
     #  formula.cmd <- paste("naiveBayes(", formula.cmd, ", data=dataSample, usekernel=TRUE)", sep="")
@@ -552,7 +627,6 @@ simCategorical <- function(simPopObj, additional,
     params$censor <- censor
     params$levelsResponse <- levelsResponse
     params$model_extra <- model_params
-    
     # windows
     if ( parallel ) {
       if ( have_win ) {

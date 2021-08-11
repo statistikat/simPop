@@ -144,7 +144,7 @@ simPop <- simCategorical(simPop, additional=c("pl030", "pb220a"), method="multin
 
 # add margins
 margins <- as.data.frame(
-  xtabs(rep(1, nrow(eusilcP)) ~ eusilcP$region + eusilcP$gender + eusilcP$citizenship), stringsAsFactors = TRUE)
+  xtabs(rep(1, nrow(eusilcP)) ~ eusilcP$region + eusilcP$gender + eusilcP$citizenship))
 colnames(margins) <- c("db040", "rb090", "pb220a", "freq")
 simPop <- addKnownMargins(simPop, margins)
 simPop_adj2 <- calibPop(simPop, split="db040", 

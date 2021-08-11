@@ -10,7 +10,8 @@ Authors@R: c(
   person("Bernhard", "Meindl", email = "bernhard.meindl@statistik.gv.at", role = c("aut")),
   person("Andreas", "Alfons", role = c("aut")),
   person("Mathieu", "Ribatet", role = c("ctb")),
-  person("Johannes", "Gussenbauer", email = "johannes.gussenbauer@statistik.gv.at", role = c("ctb")))
+  person("Johannes", "Gussenbauer", email = "johannes.gussenbauer@statistik.gv.at", role = c("ctb")),
+  person("Siro", "Fritzmann", email = "siro.fritzmann@bluewin.ch",  role = c("ctb")))
 URL: https://github.com/statistikat/simPop
 Depends:
     R(>= 3.0.0),
@@ -30,7 +31,7 @@ Imports:
     colorspace,
     VIM,
     methods,party,EnvStats,fitdistrplus,ranger,wrswoR,
-    matrixStats
+    matrixStats,xgboost
 Suggests:
     haven,
     microbenchmark,
