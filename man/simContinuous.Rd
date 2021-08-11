@@ -35,7 +35,7 @@ simContinuous(
   seed,
   verbose = FALSE,
   by = "strata",
-  optional_params = NULL
+  model_params = NULL
 )
 }
 \arguments{
@@ -186,7 +186,7 @@ number generator to be restored.}
 
 \item{by}{defining which variable to use as split up variable of the estimation. Defaults to the strata variable.}
 
-\item{optional_params}{adding optional parameter to the model, at the moment only implemented for xgboost hyperparameters}
+\item{model_params}{adding optional parameter to the model, at the moment only implemented for xgboost hyperparameters}
 }
 \value{
 An object of class \code{\linkS4class{simPopObj}} containing survey

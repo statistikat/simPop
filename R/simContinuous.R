@@ -390,8 +390,6 @@ generateValues_xgboost <- function(dataSample, dataPop, params) {
   residual <- params$residuals
   strata <- params$strata
   
-  ..predNames <- ..name <- ..weight <- res <- NULL
-  
   
   # remove strata from prediction, because xgboost can not handle factors with only one level
   predNames <- predNames[predNames != strata]
@@ -416,20 +414,20 @@ generateValues_xgboost <- function(dataSample, dataPop, params) {
     }
   }
 
-  new_data <- xgb.DMatrix(data = model.matrix(~.+0, data = model.frame(dataPop[, ..predNames],  na.action=na.pass)), missing = NA)
+  new_data <- xgb.DMatrix(data = model.matrix(~.+0, data = model.frame(dataPop[, predNames, with = FALSE],  na.action=na.pass)), missing = NA)
   pred <- predict(mod,
                   newdata=new_data)
   
   # if residuals is true, calculate in-sample residuals and add an error term to the predictions
   if(residual){
     predSample <- predict(mod,
-                          newdata=xgb.DMatrix(data = model.matrix(~.+0, data = model.frame(dataSample[, ..predNames],  na.action=na.pass)),
+                          newdata=xgb.DMatrix(data = model.matrix(~.+0, data = model.frame(dataSample[, predNames, with = FALSE],  na.action=na.pass)),
                                               missing = NA,
-                                              info = list(weight = as.numeric(dataSample[,..weight]))))
+                                              info = list(weight = as.numeric(dataSample[, weight, with = FALSE]))))
     resSample <- cbind(dataSample, predSample)
     
     resSample[, res := predSample - .SD, .SDcols = name]
-    target <- resSample[, ..name][[1]]
+    target <- resSample[, name, with = FALSE][[1]]
     
     error <- sample(resSample$res, nrow(dataPop), replace = TRUE)
     pred <- pred + error
@@ -723,7 +721,7 @@ runModel <- function(dataS, dataP, params, typ) {
 #' number generator to be restored.
 #' @param verbose (logical) if \code{TRUE}, additional output is written to the promt
 #' @param by defining which variable to use as split up variable of the estimation. Defaults to the strata variable.
-#' @param optional_params adding optional parameter to the model, at the moment only implemented for xgboost hyperparameters
+#' @param model_params adding optional parameter to the model, at the moment only implemented for xgboost hyperparameters
 #' @return An object of class \code{\linkS4class{simPopObj}} containing survey
 #' data as well as the simulated population data including the continuous
 #' variable specified by \code{additional} and possibly simulated categories
@@ -778,7 +776,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
   maxit = 500, MaxNWts = 1500,
   tol = .Machine$double.eps^0.5,
   nr_cpus=NULL, eps = NULL, regModel="basic", byHousehold=NULL,
-  imputeMissings=FALSE, seed, verbose=FALSE,by="strata", optional_params=NULL) {
+  imputeMissings=FALSE, seed, verbose=FALSE,by="strata", model_params=NULL) {
 
   x <- hhid <- vals <- id <- V1 <- randId <- NULL
 
@@ -1297,9 +1295,9 @@ simContinuous <- function(simPopObj, additional = "netIncome",
                                 objective = \"reg:squarederror\",
                                 eval_metric = \"rmse\")"
       
-      if(!is.null(optional_params)){
+      if(!is.null(model_params)){
         
-        xgb_hyper_params <- "params$optional_params"
+        xgb_hyper_params <- "params$model_params"
         
         if(!is.null(optional_params$nrounds)){
           nrounds <- optional_params$nrounds
@@ -1341,7 +1339,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
     params$predNames <- predNames
     params$verbose <- verbose
     params$by <- by
-    params$optional_params <- optional_params
+    params$model_params <- model_params
     if(useLm){
       valuesTmp <- runModel(dataSample, dataPop, params, typ="lm")
     }else if(usePoisson){

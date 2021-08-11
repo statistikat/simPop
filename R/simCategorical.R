@@ -570,9 +570,9 @@ simCategorical <- function(simPopObj, additional,
                                 objective = \"multi:softprob\",
                                 eval_metric = \"mlogloss\")"
       
-      if(!is.null(optional_params)){
+      if(!is.null(model_params)){
         
-        xgb_hyper_params <- "params$optional_params"
+        xgb_hyper_params <- "params$model_extra"
         
         if(!is.null(optional_params$nrounds)){
           nrounds <- optional_params$nrounds

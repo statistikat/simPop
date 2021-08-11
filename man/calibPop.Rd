@@ -24,6 +24,7 @@ calibPop(
   scale.redraw = 0.5,
   observe.times = 50,
   observe.break = 0.05,
+  n.forceCooldown = 30,
   verbose = FALSE,
   hhTables = NULL,
   persTables = NULL
@@ -45,7 +46,7 @@ Has to correspond to a column population data (slot 'pop' of input argument 'inp
 For example \code{split = c("region"), splitUpper = c("Country")}
 all units from the country are eligable for donor sample when problem is split
 into regions. Is usefull if \code{simInitSpatial()} was used and the variable to split
-the problem into results in very small groups (~couple of houndres to thousands).}
+the problem into results in very small groups (~couple of hundreds to thousands).}
 
 \item{temp}{starting temperatur for simulated annealing algorithm}
 
@@ -149,7 +150,7 @@ colnames(margins) <- c("db040", "rb090", "pb220a", "freq")
 simPop <- addKnownMargins(simPop, margins)
 simPop_adj2 <- calibPop(simPop, split="db040", 
   temp=1, epsP.factor=0.1, epsH.factor = 0.1,
- nr_cpus = 1)
+ epsMinN=10, nr_cpus = 1)
 }
 # apply simulated annealing
 \donttest{

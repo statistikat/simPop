@@ -18,7 +18,7 @@ simCategorical(
   seed = 1,
   verbose = FALSE,
   by = "strata",
-  optional_params = NULL
+  model_params = NULL
 )
 }
 \arguments{
@@ -98,7 +98,7 @@ number generator to be restored.}
 
 \item{by}{defining which variable to use as split up variable of the estimation. Defaults to the strata variable.}
 
-\item{optional_params}{adding optional parameter to the model, at the moment only implemented for xgboost hyperparameters}
+\item{model_params}{NULL or a named list which can contain model specific parameters which will be passed onto the function call for the respective model.}
 }
 \value{
 An object of class \code{\linkS4class{simPopObj}} containing survey
