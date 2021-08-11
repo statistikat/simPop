@@ -31,7 +31,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
                            choose.temp=FALSE,choose.temp.factor=0.2,
                            scale.redraw=.5,split=NULL,split.level=NULL,
                            observe.times=50,observe.break=0.05,
-                           n.forceCooldown=10){
+                           n.forceCooldown=200){
   N <- V1 <- sim_ID <- weight_choose <- weight_choose_new <- NULL
   FreqType <- factor_med_hh <- Freq <- FreqPopPers <- FreqPopHH <- FreqPers <- 
     Diff <- RowIndex <- MARGININDEX <- GROUP <- NULL
@@ -146,7 +146,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   
   ######################################
   # evaluate objective
-  objective <- marginTable[eps<abs(Diff),sum(abs(Diff)^2),by=list(GROUP)][,sqrt(mean(V1))]
+  objective <- marginTable[,sum(abs(Diff*factor_med_hh)),by=list(GROUP)][,sqrt(mean(V1^2))]
   
   # define redraw with initial objective value
   redraw <- marginTable[,max(abs(Diff)*2/3)]
@@ -154,9 +154,9 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
     sum(z[["Freq"]])
   })
   redrawMax[indTabPers] <- redrawMax[indTabPers]/med_hh
-  redrawMax <- round(max(redrawMax*0.025))
+  redrawMax <- round(max(redrawMax*0.05))
   redraw <- min(redraw,redrawMax)
-  
+  # cat("redraw=",redraw,"\n")
   
   # observe updating of objective function
   # if solution does not improve -> terminate
@@ -169,16 +169,19 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   
   noChange <- 0
   updatepSet <- TRUE
-  message(paste0("Starting simulated Annealing for ",split," ",split.level,"\n"))
+  
   ######################################
   # apply simulated annealing
-  if ( marginTable[,all(eps>=abs(Diff))] ) {
+  if ( marginTable[,sum(eps)>=sum(abs(Diff)),by=.(GROUP)][,all(V1==TRUE)] ) { # marginTable[,sum(eps)>=sum(abs(Diff))]
+    
+    message(paste0(split," ",split.level," already fulfills error margins\n"))
+    
     setkeyv(data0,"sim_ID")
     selectVars <- c(hhid,params[["pid"]],"weight_choose")
     out <- data0[, selectVars, with = FALSE]
-    message(paste0("Convergence successfull for ",split," ",split.level),"\n")
   } else {
     
+    message(paste0("Starting simulated Annealing for ",split," ",split.level,"\n"))
     ## if objective not fullfilled continue with simannealing
     ## if temperature falls below minimal temp -> terminate
     while( temp > min_temp ) {      
@@ -199,17 +202,56 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
         #####################################
         # resample
         # get weights for resampling
-        # probAddC <- apply(indexMatrix,1,function(z){
-        #   calcCase(x[z+1])
-        # })
-        # if(any(abs(probAddC-probAdd)>1e-10)){
-        #   stop()
+        # check <- rep(FALSE,100)
+        # for(b in 1:100){
+        #   x <- runif(nrow(marginTable),-500,500)
+        #   probAddC2 <- apply(indexMatrix,1,function(z){
+        #     calcCase2(x[z+1])
+        #   })
+        #   
+        #   probAdd2 <- apply(indexMatrix,1,function(z){
+        #     p <- sum(x[z+1]^2*sign(x[z+1]))
+        #     p <- sqrt(abs(p))*sign(p)
+        #     return(p)
+        #   })
+        #   check[b] <- all(abs(probAdd2-probAddC2)<1e-10)
         # }
+        # table(check)
+        # probAdd2-probAddC2
         # 
-        # probAdd <- probAdd/data0Unique[["Npop"]]
-        # probRemove <- probAdd*-1
-        # probAdd[probAdd<=0] <- exp(sum(probAdd[probAdd<=0]))
-        # probRemove[probRemove<=0] <- exp(sum(probRemove[probRemove<=0]))
+#         x <- marginTable[["Diff"]]
+#         probAdd <- apply(indexMatrix,1,function(z){
+#           calcCase(x[z+1])
+#         })
+#         # if(any(abs(probAddC-probAdd)>1e-10)){
+#         #   stop()
+#         # }
+# 
+# 
+#         probRemove <- probAdd*-1
+#         probAdd[probAdd<=0] <- exp(sum(probAdd[probAdd<=0]))
+#         probRemove[probRemove<=0] <- exp(sum(probRemove[probRemove<=0]))
+# 
+# #        probAdd <- probAdd/sum(probAdd)*100
+#         probAdd <- probAdd/data0Unique[["Npop"]]
+# 
+#         probAdd_vec <- rep(probAdd,times=data0Unique[["Npop"]])
+#         check_data <- list()
+#         all_data <- data.table(val=1:length(probAdd))
+#         samp_vec <- rep(1:length(probAdd),times=data0Unique[["Npop"]])
+#         for(t in 1:1000){
+#           test_s <- sample(samp_vec,size=100,prob=probAdd_vec)
+#           test_s <- data.table(val=test_s)
+#           test_s <- test_s[,.N,by=.(val)]
+#           test_s <- merge(all_data,test_s,all.x=TRUE)
+#           test_s[,run:=t]
+#           check_data <- c(check_data ,list(test_s))
+#         }
+#         check_data <- rbindlist(check_data)
+#         check_data[is.na(N),N:=0]
+#         exp_val <- check_data[,mean(N),by=.(val)]
+#         exp_val[,exp_prob:=probAdd*data0Unique[["Npop"]]]
+#         exp_val[,exp_prob:=exp_prob/sum(exp_prob)*100]
         
         if(updatepSet){
           pSet <- calcProbabilities(indexMat=indexMatrix,x=marginTable[["Diff"]],Npop=data0Unique[["Npop"]],
@@ -218,8 +260,6 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
                                     indexRemove = indexAddRemove[["indexRemove"]])
           updatepSet <- FALSE
         }
- 
-          
         # data0Unique[,probAdd0:=probAdd]
         # data0Unique[,probRemove0:=probRemove]
         # probAdd <- probAdd[indexdata0+1]
@@ -305,7 +345,8 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
         # marginTable_new[,Diffprob:=Diff/factor_med_hh]
         # marginTable_new[abs(Diff)<eps,Diff:=sign(Diff)*sqrt(abs(Diff))]
         
-        objective_new <- marginTable_new[eps<abs(Diff),sum(abs(Diff)^2),by=list(GROUP)][,sqrt(mean(V1))]
+        objective_new <- marginTable_new[,sum(abs(Diff*factor_med_hh)),by=list(GROUP)][,sqrt(mean(V1^2))]
+        cat("objective:", objective_new," objective alt:", objective,"\n")
         # objective_new
         # objective
         # marginTable_new[,sum(abs(Diff)^2),by=list(GROUP)][,sqrt(mean(V1))]
@@ -313,7 +354,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
         # message("compare results\n")
         ######################################
         ## if new sample fullfils marginals -> terminate
-        if ( marginTable_new[,all(eps>=abs(Diff))] ) {
+        if ( marginTable[,sum(eps)>=sum(abs(Diff)),by=.(GROUP)][,all(V1==TRUE)] ) { # marginTable[,all(eps>=abs(Diff))]
           objective <- objective_new
           marginTable <-  copy(marginTable_new)
           data0[,weight_choose:=weight_choose_new]
@@ -327,7 +368,9 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
         diffObj <- objective - objective_new
         # diffObj
         if ( diffObj>=0 ) { 
-          # message("solution improved!\n")
+          message("solution improved!\n")
+          cat("objective new:",objective_new,"\n\n")
+          
           marginTable <- copy(marginTable_new)
           data0[,weight_choose:=weight_choose_new]
           init_weight <- copy(init_weight_new)
@@ -354,12 +397,12 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
         
         ######################################
         # accept if solution got worse with small probability
-        if ( diffObj < 0 ) {  
+        if ( diffObj < 0 ) {
           prob <- exp(diffObj/temp)
           x <- sample(c(0,1), 1,prob=c(1-prob,prob))
           
           if ( x == 1 ) { 
-            
+            cat("accept worse!\n")
             # message("new solution accepted!\n")
             marginTable <- copy(marginTable_new)
             data0[,weight_choose:=weight_choose_new]
@@ -410,16 +453,16 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
       if(cooldown%%10==0){
         message(paste0("Cooldown number ",cooldown,"\n"))
       }
-      if ( marginTable[,all(eps>=abs(Diff))] | cooldown == 500 | redraw<2) {
+      if ( marginTable[,sum(eps)>=sum(abs(Diff)),by=.(GROUP)][,all(V1==TRUE)] | cooldown == 500) { # marginTable[,all(eps>=abs(Diff))]
         break
       }
     }
 
     # check if convergence was successfull
-    if(!marginTable[,all(eps>=abs(Diff))]){
-      message(paste0("Convergence NOT successfull for ",split," ",split.level),"\n")
-    }else{
+    if(marginTable[,sum(eps)>=sum(abs(Diff)),by=.(GROUP)][,all(V1==TRUE)]){ # marginTable[,all(eps>=abs(Diff))]
       message(paste0("Convergence successfull for ",split," ",split.level),"\n")
+    }else{
+      message(paste0("Convergence NOT successfull for ",split," ",split.level),"\n")
     }
     setkeyv(data0,"sim_ID")
     selectVars <- c(hhid,params[["pid"]],"weight_choose")

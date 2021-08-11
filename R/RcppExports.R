@@ -33,6 +33,10 @@ calcCase <- function(x) {
     .Call('_simPop_calcCase', PACKAGE = 'simPop', x)
 }
 
+calcCase2 <- function(x) {
+    .Call('_simPop_calcCase2', PACKAGE = 'simPop', x)
+}
+
 calcProbabilities <- function(indexMat, x, Npop, indexData, initWeight, indexAdd, indexRemove) {
     .Call('_simPop_calcProbabilities', PACKAGE = 'simPop', indexMat, x, Npop, indexData, initWeight, indexAdd, indexRemove)
 }
