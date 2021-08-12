@@ -198,10 +198,8 @@ simInitSpatial <- function(simPopObj, additional, region, tspatialP=NULL,tspatia
   diffp <- firstP <- freqH <- freqP <- freqPopHH <- NULL
   hhidtmp <- hsize <- nP <- t <- subregionNeu <- NULL
   Ns <- Nt <- fak <- NULL
-  dataP <- simPopObj@pop
-  dataS <- simPopObj@sample
-  data_pop <- dataP@data
-  data_sample <- dataS@data
+  data_pop <- simPopObj@pop@data
+  data_sample <- simPopObj@sample@data
   basic <- simPopObj@basicHHvars
 
   
@@ -275,7 +273,7 @@ simInitSpatial <- function(simPopObj, additional, region, tspatialP=NULL,tspatia
     print(tab)
   }
 
-  tab <- merge(tab,data_pop[,list(freqPopP=.N,freqPopHH=sum(!duplicated(eval(parse(text=dataP@hhid))))),by=c(region)],by=region,all=TRUE)
+  tab <- merge(tab,data_pop[,list(freqPopP=.N,freqPopHH=sum(!duplicated(eval(parse(text=simPopObj@pop@hhid))))),by=c(region)],by=region,all=TRUE)
   # Check if the input table match to the synthetic population
   if(any(is.na(rowSums(tab[,na.omit(match(c("freqP","freqH","freqPopP","freqPopHH"),colnames(tab))),with=FALSE])))){
     stop("The table with household counts and person counts does not merge with the population\n without empty cells.")
@@ -290,7 +288,7 @@ simInitSpatial <- function(simPopObj, additional, region, tspatialP=NULL,tspatia
   indStrata <- split(1:N, data_pop[[region]])
   
   # predictor variables
-  predNames <- dataP@hhid  # in spatial case, it can only be the hhid
+  predNames <- simPopObj@pop@hhid  # in spatial case, it can only be the hhid
   
   params <- list()
   params$additional <- additional
