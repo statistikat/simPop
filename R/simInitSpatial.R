@@ -138,7 +138,11 @@ simInitSpatial <- function(simPopObj, additional, region, tspatialP=NULL,tspatia
         dataPop[,firstP:=!duplicated(hhidtmp)]
         for(i in 1:maxIter){
           s <- curTab[nrow(curTab),abs(round(diff/meanHH))]
-          x1 <- sample(dataPop[subregion==curTab[nrow(curTab),subregion]&firstP,hhidtmp],size=s)
+          x1 <- if(length(dataPop[subregion==curTab[nrow(curTab),subregion]&firstP,hhidtmp])==1){
+            dataPop[subregion==curTab[nrow(curTab),subregion]&firstP,hhidtmp]
+          }else{
+            sample(dataPop[subregion==curTab[nrow(curTab),subregion]&firstP,hhidtmp],size=s)
+          }
           tmp <- data.table(hhidtmp=x1,subregionNeu=
                   sample(curTab[diff<0,subregion],size=length(x1),prob=curTab[diff<0,-diff],replace=TRUE))
           dataPop <- merge(dataPop,tmp,by="hhidtmp",all.x=TRUE)
@@ -176,8 +180,23 @@ simInitSpatial <- function(simPopObj, additional, region, tspatialP=NULL,tspatia
         dataPop[,firstP:=!duplicated(hhidtmp)]
         for(i in 1:maxIter){
           s <- curTab[1,abs(round(diff/meanHH))]
-          x1 <- sample(dataPop[subregion==curTab[1,subregion]&firstP,hhidtmp],size=s,prob=1/dataPop[subregion==curTab[1,subregion]&firstP,hsize],replace=TRUE)
-          x2 <- sample(dataPop[subregion==curTab[nrow(curTab),subregion]&firstP,hhidtmp],size=s,prob=dataPop[subregion==curTab[nrow(curTab),subregion]&firstP,hsize],replace=TRUE)
+          x1 <- if(length(dataPop[subregion==curTab[1,subregion]&firstP,hhidtmp])==1){
+            dataPop[subregion==curTab[1,subregion]&firstP,hhidtmp]
+          }else{
+            sample(dataPop[subregion==curTab[1,subregion]&firstP,hhidtmp],
+                   size=s,
+                   prob=1/dataPop[subregion==curTab[1,subregion]&firstP,hsize],
+                   replace=TRUE)
+          }
+          
+          x2 <- if(length(dataPop[subregion==curTab[nrow(curTab),subregion]&firstP,hhidtmp])==1){
+            dataPop[subregion==curTab[nrow(curTab),subregion]&firstP,hhidtmp]
+          }else{
+            sample(dataPop[subregion==curTab[nrow(curTab),subregion]&firstP,hhidtmp],
+                   size=s,
+                   prob=dataPop[subregion==curTab[nrow(curTab),subregion]&firstP,hsize],
+                   replace=TRUE)
+          }
           dataPop[hhidtmp%in%x2,subregion:=curTab[1,subregion]]
           dataPop[hhidtmp%in%x1,subregion:=curTab[nrow(curTab),subregion]]
           curTab <- merge(dataTable[,list(freqH,freqP,subregion)],
