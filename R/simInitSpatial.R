@@ -134,7 +134,7 @@ simInitSpatial <- function(simPopObj, additional, region, tspatialP=NULL,tspatia
       curTab[,diff:=nP-freqP]
       curTab[,diffp:=diff/freqP]
       setkey(curTab,diffp)
-      if(any(abs(curTab[["diffp"]]>eps))){
+      if(any(abs(curTab[["diffp"]])>eps)){
         dataPop[,firstP:=!duplicated(hhidtmp)]
         for(i in 1:maxIter){
           s <- curTab[nrow(curTab),abs(round(diff/meanHH))]
@@ -149,7 +149,7 @@ simInitSpatial <- function(simPopObj, additional, region, tspatialP=NULL,tspatia
           curTab[,diff:=nP-freqP]
           curTab[,diffp:=diff/freqP]
           setkey(curTab,diffp)
-          if(!any(abs(curTab[["diffp"]]>eps))){
+          if(!any(abs(curTab[["diffp"]])>eps)){
             break;#End for loop if we are close enough
           }
         }  
@@ -172,7 +172,7 @@ simInitSpatial <- function(simPopObj, additional, region, tspatialP=NULL,tspatia
       curTab[,diffp:=diff/freqP]
       setkey(curTab,diffp)
       
-      if(any(abs(curTab[["diffp"]]>eps))){
+      if(any(abs(curTab[["diffp"]])>eps)){
         dataPop[,firstP:=!duplicated(hhidtmp)]
         for(i in 1:maxIter){
           s <- curTab[1,abs(round(diff/meanHH))]
@@ -185,7 +185,7 @@ simInitSpatial <- function(simPopObj, additional, region, tspatialP=NULL,tspatia
           curTab[,diff:=nP-freqP]
           curTab[,diffp:=diff/freqP]
           setkey(curTab,diffp)
-          if(!any(abs(curTab[["diffp"]]>eps))){
+          if(!any(abs(curTab[["diffp"]])>eps)){
             break;#End for loop if we are close enough
           }
         }  
