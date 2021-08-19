@@ -127,6 +127,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   # marginTable[abs(Diff)<eps,Diff:=sign(Diff)*sqrt(abs(Diff))]
   # marginTable[,Diffprob:=Diff/factor_med_hh]
   marginTable[,RowIndex:=.I-1]
+  h_margins <- as.integer(marginTable$FreqType=="FreqHH") # for c++ function needed
   
   ######################################
   # initialize unique groups in data0
@@ -202,99 +203,15 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
         #####################################
         # resample
         # get weights for resampling
-        # check <- rep(FALSE,100)
-        # for(b in 1:100){
-        #   x <- runif(nrow(marginTable),-500,500)
-        #   probAddC2 <- apply(indexMatrix,1,function(z){
-        #     calcCase2(x[z+1])
-        #   })
-        #   
-        #   probAdd2 <- apply(indexMatrix,1,function(z){
-        #     p <- sum(x[z+1]^2*sign(x[z+1]))
-        #     p <- sqrt(abs(p))*sign(p)
-        #     return(p)
-        #   })
-        #   check[b] <- all(abs(probAdd2-probAddC2)<1e-10)
-        # }
-        # table(check)
-        # probAdd2-probAddC2
-        # 
-#         x <- marginTable[["Diff"]]
-#         probAdd <- apply(indexMatrix,1,function(z){
-#           calcCase(x[z+1])
-#         })
-#         # if(any(abs(probAddC-probAdd)>1e-10)){
-#         #   stop()
-#         # }
-# 
-# 
-#         probRemove <- probAdd*-1
-#         probAdd[probAdd<=0] <- exp(sum(probAdd[probAdd<=0]))
-#         probRemove[probRemove<=0] <- exp(sum(probRemove[probRemove<=0]))
-# 
-# #        probAdd <- probAdd/sum(probAdd)*100
-#         probAdd <- probAdd/data0Unique[["Npop"]]
-# 
-#         probAdd_vec <- rep(probAdd,times=data0Unique[["Npop"]])
-#         check_data <- list()
-#         all_data <- data.table(val=1:length(probAdd))
-#         samp_vec <- rep(1:length(probAdd),times=data0Unique[["Npop"]])
-#         for(t in 1:1000){
-#           test_s <- sample(samp_vec,size=100,prob=probAdd_vec)
-#           test_s <- data.table(val=test_s)
-#           test_s <- test_s[,.N,by=.(val)]
-#           test_s <- merge(all_data,test_s,all.x=TRUE)
-#           test_s[,run:=t]
-#           check_data <- c(check_data ,list(test_s))
-#         }
-#         check_data <- rbindlist(check_data)
-#         check_data[is.na(N),N:=0]
-#         exp_val <- check_data[,mean(N),by=.(val)]
-#         exp_val[,exp_prob:=probAdd*data0Unique[["Npop"]]]
-#         exp_val[,exp_prob:=exp_prob/sum(exp_prob)*100]
-        
         if(updatepSet){
           pSet <- calcProbabilities(indexMat=indexMatrix,x=marginTable[["Diff"]],Npop=data0Unique[["Npop"]],
                                     indexData = indexdata0,initWeight = init_weight,
                                     indexAdd = indexAddRemove[["indexAdd"]],
-                                    indexRemove = indexAddRemove[["indexRemove"]])
+                                    indexRemove = indexAddRemove[["indexRemove"]],
+                                    n_add = redraw_add, n_remove= redraw_remove)
           updatepSet <- FALSE
         }
-        # data0Unique[,probAdd0:=probAdd]
-        # data0Unique[,probRemove0:=probRemove]
-        # probAdd <- probAdd[indexdata0+1]
-        # probAdd <- probAdd[(indexAddRemove[["indexAdd"]]%%nrow(data0))+1]
-        # indexAdd <- indexAddRemove[["indexAdd"]][probAdd>0]
-        # probAdd <- probAdd[probAdd>0]
-        # 
-        # probAdd2 <- pSet$probAdd
-        # indexAdd2 <- pSet$indexAdd
-        # 
-        # probRemove <- probRemove[indexdata0+1]
-        # probRemove <- probRemove[(indexAddRemove[["indexRemove"]]%%nrow(data0))+1]
-        # indexRemove <- indexAddRemove[["indexRemove"]][probRemove>0]
-        # probRemove <- probRemove[probRemove>0]
-        # 
-        # probRemove2 <- pSet$probRemove
-        # indexRemove2 <- pSet$indexRemove
-        # 
-        # if(any(abs(probAdd2-probAdd)>1e-10)){
-        #   stop()
-        # }
-        # if(any(abs(probRemove2-probRemove)>1e-10)){
-        #   stop()
-        # }
-        # if(!all.equal(indexAdd2,indexAdd)){
-        #   stop()
-        # }
-        # if(!all.equal(indexRemove2,indexRemove)){
-        #   stop()
-        # }
-        # all(abs(probRemove-pSet$probRemove)<1e-10)
-        # pSet$nAdd <- 10
-        # pSet$nRemove <- 10
-        # indexdata0[head(pSet$indexAdd[order(pSet$probAdd,decreasing = TRUE)])]
-        # message("draw sample\n")
+       
         
         # set.seed(seedX[n])
         if(pSet[["nAdd"]]>0){
@@ -313,51 +230,43 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
           remove_hh <- sample(indexAddRemove[["indexRemove"]],min(c(redraw_add,length(indexAddRemove[["indexRemove"]]))))
         }
 
-        # set.seed(seedX[n])
-        # add_hh2 <- indexAdd[sample_int_crank(length(indexAdd),
-        #                                     min(c(redraw_add,length(indexAdd))),
-        #                                     prob=probAdd)]
-        # # probAdd[which(indexAdd%in%add_hh)]
-        # remove_hh2 <- indexRemove[sample_int_crank(length(indexRemove),
-        #                                     min(c(redraw_remove,length(indexRemove))),
-        #                                     prob=probRemove)]
-        # if(!all.equal( add_hh2, add_hh)){
-        #   stop()
-        # } 
-        # if(!all.equal(remove_hh2,remove_hh)){
-        #   stop()
-        # }
         ####################################
         ## create new composition
+        # init_weight_new2 <- copy(init_weight)
+        # # update init_weight_new for add_hh and remove_hh
+        # # and update diff vector from marginTable to account for changes due
+        # # to add_hh and remove_hh
+        # init_weight_new2 <-  updateVecC(init_weight_new2,add_index=add_hh, remove_index=remove_hh, hhsize=size, hhid=id, sizefactor=size_all)
+        # set(data0,i=NULL,j="weight_choose_new",value=sumVec(init_weight_new2,size_all))
+        # # ######################################
+        # # # calculate new margins 
+        # marginTable_new <- copy(marginTable)
+        # marginTable_new[,c("FreqPers","FreqHH"):=NULL]
+        # popGrouped <- helpGrouping(x=data0[weight_choose_new>0],varSets=marginSets,varName = "weight_choose_new")
+        # marginTable_new[popGrouped,c("FreqPers","FreqHH"):=list(FreqPopPers,FreqPopHH),on=c(marginNames)]
+        # marginTable_new[is.na(FreqPers),c("FreqPers","FreqHH"):=0]
+        # marginTable_new[,Diff:=(Freq-get(unlist(.BY))),by=list(FreqType)]
+        
         init_weight_new <- copy(init_weight)
-        init_weight_new <-  updateVecC(init_weight_new,add_index=add_hh, remove_index=remove_hh, hhsize=size, hhid=id, sizefactor=size_all)
-        set(data0,i=NULL,j="weight_choose_new",value=sumVec(init_weight_new,size_all))
+        new_solution <-  updateObjectiveC(init_weight_new,add_index=add_hh, remove_index=remove_hh,
+                                          hhsize=size, hhid=id, sizefactor=size_all,
+                                          indexMat = indexMatrix, indexData = indexdata0,
+                                          diff = copy(marginTable[["Diff"]]),
+                                          householdMargin = h_margins)
+        # if(any(abs(new_solution[["diff_new"]]-marginTable_new$Diff)>1e-8)){
+        #   stop()
+        # }
+        set(marginTable,j="Diff_new",value=new_solution[["diff_new"]])
+        objective_new <- marginTable[,sum(abs(Diff_new*factor_med_hh)),by=list(GROUP)][,sqrt(mean(V1^2))]
         
-        
-        ######################################
-        # calculate new margins 
-        marginTable_new <- copy(marginTable)
-        marginTable_new[,c("FreqPers","FreqHH"):=NULL]
-        popGrouped <- helpGrouping(x=data0[weight_choose_new>0],varSets=marginSets,varName = "weight_choose_new")
-        marginTable_new[popGrouped,c("FreqPers","FreqHH"):=list(FreqPopPers,FreqPopHH),on=c(marginNames)]
-        marginTable_new[is.na(FreqPers),c("FreqPers","FreqHH"):=0]
-        marginTable_new[,Diff:=(Freq-get(unlist(.BY))),by=list(FreqType)]
-        # marginTable_new[,Diffprob:=Diff/factor_med_hh]
-        # marginTable_new[abs(Diff)<eps,Diff:=sign(Diff)*sqrt(abs(Diff))]
-        
-        objective_new <- marginTable_new[,sum(abs(Diff*factor_med_hh)),by=list(GROUP)][,sqrt(mean(V1^2))]
-        cat("objective:", objective_new," objective alt:", objective,"\n")
-        # objective_new
-        # objective
-        # marginTable_new[,sum(abs(Diff)^2),by=list(GROUP)][,sqrt(mean(V1))]
-        # marginTable[,sum(abs(Diff)^2),by=list(GROUP)]
-        # message("compare results\n")
+        # cat("objective old = ",objective,"  -  objective new = ",objective_new,"\n")
         ######################################
         ## if new sample fullfils marginals -> terminate
-        if ( marginTable[,sum(eps)>=sum(abs(Diff)),by=.(GROUP)][,all(V1==TRUE)] ) { # marginTable[,all(eps>=abs(Diff))]
+        if ( marginTable[,sum(eps)>=sum(abs(Diff_new)),by=.(GROUP)][,all(V1==TRUE)] ) { # marginTable[,all(eps>=abs(Diff))]
           objective <- objective_new
-          marginTable <-  copy(marginTable_new)
-          data0[,weight_choose:=weight_choose_new]
+          marginTable[,c("Diff"):=NULL]
+          setnames(marginTable,"Diff_new","Diff")
+          set(data0,i=NULL,j="weight_choose",value=sumVec(new_solution[["init_weight"]],size_all))
           break
         }
         # data0[weight_choose_new>weight_choose,.N,by=c(marginNames)][order(N)]
@@ -368,12 +277,13 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
         diffObj <- objective - objective_new
         # diffObj
         if ( diffObj>=0 ) { 
-          message("solution improved!\n")
-          cat("objective new:",objective_new,"\n\n")
+          # message("solution improved!\n")
+          # cat("objective new:",objective_new,"\n\n")
           
-          marginTable <- copy(marginTable_new)
-          data0[,weight_choose:=weight_choose_new]
-          init_weight <- copy(init_weight_new)
+          marginTable[,c("Diff"):=NULL]
+          setnames(marginTable,"Diff_new","Diff")
+          set(data0,i=NULL,j="weight_choose",value=sumVec(new_solution[["init_weight"]],size_all))
+          init_weight <- copy(new_solution[["init_weight"]])
           indexAddRemove <- splitVector(init_weight)
           objective <- objective_new
           updatepSet <- TRUE
@@ -404,9 +314,10 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
           if ( x == 1 ) { 
             cat("accept worse!\n")
             # message("new solution accepted!\n")
-            marginTable <- copy(marginTable_new)
-            data0[,weight_choose:=weight_choose_new]
-            init_weight <- copy(init_weight_new)
+            marginTable[,c("Diff"):=NULL]
+            setnames(marginTable,"Diff_new","Diff")
+            set(data0,i=NULL,j="weight_choose",value=sumVec(new_solution[["init_weight"]],size_all))
+            init_weight <- copy(new_solution[["init_weight"]])
             indexAddRemove <- splitVector(init_weight)
             objective <- objective_new
             updatepSet <- TRUE
@@ -453,7 +364,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
       if(cooldown%%10==0){
         message(paste0("Cooldown number ",cooldown,"\n"))
       }
-      if ( marginTable[,sum(eps)>=sum(abs(Diff)),by=.(GROUP)][,all(V1==TRUE)] | cooldown == 500) { # marginTable[,all(eps>=abs(Diff))]
+      if ( marginTable[,sum(eps)>=sum(abs(Diff)),by=.(GROUP)][,all(V1==TRUE)] | cooldown == 500 |(cooldown > 50 & redraw<2)) { # marginTable[,all(eps>=abs(Diff))]
         break
       }
     }
@@ -470,6 +381,14 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   }
   
   out[,c(split):=split.level]
+  
+  # # check output
+  # marginTable_new <- copy(marginTable)
+  # marginTable_new[,c("FreqPers","FreqHH"):=NULL]
+  # popGrouped <- helpGrouping(x=data0[weight_choose>0],varSets=marginSets,varName = "weight_choose_new")
+  # marginTable_new[popGrouped,c("FreqPers","FreqHH"):=list(FreqPopPers,FreqPopHH),on=c(marginNames)]
+  # marginTable_new[is.na(FreqPers),c("FreqPers","FreqHH"):=0]
+  # marginTable_new[,Diff:=(Freq-get(unlist(.BY))),by=list(FreqType)]
   
   return(out)
 }

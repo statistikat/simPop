@@ -37,7 +37,11 @@ calcCase2 <- function(x) {
     .Call('_simPop_calcCase2', PACKAGE = 'simPop', x)
 }
 
-calcProbabilities <- function(indexMat, x, Npop, indexData, initWeight, indexAdd, indexRemove) {
-    .Call('_simPop_calcProbabilities', PACKAGE = 'simPop', indexMat, x, Npop, indexData, initWeight, indexAdd, indexRemove)
+calcProbabilities <- function(indexMat, x, Npop, indexData, initWeight, indexAdd, indexRemove, n_add, n_remove) {
+    .Call('_simPop_calcProbabilities', PACKAGE = 'simPop', indexMat, x, Npop, indexData, initWeight, indexAdd, indexRemove, n_add, n_remove)
+}
+
+updateObjectiveC <- function(init_weight, add_index, remove_index, hhsize, hhid, sizefactor, indexMat, indexData, diff, householdMargin) {
+    .Call('_simPop_updateObjectiveC', PACKAGE = 'simPop', init_weight, add_index, remove_index, hhsize, hhid, sizefactor, indexMat, indexData, diff, householdMargin)
 }
 

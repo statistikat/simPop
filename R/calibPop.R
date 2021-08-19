@@ -117,17 +117,19 @@ checkTables <- function(tabs,data,split=NULL,verbose=FALSE,namesTabs="pers"){
   
   if(verbose){
     cat("\nCheck if values in tables and data match\n")
-    lapply(tabs,function(z,data){
+  }
+  lapply(tabs,function(z,data){
       check_values <- colnames(z)
       check_values <- check_values[check_values!="Freq"]
       tab_data <- data[,.N,by=c(check_values)]
-      z_both <- merge(z,tab_data,by=c(check_values),all=TRUE)
-      if(nrow(z_both[is.na(Freq) | is.na(N)])>0){
+      check_vars <- sapply(check_values,function(cz){
+        isTRUE(all.equal(unique(z[,..cz][order(get(cz))]),unique(tab_data[,..cz]),check.attributes=FALSE,ignore.row.order=TRUE))
+      })
+      if(any(!check_vars)){
         stop("Values in columns ",paste(check_values,collapse=" and ")," do not agree between the synthetic population and the supplied population margins")
       }
     },data=data)
-  }
-
+ 
   
   
   return(tabs)
@@ -477,7 +479,8 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
   
   inp@pop@data <- data
   if(verbose){
-    Sys.time()-t0
+    dt <- difftime(Sys.time(),t0,units = "auto")
+    cat("\nSimulated Annealing finished in: ",dt,attr(dt,"units"))
   }
   invisible(inp)
 }

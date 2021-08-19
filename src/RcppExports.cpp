@@ -132,8 +132,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // calcProbabilities
-Rcpp::List calcProbabilities(Rcpp::IntegerMatrix& indexMat, Rcpp::NumericVector& x, Rcpp::NumericVector& Npop, Rcpp::IntegerVector& indexData, Rcpp::IntegerVector& initWeight, Rcpp::IntegerVector& indexAdd, Rcpp::IntegerVector& indexRemove);
-RcppExport SEXP _simPop_calcProbabilities(SEXP indexMatSEXP, SEXP xSEXP, SEXP NpopSEXP, SEXP indexDataSEXP, SEXP initWeightSEXP, SEXP indexAddSEXP, SEXP indexRemoveSEXP) {
+Rcpp::List calcProbabilities(Rcpp::IntegerMatrix& indexMat, Rcpp::NumericVector& x, Rcpp::NumericVector& Npop, Rcpp::IntegerVector& indexData, Rcpp::IntegerVector& initWeight, Rcpp::IntegerVector& indexAdd, Rcpp::IntegerVector& indexRemove, int n_add, int n_remove);
+RcppExport SEXP _simPop_calcProbabilities(SEXP indexMatSEXP, SEXP xSEXP, SEXP NpopSEXP, SEXP indexDataSEXP, SEXP initWeightSEXP, SEXP indexAddSEXP, SEXP indexRemoveSEXP, SEXP n_addSEXP, SEXP n_removeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -144,7 +144,29 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::IntegerVector& >::type initWeight(initWeightSEXP);
     Rcpp::traits::input_parameter< Rcpp::IntegerVector& >::type indexAdd(indexAddSEXP);
     Rcpp::traits::input_parameter< Rcpp::IntegerVector& >::type indexRemove(indexRemoveSEXP);
-    rcpp_result_gen = Rcpp::wrap(calcProbabilities(indexMat, x, Npop, indexData, initWeight, indexAdd, indexRemove));
+    Rcpp::traits::input_parameter< int >::type n_add(n_addSEXP);
+    Rcpp::traits::input_parameter< int >::type n_remove(n_removeSEXP);
+    rcpp_result_gen = Rcpp::wrap(calcProbabilities(indexMat, x, Npop, indexData, initWeight, indexAdd, indexRemove, n_add, n_remove));
+    return rcpp_result_gen;
+END_RCPP
+}
+// updateObjectiveC
+Rcpp::List updateObjectiveC(IntegerVector& init_weight, IntegerVector& add_index, IntegerVector& remove_index, IntegerVector& hhsize, IntegerVector& hhid, int& sizefactor, IntegerMatrix& indexMat, IntegerVector& indexData, NumericVector diff, IntegerVector& householdMargin);
+RcppExport SEXP _simPop_updateObjectiveC(SEXP init_weightSEXP, SEXP add_indexSEXP, SEXP remove_indexSEXP, SEXP hhsizeSEXP, SEXP hhidSEXP, SEXP sizefactorSEXP, SEXP indexMatSEXP, SEXP indexDataSEXP, SEXP diffSEXP, SEXP householdMarginSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector& >::type init_weight(init_weightSEXP);
+    Rcpp::traits::input_parameter< IntegerVector& >::type add_index(add_indexSEXP);
+    Rcpp::traits::input_parameter< IntegerVector& >::type remove_index(remove_indexSEXP);
+    Rcpp::traits::input_parameter< IntegerVector& >::type hhsize(hhsizeSEXP);
+    Rcpp::traits::input_parameter< IntegerVector& >::type hhid(hhidSEXP);
+    Rcpp::traits::input_parameter< int& >::type sizefactor(sizefactorSEXP);
+    Rcpp::traits::input_parameter< IntegerMatrix& >::type indexMat(indexMatSEXP);
+    Rcpp::traits::input_parameter< IntegerVector& >::type indexData(indexDataSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type diff(diffSEXP);
+    Rcpp::traits::input_parameter< IntegerVector& >::type householdMargin(householdMarginSEXP);
+    rcpp_result_gen = Rcpp::wrap(updateObjectiveC(init_weight, add_index, remove_index, hhsize, hhid, sizefactor, indexMat, indexData, diff, householdMargin));
     return rcpp_result_gen;
 END_RCPP
 }
