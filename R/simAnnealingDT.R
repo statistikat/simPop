@@ -11,8 +11,8 @@ dteval <- function(...,envir=parent.frame()){
 helpGrouping <- function(x,varSets,varName="weight_choose"){
   firstPersonInHousehold <- NULL
   rbindlist(lapply(varSets,function(z){
-    x[,list(FreqPopPers=sum(get(varName)),FreqPopHH=sum(get(varName)[firstPersonInHousehold])),by=c(z)]
-  }),use.names=TRUE,fill=TRUE)
+    x[,list(FreqPers=sum(get(varName)),FreqHH=sum(get(varName)[firstPersonInHousehold])),by=c(z)]
+  }),use.names=TRUE,fill=TRUE,idcol = "GROUP_pop")
   
 }
 
@@ -121,7 +121,18 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   
 
   popGrouped <- helpGrouping(x=data0[weight_choose>0],varSets=marginSets)
-  marginTable[popGrouped,c("FreqPers","FreqHH"):=list(FreqPopPers,FreqPopHH),on=c(marginNames)]
+  # marginTable[popGrouped,c("FreqPers","FreqHH"):=list(FreqPopPers,FreqPopHH),on=c(marginNames)]
+  marginTable <- merge(marginTable,popGrouped,by=c(marginNames),all=TRUE)
+  if(any(is.na(marginTable[["GROUP"]]))){
+    # fill up missings if combination exists in population but not in margins
+    fill_vars <- c("GROUP", "Freq", "FreqType", "factor_med_hh", "eps")
+    marginTable[is.na(GROUP),c("GROUP","Freq","FreqType","eps"):=.(GROUP_pop,
+                                                            0,
+                                                            fifelse(grepl("pers",GROUP_pop),"FreqPers","FreqHH"),
+                                                            epsMinN)]
+    marginTable[,factor_med_hh:=factor_med_hh[!is.na(factor_med_hh)][1],by=.(GROUP)]
+    marginTable[,GROUP_pop:=NULL]
+  }
   marginTable[is.na(FreqPers),c("FreqPers","FreqHH"):=0]
   marginTable[,Diff:=(Freq-get(unlist(.BY))),by=list(FreqType)]
   # marginTable[abs(Diff)<eps,Diff:=sign(Diff)*sqrt(abs(Diff))]
@@ -259,7 +270,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
         set(marginTable,j="Diff_new",value=new_solution[["diff_new"]])
         objective_new <- marginTable[,sum(abs(Diff_new*factor_med_hh)),by=list(GROUP)][,sqrt(mean(V1^2))]
         
-        # cat("objective old = ",objective,"  -  objective new = ",objective_new,"\n")
+        cat("objective old = ",objective,"  -  objective new = ",objective_new,"\n")
         ######################################
         ## if new sample fullfils marginals -> terminate
         if ( marginTable[,sum(eps)>=sum(abs(Diff_new)),by=.(GROUP)][,all(V1==TRUE)] ) { # marginTable[,all(eps>=abs(Diff))]
@@ -277,8 +288,8 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
         diffObj <- objective - objective_new
         # diffObj
         if ( diffObj>=0 ) { 
-          # message("solution improved!\n")
-          # cat("objective new:",objective_new,"\n\n")
+          message("solution improved!\n")
+          cat("objective new:",objective_new,"\n\n")
           
           marginTable[,c("Diff"):=NULL]
           setnames(marginTable,"Diff_new","Diff")

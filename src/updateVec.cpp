@@ -190,9 +190,11 @@ Rcpp::List calcProbabilities(Rcpp::IntegerMatrix &indexMat, Rcpp::NumericVector 
   Rcpp::LogicalVector negIndex(nrow);
   double sumNegatives = 0.0;
   double sumPositives = 0.0;
-  
+  // std::cout<<"start loop";
   // get probabilites for adding
   for(int i=0;i<nrow;i++){
+    
+    // std::cout<<i<<"   ";
     helpVec = x[indexMat(i,_)];
     probAdd[i] = calcCase(helpVec);
     negIndex[i] = probAdd[i]<=0;
@@ -202,7 +204,7 @@ Rcpp::List calcProbabilities(Rcpp::IntegerMatrix &indexMat, Rcpp::NumericVector 
       sumPositives += probAdd[i];
     }
   }
-  
+  // std::cout<<"finish\n";
   // get probabilities for removing
   Rcpp::NumericVector probRemove = probAdd*-1;
   
@@ -210,6 +212,7 @@ Rcpp::List calcProbabilities(Rcpp::IntegerMatrix &indexMat, Rcpp::NumericVector 
   probAdd[negIndex] = exp(sumNegatives);
   probRemove[!negIndex] = exp(-1*sumPositives);
   
+  // std::cout<<"start adjustment";
   if(max(x)<n_add){
     // std::cout<<"adjust\n";
     // create weighted mean between probAdd and probRemove 
