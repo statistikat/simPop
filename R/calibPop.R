@@ -429,6 +429,10 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
   params$epsMinN <- epsMinN
   params$redist.var <- redist.var
   params$redist.var.factor <- redist.var.factor
+  if(!is.null(params[["redist.var"]])){
+    params[["hhid_orig"]] <- paste0(params[["hhid"]],"_orig")
+    params[["pid_orig"]] <- paste0(params[["pid"]],"_orig")
+  }
   
   # parameters for parallel computing
   nr_strata <- length(unique(data[[split]]))
@@ -507,16 +511,21 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
   if(final_weights[,any(weight_choose>1)]){
     final_weights <- rbind(final_weights[weight_choose==1],final_weights[weight_choose>1,.SD[rep(1:.N,weight_choose)]])
   }
-  final_weights[,doub:=1:.N,by=c(params[["pid"]],params[["hhid"]],params[["split"]])]
+  final_weights[,doub:=1:.N,by=c(params[["pid"]],params[["hhid"]],split)]
   final_weights[,hid_help:=paste(get(params[["hhid"]]),get(split),doub,sep="_")]
   final_weights[,c(paste0(params[["hhid"]],"_new")):=.GRP,by=hid_help]
-  final_weights[,c(paste0(params[["pid"]],"_new")):=paste(get(paste0(params[["hhid"]],"_new")),gsub("^[[:digit:]]*.","",get(params[["pid"]])),sep=".")]
+  final_weights[,c(paste0(params[["pid"]],"_new")):=paste(get(paste0(params[["hhid"]],"_new")),gsub("^[[:digit:]]*\\.","",get(params[["pid"]])),sep=".")]
+  if(!is.null(params[["redist.var"]])){
+    final_weights[,c(params[["hhid"]],params[["pid"]]):=NULL]
+    setnames(final_weights,c(params[["hhid_orig"]],params[["pid_orig"]]),c(params[["hhid"]],params[["pid"]]))
+  }
+  
   final_weights[,c("weight_choose","doub","hid_help"):=NULL]
   
   data <- data[final_weights,,on=c(params[["hhid"]],params[["pid"]])]
-  data[,c(params[["hhid"]],params[["pid"]],split):=NULL]
-  oldNames <- c(paste0(c(params[["hhid"]],params[["pid"]]),"_new"),paste0("i.",split))
-  newNames <- c(c(params[["hhid"]],params[["pid"]]),split)
+  data[,c(params[["hhid"]],params[["pid"]],split,params[["redist.var"]]):=NULL]
+  oldNames <- c(paste0(c(params[["hhid"]],params[["pid"]]),"_new"),paste0("i.",c(split,params[["redist.var"]])))
+  newNames <- c(c(params[["hhid"]],params[["pid"]]),split,params[["redist.var"]])
   setnames(data,oldNames,newNames)
   
   inp@pop@data <- data
