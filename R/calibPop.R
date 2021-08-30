@@ -182,6 +182,38 @@ makeFactors <- function(totals,dat,split){
   return(dat)
 }
 
+# multiply data if variable needs to be redistributed
+multiply_data <- function(data0,params,redist.var,redist.var.factor,split){
+  
+  var_levels <- levels(data0[[redist.var]])
+  fac_sample <- params[["redist.var.factor"]]
+  redist.var_freq <- data0[,.(N_sample_extra=round(uniqueN(get(params[["hhid"]]))*fac_sample)),by=c(redist.var)]
+  data0_extra <- list()
+  for(u in 1:nrow(redist.var_freq)){
+    uc <- redist.var_freq[u,][[redist.var]]
+    N_samp <- redist.var_freq[u,][["N_sample_extra"]]
+    
+    samp_hid <- data0[!.(uc),unique(hid),on=c(redist.var)]
+    samp_hid <- sample(samp_hid,min(length(samp_hid),N_samp),replace=FALSE)
+    data0_u <- data0[.(samp_hid),on=.(hid)]
+    set(data0_u,j=redist.var,value=uc)
+    data0_extra <- c(data0_extra,list(data0_u))
+  }
+  data0_extra <- rbindlist(data0_extra)
+  data0_extra[,c(split):=NA]
+  data0 <- rbindlist(list(data0,data0_extra),use.names=TRUE)
+  data0[,c(redist.var):=factor(get(redist.var),levels=var_levels)]
+  
+  var_values <- as.character(unique(data0[[redist.var]]))
+  
+  hid_orig <- params[["hhid_orig"]]
+  pid_orig <- params[["pid_orig"]]
+  setnames(data0,c(params[["hhid"]],params[["pid"]]),c(hid_orig,pid_orig))
+  data0[,c(params[["hhid"]]):=.GRP,by=c(hid_orig,redist.var)]
+  data0[,c(params[["pid"]]):=1:.N,by=c(params[["hhid"]])]
+  
+  return(data0)
+}
 
 #' Calibration of 0/1 weights by Simulated Annealing
 #'
@@ -263,6 +295,8 @@ makeFactors <- function(totals,dat,split){
 #' simmulated annealing terminates. This repeats for each new set of \code{observe.times} new values of the objecive function. Can help save run time if objective value does not improve much. Disable this termination by either setting \code{observe.times=0} or \code{observe.break=0}.
 #' @param hhTables information on population margins for households
 #' @param persTables information on population margins for persons
+#' @param redist.var single column in the population which can be redistributed in each `split`. Still experimental!
+#' @param redist.var.factor numeric in the interval (0,1]. Used in combinationo with `redist.var`, still experimental!
 #' @return Returns an object of class \code{\linkS4class{simPopObj}} with an
 #' updated population listed in slot 'pop'.
 #' @author Bernhard Meindl, Johannes Gussenbauer and Matthias Templ
@@ -299,7 +333,7 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
   temp.cooldown = 0.9, factor.cooldown = 0.85, min.temp = 10^-3,
   nr_cpus=NULL, sizefactor=2, 
   choose.temp=TRUE,choose.temp.factor=0.2,scale.redraw=.5,observe.times=50,observe.break=0.05,n.forceCooldown=30,
-  verbose=FALSE,hhTables=NULL,persTables=NULL) {
+  verbose=FALSE,hhTables=NULL,persTables=NULL,redist.var=NULL,redist.var.factor=1) {
   
   if(verbose){
     t0 <- Sys.time()
@@ -393,7 +427,8 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
   params$pid <- pid
   params$hhsize <- hhsize
   params$epsMinN <- epsMinN
-
+  params$redist.var <- redist.var
+  params$redist.var.factor <- redist.var.factor
   
   # parameters for parallel computing
   nr_strata <- length(unique(data[[split]]))
@@ -451,6 +486,10 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
       split.level <- split.number[x]
       splitUpper.x <- data[list(split.level),,on=c(split)][[splitUpper]][1]
       data0 <- data[list(splitUpper.x),,on=c(splitUpper)]
+      if(!is.null(params[["redist.var"]])){
+        data0 <- multiply_data(data0,params,redist.var=params[["redist.var"]],split)
+      }
+      
       totals0 <- subsetList(totals,split=split,x=split.level)
       simAnnealingDT(
         data0=data0,

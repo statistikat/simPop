@@ -157,7 +157,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   
   ######################################
   # evaluate objective
-  objective <- marginTable[,sum(abs(Diff*factor_med_hh)),by=list(GROUP)][,sqrt(mean(V1^2))]
+  objective <- marginTable[,sum(abs(Diff)),by=list(GROUP)][,sqrt(mean(V1^2))]    # *factor_med_hh
   
   # define redraw with initial objective value
   redraw <- marginTable[,max(abs(Diff)*2/3)]
@@ -271,7 +271,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
         #   stop()
         # }
         set(marginTable,j="Diff_new",value=new_solution[["diff_new"]])
-        objective_new <- marginTable[,sum(abs(Diff_new*factor_med_hh)),by=list(GROUP)][,sqrt(mean(V1^2))]
+        objective_new <- marginTable[,sum(abs(Diff_new)),by=list(GROUP)][,sqrt(mean(V1^2))]  #  *factor_med_hh
         
         if(verbose){
           cat("objective old = ",objective,"  -  objective new = ",objective_new,"\n")
@@ -399,7 +399,9 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
     }
 
     setkeyv(data0,"sim_ID")
-    selectVars <- c(hhid,params[["pid"]],"weight_choose")
+    selectVars <- c(hhid,params[["pid"]],
+                    params[["redist.var"]],params[["hhid_orig"]],params[["pid_orig"]],  # <- only not NULL if variable was "redistributed"
+                    "weight_choose")
     out <- data0[, selectVars, with = FALSE]
   }
   

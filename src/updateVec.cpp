@@ -120,7 +120,7 @@ Rcpp::List splitVector(Rcpp::IntegerVector &x){
   int nOnes = sum(x);
   Rcpp::IntegerVector xOnes(nOnes);
   Rcpp::IntegerVector xZeros(x.size()-nOnes);
-
+  
   for(int i=0;i<x.size();i++){
     if(x[i]==1){
       xOnes[ones] = i;
@@ -135,7 +135,6 @@ Rcpp::List splitVector(Rcpp::IntegerVector &x){
                             Rcpp::Named("indexRemove") = xOnes);
   
 }
-
 
 // helpfunction to calcualte probabilities for each
 // case
@@ -192,11 +191,9 @@ Rcpp::List calcProbabilities(Rcpp::IntegerMatrix &indexMat, Rcpp::NumericVector 
   Rcpp::LogicalVector negIndex(nrow);
   double sumNegatives = 0.0;
   double sumPositives = 0.0;
-  // std::cout<<"start loop";
+  
   // get probabilites for adding
   for(int i=0;i<nrow;i++){
-    
-    // std::cout<<i<<"   ";
     helpVec = x[indexMat(i,_)];
     probAdd[i] = calcCase(helpVec);
     negIndex[i] = probAdd[i]<=0;
@@ -206,7 +203,7 @@ Rcpp::List calcProbabilities(Rcpp::IntegerMatrix &indexMat, Rcpp::NumericVector 
       sumPositives += probAdd[i];
     }
   }
-  // std::cout<<"finish\n";
+  
   // get probabilities for removing
   Rcpp::NumericVector probRemove = probAdd*-1;
   
@@ -214,15 +211,15 @@ Rcpp::List calcProbabilities(Rcpp::IntegerMatrix &indexMat, Rcpp::NumericVector 
   probAdd[negIndex] = exp(sumNegatives);
   probRemove[!negIndex] = exp(-1*sumPositives);
   
-  // std::cout<<"start adjustment";
-  if(max(x)<n_add){
+  int m_value = 1; // maybe make this a parameter
+  if((max(x)*m_value)<n_add){
     // std::cout<<"adjust\n";
     // create weighted mean between probAdd and probRemove 
     // if number of draws succeeds highest positived difference to target margins
-    probAdd = (probAdd*max(x) + probRemove*(n_add-max(x)))/n_add;
+    probAdd = (probAdd*max(x)*m_value + probRemove*(n_add-max(x)*m_value))/n_add;
   }
-  if(abs(min(x))<n_remove){
-    probRemove = (probRemove*abs(min(x)) + probAdd*(n_remove-abs(min(x))))/n_remove;
+  if(abs(min(x)*m_value)<n_remove){
+    probRemove = (probRemove*abs(min(x)*m_value) + probAdd*(n_remove-abs(min(x)*m_value)))/n_remove;
   }
   
   // for(int i=0;i<probAdd.size();i++){

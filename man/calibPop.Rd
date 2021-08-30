@@ -27,7 +27,9 @@ calibPop(
   n.forceCooldown = 30,
   verbose = FALSE,
   hhTables = NULL,
-  persTables = NULL
+  persTables = NULL,
+  redist.var = NULL,
+  redist.var.factor = 1
 )
 }
 \arguments{
@@ -100,6 +102,10 @@ performed in parallel and no useful output can be provided.}
 \item{hhTables}{information on population margins for households}
 
 \item{persTables}{information on population margins for persons}
+
+\item{redist.var}{single column in the population which can be redistributed in each `split`. Still experimental!}
+
+\item{redist.var.factor}{numeric in the interval (0,1]. Used in combinationo with `redist.var`, still experimental!}
 }
 \value{
 Returns an object of class \code{\linkS4class{simPopObj}} with an
