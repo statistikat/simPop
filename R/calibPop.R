@@ -183,7 +183,7 @@ makeFactors <- function(totals,dat,split){
 }
 
 # multiply data if variable needs to be redistributed
-multiply_data <- function(data0,params,redist.var,redist.var.factor,split){
+multiply_data <- function(data0,params,redist.var,split){
   
   var_levels <- levels(data0[[redist.var]])
   fac_sample <- params[["redist.var.factor"]]
