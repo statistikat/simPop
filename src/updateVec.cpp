@@ -5,6 +5,7 @@
 #include <algorithm>    // std::count
 #include <vector>       // std::vector
 #include <iostream>
+#include <numeric>
 
 // [[Rcpp::depends(RcppArmadillo)]]
 // Enable C++11 via this plugin (Rcpp 0.10.3 or later)
@@ -119,7 +120,7 @@ Rcpp::List splitVector(Rcpp::IntegerVector &x){
   int nOnes = sum(x);
   Rcpp::IntegerVector xOnes(nOnes);
   Rcpp::IntegerVector xZeros(x.size()-nOnes);
-  
+
   for(int i=0;i<x.size();i++){
     if(x[i]==1){
       xOnes[ones] = i;
@@ -134,6 +135,7 @@ Rcpp::List splitVector(Rcpp::IntegerVector &x){
                             Rcpp::Named("indexRemove") = xOnes);
   
 }
+
 
 // helpfunction to calcualte probabilities for each
 // case

@@ -123,7 +123,7 @@ checkTables <- function(tabs,data,split=NULL,verbose=FALSE,namesTabs="pers"){
       check_values <- check_values[check_values!="Freq"]
       tab_data <- data[,.N,by=c(check_values)]
       check_vars <- sapply(check_values,function(cz){
-        isTRUE(all.equal(unique(z[,..cz][order(get(cz))]),unique(tab_data[,..cz]),check.attributes=FALSE,ignore.row.order=TRUE))
+        isTRUE(all.equal(sort(as.character(unique(z[[cz]]))),sort(as.character(unique(tab_data[[cz]])))))
       })
       if(any(!check_vars)){
         stop("Values in columns ",paste(check_values,collapse=" and ")," do not agree between the synthetic population and the supplied population margins")
@@ -334,17 +334,20 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
     persTables <- list(persTables)
   }
   # check persTables
-  if(verbose){
-    cat("\nCheck Person-Tables\n")
+  if(!is.null(persTables)){
+    if(verbose){
+      cat("\nCheck Person-Tables\n")
+    }
+    persTables <- checkTables(persTables,data=data,split=split,verbose=verbose)
   }
-  persTables <- checkTables(persTables,data=data,split=split,verbose=verbose)
-    
+  
   # check hhTables
-  if(verbose){
-    cat("\nCheck Household-Tables\n")
+  if(!is.null(hhTables)){
+    if(verbose){
+      cat("\nCheck Household-Tables\n")
+    }
+    hhTables <- checkTables(hhTables,data=data,split=split,verbose=verbose,namesTabs="hh")
   }
-  hhTables <- checkTables(hhTables,data=data,split=split,verbose=verbose,namesTabs="hh")
-    
   totals <- c(persTables,hhTables)  
   totals <- totals[!sapply(totals,is.null)]
 
@@ -401,7 +404,7 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
   
   # make factor variables
   # and check if factor in totals coincide with factors in data
-  data <- makeFactors(list(totals),data,split)
+  data <- makeFactors(totals,data,split)
 
   ## split the problem by "split"-factor
   setkeyv(data,split)

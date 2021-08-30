@@ -88,7 +88,8 @@ addKnownMargins <- function(inp, margins) {
   if ( length(ind) > 0 ) {
     frame$N[ind] <- 0
   }
-
+  frame <- frame[N>0]
+  
   if ( !is.null(inp@table) ) {
     message("Note: currently stored marginals/totals are going to be overwritten!\n")
   }

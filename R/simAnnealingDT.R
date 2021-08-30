@@ -56,6 +56,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   epsMinN <- params[["epsMinN"]]
   npers <- sum(indTabPers)
   nhh <- sum(indTabHH)
+  verbose <- params[["verbose"]]
   
   # parameters used for c++ code
   # set index for original order
@@ -89,11 +90,9 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   data0[list(split.level),weight_choose:=1,on=c(split)]
   init_index <- data0[weight_choose==1,which=TRUE]
   init_weight <- rep(0L,max_n)
-  init_weight[init_index] <- 1
-  
+  init_weight[init_index] <- 1L
   indexAddRemove <- splitVector(init_weight)
-  
-  
+
   marginTable <- copy(totals0)
   marginSets <- list()
   for(i in seq_along(marginTable)){
@@ -131,8 +130,8 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
                                                             fifelse(grepl("pers",GROUP_pop),"FreqPers","FreqHH"),
                                                             epsMinN)]
     marginTable[,factor_med_hh:=factor_med_hh[!is.na(factor_med_hh)][1],by=.(GROUP)]
-    marginTable[,GROUP_pop:=NULL]
   }
+  marginTable[,GROUP_pop:=NULL]
   marginTable[is.na(FreqPers),c("FreqPers","FreqHH"):=0]
   marginTable[,Diff:=(Freq-get(unlist(.BY))),by=list(FreqType)]
   # marginTable[abs(Diff)<eps,Diff:=sign(Diff)*sqrt(abs(Diff))]
@@ -186,14 +185,18 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   # apply simulated annealing
   if ( marginTable[,sum(eps)>=sum(abs(Diff)),by=.(GROUP)][,all(V1==TRUE)] ) { # marginTable[,sum(eps)>=sum(abs(Diff))]
     
-    message(paste0(split," ",split.level," already fulfills error margins\n"))
+    if(verbose){
+      message(paste0(split," ",split.level," already fulfills error margins\n"))
+    }
     
     setkeyv(data0,"sim_ID")
     selectVars <- c(hhid,params[["pid"]],"weight_choose")
     out <- data0[, selectVars, with = FALSE]
   } else {
     
-    message(paste0("Starting simulated Annealing for ",split," ",split.level,"\n"))
+    if(verbose){
+      message(paste0("Starting simulated Annealing for ",split," ",split.level,"\n"))
+    }
     ## if objective not fullfilled continue with simannealing
     ## if temperature falls below minimal temp -> terminate
     while( temp > min_temp ) {      
@@ -270,7 +273,9 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
         set(marginTable,j="Diff_new",value=new_solution[["diff_new"]])
         objective_new <- marginTable[,sum(abs(Diff_new*factor_med_hh)),by=list(GROUP)][,sqrt(mean(V1^2))]
         
-        cat("objective old = ",objective,"  -  objective new = ",objective_new,"\n")
+        if(verbose){
+          cat("objective old = ",objective,"  -  objective new = ",objective_new,"\n")
+        }
         ######################################
         ## if new sample fullfils marginals -> terminate
         if ( marginTable[,sum(eps)>=sum(abs(Diff_new)),by=.(GROUP)][,all(V1==TRUE)] ) { # marginTable[,all(eps>=abs(Diff))]
@@ -287,10 +292,11 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
         ## choose wether to accepts the resample
         diffObj <- objective - objective_new
         # diffObj
-        if ( diffObj>=0 ) { 
-          message("solution improved!\n")
-          cat("objective new:",objective_new,"\n\n")
-          
+        if ( diffObj>=0 ) {
+          if(verbose){
+            message("solution improved!\n")
+            cat("objective new:",objective_new,"\n\n")
+          }
           marginTable[,c("Diff"):=NULL]
           setnames(marginTable,"Diff_new","Diff")
           set(data0,i=NULL,j="weight_choose",value=sumVec(new_solution[["init_weight"]],size_all))
@@ -322,8 +328,11 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
           prob <- exp(diffObj/temp)
           x <- sample(c(0,1), 1,prob=c(1-prob,prob))
           
-          if ( x == 1 ) { 
-            cat("accept worse!\n")
+          if ( x == 1 ) {
+            if(verbose){
+              message("accept worse!\n")
+              cat("objective new:",objective_new,"\n\n")
+            }
             # message("new solution accepted!\n")
             marginTable[,c("Diff"):=NULL]
             setnames(marginTable,"Diff_new","Diff")
@@ -372,7 +381,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
         redraw <- 1
       }
       cooldown <- cooldown + 1
-      if(cooldown%%10==0){
+      if(cooldown%%10==0 & verbose){
         message(paste0("Cooldown number ",cooldown,"\n"))
       }
       if ( marginTable[,sum(eps)>=sum(abs(Diff)),by=.(GROUP)][,all(V1==TRUE)] | cooldown == 500 |(cooldown > 50 & redraw<2)) { # marginTable[,all(eps>=abs(Diff))]
@@ -381,25 +390,20 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
     }
 
     # check if convergence was successfull
-    if(marginTable[,sum(eps)>=sum(abs(Diff)),by=.(GROUP)][,all(V1==TRUE)]){ # marginTable[,all(eps>=abs(Diff))]
-      message(paste0("Convergence successfull for ",split," ",split.level),"\n")
-    }else{
-      message(paste0("Convergence NOT successfull for ",split," ",split.level),"\n")
+    if(verbose){
+      if(marginTable[,sum(eps)>=sum(abs(Diff)),by=.(GROUP)][,all(V1==TRUE)]){ # marginTable[,all(eps>=abs(Diff))]
+        message(paste0("Convergence successfull for ",split," ",split.level),"\n")
+      }else{
+        message(paste0("Convergence NOT successfull for ",split," ",split.level),"\n")
+      }
     }
+
     setkeyv(data0,"sim_ID")
     selectVars <- c(hhid,params[["pid"]],"weight_choose")
     out <- data0[, selectVars, with = FALSE]
   }
   
   out[,c(split):=split.level]
-  
-  # # check output
-  # marginTable_new <- copy(marginTable)
-  # marginTable_new[,c("FreqPers","FreqHH"):=NULL]
-  # popGrouped <- helpGrouping(x=data0[weight_choose>0],varSets=marginSets,varName = "weight_choose_new")
-  # marginTable_new[popGrouped,c("FreqPers","FreqHH"):=list(FreqPopPers,FreqPopHH),on=c(marginNames)]
-  # marginTable_new[is.na(FreqPers),c("FreqPers","FreqHH"):=0]
-  # marginTable_new[,Diff:=(Freq-get(unlist(.BY))),by=list(FreqType)]
-  
+
   return(out)
 }
