@@ -52,7 +52,7 @@ specifyInput <- function(data, hhid, hhsize=NULL, pid=NULL, weight=NULL,
       stop("strata must be a character defining the variable holding information on stratas and must be of length 1!\n")
     }
     if(!"factor"%in%class(data[[strata]])){
-      stop(strata,"is not a factor variable as needed for a strata variable.")
+      stop(strata," is not a factor variable as needed for a strata variable.")
     }
   }
 
