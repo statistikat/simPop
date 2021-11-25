@@ -77,7 +77,7 @@ checkTables <- function(tabs,data,split=NULL,verbose=FALSE,namesTabs="pers"){
     return(NULL)
   }
   
-  if(!is.list(tabs)){
+  if(class(tabs)!="list"){
     tabs <- list(tabs)
   }
   
