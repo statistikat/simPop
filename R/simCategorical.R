@@ -335,7 +335,7 @@ simCategorical <- function(simPopObj, additional,
       
       names_params <- names(model_params)
       names_all <- names(all_model_params)
-      if(any(!names_params %in% names_all)){
+      if(any(!names_params %in% names_all) & !"..."%in%names_all){
         stop("The following are not parameters of method ",method,"\n ",paste(names_params[!names_params %in% names_all],collapse=", "))
       }
       
@@ -572,14 +572,22 @@ simCategorical <- function(simPopObj, additional,
       
       if(!is.null(model_params)){
         
+        xgb_hyper_params <- eval(parse(text=xgb_hyper_params))
+        for(hyper in names(xgb_hyper_params)){
+          if(is.null(model_params[[hyper]])){
+            model_params[[hyper]] <- xgb_hyper_params[[hyper]]
+          }
+        }
         xgb_hyper_params <- "params$model_extra"
         
-        if(!is.null(optional_params$nrounds)){
-          nrounds <- optional_params$nrounds
+        if(!is.null(model_params$nrounds)){
+          nrounds <- model_params$nrounds
+          model_params$nrounds <- NULL
         }
         
-        if(!is.null(optional_params$early_stopping_rounds)){
-          early_stopping_rounds <- optional_params$early_stopping_rounds
+        if(!is.null(model_params$early_stopping_rounds)){
+          early_stopping_rounds <- model_params$early_stopping_rounds
+          model_params$early_stopping_rounds <- NULL
         }
       }
       
@@ -596,7 +604,7 @@ simCategorical <- function(simPopObj, additional,
                                     "params = ", xgb_hyper_params, ")")
       
       formula.cmd <- command
-      
+      if(verbose) cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
     }
     #if ( method == "naivebayes" ) {
     #  formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
