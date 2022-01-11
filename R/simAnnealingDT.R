@@ -180,7 +180,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
   
   noChange <- 0
   updatepSet <- TRUE
-  
+  number_iterations <- 0
   ######################################
   # apply simulated annealing
   if ( marginTable[,sum(eps)>=sum(abs(Diff)),by=.(GROUP)][,all(V1==TRUE)] ) { # marginTable[,sum(eps)>=sum(abs(Diff))]
@@ -204,7 +204,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
       # seedX <- sample(1:10000,maxiter)
       
       while( n<maxiter) {
-        
+        number_iterations <- number_iterations +1
         # scale redraw for add and remove to keep synthetic totals stable
         
         # message("set redrawgap")
@@ -392,9 +392,9 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
     # check if convergence was successfull
     if(verbose){
       if(marginTable[,sum(eps)>=sum(abs(Diff)),by=.(GROUP)][,all(V1==TRUE)]){ # marginTable[,all(eps>=abs(Diff))]
-        message(paste0("Convergence successfull for ",split," ",split.level),"\n")
+        message(paste0("Convergence successfull for ",split," ",split.level)," in ",number_iterations,"iterations!\n")
       }else{
-        message(paste0("Convergence NOT successfull for ",split," ",split.level),"\n")
+        message(paste0("Convergence NOT successfull for ",split," ",split.level)," in ",number_iterations,"iterations!\n")
       }
     }
 
