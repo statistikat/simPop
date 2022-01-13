@@ -394,7 +394,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
       if(marginTable[,sum(eps)>=sum(abs(Diff)),by=.(GROUP)][,all(V1==TRUE)]){ # marginTable[,all(eps>=abs(Diff))]
         message(paste0("Convergence successfull for ",split," ",split.level)," in ",number_iterations,"iterations!\n")
       }else{
-        message(paste0("Convergence NOT successfull for ",split," ",split.level)," in ",number_iterations,"iterations!\n")
+        message(paste0("Convergence NOT successfull for ",split," ",split.level)," in ",number_iterations," iterations!\n")
       }
     }
 
