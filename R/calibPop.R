@@ -333,7 +333,7 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
   temp.cooldown = 0.9, factor.cooldown = 0.85, min.temp = 10^-3,
   nr_cpus=NULL, sizefactor=2, 
   choose.temp=TRUE,choose.temp.factor=0.2,scale.redraw=.5,observe.times=50,observe.break=0.05,n.forceCooldown=30,
-  verbose=FALSE,hhTables=NULL,persTables=NULL,redist.var=NULL,redist.var.factor=1,old_method=FALSE) {
+  verbose=FALSE,hhTables=NULL,persTables=NULL,redist.var=NULL,redist.var.factor=1) {
   
   if(verbose){
     t0 <- Sys.time()

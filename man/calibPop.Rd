@@ -29,8 +29,7 @@ calibPop(
   hhTables = NULL,
   persTables = NULL,
   redist.var = NULL,
-  redist.var.factor = 1,
-  old_method = FALSE
+  redist.var.factor = 1
 )
 }
 \arguments{
