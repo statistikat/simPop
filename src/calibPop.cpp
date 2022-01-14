@@ -128,6 +128,7 @@ IntegerVector calibPop_work(IntegerMatrix inp, NumericVector totals, IntegerVect
     return(weights);
   }
 
+  int counter_all = 0;
   int counter = 0;
   int change = 0;
   double prob = 0.0;
@@ -182,6 +183,7 @@ IntegerVector calibPop_work(IntegerMatrix inp, NumericVector totals, IntegerVect
         }
       }
       counter = counter + 1;
+      counter_all = counter_all+1;
     }
     // decrease temp and decrease factor accordingly
     // decrease temp by a const fraction (simple method used for testing only)
@@ -193,7 +195,7 @@ IntegerVector calibPop_work(IntegerMatrix inp, NumericVector totals, IntegerVect
     cooldown = cooldown + 1;
     if ( (obj_new <= eps) | (cooldown == 500) ) {
       if ( verb ) {
-        Rprintf("Required precision reached!\nValue of objective function: %g (required precision=%g)\n", obj_new, eps);
+        Rprintf("Required precision reached!\nValue of objective function: %g (required precision=%g)\nNumber of iterations=%g", obj_new, eps,counter_all);
       }
       break;
     }

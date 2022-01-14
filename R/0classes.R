@@ -17,6 +17,7 @@ setClassUnion('listOrNULL', c('list', 'NULL'))
 #' @import Rcpp
 #' @import party
 #' @import fitdistrplus
+#' @import xgboost
 #' @importFrom lattice bwplot panel.bwplot packet.number panel.points panel.refline panel.xyplot
 #' @importFrom laeken calibVars
 #' @importFrom MASS ginv
@@ -31,7 +32,6 @@ setClassUnion('listOrNULL', c('list', 'NULL'))
 #' @importFrom EnvStats rlnormTrunc rnormTrunc
 #' @importFrom fitdistrplus fitdist
 #' @importFrom ranger ranger
-#' @importFrom xgboost xgb.train xgb.DMatrix
 #' @importFrom RcppArmadillo armadillo_version
 #' @importFrom matrixStats colSds colMeans2
 NULL
