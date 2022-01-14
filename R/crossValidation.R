@@ -189,6 +189,7 @@ crossValidation <- function(simPopObj, additionals, hyper_param_grid, fold = 3,
     hyper_param_grid$nr_cpus <- nr_cpus
     hyper_param_grid$regModel <- regModel
     hyper_param_grid$by <- by
+    hyper_param_grid$method <- method
     
     result_list <- cross_validation(simPopObj,
                                     grid = hyper_param_grid,
