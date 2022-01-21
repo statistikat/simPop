@@ -58,6 +58,7 @@ Collate:
     'calibVars.R'
     'contingencyWt.R'
     'correctHeap.R'
+    'crossValidation.R'
     'fitGPD.R'
     'getBreaks.R'
     'getCat.R'

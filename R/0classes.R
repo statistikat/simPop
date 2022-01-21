@@ -34,6 +34,8 @@ setClassUnion('listOrNULL', c('list', 'NULL'))
 #' @importFrom ranger ranger
 #' @importFrom RcppArmadillo armadillo_version
 #' @importFrom matrixStats colSds colMeans2
+#' @importFrom forcats fct_unify
+#' @importFrom dplyr %>% select group_by summarise arrange pull across
 NULL
 
 #' Class \code{"dataObj"}
