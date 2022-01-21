@@ -381,6 +381,8 @@ generateValues_binary <- function(dataSample, dataPop, params) {
 
 generateValues_xgboost <- function(dataSample, dataPop, params) {
   
+  res <- NULL
+  
   predNames <- params$predNames
   name <- params$name
   typ <- params$typ
@@ -778,7 +780,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
   nr_cpus=NULL, eps = NULL, regModel="basic", byHousehold=NULL,
   imputeMissings=FALSE, seed, verbose=FALSE,by="strata", model_params=NULL) {
 
-  x <- hhid <- vals <- id <- V1 <- randId <- NULL
+  x <- hhid <- vals <- id <- V1 <- randId <- optional_params <- NULL
 
   if ( !is.null(byHousehold) ) {
     if ( !byHousehold %in% c("mean","sum","random") ) {
@@ -790,8 +792,8 @@ simContinuous <- function(simPopObj, additional = "netIncome",
   pop <- simPopObj@pop
   basic <- simPopObj@basicHHvars
   if(by %in% c("strata", "none")){
-    if(by == "none" & method != "xgboost"){
-      stop(paste0("by \"none\" not implemented for method ", method))
+    if(by == "none" & method[1] != "xgboost"){
+      stop(paste0("by \"none\" not implemented for method ", method[1]))
     }
     strata <- samp@strata
   }else if(!is.null(by)){

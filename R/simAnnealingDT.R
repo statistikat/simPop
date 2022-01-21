@@ -34,7 +34,7 @@ simAnnealingDT <- function(data0,totals0,params,sizefactor=2,
                            n.forceCooldown=200){
   N <- V1 <- sim_ID <- weight_choose <- weight_choose_new <- NULL
   FreqType <- factor_med_hh <- Freq <- FreqPopPers <- FreqPopHH <- FreqPers <- 
-    Diff <- RowIndex <- MARGININDEX <- GROUP <- NULL
+    Diff <- RowIndex <- MARGININDEX <- GROUP <- . <- GROUP_pop <- Diff_new <- NULL
   ######################################
   ## define variables from param
   # totals0 <- totals0[grepl("hh",names(totals0))]

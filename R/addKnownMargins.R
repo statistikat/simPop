@@ -41,6 +41,7 @@
 #' str(inp)
 #' }
 addKnownMargins <- function(inp, margins) {
+  N <- NULL
   dataP <- inp@pop@data
   margins <- as.data.frame(margins)
   if ( !class(margins) == "data.frame" ) {
