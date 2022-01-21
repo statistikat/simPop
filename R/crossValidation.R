@@ -157,6 +157,13 @@ cross_validation <- function(synth_pop, fold = 1, grid, metric, sim, return_best
 #' inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
 #' ## in the following, nr_cpus are selected automatically
 #' simPop <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090"))
+#' grid <- expand.grid(nrounds = c(5, 10),
+#'                     max_depth = 10,
+#'                     eta = c(0.2, 0.3, 0.5),
+#'                     eval_metric = "mlogloss",
+#'                     stringsAsFactors = F)
+#'
+#' additionals <- c("pl030", "pb220a")
 #' simPop <- crossValidation(simPop, additionals=c("pl030", "pb220a"), nr_cpus=1)
 #' simPop
 #' }
