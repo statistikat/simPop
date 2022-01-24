@@ -21,7 +21,6 @@ Imports:
     data.table,
     laeken,
     dplyr,
-    forcats,
     plyr,
     MASS,
     Rcpp (>= 0.11.0),RcppArmadillo,

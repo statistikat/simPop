@@ -1,8 +1,14 @@
-library(forcats)
-
-
+# functionality similar to forcats::fct_unify
+factor_unify <- function(fs){
+  lev <- lapply(fs,levels)
+  lev <- unique(do.call("c",lev))
+  out <- lapply(fs,function(x,levNew){
+    factor(as.character(x),levels=levNew,labels=levNew)
+  },  levNew = lev)
+  return(out)
+}
 categorical_metric <- function(x, y, weights) {
-  unified_factors <- fct_unify(list(x = as.factor(x),
+  unified_factors <- factor_unify(list(x = as.factor(x),
                                     y = as.factor(y)))
   x <- unified_factors$x
   y <- unified_factors$y
