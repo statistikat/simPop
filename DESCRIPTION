@@ -20,7 +20,6 @@ Depends:
 Imports:
     data.table,
     laeken,
-    dplyr,
     plyr,
     MASS,
     Rcpp (>= 0.11.0),RcppArmadillo,

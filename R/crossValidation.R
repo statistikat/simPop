@@ -20,7 +20,7 @@ categorical_metric <- function(x, y, weights) {
 }
 
 
-cross_validation <- function(synth_pop, fold = 1, grid, metric, sim, return_best = TRUE, verbose = FALSE) {
+cross_validation <- function(synth_pop, fold = 1, grid,metric, sim, return_best = TRUE, verbose = FALSE) {
   
   fun_args <- as.list(formals(sim))
   fun_args$simPopObj <- synth_pop
@@ -57,9 +57,9 @@ cross_validation <- function(synth_pop, fold = 1, grid, metric, sim, return_best
     run_time <- proc.time() - ptm
     
     track[i, "run_time"] <- run_time[3]
-    track[i, "metric"] <- metric(x = synth_pop@sample@data[,..additional] %>% pull(),
-                                 y = synth_pop@pop@data[,..additional] %>% pull(), 
-                                 weights = synth_pop@sample@data[, ..weight] %>% pull())
+    track[i, "metric"] <- metric(x = synth_pop@sample@data[,..additional][[1]],
+                                 y = synth_pop@pop@data[,..additional][[1]], 
+                                 weights = synth_pop@sample@data[, ..weight][[1]])
     
     if(verbose) {
       cat(paste0("    Metric at ", i," : ", round(track[i, "metric"], 4), "\n"))
@@ -70,13 +70,10 @@ cross_validation <- function(synth_pop, fold = 1, grid, metric, sim, return_best
     synth_pop@pop@data[, (dt_index) := NULL]
     
   }
-  
-  best <- track %>%
-    select(-contains("fold_index"), run_time) %>%
-    group_by(across(all_of(c(first_level_params, second_level_params)))) %>%
-    summarise(mean = mean(metric, na.rm = T), max = max(metric), .groups = "keep") %>%
-    arrange(mean)
-  
+  setDT(track)
+  best <- track[,.(mean = mean(metric, na.rm = T), max = max(metric)), by=c(first_level_params, second_level_params)]
+  setorder(best,mean)
+
   if(return_best){
     
     for (first_level_param in first_level_params) {
@@ -91,9 +88,9 @@ cross_validation <- function(synth_pop, fold = 1, grid, metric, sim, return_best
     
     synth_pop <- do.call(sim, fun_args)
     
-    best_metric <- metric(x = synth_pop@sample@data[,..additional] %>% pull(),
-                          y = synth_pop@pop@data[,..additional] %>% pull(), 
-                          weights = synth_pop@sample@data[, ..weight] %>% pull())
+    best_metric <- metric(x = synth_pop@sample@data[,..additional][[1]],
+                          y = synth_pop@pop@data[,..additional][[1]], 
+                          weights = synth_pop@sample@data[, ..weight][[1]])
     
     if(verbose) {
       cat(paste0("  Best metric : ", round(best_metric, 4), "\n"))
@@ -154,7 +151,6 @@ cross_validation <- function(synth_pop, fold = 1, grid, metric, sim, return_best
 #' @author Bernhard Meindl, Andreas Alfons, Stefan Kraft, Alexander Kowarik, Matthias Templ, Siro Fritzmann
 #' @seealso \code{\link{simStructure}}, \code{\link{simRelation}},
 #' \code{\link{simContinuous}}, \code{\link{simComponents}}, \code{\link{simCategorical}}
-#' @export
 #' @keywords datagen
 #' @examples
 #' data(eusilcS) # load sample data
@@ -173,6 +169,7 @@ cross_validation <- function(synth_pop, fold = 1, grid, metric, sim, return_best
 #' simPop <- crossValidation(simPop, additionals=c("pl030", "pb220a"), nr_cpus=1)
 #' simPop
 #' }
+#' @export
 crossValidation <- function(simPopObj, additionals, hyper_param_grid, fold = 3,
                             method = c("xgboost"), type = c("categorical"),
                             by = "strata", regModel = "available",
