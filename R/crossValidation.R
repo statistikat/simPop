@@ -70,10 +70,10 @@ cross_validation <- function(synth_pop, fold = 1, grid,metric, sim, return_best 
     synth_pop@pop@data[, (dt_index) := NULL]
     
   }
-  setDT(track)
-  best <- track[,.(mean = mean(metric, na.rm = T), max = max(metric)), by=c(first_level_params, second_level_params)]
-  setorder(best,mean)
 
+  best <- as.data.table(track)[,.(mean = mean(metric, na.rm = T), max = max(metric)), by=c(first_level_params, second_level_params)]
+  setorder(best,mean)
+  best <- as.data.frame(best)
   if(return_best){
     
     for (first_level_param in first_level_params) {
