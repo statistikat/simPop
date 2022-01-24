@@ -1,7 +1,7 @@
 #Test for xgboost implementation
 library(simPop)
 
-test_that("xgboost integration tests",{
+# xgboost integration tests",{
   
   data("eusilc13puf")
   data("totalsRGtab")
@@ -37,7 +37,7 @@ test_that("xgboost integration tests",{
                            alpha = NULL,
                            nr_cpus = 1)
 
-  expect_gt(nrow(simPop@pop@data), 0,
+  expect_true(nrow(simPop@pop@data)>0,
             "Expected generated synthetic population to have some rows")
   
   
@@ -65,4 +65,4 @@ test_that("xgboost integration tests",{
                                          nr_cpus = 1)},
                 "are running xgboost",
                 "Expected commandline output when verbose is true")
-})
+#

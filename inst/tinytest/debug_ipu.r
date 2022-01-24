@@ -1,7 +1,7 @@
 ## goal: calculate household weights that should also fulfil person-type constraints
-context("ipu")
+message("ipu")
 library(simPop)
-test_that("ipu debug",{
+# ipu debug",{
 # load sample and population data
 data(eusilcS)
 data(eusilcP)
@@ -52,7 +52,7 @@ res <- ipu(inp=inp, hid="db030", con=con, verbose=TRUE)
 
 is <- sapply(2:(ncol(res)-1), function(x) { 
   sum(res[,x]*res$weights)
-}) 
+#  
 data.frame(required=unlist(con), is=is)
 
 
@@ -72,4 +72,4 @@ inp$p4 <- c(0,0,0,0,0,0,0,0)
 con <- list(hh1=35, hh2=65, p1=91, p2=65, p3=104,p4=5)
 res <- ipu(inp=inp, hid="hhid", con=con, verbose=TRUE)
 
-})
+# 

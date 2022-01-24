@@ -1,6 +1,6 @@
 #Test for reproducibility
 library(simPop)
-test_that("Reproduc test",{
+# Reproduc test",{
 data(eusilcS)
 inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
 ## in the following, nr_cpus are selected automatically
@@ -38,4 +38,4 @@ x2 <- simPop@pop@data
 if(Sys.info()["sysname"] != "Windows"){
   expect_identical(x1,x2,info="setting seed in parallel mode does not work!")
 }
-})
+#

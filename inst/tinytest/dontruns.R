@@ -1,5 +1,5 @@
 library(simPop)
-test_that("All examples dontruns run",{
+# All examples dontruns run",{
 data(eusilcS,package="simPop")
 data(eusilcP,package="simPop")
 ## approx. 20 seconds computation time
@@ -118,4 +118,4 @@ class(eusilcM)
 spBwplot(eusilcM, x="netIncome", cond=NULL)
 spBwplot(eusilcM, x="netIncome", cond="rb090", layout=c(1,2))
 
-})
+#

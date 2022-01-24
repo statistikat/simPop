@@ -1,6 +1,6 @@
-context("heap")
+message("heap")
 library(simPop)
-test_that("correctHeaps",{
+# correctHeaps",{
   ## create some artificial data
   age <- rlnorm(10000, meanlog=2.466869, sdlog=1.652772)
   age <- round(age[age < 93])
@@ -34,9 +34,9 @@ test_that("correctHeaps",{
   
   expect_identical(cs10f[i1],age10[i1])
   expect_identical(cs5f[i2],age5[i2])
-})
+#
 
-test_that("correctSingleHeap",{
+# correctSingleHeap",{
   ## create some artificial data
   age <- rlnorm(10000, meanlog=2.466869, sdlog=1.652772)
   age <- round(age[age < 93])
@@ -57,5 +57,4 @@ test_that("correctSingleHeap",{
   i <- sample(1:length(age23),5)
   csf <- correctSingleHeap(age23, heap=23, before=5, after=5, method="lnorm", fixed=i)
   expect_identical(csf[i],age23[i])
-  
-})
+#

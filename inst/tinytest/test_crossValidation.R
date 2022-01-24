@@ -1,7 +1,7 @@
 #Test for xgboost implementation
 library(simPop)
 
-test_that("xgboost integration tests",{
+# xgboost integration tests",{
   
   data(eusilcS) # load sample data
   
@@ -19,8 +19,6 @@ test_that("xgboost integration tests",{
   simPop <- crossValidation(simPop, additionals=c("pl030", "pb220a"), nr_cpus=1,
                             verbose = TRUE, hyper_param_grid = grid)
   
-  expect_gt(nrow(simPop@pop@data), 0,
+  expect_true(nrow(simPop@pop@data)> 0,
             "Expected generated synthetic population to have some rows")
-  
-  
-})
+#

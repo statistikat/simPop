@@ -4,9 +4,7 @@
 ###############################################################################
 context("simInitSpatial")
 library(simPop)
-test_that(
-  "simInit Spatial Test",
-  {
+# simInit Spatial Test",{
     data(eusilcS)
     data(eusilcP)
     
@@ -144,4 +142,3 @@ test_that(
   #simPop_adj <- calibPop(simPopObj3, split="district", temp=10, eps.factor=0.1)
   #marginsSynth2 <- simPop_adj@pop@data[,.(freqSynth=.N),by=.(district,gender,citizenship)]
   #out <- merge(merge(margins,marginsSynth,by=c("district","gender","citizenship")),marginsSynth2,by=c("district","gender","citizenship"))
-  })

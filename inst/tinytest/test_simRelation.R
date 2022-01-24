@@ -1,4 +1,4 @@
-context("simRelation")
+message("simRelation")
 library(simPop)
 data(ghanaS) # load sample data
 ghanaS[ghanaS$region=="western","nation"] <- ghanaS[ghanaS$region=="western","nation"][1]
@@ -16,7 +16,7 @@ ghanaP <- simStructure(
 class(ghanaP)
 
 
-test_that("simRelation",{
+# simRelation",{
 ## long computation time ...
 ghanaP <- simRelation(
   simPopObj = ghanaP,
@@ -25,5 +25,4 @@ ghanaP <- simRelation(
   additional = c("nation", "ethnic", "religion"), nr_cpus = 1
 )
 expect_true("nation"%in%colnames(ghanaP@pop@data))
-
-})
+#
