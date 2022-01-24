@@ -201,11 +201,24 @@ chooseSILCvars <- function(x, vars = c("db030", "db040", "rb030", "rb080", "rb09
   if(!is.factor(x$pl111)) x$pl111 <- factor(x$pl111)
   if(!is.factor(x$rb010)) x$rb010 <- factor(x$rb010)
   if(!is.factor(x$pl031)) x$pl031 <- factor(x$pl031)
-
+  revalueFactor <- function(x, replace = NULL){
+    if (!is.null(x) && !is.factor(x) && !is.character(x)) {
+      stop("x is not a factor or a character vector.")
+    }
+    if(is.null(replace)){
+      return(x)
+    }
+    xchr <- as.character(x)
+    nrepl <- names(replace)
+    for(i in seq_along(replace)){
+      xchr[which(xchr==nrepl[i])] <- replace[i]
+    }
+    as.factor(x)
+  }
   ## category 1 is too small:
   tab <- table(x$pe040, useNA = "always")[2]
   if(tab < 10){
-    x$pe040 <- revalue(x$pe040, c("0"="0-1", "1"="0-1" ))
+    x$pe040 <- revalueFactor(x$pe040, c("0"="0-1", "1"="0-1" ))
     message(cat("Note: number of categories in pe040 was too small ( count =", tab, ").\n Categories 0 and 1 in pe040 have been combined to category 0-1\n"))
   }
 
@@ -260,7 +273,7 @@ modifySILC <- function(x, country = "Austria"){
   ## Recoding of Occupation to 1-digit version
   x$pl051 <- as.numeric(as.character(x$pl051))
   x$pl051 <- as.factor(trunc(x$pl051/10))
-  x$pl051 <- revalue(x$pl051, c("0"="0-1", "1"="0-1" ))
+  x$pl051 <- revalueFactor(x$pl051, c("0"="0-1", "1"="0-1" ))
 
   if(country %in% c("France", "Austria")){
     ## Recoding of NACE code - this may be country-specific.
