@@ -85,6 +85,7 @@ Conditions (EU-SILC).</p>
   maxit <span class="op">=</span> <span class="fl">500</span>,
   MaxNWts <span class="op">=</span> <span class="fl">1500</span>,
   tol <span class="op">=</span> <span class="va">.Machine</span><span class="op">$</span><span class="va">double.eps</span><span class="op">^</span><span class="fl">0.5</span>,
+  nr_cpus <span class="op">=</span> <span class="cn">NULL</span>,
   <span class="va">seed</span>
 <span class="op">)</span></code></pre></div>
     </div>
@@ -208,6 +209,9 @@ for <code><a href="https://rdrr.io/pkg/nnet/man/nnet.html" class="external-link"
 <dt>tol</dt>
 <dd><p>if <code>method</code> is <code>"twostep"</code>, a small positive numeric
 value or <code>NULL</code> (see <code><a href="simContinuous.html">simContinuous</a></code>).</p></dd>
+<dt>nr_cpus</dt>
+<dd><p>if specified, an integer number defining the number of cpus
+that should be used for parallel processing.</p></dd>
 <dt>seed</dt>
 <dd><p>optional; an integer value to be used as the seed of the random
 number generator, or an integer vector containing the state of the random
@@ -242,13 +246,14 @@ simulated EU-SILC population data as well as the underlying sample.</p>
 <span class="r-in"><span class="co"># \donttest{</span></span>
 <span class="r-in"><span class="co">## long computation time</span></span>
 <span class="r-in"><span class="co"># multinomial model with random draws</span></span>
-<span class="r-in"><span class="va">eusilcM</span> <span class="op">&lt;-</span> <span class="fu">simEUSILC</span><span class="op">(</span><span class="va">eusilcS</span>, upper <span class="op">=</span> <span class="fl">200000</span>, equidist <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">eusilcM</span> <span class="op">&lt;-</span> <span class="fu">simEUSILC</span><span class="op">(</span><span class="va">eusilcS</span>, upper <span class="op">=</span> <span class="fl">200000</span>, equidist <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span class="r-in">, nr_cpus <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">eusilcM</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Length     Class      Mode </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         1 simPopObj        S4 </span>
 <span class="r-in"></span>
 <span class="r-in"><span class="co"># two-step regression</span></span>
-<span class="r-in"><span class="va">eusilcT</span> <span class="op">&lt;-</span> <span class="fu">simEUSILC</span><span class="op">(</span><span class="va">eusilcS</span>, method <span class="op">=</span> <span class="st">"twostep"</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">eusilcT</span> <span class="op">&lt;-</span> <span class="fu">simEUSILC</span><span class="op">(</span><span class="va">eusilcS</span>, method <span class="op">=</span> <span class="st">"twostep"</span>, nr_cpus <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">eusilcT</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Length     Class      Mode </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         1 simPopObj        S4 </span>
