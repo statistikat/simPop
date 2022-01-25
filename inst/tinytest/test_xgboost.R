@@ -41,18 +41,16 @@ library(simPop)
             "Expected generated synthetic population to have some rows")
   
   
-  simPop <- simStructure(data=inp,
+  simPop0 <- simStructure(data=inp,
                          method="direct",
                          basicHHvars=c("age", "rb090"),
                          seed=10)
-  output <- capture.output(simPop <- simCategorical(simPop,
-                                                    additional=c("pl031", "pb220a"),
-                                                    method="xgboost",
-                                                    verbose = TRUE,
-                                                    nr_cpus = 1))
-  expect_true(output[6]=="we are running xgboost:",
-                "Expected commandline output when verbose is true")
-  output <- capture.output(simPop <- simContinuous(simPop,
+  simPop <- simCategorical(simPop0, additional=c("pl031", "pb220a"),
+                           method="xgboost",
+                           verbose = TRUE,
+                           nr_cpus = 1)
+  expect_true(all(c("pl031", "pb220a")%in%colnames(simPop@sample@data)))
+  simPop <- simContinuous(simPop,
                           additional="hgrossminus",
                           method = "xgboost",
                           regModel = "available",
@@ -60,7 +58,6 @@ library(simPop)
                           by = "db040",
                           log = FALSE,
                           alpha = NULL,
-                          nr_cpus = 1))
-  expect_true(output[6]=="we are running xgboost:",
-                "Expected commandline output when verbose is true")
+                          nr_cpus = 1)
+  expect_true(all(c("hgrossminus")%in%colnames(simPop@sample@data)))
 #
