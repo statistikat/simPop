@@ -37,9 +37,8 @@ calibVars.default <- function(x) {
   if(length(x) == 0) matrix(integer(), 0, 0)
   x <- as.factor(x)
   levs <- levels(x)
-  res <- binary_representation(levels=1:length(levels(x)), values=as.integer(x))
-  colnames(res) <- levs
-  rownames(res) <- names(x)  # set rownames from original vector
+  res <- sapply(levels(x), function(l) as.integer(x == l))
+  rownames(res) <- names(x)
   res
 }
 

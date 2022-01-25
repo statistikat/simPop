@@ -19,7 +19,6 @@ setClassUnion('listOrNULL', c('list', 'NULL'))
 #' @import fitdistrplus
 #' @import xgboost
 #' @importFrom lattice bwplot panel.bwplot packet.number panel.points panel.refline panel.xyplot
-#' @importFrom laeken calibVars
 #' @importFrom MASS ginv
 #' @importFrom colorspace heat_hcl
 #' @importFrom VIM hotdeck

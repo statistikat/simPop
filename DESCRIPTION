@@ -19,7 +19,6 @@ Depends:
     vcd
 Imports:
     data.table,
-    laeken,
     MASS,
     Rcpp (>= 0.11.0),RcppArmadillo,
     e1071,
