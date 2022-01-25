@@ -27,10 +27,14 @@ simulated for the population data.}
 
 \item{hyper_param_grid}{a grid which can contain model specific parameters which will be passed onto the function call for the respective model.}
 
+\item{fold}{the number of k in k-fold crossvalidation}
+
 \item{method}{a character string specifying the method to be used for
 simulating the additional categorical variables. Accepted value at the moment
 only 
 \code{"xgboost"}  for using xgboost (implementation in package xgboost)}
+
+\item{type}{currently only "categorical" is implemented}
 
 \item{by}{defining which variable to use as split up variable of the estimation. Defaults to the strata variable.}
 
@@ -85,7 +89,7 @@ grid <- expand.grid(nrounds = c(5, 10),
                     max_depth = 10,
                     eta = c(0.2, 0.3, 0.5),
                     eval_metric = "mlogloss",
-                    stringsAsFactors = F)
+                    stringsAsFactors = FALSE)
 
 simPop <- crossValidation(simPop, additionals=c("pl030", "pb220a"), nr_cpus=1)
 simPop

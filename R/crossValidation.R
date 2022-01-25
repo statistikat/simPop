@@ -57,9 +57,9 @@ cross_validation <- function(synth_pop, fold = 1, grid,metric, sim, return_best 
     run_time <- proc.time() - ptm
     
     track[i, "run_time"] <- run_time[3]
-    track[i, "metric"] <- metric(x = synth_pop@sample@data[,..additional][[1]],
-                                 y = synth_pop@pop@data[,..additional][[1]], 
-                                 weights = synth_pop@sample@data[, ..weight][[1]])
+    track[i, "metric"] <- metric(x = synth_pop@sample@data[,get(additional)][[1]],
+                                 y = synth_pop@pop@data[,get(additional)][[1]], 
+                                 weights = synth_pop@sample@data[, get(weight)][[1]])
     
     if(verbose) {
       cat(paste0("    Metric at ", i," : ", round(track[i, "metric"], 4), "\n"))
@@ -71,7 +71,7 @@ cross_validation <- function(synth_pop, fold = 1, grid,metric, sim, return_best 
     
   }
 
-  best <- as.data.table(track)[,.(mean = mean(metric, na.rm = T), max = max(metric)), by=c(first_level_params, second_level_params)]
+  best <- as.data.table(track)[,list(mean = mean(metric, na.rm = TRUE), max = max(metric)), by=c(first_level_params, second_level_params)]
   setorder(best,mean)
   best <- as.data.frame(best)
   if(return_best){
@@ -143,6 +143,8 @@ cross_validation <- function(synth_pop, fold = 1, grid,metric, sim, return_best 
 #' @param verbose set to TRUE if additional print output should be shown.
 #' @param by defining which variable to use as split up variable of the estimation. Defaults to the strata variable.
 #' @param hyper_param_grid a grid which can contain model specific parameters which will be passed onto the function call for the respective model. 
+#' @param fold the number of k in k-fold crossvalidation
+#' @param type currently only "categorical" is implemented
 #' @return An object of class \code{\linkS4class{simPopObj}} containing survey
 #' data as well as the simulated population data including the categorical
 #' variables specified by argument \code{additional}.
@@ -163,13 +165,14 @@ cross_validation <- function(synth_pop, fold = 1, grid,metric, sim, return_best 
 #'                     max_depth = 10,
 #'                     eta = c(0.2, 0.3, 0.5),
 #'                     eval_metric = "mlogloss",
-#'                     stringsAsFactors = F)
+#'                     stringsAsFactors = FALSE)
 #'
 #' simPop <- crossValidation(simPop, additionals=c("pl030", "pb220a"), nr_cpus=1)
 #' simPop
 #' }
 #' @export
-crossValidation <- function(simPopObj, additionals, hyper_param_grid, fold = 3,
+crossValidation <- function(simPopObj, additionals, hyper_param_grid,
+                            fold = 3,
                             method = c("xgboost"), type = c("categorical"),
                             by = "strata", regModel = "available",
                             nr_cpus = 1, verbose = FALSE) {
@@ -206,7 +209,7 @@ crossValidation <- function(simPopObj, additionals, hyper_param_grid, fold = 3,
                                     metric = metric,
                                     sim = sim_pop_func,
                                     verbose = verbose,
-                                    return_best = T)
+                                    return_best = TRUE)
     
     simPopObj <- result_list$synth_pop
     
