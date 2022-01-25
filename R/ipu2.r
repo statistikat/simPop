@@ -26,7 +26,7 @@ kishFactor <- function(w){
 #' individual level constraints.
 #' 
 #' This function implements the weighting procedure described 
-#' [here](http://www.ajs.or.at/index.php/ajs/article/viewFile/doi10.17713ajs.v45i3.120/512). 
+#' [here](https://www.ajs.or.at/index.php/ajs/article/download/doi10.17713ajs.v45i3.120/512/0). 
 #' 
 #' `conP` and `conH` are contingency tables, which can be created with `xtabs`. The `dimnames` of those
 #' tables should match the names and levels of the corresponding columns in `dat`.

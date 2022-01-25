@@ -115,7 +115,7 @@ individual level constraints.
 }
 \details{
 This function implements the weighting procedure described
-\href{http://www.ajs.or.at/index.php/ajs/article/viewFile/doi10.17713ajs.v45i3.120/512}{here}.
+\href{https://www.ajs.or.at/index.php/ajs/article/download/doi10.17713ajs.v45i3.120/512/0}{here}.
 
 \code{conP} and \code{conH} are contingency tables, which can be created with \code{xtabs}. The \code{dimnames} of those
 tables should match the names and levels of the corresponding columns in \code{dat}.
