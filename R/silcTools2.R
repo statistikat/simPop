@@ -1,3 +1,17 @@
+revalueFactor <- function(x, replace = NULL){
+  if (!is.null(x) && !is.factor(x) && !is.character(x)) {
+    stop("x is not a factor or a character vector.")
+  }
+  if(is.null(replace)){
+    return(x)
+  }
+  xchr <- as.character(x)
+  nrepl <- names(replace)
+  for(i in seq_along(replace)){
+    xchr[which(xchr==nrepl[i])] <- replace[i]
+  }
+  as.factor(x)
+}
 ################################################################
 ### utility functions for the sga project on EU-SILC
 #' @name silcTools2
@@ -201,20 +215,7 @@ chooseSILCvars <- function(x, vars = c("db030", "db040", "rb030", "rb080", "rb09
   if(!is.factor(x$pl111)) x$pl111 <- factor(x$pl111)
   if(!is.factor(x$rb010)) x$rb010 <- factor(x$rb010)
   if(!is.factor(x$pl031)) x$pl031 <- factor(x$pl031)
-  revalueFactor <- function(x, replace = NULL){
-    if (!is.null(x) && !is.factor(x) && !is.character(x)) {
-      stop("x is not a factor or a character vector.")
-    }
-    if(is.null(replace)){
-      return(x)
-    }
-    xchr <- as.character(x)
-    nrepl <- names(replace)
-    for(i in seq_along(replace)){
-      xchr[which(xchr==nrepl[i])] <- replace[i]
-    }
-    as.factor(x)
-  }
+  
   ## category 1 is too small:
   tab <- table(x$pe040, useNA = "always")[2]
   if(tab < 10){
