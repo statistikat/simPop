@@ -45,24 +45,22 @@ library(simPop)
                          method="direct",
                          basicHHvars=c("age", "rb090"),
                          seed=10)
-
-  expect_output({simPop <- simCategorical(simPop,
-                                          additional=c("pl031", "pb220a"),
-                                          method="xgboost",
-                                          verbose = TRUE,
-                                          nr_cpus = 1)},
-                "are running xgboost",
+  output <- capture.output(simPop <- simCategorical(simPop,
+                                                    additional=c("pl031", "pb220a"),
+                                                    method="xgboost",
+                                                    verbose = TRUE,
+                                                    nr_cpus = 1))
+  expect_true(output[6]=="we are running xgboost:",
                 "Expected commandline output when verbose is true")
-
-  expect_output({simPop <- simContinuous(simPop,
-                                         additional="hgrossminus",
-                                         method = "xgboost",
-                                         regModel = "available",
-                                         verbose = TRUE,
-                                         by = "db040",
-                                         log = FALSE,
-                                         alpha = NULL,
-                                         nr_cpus = 1)},
-                "are running xgboost",
+  output <- capture.output(simPop <- simContinuous(simPop,
+                          additional="hgrossminus",
+                          method = "xgboost",
+                          regModel = "available",
+                          verbose = TRUE,
+                          by = "db040",
+                          log = FALSE,
+                          alpha = NULL,
+                          nr_cpus = 1))
+  expect_true(output[6]=="we are running xgboost:",
                 "Expected commandline output when verbose is true")
 #
