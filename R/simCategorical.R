@@ -141,12 +141,19 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
 
   # population data
   splitS <- split(1:nrow(dataSample), dataSample[, basic, with=FALSE], drop=TRUE)
+
   pSplit <- lapply(splitS, function(i) {
-        tmp <- tableWt(dataSample[i, additional, with=FALSE], dataSample[[w]][i])
-        tmp <- as.data.frame(tmp)
-        p <- ncol(tmp)
-        tmp[, p]/sum(tmp[, p])
-      })
+    if(!is.null(w)){
+      wvec <- dataSample[[w]][i] 
+    }else{
+      wvec <- NULL
+    }
+    tmp <- tableWt(dataSample[i, additional, with=FALSE], wvec)
+    tmp <- as.data.frame(tmp)
+    p <- ncol(tmp)
+    tmp[, p]/sum(tmp[, p])
+  })
+
   splitP <- split(1:nrow(dataPop), dataPop[, basic, with=FALSE])
   NSplit <- sapply(splitP, length)
   # in sample, observations with NAs have been removed to fit the
@@ -154,7 +161,10 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
   whichP <- which(names(splitP) %in% names(splitS))
   # generate realizations for each combination
   sim <- as.list(rep.int(NA, length(splitP)))
-  sim[whichP] <- mapply(spSample, NSplit[whichP], pSplit, SIMPLIFY=FALSE)
+  for(i in seq_along(whichP)){
+    sim[[whichP[i]]] <- spSample(NSplit[whichP][i],pSplit[[i]])
+  }
+  #sim[whichP] <- mapply(spSample, NSplit[whichP], pSplit, SIMPLIFY=FALSE)
   sim <- unsplit(sim, dataPop[, basic, with=FALSE])
   sim <- grid[sim,,drop=FALSE]
   rownames(sim) <- rownames(dataPop)
