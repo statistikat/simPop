@@ -150,7 +150,6 @@ the function <code><a href="simStructure.html">simStructure</a></code>.</p>
 <span class="r-in">                    eval_metric <span class="op">=</span> <span class="st">"mlogloss"</span>,</span>
 <span class="r-in">                    stringsAsFactors <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
 <span class="r-in"></span>
-<span class="r-in"><span class="va">additionals</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pl030"</span>, <span class="st">"pb220a"</span><span class="op">)</span></span>
 <span class="r-in"><span class="va">simPop</span> <span class="op">&lt;-</span> <span class="fu">crossValidation</span><span class="op">(</span><span class="va">simPop</span>, additionals<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pl030"</span>, <span class="st">"pb220a"</span><span class="op">)</span>, nr_cpus<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in hyper_param_grid$additional &lt;- additional:</span> object of type 'symbol' is not subsettable</span>
 <span class="r-in"><span class="va">simPop</span></span>
