@@ -113,17 +113,19 @@ setkey(tabP,db040,district)
 setnames(eusilcP,"region","db040")
 setnames(eusilcP,"hid","db030")
 inp <- specifyInput(data=eusilcP, hhid="db030", hhsize="hsize", strata="db040",population=TRUE)
-simPopObj <- simStructure(data=inp, method="direct", basicHHvars=c("age", "gender"))
 \donttest{
 # use only HH counts
+simPopObj <- simStructure(data=inp, method="direct", basicHHvars=c("age", "gender"))
 simPopObj1 <- simInitSpatial(simPopObj, additional="district", region="db040", tspatialHH=tabHH,
 tspatialP=NULL, nr_cpus=1)
 
 # use only P counts
+simPopObj <- simStructure(data=inp, method="direct", basicHHvars=c("age", "gender"))
 simPopObj2 <- simInitSpatial(simPopObj, additional="district", region="db040", tspatialHH=NULL,
 tspatialP=tabP, nr_cpus = 1)
 
 # use P and HH counts
+simPopObj <- simStructure(data=inp, method="direct", basicHHvars=c("age", "gender"))
 simPopObj3 <- simInitSpatial(simPopObj, additional="district", region="db040", tspatialHH=tabHH,
 tspatialP=tabP, nr_cpus = 1)
 }

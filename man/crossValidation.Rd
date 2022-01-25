@@ -91,7 +91,8 @@ grid <- expand.grid(nrounds = c(5, 10),
                     eval_metric = "mlogloss",
                     stringsAsFactors = FALSE)
 
-simPop <- crossValidation(simPop, additionals=c("pl030", "pb220a"), nr_cpus=1)
+simPop <- crossValidation(simPop, additionals=c("pl030", "pb220a"),
+nr_cpus=1, hyper_param_grid = grid)
 simPop
 }
 }

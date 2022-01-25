@@ -88,9 +88,9 @@ cross_validation <- function(synth_pop, fold = 1, grid,metric, sim, return_best 
     
     synth_pop <- do.call(sim, fun_args)
     
-    best_metric <- metric(x = synth_pop@sample@data[,..additional][[1]],
-                          y = synth_pop@pop@data[,..additional][[1]], 
-                          weights = synth_pop@sample@data[, ..weight][[1]])
+    best_metric <- metric(x = synth_pop@sample@data[,get(additional)][[1]],
+                          y = synth_pop@pop@data[,get(additional)][[1]], 
+                          weights = synth_pop@sample@data[, get(weight)][[1]])
     
     if(verbose) {
       cat(paste0("  Best metric : ", round(best_metric, 4), "\n"))
@@ -167,7 +167,8 @@ cross_validation <- function(synth_pop, fold = 1, grid,metric, sim, return_best 
 #'                     eval_metric = "mlogloss",
 #'                     stringsAsFactors = FALSE)
 #'
-#' simPop <- crossValidation(simPop, additionals=c("pl030", "pb220a"), nr_cpus=1)
+#' simPop <- crossValidation(simPop, additionals=c("pl030", "pb220a"),
+#' nr_cpus=1, hyper_param_grid = grid)
 #' simPop
 #' }
 #' @export

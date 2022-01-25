@@ -92,6 +92,8 @@
 #' for \code{\link[nnet]{nnet}}.
 #' @param tol if \code{method} is \code{"twostep"}, a small positive numeric
 #' value or \code{NULL} (see \code{\link{simContinuous}}).
+#' @param nr_cpus if specified, an integer number defining the number of cpus
+#' that should be used for parallel processing.
 #' @param seed optional; an integer value to be used as the seed of the random
 #' number generator, or an integer vector containing the state of the random
 #' number generator to be restored.
@@ -112,11 +114,12 @@
 #' \donttest{
 #' ## long computation time
 #' # multinomial model with random draws
-#' eusilcM <- simEUSILC(eusilcS, upper = 200000, equidist = FALSE)
+#' eusilcM <- simEUSILC(eusilcS, upper = 200000, equidist = FALSE
+#' , nr_cpus = 1)
 #' summary(eusilcM)
 #' 
 #' # two-step regression
-#' eusilcT <- simEUSILC(eusilcS, method = "twostep")
+#' eusilcT <- simEUSILC(eusilcS, method = "twostep", nr_cpus = 1)
 #' summary(eusilcT)
 #' }
 #' 
@@ -133,7 +136,7 @@ simEUSILC <- function(dataS, hid = "db030", wh = "db090",
   components = c("py010n", "py050n", "py090n", "py100n", "py110n", "py120n", "py130n", "py140n"),
   conditional = c(getCatName(income), "pl030"),
   keep = TRUE, maxit = 500, MaxNWts = 1500,
-  tol = .Machine$double.eps^0.5, seed) {
+  tol = .Machine$double.eps^0.5, nr_cpus = NULL, seed) {
 
   ## initializations
   if ( !missing(seed) ) {
@@ -180,7 +183,8 @@ simEUSILC <- function(dataS, hid = "db030", wh = "db090",
 
   ## simulate additional categorical variables
   basic <- c(structure, if(is.null(hsize)) "hsize" else hsize)
-  simPop <- simCategorical(simPop, additional=categorical, maxit=maxit, MaxNWts=MaxNWts)
+  simPop <- simCategorical(simPop, additional=categorical, maxit=maxit, MaxNWts=MaxNWts
+                           ,nr_cpus = nr_cpus)
 
   dataS <- simPop@sample@data
   dataP <- simPop@pop@data
@@ -217,12 +221,12 @@ simEUSILC <- function(dataS, hid = "db030", wh = "db090",
       threshold <- breaks[length(breaks)-2]
     }
     simPop <- simContinuous(simPop, additional=income, zeros=zeros, breaks=breaks,
-      gpd=gpd, threshold=threshold, est=est, keep=TRUE, maxit=maxit, MaxNWts=MaxNWts)
+      gpd=gpd, threshold=threshold, est=est, keep=TRUE, maxit=maxit, MaxNWts=MaxNWts,nr_cpus = nr_cpus)
   } else {
     # two-step model
     simPop <- simContinuous(simPop, additional=income, method="lm", zeros=zeros,
       breaks=breaks, log=TRUE, const=const, alpha=alpha,
-      residuals=residuals, maxit=maxit, MaxNWts=MaxNWts, tol=tol)
+      residuals=residuals, maxit=maxit, MaxNWts=MaxNWts, tol=tol,nr_cpus = nr_cpus)
     dataP <- simPop@pop@data
     dataP[[incomeCat]] <- getCat(dataP[[income]], breaks, zeros)
     simPop@pop@data <- dataP

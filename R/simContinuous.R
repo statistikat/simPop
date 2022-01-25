@@ -764,7 +764,7 @@ runModel <- function(dataS, dataP, params, typ) {
 #' # two-step regression
 #' eusilcT <- simContinuous(simPop, additional="netIncome",
 #'               regModel = "basic",
-#'               method = "lm")
+#'               method = "lm", nr_cpus=1)
 #' class(eusilcT)
 #' }
 #'

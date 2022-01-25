@@ -1,3 +1,4 @@
+if(Sys.info()[["machine"]]!="arm64"){
 #Test for xgboost implementation
 library(simPop)
 
@@ -50,7 +51,8 @@ library(simPop)
                            verbose = TRUE,
                            nr_cpus = 1)
   expect_true(all(c("pl031", "pb220a")%in%colnames(simPop@sample@data)))
-  simPop <- simContinuous(simPop,
+  
+    simPop <- simContinuous(simPop,
                           additional="hgrossminus",
                           method = "xgboost",
                           regModel = "available",
@@ -59,5 +61,6 @@ library(simPop)
                           log = FALSE,
                           alpha = NULL,
                           nr_cpus = 1)
-  expect_true(all(c("hgrossminus")%in%colnames(simPop@sample@data)))
+    expect_true(all(c("hgrossminus")%in%colnames(simPop@sample@data)))
+}
 #

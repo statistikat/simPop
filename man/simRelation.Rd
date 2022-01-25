@@ -165,7 +165,7 @@ ghanaP <- simRelation(
   simPopObj = ghanaP,
   relation = "relate",
   head = "head",
-  additional = c("nation", "ethnic", "religion")
+  additional = c("nation", "ethnic", "religion"), nr_cpus = 1
 )
 str(ghanaP)
 }

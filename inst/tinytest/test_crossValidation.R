@@ -16,7 +16,8 @@ library(simPop)
                       eval_metric = "mlogloss",
                       stringsAsFactors = F)
   
-  simPop <- crossValidation(simPop, additionals=c("pl030", "pb220a"), nr_cpus=1,
+  simPop <- crossValidation(simPop, additionals=c("pl030", "pb220a"),
+                            nr_cpus=1,
                             verbose = TRUE, hyper_param_grid = grid)
   
   expect_true(nrow(simPop@pop@data)> 0,

@@ -37,6 +37,7 @@ simEUSILC(
   maxit = 500,
   MaxNWts = 1500,
   tol = .Machine$double.eps^0.5,
+  nr_cpus = NULL,
   seed
 )
 }
@@ -158,6 +159,9 @@ for \code{\link[nnet]{nnet}}.}
 \item{tol}{if \code{method} is \code{"twostep"}, a small positive numeric
 value or \code{NULL} (see \code{\link{simContinuous}}).}
 
+\item{nr_cpus}{if specified, an integer number defining the number of cpus
+that should be used for parallel processing.}
+
 \item{seed}{optional; an integer value to be used as the seed of the random
 number generator, or an integer vector containing the state of the random
 number generator to be restored.}
@@ -182,11 +186,12 @@ data(eusilcS) # load sample data
 \donttest{
 ## long computation time
 # multinomial model with random draws
-eusilcM <- simEUSILC(eusilcS, upper = 200000, equidist = FALSE)
+eusilcM <- simEUSILC(eusilcS, upper = 200000, equidist = FALSE
+, nr_cpus = 1)
 summary(eusilcM)
 
 # two-step regression
-eusilcT <- simEUSILC(eusilcS, method = "twostep")
+eusilcT <- simEUSILC(eusilcS, method = "twostep", nr_cpus = 1)
 summary(eusilcT)
 }
 
