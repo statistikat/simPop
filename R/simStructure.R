@@ -131,7 +131,6 @@ simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), 
                                )
                         )                         
     } else if ( method == "distribution" ) {
-      hsizePH <- unlist(lapply(ls, function(l) spSample(NH[l], households[, l])))
       hsizePH <- unlist(lapply(ls, function(l) {
                  # spSample(NH[l], households[, l]) was removed and insides was adjusted
                  # length(p) was replaced with as.numeric(names(p))
