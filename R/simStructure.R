@@ -117,7 +117,6 @@ simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), 
       # fraction <- nrow(dataH)/nrow(dataPH)
       # boost <- 1/sqrt(fraction)
       # probs[probs < fraction] <- pmin(fraction, boost*probs[probs < fraction])
-      hsizePH <- unlist(lapply(ls, function(l) spSample(NH[l], probs[l,])))
       hsizePH <- unlist(lapply(ls, function(l) {
                 # spSample(NH[l], probs[l,]) was removed and insides was adjusted
                 # length(p) was replaced with as.numeric(names(p))
