@@ -145,7 +145,6 @@ simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), 
                                )
                         )
      }                         
-    }
     dataPH <- data.frame(hsize=as.factor(hsizePH), strata=factor(rep(ls, times=NH), levels=ls, ordered=is.ordered(strata)))
     households <- tableWt(dataPH)  # recompute number of households
   }
