@@ -118,6 +118,19 @@ simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), 
       # boost <- 1/sqrt(fraction)
       # probs[probs < fraction] <- pmin(fraction, boost*probs[probs < fraction])
       hsizePH <- unlist(lapply(ls, function(l) spSample(NH[l], probs[l,])))
+      hsizePH <- unlist(lapply(ls, function(l) {
+                # spSample(NH[l], probs[l,]) was removed and insides was adjusted
+                # length(p) was replaced with as.numeric(names(p))
+        n <-  NH[l]
+        p <- probs[l,]
+        
+        sample(as.numeric(names(p)),
+               size = n, 
+               replace = TRUE,
+               prob = p)
+      }
+                               )
+                        )                         
     } else if ( method == "distribution" ) {
       hsizePH <- unlist(lapply(ls, function(l) spSample(NH[l], households[, l])))
     }
@@ -154,11 +167,7 @@ simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), 
     n <- households[grid[i, 1], grid[i, 2]]
     w <- wH[split[[i]]]
     p <- w / sum(w)  # probability weights
-    if(length(p) == 0) {
-      integer(0)
-    } else {
-      spSample(n, p)
-    }
+    spSample(n, p)
   })
 
   ### generation of the household structure for the population
