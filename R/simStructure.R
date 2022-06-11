@@ -43,7 +43,7 @@
 #' class(eusilcP)
 #' eusilcP
 #' 
-simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), basicHHvars, seed=1) {
+simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), basicHHvars, seed=1, MaxNWts = 10000000) {
   if ( !class(dataS) == "dataObj" ) {
     stop("Error. Please provide the input sample in the required format.\n
       It must be an object of class 'dataObj' that can be created using function specifyInput()!\n")
@@ -107,7 +107,7 @@ simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), 
     if ( method == "multinom" ) {
       empty <- which(households == 0)
       # TODO: allow setting some more arguments
-      mod <- suppressWarnings(multinom(hsize~strata, weights=wH, data=dataH, trace=FALSE))
+      mod <- suppressWarnings(multinom(hsize~strata, weights=wH, data=dataH, trace=FALSE, MaxNWts = MaxNWts))
       newdata <- data.frame(strata=ls)
       rownames(newdata) <- ls
       probs <- as.matrix(predict(mod, newdata=newdata, type="probs"))
@@ -152,7 +152,11 @@ simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), 
     n <- households[grid[i, 1], grid[i, 2]]
     w <- wH[split[[i]]]
     p <- w / sum(w)  # probability weights
-    spSample(n, p)
+    if(length(p) == 0) {
+      integer(0)
+    } else {
+      spSample(n, p)
+    }
   })
 
   ### generation of the household structure for the population
