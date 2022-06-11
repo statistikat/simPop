@@ -132,6 +132,20 @@ simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), 
                         )                         
     } else if ( method == "distribution" ) {
       hsizePH <- unlist(lapply(ls, function(l) spSample(NH[l], households[, l])))
+      hsizePH <- unlist(lapply(ls, function(l) {
+                 # spSample(NH[l], households[, l]) was removed and insides was adjusted
+                 # length(p) was replaced with as.numeric(names(p))
+        n <-  NH[l]
+        p <- households[, l] 
+                   
+        sample(as.numeric(names(p)),
+               size = n, 
+               replace = TRUE,
+               prob = p)
+    }                           
+                               )
+                        )
+     }                         
     }
     dataPH <- data.frame(hsize=as.factor(hsizePH), strata=factor(rep(ls, times=NH), levels=ls, ordered=is.ordered(strata)))
     households <- tableWt(dataPH)  # recompute number of households
