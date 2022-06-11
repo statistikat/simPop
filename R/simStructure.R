@@ -21,6 +21,8 @@
 #' @param seed optional; an integer value to be used as the seed of the random
 #' number generator, or an integer vector containing the state of the random
 #' number generator to be restored.
+#' @param MaxNWts optional; an integer value for the multinom method  for controlling 
+#' the maximum number of weights.
 #' @return An object of class \code{simPopObj} containing the simulated
 #' population household structure as well as the underlying sample that was
 #' provided as input.
