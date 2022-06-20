@@ -81,22 +81,32 @@ population data needs to be simulated beforehand using
     <dl><dt>simPopObj</dt>
 <dd><p>a <code>simPopObj</code> containing population and household
 survey data as well as optionally margins in standardized format.</p></dd>
+
+
 <dt>relation</dt>
 <dd><p>a character string specifying the columns of <code>dataS</code>
 and <code>dataP</code>, respectively, that define the relationships between the
 household members.</p></dd>
+
+
 <dt>head</dt>
 <dd><p>a character string specifying the category of the variable given
 by <code>relation</code> that identifies the household head.</p></dd>
+
+
 <dt>direct</dt>
 <dd><p>a character string specifying categories of the variable given
 by <code>relation</code>. Simulated individuals with those categories directly
 inherit the values of the additional variables from the household head. The
 default is <code>NULL</code> such that no individuals directly inherit value from
 the household head.</p></dd>
+
+
 <dt>additional</dt>
 <dd><p>a character vector specifying additional categorical
 variables of <code>dataS</code> that should be simulated for the population data.</p></dd>
+
+
 <dt>limit</dt>
 <dd><p>this can be used to account for structural zeros. If only one
 additional variable is requested, a named list of lists should be supplied.
@@ -108,6 +118,8 @@ on combinations that contain the specified categories of the supplied
 predictors are set to 0. If more than one additional variable is requested,
 such a list of lists can be supplied for each variable as a component of yet
 another list, with the component names specifying the respective variables.</p></dd>
+
+
 <dt>censor</dt>
 <dd><p>this can be used to account for structural zeros. If only one
 additional variable is requested, a named list of lists or
@@ -119,21 +131,31 @@ set to 0 for the respective predictor levels. If more than one additional
 variable is requested, such a list of lists or <code>data.frame</code>s can be
 supplied for each variable as a component of yet another list, with the
 component names specifying the respective variables.</p></dd>
+
+
 <dt>maxit, MaxNWts</dt>
 <dd><p>control parameters to be passed to
 <code><a href="https://rdrr.io/pkg/nnet/man/multinom.html" class="external-link">nnet::multinom()</a></code> and <code><a href="https://rdrr.io/pkg/nnet/man/nnet.html" class="external-link">nnet::nnet()</a></code>. See the help file
 for <code><a href="https://rdrr.io/pkg/nnet/man/nnet.html" class="external-link">nnet::nnet()</a></code>.</p></dd>
+
+
 <dt>eps</dt>
 <dd><p>a small positive numeric value, or <code>NULL</code> (the default). In
 the former case, estimated probabilities smaller than this are assumed to
 result from structural zeros and are set to exactly 0.</p></dd>
+
+
 <dt>nr_cpus</dt>
 <dd><p>if specified, an integer number defining the number of cpus
 that should be used for parallel processing.</p></dd>
+
+
 <dt>seed</dt>
 <dd><p>optional; an integer value to be used as the seed of the random
 number generator, or an integer vector containing the state of the random
 number generator to be restored.</p></dd>
+
+
 <dt>regModel</dt>
 <dd><p>allows to specify the variables or model that is used when
 simulating additional categorical variables. The following choices are
@@ -149,8 +171,12 @@ will be used. Checks are performed that all required variables are available.
 If parameter <code>regModel</code> is <code>NULL</code>, only basic household variables are used
 in any case.</p></li>
 </ul></dd>
+
+
 <dt>verbose</dt>
 <dd><p>set to <code>TRUE</code> if additional print output should be shown.</p></dd>
+
+
 <dt>method</dt>
 <dd><p>a character string specifying the method to be used for
 simulating the additional categorical variables. Accepted values are</p><ul><li><p>"multinom": estimation of the conditional probabilities using
@@ -160,13 +186,18 @@ distributions</p></li>
 <li><p>"cforest": for using random forest (implementation in package party)</p></li>
 <li><p>"ranger": for using random forest (implementation in package ranger)</p></li>
 </ul></dd>
+
+
 <dt>by</dt>
 <dd><p>defining which variable to use as split up variable of the estimation. Defaults
 to the strata variable.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An object of class <a href="simPopObj-class.html">simPopObj</a> containing survey
+    
+
+<p>An object of class <a href="simPopObj-class.html">simPopObj</a> containing survey
 data as well as the simulated population data including the categorical
 variables specified by <code>additional</code>.</p>
     </div>
@@ -262,14 +293,14 @@ the function <code><a href="simStructure.html">simStructure()</a></code>.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ hhid    : int [1:226451] 1 2 3 4 5 6 7 8 9 10 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ hhsize  : int [1:226451] 1 1 1 1 1 1 1 1 1 1 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ region  : Factor w/ 10 levels "western","central",..: 1 1 1 1 1 1 1 1 1 1 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ age     : int [1:226451] 38 19 74 19 21 76 27 51 80 85 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ sex     : Factor w/ 2 levels "male","female": 2 1 1 1 1 1 1 1 2 1 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ age     : int [1:226451] 50 19 47 75 55 70 26 27 26 20 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ sex     : Factor w/ 2 levels "male","female": 1 1 2 2 1 2 2 2 1 2 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ relate  : Factor w/ 10 levels "head","spouse",..: 1 1 1 1 1 1 1 1 1 1 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ pid     : chr [1:226451] "1.1" "2.1" "3.1" "4.1" ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ weight  : num [1:226451] 1 1 1 1 1 1 1 1 1 1 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ nation  : Factor w/ 11 levels "ghanaian birth",..: 1 1 1 1 1 1 1 1 1 1 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ ethnic  : Factor w/ 9 levels "akan","all other tribes",..: 1 1 1 1 9 1 1 9 1 1 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ religion: Factor w/ 11 levels "catholic","anglican",..: 1 10 3 6 8 6 10 4 1 7 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ ethnic  : Factor w/ 9 levels "akan","all other tribes",..: 1 3 1 1 1 1 1 1 1 3 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ religion: Factor w/ 11 levels "catholic","anglican",..: 7 7 4 10 1 10 5 1 4 5 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, "sorted")= chr "hhid"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..@ hhid        : chr "hhid"</span>
@@ -294,7 +325,7 @@ the function <code><a href="simStructure.html">simStructure()</a></code>.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

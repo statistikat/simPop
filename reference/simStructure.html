@@ -67,6 +67,8 @@ data by resampling from survey data.</p>
     <dl><dt>dataS</dt>
 <dd><p>an object of class <code>dataObj</code> containing household survey
 data that is usually generated with <code><a href="specifyInput.html">specifyInput</a></code>.</p></dd>
+
+
 <dt>method</dt>
 <dd><p>a character string specifying the method to be used for
 simulating the household sizes.  Accepted values are <code>"direct"</code>
@@ -76,18 +78,25 @@ household size using the Horvitz-Thompson estimator), <code>"multinom"</code>
 multinomial log-linear model and random draws from the resulting
 distributions), or <code>"distribution"</code> (random draws from the observed
 conditional distributions within the strata).</p></dd>
+
+
 <dt>basicHHvars</dt>
 <dd><p>a character vector specifying important variables for the
 household structure that need to be available in <code>dataS</code>. Typically
 variables such as age or sex may be used.</p></dd>
+
+
 <dt>seed</dt>
 <dd><p>optional; an integer value to be used as the seed of the random
 number generator, or an integer vector containing the state of the random
 number generator to be restored.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An object of class <code>simPopObj</code> containing the simulated
+    
+
+<p>An object of class <code>simPopObj</code> containing the simulated
 population household structure as well as the underlying sample that was
 provided as input.</p>
     </div>
@@ -100,7 +109,7 @@ this happens in a session.</p>
     <div id="references">
     <h2>References</h2>
     <p>M. Templ, B. Meindl, A. Kowarik, A. Alfons, O. Dupriez (2017) Simulation of Synthetic Populations for Survey Data Considering Auxiliary
-Information. <em>Journal of Statistical Survey</em>, <strong>79</strong> (10), 1--38. doi: <a href="https://doi.org/10.18637/jss.v079.i10" class="external-link">10.18637/jss.v079.i10</a></p>
+Information. <em>Journal of Statistical Survey</em>, <strong>79</strong> (10), 1--38. <a href="https://doi.org/10.18637/jss.v079.i10" class="external-link">doi:10.18637/jss.v079.i10</a></p>
     </div>
     <div id="see-also">
     <h2>See also</h2>
@@ -149,7 +158,7 @@ Information. <em>Journal of Statistical Survey</em>, <strong>79</strong> (10), 1
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

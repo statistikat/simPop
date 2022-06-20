@@ -70,31 +70,46 @@ useful for writing custom wrapper functions such as <code><a href="simEUSILC.htm
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>a numeric vector to be categorized.</p></dd>
+
+
 <dt>weights</dt>
 <dd><p>an optional numeric vector containing sample weights.</p></dd>
+
+
 <dt>zeros</dt>
 <dd><p>a logical indicating whether <code>x</code> is semi-continuous, i.e.,
 contains a considerable amount of zeros. See “Details” on how this
 affects the behavior of the function.</p></dd>
+
+
 <dt>lower, upper</dt>
 <dd><p>optional numeric values specifying lower and upper bounds
 other than minimum and maximum of <code>x</code>, respectively.</p></dd>
+
+
 <dt>equidist</dt>
 <dd><p>a logical indicating whether the (positive) break points
 should be equidistant or whether there should be refinements in the lower
 and upper tail (see “Details”).</p></dd>
+
+
 <dt>probs</dt>
 <dd><p>a numeric vector of probabilities with values in \([0, 1]\)
 giving quantiles to be used as (positive) break points.  If supplied, this
 is preferred over <code>equidist</code>.</p></dd>
+
+
 <dt>strata</dt>
 <dd><p>an optional vector specifying a strata variable (e.g household ids).
 if specified, the mean of <code>x</code> (and also of <code>weights</code> if specified) is
 computed within each strata before calculating the breaks.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A numeric vector of break points.</p>
+    
+
+<p>A numeric vector of break points.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -156,7 +171,7 @@ respectively, if these are specified.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

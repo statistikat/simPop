@@ -69,18 +69,26 @@ categorical conditioning variables need to be simulated beforehand.</p>
     <h2>Arguments</h2>
     <dl><dt>simPopObj</dt>
 <dd><p>a <code><a href="simPopObj-class.html">simPopObj</a></code>-object.</p></dd>
+
+
 <dt>total</dt>
 <dd><p>a character string specifying the continuous variable of dataP
 that should be split into components. Currently, only one variable can be
 split at a time.</p></dd>
+
+
 <dt>components</dt>
 <dd><p>a character vector specifying the components in
 <code>dataS</code> that should be simulated for the population data.</p></dd>
+
+
 <dt>conditional</dt>
 <dd><p>an optional character vector specifying categorical
 conditioning variables for resampling. The fractions occurring in
 <code>dataS</code> are then drawn from the respective subsets defined by these
 variables.</p></dd>
+
+
 <dt>replaceEmpty</dt>
 <dd><p>a character string; if <code>conditional</code> specifies at
 least two conditioning variables, this determines how replacement cells for
@@ -91,14 +99,19 @@ distance in the other conditioning variables. If no such cells exist,
 replacement cells with minimum overall Manhattan distance are selected. The
 latter is always done if this is <code>"min"</code> or only one conditioning
 variable is used.</p></dd>
+
+
 <dt>seed</dt>
 <dd><p>optional; an integer value to be used as the seed of the random
 number generator, or an integer vector containing the state of the random
 number generator to be restored.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An object of class <code><a href="simPopObj-class.html">simPopObj</a></code> containing survey
+    
+
+<p>An object of class <code><a href="simPopObj-class.html">simPopObj</a></code> containing survey
 data as well as the simulated population data including the components of
 the continuous variable specified by <code>total</code> and <code>components</code>.</p>
     </div>
@@ -112,9 +125,9 @@ the functions <code><a href="simStructure.html">simStructure</a></code>, <code><
     <div id="references">
     <h2>References</h2>
     <p>B. Meindl, M. Templ, A. Kowarik, O. Dupriez (2017) Simulation of Synthetic Populations for Survey Data Considering Auxiliary
-Information. <em>Journal of Statistical Survey</em>, <strong>79</strong> (10), 1--38. doi: <a href="https://doi.org/10.18637/jss.v079.i10" class="external-link">10.18637/jss.v079.i10</a></p>
+Information. <em>Journal of Statistical Survey</em>, <strong>79</strong> (10), 1--38. <a href="https://doi.org/10.18637/jss.v079.i10" class="external-link">doi:10.18637/jss.v079.i10</a></p>
 <p>A. Alfons, M. Templ (2011) Simulation of close-to-reality population data for household surveys with application to EU-SILC. 
-<em>Statistical Methods &amp; Applications</em>, <strong>20</strong> (3), 383--407. doi: <a href="https://doi.org/10.1080/02664763.2013.859237" class="external-link">10.1080/02664763.2013.859237</a></p>
+<em>Statistical Methods &amp; Applications</em>, <strong>20</strong> (3), 383--407. <a href="https://doi.org/10.1080/02664763.2013.859237" class="external-link">doi:10.1080/02664763.2013.859237</a></p>
     </div>
     <div id="see-also">
     <h2>See also</h2>
@@ -174,7 +187,7 @@ Information. <em>Journal of Statistical Survey</em>, <strong>79</strong> (10), 1
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

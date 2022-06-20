@@ -84,40 +84,59 @@ account sample weights.</p>
     <dl><dt>inp</dt>
 <dd><p>an object of class <code><a href="simPopObj-class.html">simPopObj</a></code> containing
 survey sample and synthetic population data.</p></dd>
+
+
 <dt>x</dt>
 <dd><p>a character vector specifying the columns of data available in the
 sample and the population (specified in input object 'inp') to be plotted.</p></dd>
+
+
 <dt>cond</dt>
 <dd><p>an optional character vector (of length 1, if used) specifying
 the conditioning variable.</p></dd>
+
+
 <dt>horizontal</dt>
 <dd><p>a logical indicating whether the boxes should be
 horizontal or vertical.</p></dd>
+
+
 <dt>coef</dt>
 <dd><p>a numeric value that determines the extension of the whiskers.</p></dd>
+
+
 <dt>zeros</dt>
 <dd><p>a logical indicating whether the variables specified by
 <code>x</code> are semi-continuous, i.e., contain a considerable amount of zeros.
 If <code>TRUE</code>, the box widths correspond to the proportion of non-zero data
 points and the (weighted) box plot statistics are computed for these
 non-zero data points only.</p></dd>
+
+
 <dt>minRatio</dt>
 <dd><p>a numeric value in \((0,1]\); if <code>zeros</code> is
 <code>TRUE</code>, the boxes may become unreadable for a large proportion of
 zeros. In such a case, this can be used to specify a minimum ratio for the
 box widths. Variable box widths for semi-continuous variables can be
 suppressed by setting this value to 1.</p></dd>
+
+
 <dt>do.out</dt>
 <dd><p>a logical indicating whether data points that lie beyond the
 extremes of the whiskers should be plotted. Note that this is <code>FALSE</code>
 by default.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>further arguments to be passed to
 <code><a href="https://rdrr.io/pkg/lattice/man/xyplot.html" class="external-link">bwplot</a></code>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An object of class <code>"trellis"</code>, as returned by
+    
+
+<p>An object of class <code>"trellis"</code>, as returned by
 <code><a href="https://rdrr.io/pkg/lattice/man/xyplot.html" class="external-link">bwplot</a></code>.</p>
     </div>
     <div id="details">
@@ -128,7 +147,7 @@ extracted from the input object <code>inp</code>.</p>
     <div id="references">
     <h2>References</h2>
     <p>A. Alfons, M. Templ (2011) Simulation of close-to-reality population data for household surveys with application to EU-SILC. 
-<em>Statistical Methods &amp; Applications</em>, <strong>20</strong> (3), 383--407. doi: <a href="https://doi.org/10.1007/s10260-011-0163-2" class="external-link">10.1007/s10260-011-0163-2</a></p>
+<em>Statistical Methods &amp; Applications</em>, <strong>20</strong> (3), 383--407. <a href="https://doi.org/10.1007/s10260-011-0163-2" class="external-link">doi:10.1007/s10260-011-0163-2</a></p>
     </div>
     <div id="see-also">
     <h2>See also</h2>
@@ -184,7 +203,7 @@ extracted from the input object <code>inp</code>.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

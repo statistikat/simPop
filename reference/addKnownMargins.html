@@ -60,15 +60,20 @@ to an object of class <code><a href="simPopObj-class.html">simPopObj</a></code>.
     <dl><dt>inp</dt>
 <dd><p>a <code>simPopObj</code> containing population and household survey
 data as well as optionally margins in standardized format.</p></dd>
+
+
 <dt>margins</dt>
 <dd><p>a <code>data.frame</code> containing for a combination of unique
 variable levels for n-variables the number of known occurences in the
 population. The numbers must be listed in the last column of data.frame
 'margins' while the characteristics must be listed in the first 'n' columns.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>an object of class <code><a href="simPopObj-class.html">simPopObj</a></code> with updated slot
+    
+
+<p>an object of class <code><a href="simPopObj-class.html">simPopObj</a></code> with updated slot
 'table'.</p>
     </div>
     <div id="details">
@@ -83,7 +88,7 @@ households.</p>
     <div id="references">
     <h2>References</h2>
     <p>M. Templ, B. Meindl, A. Kowarik, A. Alfons, O. Dupriez (2017) Simulation of Synthetic Populations for Survey Data Considering Auxiliary
-Information. <em>Journal of Statistical Survey</em>, <strong>79</strong> (10), 1--38. doi: <a href="https://doi.org/10.18637/jss.v079.i10" class="external-link">10.18637/jss.v079.i10</a></p>
+Information. <em>Journal of Statistical Survey</em>, <strong>79</strong> (10), 1--38. <a href="https://doi.org/10.18637/jss.v079.i10" class="external-link">doi:10.18637/jss.v079.i10</a></p>
     </div>
     <div id="author">
     <h2>Author</h2>
@@ -146,12 +151,12 @@ Information. <em>Journal of Statistical Survey</em>, <strong>79</strong> (10), 1
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ db030 : int [1:81838] 1 2 3 4 5 6 7 8 9 10 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ hsize : int [1:81838] 1 1 1 1 1 1 1 1 1 1 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ db040 : Factor w/ 9 levels "Burgenland","Carinthia",..: 1 1 1 1 1 1 1 1 1 1 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ age   : int [1:81838] 46 50 78 43 78 53 65 21 37 65 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ rb090 : Factor w/ 2 levels "male","female": 1 2 2 1 2 2 2 2 1 2 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ age   : int [1:81838] 43 70 66 21 21 70 65 75 85 79 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ rb090 : Factor w/ 2 levels "male","female": 1 1 1 2 2 1 2 1 2 2 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ pid   : chr [1:81838] "1.1" "2.1" "3.1" "4.1" ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ weight: num [1:81838] 1 1 1 1 1 1 1 1 1 1 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ pl030 : Factor w/ 7 levels "1","2","3","4",..: 1 7 5 1 5 7 5 4 6 7 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ pb220a: Factor w/ 3 levels "AT","EU","Other": 1 1 1 1 1 1 2 1 1 1 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ pl030 : Factor w/ 7 levels "1","2","3","4",..: 1 5 5 1 1 5 7 5 5 5 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ pb220a: Factor w/ 3 levels "AT","EU","Other": 1 1 1 1 1 1 1 1 1 2 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, "sorted")= chr "db030"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..@ hhid        : chr "db030"</span>
@@ -176,7 +181,7 @@ Information. <em>Journal of Statistical Survey</em>, <strong>79</strong> (10), 1
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

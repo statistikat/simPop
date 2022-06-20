@@ -59,39 +59,52 @@ continuous or semi-continuous variables, taking into account sample weights.</p>
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>a numeric vector.</p></dd>
+
+
 <dt>weights</dt>
 <dd><p>an optional numeric vector containing sample weights.</p></dd>
+
+
 <dt>coef</dt>
 <dd><p>a numeric value that determines the extension of the whiskers.</p></dd>
+
+
 <dt>zeros</dt>
 <dd><p>a logical indicating whether the variable specified by
 <code>additional</code> is semi-continuous, i.e., contains a considerable amount
 of zeros.  If <code>TRUE</code>, the (weighted) box plot statistics are computed
 for the non-zero data points only and the number of zeros is returned, too.</p></dd>
+
+
 <dt>do.out</dt>
 <dd><p>a logical indicating whether data points that lie beyond the
 extremes of the whiskers should be returned.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A list of class <code>"spBwplotStats"</code> with the following
+    
+
+<p>A list of class <code>"spBwplotStats"</code> with the following
 components:</p>
 <dl><dt>stats</dt>
 <dd><p>A vector of length 5 containing the (weighted)
 statistics for the construction of a box plot.</p></dd>
-<dt>n</dt>
+ <dt>n</dt>
 <dd><p>if <code>weights</code>
 is <code>NULL</code>, the number of non-missing and, if <code>zeros</code> is
 <code>TRUE</code>, non-zero data points.  Otherwise the sum of the weights of the
 corresponding points.</p></dd>
-<dt>nzero</dt>
+ <dt>nzero</dt>
 <dd><p>if <code>zeros</code> is <code>TRUE</code> and
 <code>weights</code> is <code>NULL</code>, the number of zeros.  If <code>zeros</code> is
 <code>TRUE</code> and <code>weights</code> is not <code>NULL</code>, the sum of the weights of
 the zeros.  If <code>zeros</code> is not <code>TRUE</code>, this is <code>NULL</code>.</p></dd>
+
 <dt>out</dt>
 <dd><p>if <code>do.out</code>, the values of any data points that lie beyond
 the extremes of the whiskers.</p></dd>
+
 </dl></div>
     <div id="details">
     <h2>Details</h2>
@@ -153,7 +166,7 @@ plots (not considering semi-continuous variables).</p></div>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

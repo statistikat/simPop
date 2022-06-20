@@ -79,9 +79,13 @@ individual level constraints.</p>
 <dd><p>a <code>data.table</code> containing household ids (optionally), base
 weights (optionally), household and/or personal level variables (numerical
 or categorical) that should be fitted.</p></dd>
+
+
 <dt>hid</dt>
 <dd><p>name of the column containing the household-ids
 within <code>dat</code> or NULL if such a variable does not exist.</p></dd>
+
+
 <dt>conP</dt>
 <dd><p>list or (partly) named list defining the constraints on person
 level.  The list elements are contingency tables in array representation
@@ -89,6 +93,8 @@ with dimnames corresponding to the names of the relevant calibration
 variables in <code>dat</code>. If a numerical variable is to be calibrated, the
 respective list element has to be named with the name of that numerical
 variable. Otherwise the list element shoud NOT be named.</p></dd>
+
+
 <dt>conH</dt>
 <dd><p>list or (partly) named list defining the constraints on
 household level.  The list elements are contingency tables in array
@@ -96,61 +102,93 @@ representation with dimnames corresponding to the names of the relevant
 calibration variables in <code>dat</code>. If a numerical variable is to be
 calibrated, the respective list element has to be named with the name of
 that numerical variable. Otherwise the list element shoud NOT be named.</p></dd>
+
+
 <dt>epsP</dt>
 <dd><p>numeric value or list (of numeric values and/or arrays)
 specifying the convergence limit(s) for <code>conP</code>. The list can contain
 numeric values and/or arrays which must appear in the same order as the
 corresponding constraints in <code>conP</code>. Also, an array must have the same
 dimensions and dimnames as the corresponding constraint in <code>conP</code>.</p></dd>
+
+
 <dt>epsH</dt>
 <dd><p>numeric value or list (of numeric values and/or arrays)
 specifying the convergence limit(s) for <code>conH</code>. The list can contain
 numeric values and/or arrays which must appear in the same order as the
 corresponding constraints in <code>conH</code>. Also, an array must have the same
 dimensions and dimnames as the corresponding constraint in <code>conH</code>.</p></dd>
+
+
 <dt>verbose</dt>
 <dd><p>if TRUE, some progress information will be printed.</p></dd>
+
+
 <dt>w</dt>
 <dd><p>name if the column containing the base
 weights within <code>dat</code> or NULL if such a variable does not exist. In the
 latter case, every observation in <code>dat</code> is assigned a starting weight
 of 1.</p></dd>
+
+
 <dt>bound</dt>
 <dd><p>numeric value specifying the multiplier for determining the
 weight trimming boundary if the change of the base weights should be
 restricted, i.e. if the weights should stay between 1/<code>bound</code>*<code>w</code>
 and <code>bound</code>*<code>w</code>.</p></dd>
+
+
 <dt>maxIter</dt>
 <dd><p>numeric value specifying the maximum number of iterations
 that should be performed.</p></dd>
+
+
 <dt>meanHH</dt>
 <dd><p>if TRUE, every person in a household is assigned the mean of
 the person weights corresponding to the household. If <code>"geometric"</code>, the geometric mean
 is used rather than the arithmetic mean.</p></dd>
+
+
 <dt>allPthenH</dt>
 <dd><p>if TRUE, all the person level calibration steps are performed before the houshold level calibration steps (and <code>meanHH</code>, if specified).
 If FALSE, the houshold level calibration steps (and <code>meanHH</code>, if specified) are performed after everey person level calibration step.
 This can lead to better convergence properties in certain cases but also means that the total number of calibration steps is increased.</p></dd>
+
+
 <dt>returnNA</dt>
 <dd><p>if TRUE, the calibrated weight will be set to NA in case of no convergence.</p></dd>
+
+
 <dt>looseH</dt>
 <dd><p>if FALSE, the actual constraints <code>conH</code> are used for calibrating all the hh weights.
 If TRUE, only the weights for which the lower and upper thresholds defined by <code>conH</code> and <code>epsH</code> are exceeded
 are calibrated. They are however not calibrated against the actual constraints <code>conH</code> but against
 these lower and upper thresholds, i.e. <code>conH</code>-<code>conH</code>*<code>epsH</code> and <code>conH</code>+<code>conH</code>*<code>epsH</code>.</p></dd>
+
+
 <dt>numericalWeighting</dt>
 <dd><p>If NULL computeLinear from the pacakge survey sd will be used.</p></dd>
+
+
 <dt>check_hh_vars</dt>
 <dd><p>If <code>TRUE</code> check for non-unique values inside of a household for variables in
 household constraints</p></dd>
+
+
 <dt>conversion_messages</dt>
 <dd><p>show a message, if inputs need to be reformatted. This can be useful for speed
 optimizations if ipu2 is called several times with similar inputs (for example bootstrapping)</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>The function will return the input data <code>dat</code> with the
-calibrated weights <code>calibWeight</code> as an additional column as well as attributes. If no convergence has been reached in <code>maxIter</code>steps, and <code>returnNA</code> is <code>TRUE</code> (the default), the column <code>calibWeights</code> will only consist of <code>NA</code>s. The attributes of the table are
+    
+
+<p>The function will return the input data <code>dat</code> with the
+calibrated weights <code>calibWeight</code> as an additional column as well as attributes. If no convergence has been reached in <code>maxIter</code></p>
+
+
+<p>steps, and <code>returnNA</code> is <code>TRUE</code> (the default), the column <code>calibWeights</code> will only consist of <code>NA</code>s. The attributes of the table are
 attributes derived from the <code>data.table</code> class as well as the following.</p><table class="table table"><tr><td><code>converged</code></td><td>Did the algorithm converge in <code>maxIter</code> steps?</td></tr><tr><td><code>iterations</code></td><td>The number of iterations performed.</td></tr><tr><td><code>conP</code>, <code>conH</code>, <code>epsP</code>, <code>epsH</code></td><td>See Arguments.</td></tr><tr><td><code>conP_adj</code>, <code>conH_adj</code></td><td>Adjusted versions of <code>conP</code> and <code>conH</code></td></tr><tr><td><code>formP</code>, <code>formH</code></td><td>Formulas that were used to calculate <code>conP_adj</code> and <code>conH_adj</code> based on the output table.</td></tr></table></div>
     <div id="details">
     <h2>Details</h2>
@@ -508,7 +546,7 @@ Setting <code>check_hh_vars</code> to <code>FALSE</code> can also incease the pe
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

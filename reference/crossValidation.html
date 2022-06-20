@@ -71,23 +71,37 @@ of the population data needs to be simulated beforehand.</p>
     <dl><dt>simPopObj</dt>
 <dd><p>a <code>simPopObj</code> containing population and household
 survey data as well as optionally margins in standardized format.</p></dd>
+
+
 <dt>additionals</dt>
 <dd><p>a character vector specifying additional categorical
 variables available in the sample object of <code>simPopObj</code> that should be
 simulated for the population data.</p></dd>
+
+
 <dt>hyper_param_grid</dt>
 <dd><p>a grid which can contain model specific parameters which will be passed onto the function call for the respective model.</p></dd>
+
+
 <dt>fold</dt>
 <dd><p>the number of k in k-fold crossvalidation</p></dd>
+
+
 <dt>method</dt>
 <dd><p>a character string specifying the method to be used for
 simulating the additional categorical variables. Accepted value at the moment
 only 
 <code>"xgboost"</code>  for using xgboost (implementation in package xgboost)</p></dd>
+
+
 <dt>type</dt>
 <dd><p>currently only "categorical" is implemented</p></dd>
+
+
 <dt>by</dt>
 <dd><p>defining which variable to use as split up variable of the estimation. Defaults to the strata variable.</p></dd>
+
+
 <dt>regModel</dt>
 <dd><p>allows to specify the variables or model that is used when
 simulating additional categorical variables. The following choices are
@@ -105,15 +119,22 @@ performed that all required variables are available.</p></li>
 'distribution' is used, it is only possible to specify a vector of length
 one containing one of the choices described above.  If parameter 'regModel'
 is NULL, only basic household variables are used in any case.</p></dd>
+
+
 <dt>nr_cpus</dt>
 <dd><p>if specified, an integer number defining the number of cpus
 that should be used for parallel processing.</p></dd>
+
+
 <dt>verbose</dt>
 <dd><p>set to TRUE if additional print output should be shown.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An object of class <code><a href="simPopObj-class.html">simPopObj</a></code> containing survey
+    
+
+<p>An object of class <code><a href="simPopObj-class.html">simPopObj</a></code> containing survey
 data as well as the simulated population data including the categorical
 variables specified by argument <code>additional</code>.</p>
     </div>
@@ -183,7 +204,7 @@ the function <code><a href="simStructure.html">simStructure</a></code>.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>
