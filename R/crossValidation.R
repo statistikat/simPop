@@ -25,7 +25,7 @@ cross_validation <- function(synth_pop, fold = 1, grid,metric, sim, return_best 
   fun_args <- as.list(formals(sim))
   fun_args$simPopObj <- synth_pop
   
-  if(class(metric) != "function"){
+  if(!inherits(metric, "function") ){
     stop("metric is not a function, please provide a function")
   }
   
@@ -186,7 +186,7 @@ crossValidation <- function(simPopObj, additionals, hyper_param_grid,
     stop(paste0("Parameter type should be categorical, is ", type))
   }
   
-  if(class(fold) == "numeric"){
+  if(inherits(fold, "numeric")){
     if(fold <= 0){
       stop(paste0("Parameter fold should be greater than 0, is ", fold))
     }

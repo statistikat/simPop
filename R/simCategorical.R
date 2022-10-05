@@ -306,8 +306,8 @@ simCategorical <- function(simPopObj, additional,
     stop("variables already exist in the population!\n")
   }
 
-  if ( (length(regModel)==1|class(regModel)=="formula") & length(additional)>1 ) {
-    if(class(regModel)=="formula"){
+  if ( (length(regModel)==1|inherits(regModel, "formula")) & length(additional)>1 ) {
+    if(inherits(regModel, "formula")){
       regModelL <- list()
       for(i in seq_along(additional)){
         regModelL[[i]] <- regModel
@@ -318,7 +318,7 @@ simCategorical <- function(simPopObj, additional,
     }
   }
   if (!is.null(regModel) ) {
-    if ( class(regModel)=="formula" ) {
+    if ( inherits(regModel, "formula") ) {
       regModel <- list(regModel)
     }
   }

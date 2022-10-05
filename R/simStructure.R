@@ -46,7 +46,7 @@
 #' eusilcP
 #' 
 simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), basicHHvars, seed=1, MaxNWts = 10000000) {
-  if ( !class(dataS) == "dataObj" ) {
+  if ( !inherits(dataS, "dataObj" ) ){
     stop("Error. Please provide the input sample in the required format.\n
       It must be an object of class 'dataObj' that can be created using function specifyInput()!\n")
   }

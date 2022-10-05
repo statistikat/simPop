@@ -35,12 +35,12 @@
 #' inp
 specifyInput <- function(data, hhid, hhsize=NULL, pid=NULL, weight=NULL,
                          strata=NULL, population=FALSE) {
-  if ( !class(hhid)=="character" | length(hhid) != 1 | is.na(match(hhid, colnames(data)))) {
+  if ( !inherits(hhid, "character") | length(hhid) != 1 | is.na(match(hhid, colnames(data)))) {
     stop("hhid must be a character defining the variable holding household ids and must be of length 1!\n")
   }
   ## check if weight var is defined well for sample data
   if(!population){
-    if ( !class(weight)=="character" | length(weight) != 1 | is.na(match(weight, colnames(data)))) {
+    if ( !inherits(weight, "character") | length(weight) != 1 | is.na(match(weight, colnames(data)))) {
       stop("weight must be a character defining the variable holding sampling weights and must be of length 1!\n")
     }
   }else{ # for population data no weight car is accepted
@@ -48,10 +48,10 @@ specifyInput <- function(data, hhid, hhsize=NULL, pid=NULL, weight=NULL,
       stop("weight must not be defined for a population")
   }
   if ( !is.null(strata) ) {
-    if ( !class(strata)=="character" | length(strata) != 1 | is.na(match(strata, colnames(data)))) {
+    if ( !inherits(strata, "character") | length(strata) != 1 | is.na(match(strata, colnames(data)))) {
       stop("strata must be a character defining the variable holding information on stratas and must be of length 1!\n")
     }
-    if(!"factor"%in%class(data[[strata]])){
+    if(!inherits(data[[strata]], "factor")){
       stop(strata," is not a factor variable as needed for a strata variable.")
     }
   }
@@ -60,7 +60,7 @@ specifyInput <- function(data, hhid, hhsize=NULL, pid=NULL, weight=NULL,
   setkeyv(data, hhid)
 
   if ( !is.null(hhsize) ) {
-    if ( !class(hhsize)=="character" | length(hhsize) != 1 | is.na(match(hhsize, colnames(data)))) {
+    if ( !inherits(hhsize, "character") | length(hhsize) != 1 | is.na(match(hhsize, colnames(data)))) {
       stop("strata must be a character defining the variable holding information on stratas and must be of length 1!\n")
     }
   } else {
@@ -70,7 +70,7 @@ specifyInput <- function(data, hhid, hhsize=NULL, pid=NULL, weight=NULL,
     data <- data[sizes]
   }
   if ( !is.null(pid) ) {
-    if ( !class(pid)=="character" | length(pid) != 1 | is.na(match(pid, colnames(data)))) {
+    if ( !inherits(pid, "character") | length(pid) != 1 | is.na(match(pid, colnames(data)))) {
       stop("strata must be a character defining the variable holding information on stratas and must be of length 1!\n")
     }
   } else {

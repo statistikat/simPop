@@ -233,7 +233,7 @@ setClass(
 #' (manageSimPopObj(simPopObj, var="age", sample=FALSE, set=FALSE))
 #' (manageSimPopObj(simPopObj, var="age", sample=TRUE, set=FALSE))
 manageSimPopObj <- function(x, var, sample=FALSE, set=FALSE, values=NULL) {
-  if ( class(x) != "simPopObj" ) {
+  if ( !inherits(x,"simPopObj") ) {
     stop("wrong input of argument 'x' (needs to be of class 'simPopObj')!\n")
   }
   if ( length(var) != 1 ) {

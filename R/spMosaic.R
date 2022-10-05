@@ -48,7 +48,7 @@
 #'   labeling=labeling_border(abbreviate=c(db040=TRUE)))
 #'
 spMosaic <- function(x, method = c("split", "color"), ...) {
-  if ( !class(x) == "spTable" ) {
+  if ( !inherits(x, "spTable" ) ){
     stop("input argument 'x' must be of class 'spTable'!\n")
   }
   method <- match.arg(method)

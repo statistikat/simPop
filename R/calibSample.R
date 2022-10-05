@@ -87,17 +87,17 @@ setGeneric("calibSample", function(inp, totals, ...) {
 
 #' @export
 setMethod("calibSample", c(inp="df_or_dataObj_or_simPopObj", totals="dataFrame_or_Table"), function(inp, totals, ...) {
-  if ( class(inp) == "data.frame" ) {
+  if ( !inherits(inp,"data.table") & inherits(inp, "data.frame") ) {
     samp <- data.table(inp)
   }
-  if ( class(inp) == "dataObj" ) {
+  if ( inherits(inp, "dataObj")) {
     samp <- inp@data
   }
-  if ( class(inp) == "simPopObj" ) {
+  if ( inherits(inp, "simPopObj" ) ) {
     samp <- inp@sample@data
   }
 
-  if ( class(totals) == "table" ) {
+  if ( inherits(totals, "table") ) {
     totals <- as.data.frame(totals)
   }
 
@@ -174,13 +174,13 @@ setMethod("calibSample", c(inp="df_or_dataObj_or_simPopObj", totals="dataFrame_o
   freqs <- freqs[ii]
 
   # initial sample weights
-  if ( class(inp) == "dataObj" ) {
+  if ( inherits(inp, "dataObj" ) ) {
     w <- samp[[inp@weight]]
   }
-  if ( class(inp) == "simPopObj" ) {
+  if ( inherits(inp, "simPopObj" ) ) {
     w <- samp[[inp@sample@weight]]
   }
-  if ( class(inp) == "data.frame" ) {
+  if ( inherits(inp, "data.frame" ) ) {
     if ( !is.null(args$w) ) {
       w <- args$w
       if ( length(w) != nrow(samp) ) {

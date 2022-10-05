@@ -31,7 +31,7 @@
 #' class(res)
 #' res
 spTable <- function(inp, select) {
-  if ( class(inp) != "simPopObj") {
+  if ( !inherits(inp, "simPopObj") ){
     stop("wrong input! Argument 'inp' must be of class 'simPopObj'!\n")
   }
   dataS <- inp@sample@data

@@ -60,7 +60,6 @@
 #' eusilcM <- simContinuous(simPop, additional="netIncome",
 #'   regModel  = ~rb090+hsize+pl030+pb220a+hsize,
 #'   upper=200000, equidist=FALSE, nr_cpus=1)
-#' class(eusilcM)
 #'
 #' # plot results
 #' spBwplot(eusilcM, x="netIncome", cond=NULL)
@@ -72,7 +71,7 @@ spBwplot <- function(inp, x, cond = NULL, horizontal = TRUE,
                      do.out = FALSE, ...) {
 
   ## initializations
-  if ( !class(inp) == "simPopObj" ) {
+  if ( !inherits(inp, "simPopObj" ) ){
     stop("input argument 'inp' must be of class 'simPopObj'!\n")
   }
 

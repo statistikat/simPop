@@ -469,9 +469,9 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
   if (any(additional %in% colnames(data_pop))) {
     stop("variables already exist in the population!\n")
   }
-  if ((length(regModel) == 1 | class(regModel) == "formula") &
+  if ((length(regModel) == 1 | inherits(regModel, "formula") )&
       length(additional) > 1) {
-    if (class(regModel) == "formula") {
+    if (inherits(regModel, "formula")) {
       regModelL <- list()
       for (i in seq_along(additional)) {
         regModelL[[i]] <- regModel
@@ -480,7 +480,7 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
     } else if (regModel %in% c("available", "basic")) {
       regModel <- rep(regModel, length(additional))
     }
-  } else if (class(regModel) == "formula") {
+  } else if (inherits(regModel, "formula")) {
     regModelL <- list()
     for (i in seq_along(additional)) {
       regModelL[[i]] <- regModel

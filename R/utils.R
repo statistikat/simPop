@@ -39,7 +39,7 @@ checkBreaks <- function(x) {
 ## check whether selected columns of a data frame are factors
 # TODO: add argument 'num': a logical indicating whether numeric variables other than integers should be converted to factors
 checkFactor <- function(x, select) {
-  if ( "data.table" %in% class(x) ) {
+  if ( inherits(x, "data.table") ) {
     convert <- select[sapply(x[, select, with=F], function(x) !is.factor(x))]
     if ( length(convert) > 0 ) {
       x[,(convert):=lapply(.SD, as.factor),.SDcols=convert]
@@ -315,7 +315,7 @@ regressionInput <- function(obj, additional, regModel) {
   cn_pop <- colnames(popData(obj))
   cn_samp <- colnames(sampleData(obj))
 
-  if ( length(additional) == 1 & class(regModel)=="formula" ) {
+  if ( length(additional) == 1 & inherits(regModel,"formula") ) {
     regModel <- list(regModel)
   }
 
@@ -323,14 +323,14 @@ regressionInput <- function(obj, additional, regModel) {
     stop("makeRegInput:: dimensions do not match!\n")
   }
 
-  if ( length(additional) == 1 & class(regModel)=="formula" ) {
+  if ( length(additional) == 1 & inherits(regModel,"formula") ) {
     regModel <- list(regModel)
   }
 
   regInput <- list(); length(regInput) <- length(additional)
   names(regInput) <- additional
   for ( i in seq_along(additional) ) {
-    if ( class(regModel[[i]]) == "formula" ) {
+    if ( inherits(regModel[[i]], "formula" ) ){
       # check the formula
       fmt <- paste0(as.character(regModel[[i]]),collapse="")
       if ( substr(fmt,1,1)=="~" ) {

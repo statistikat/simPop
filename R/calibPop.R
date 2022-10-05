@@ -77,7 +77,7 @@ checkTables <- function(tabs,data,split=NULL,verbose=FALSE,namesTabs="pers"){
     return(NULL)
   }
   
-  if(!"list"%in%class(tabs)){
+  if(!inherits(tabs, "list")){
     tabs <- list(tabs)
   }
   
@@ -85,7 +85,7 @@ checkTables <- function(tabs,data,split=NULL,verbose=FALSE,namesTabs="pers"){
   
   tabs <- lapply(tabs,function(z){
     
-    if(!any(class(z)%in%c("data.frame","data.table"))){
+    if(!inherits(z, "data.frame")){
       stop("Each contingency Table must bei either a 'data.frame' or 'data.table'")  
     }
     setDT(z)
@@ -361,7 +361,7 @@ calibPop <- function(inp, split=NULL, splitUpper=NULL, temp = 1, epsP.factor = 0
   if(verbose){
     t0 <- Sys.time()
   }
-  if ( class(inp) != "simPopObj" ) {
+  if ( !inherits(inp, "simPopObj" ) ) {
     stop("argument 'inp' must be of class 'simPopObj'!\n")
   }
 
