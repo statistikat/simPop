@@ -51,7 +51,7 @@ weights: an optional numeric vector containing sample weights.
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">simPop</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.1.0</span>
       </span>
     </div>
 
@@ -111,13 +111,13 @@ is <code>TRUE</code>.</p></li>
 </ul></div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">meanWt</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span>
-
-<span class="fu">varWt</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span>
-
-<span class="fu">covWt</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span>
-
-<span class="fu">corWt</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">meanWt</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">varWt</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">covWt</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">corWt</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -172,23 +172,23 @@ used.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">meanWt</span><span class="op">(</span><span class="va">eusilcS</span><span class="op">$</span><span class="va">netIncome</span>, weights<span class="op">=</span><span class="va">eusilcS</span><span class="op">$</span><span class="va">rb050</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">meanWt</span><span class="op">(</span><span class="va">eusilcS</span><span class="op">$</span><span class="va">netIncome</span>, weights<span class="op">=</span><span class="va">eusilcS</span><span class="op">$</span><span class="va">rb050</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 15173.8</span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu">varWt</span><span class="op">(</span><span class="va">eusilcS</span><span class="op">$</span><span class="va">netIncome</span>, weights<span class="op">=</span><span class="va">eusilcS</span><span class="op">$</span><span class="va">rb050</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu">varWt</span><span class="op">(</span><span class="va">eusilcS</span><span class="op">$</span><span class="va">netIncome</span>, weights<span class="op">=</span><span class="va">eusilcS</span><span class="op">$</span><span class="va">rb050</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 12031.05</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># dataObj-methods</span></span>
-<span class="r-in"><span class="va">inp</span> <span class="op">&lt;-</span> <span class="fu"><a href="specifyInput.html">specifyInput</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">eusilcS</span>, hhid<span class="op">=</span><span class="st">"db030"</span>, hhsize<span class="op">=</span><span class="st">"hsize"</span>, strata<span class="op">=</span><span class="st">"db040"</span>, weight<span class="op">=</span><span class="st">"db090"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">meanWt</span><span class="op">(</span><span class="va">inp</span>, vars<span class="op">=</span><span class="st">"netIncome"</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># dataObj-methods</span></span></span>
+<span class="r-in"><span><span class="va">inp</span> <span class="op">&lt;-</span> <span class="fu"><a href="specifyInput.html">specifyInput</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">eusilcS</span>, hhid<span class="op">=</span><span class="st">"db030"</span>, hhsize<span class="op">=</span><span class="st">"hsize"</span>, strata<span class="op">=</span><span class="st">"db040"</span>, weight<span class="op">=</span><span class="st">"db090"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">meanWt</span><span class="op">(</span><span class="va">inp</span>, vars<span class="op">=</span><span class="st">"netIncome"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 15173.8</span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu">varWt</span><span class="op">(</span><span class="va">inp</span>, vars<span class="op">=</span><span class="st">"netIncome"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu">varWt</span><span class="op">(</span><span class="va">inp</span>, vars<span class="op">=</span><span class="st">"netIncome"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 12031.05</span>
-<span class="r-in"><span class="fu">corWt</span><span class="op">(</span><span class="va">inp</span>, vars<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"netIncome"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu">corWt</span><span class="op">(</span><span class="va">inp</span>, vars<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"netIncome"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           [,1]      [,2]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 1.0000000 0.1099544</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 0.1099544 1.0000000</span>
-<span class="r-in"><span class="fu">covWt</span><span class="op">(</span><span class="va">inp</span>, vars<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"netIncome"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu">covWt</span><span class="op">(</span><span class="va">inp</span>, vars<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"netIncome"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            [,1]         [,2]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1,]   487.4475     29206.55</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 29206.5455 144746258.13</span>
@@ -206,7 +206,7 @@ used.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

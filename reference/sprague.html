@@ -18,7 +18,7 @@ having 5-years interval data as input."><!-- mathjax --><script src="https://cdn
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">simPop</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.1.0</span>
       </span>
     </div>
 
@@ -52,7 +52,7 @@ having 5-years interval data as input.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">sprague</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">sprague</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -89,21 +89,21 @@ Demographic Observatory</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="co">## example from the world bank</span></span>
-<span class="r-in"><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>age<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span class="r-in">  <span class="st">"0-4"</span>,</span>
-<span class="r-in">  <span class="st">"5-9"</span>,<span class="st">"10-14"</span>,<span class="st">"15-19"</span>, <span class="st">"20-24"</span>,</span>
-<span class="r-in">  <span class="st">"25-29"</span>,<span class="st">"30-34"</span>,<span class="st">"35-39"</span>,<span class="st">"40-44"</span>,<span class="st">"45-49"</span>,</span>
-<span class="r-in">  <span class="st">"50-54"</span>,<span class="st">"55-59"</span>,<span class="st">"60-64"</span>,<span class="st">"65-69"</span>,<span class="st">"77-74"</span>,<span class="st">"75-79"</span>,<span class="st">"80+"</span></span>
-<span class="r-in">    <span class="op">)</span><span class="op">)</span>,</span>
-<span class="r-in">  pop<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1971990</span>, <span class="fl">2095820</span>,<span class="fl">2157190</span>, <span class="fl">2094110</span>,<span class="fl">2116580</span>,   <span class="fl">2003840</span>, <span class="fl">1785690</span>,</span>
-<span class="r-in">        <span class="fl">1502990</span>, <span class="fl">1214170</span>, <span class="fl">796934</span>,  <span class="fl">627551</span>,  <span class="fl">530305</span>, <span class="fl">488014</span>,</span>
-<span class="r-in">        <span class="fl">364498</span>, <span class="fl">259029</span>,<span class="fl">158047</span>,  <span class="fl">125941</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">s</span>  <span class="op">&lt;-</span> <span class="fu">sprague</span><span class="op">(</span><span class="va">x</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">s</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## example from the world bank</span></span></span>
+<span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>age<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="st">"0-4"</span>,</span></span>
+<span class="r-in"><span>  <span class="st">"5-9"</span>,<span class="st">"10-14"</span>,<span class="st">"15-19"</span>, <span class="st">"20-24"</span>,</span></span>
+<span class="r-in"><span>  <span class="st">"25-29"</span>,<span class="st">"30-34"</span>,<span class="st">"35-39"</span>,<span class="st">"40-44"</span>,<span class="st">"45-49"</span>,</span></span>
+<span class="r-in"><span>  <span class="st">"50-54"</span>,<span class="st">"55-59"</span>,<span class="st">"60-64"</span>,<span class="st">"65-69"</span>,<span class="st">"77-74"</span>,<span class="st">"75-79"</span>,<span class="st">"80+"</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  pop<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1971990</span>, <span class="fl">2095820</span>,<span class="fl">2157190</span>, <span class="fl">2094110</span>,<span class="fl">2116580</span>,   <span class="fl">2003840</span>, <span class="fl">1785690</span>,</span></span>
+<span class="r-in"><span>        <span class="fl">1502990</span>, <span class="fl">1214170</span>, <span class="fl">796934</span>,  <span class="fl">627551</span>,  <span class="fl">530305</span>, <span class="fl">488014</span>,</span></span>
+<span class="r-in"><span>        <span class="fl">364498</span>, <span class="fl">259029</span>,<span class="fl">158047</span>,  <span class="fl">125941</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">s</span>  <span class="op">&lt;-</span> <span class="fu">sprague</span><span class="op">(</span><span class="va">x</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">s</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         0         1         2         3         4         5         6         7 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 383576.38 388941.36 394401.76 399858.40 405212.10 410363.66 415213.92 419663.68 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         8         9        10        11        12        13        14        15 </span>
@@ -126,10 +126,10 @@ Demographic Observatory</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  52268.78  47642.59  42781.17  38411.13  34510.77  31058.39  28157.02  25909.69 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       80+ </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 125941.00 </span>
-<span class="r-in">  </span>
-<span class="r-in"><span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/all.equal.data.table.html" class="external-link">all.equal</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">s</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">x</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span>  </span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/all.equal.html" class="external-link">all.equal</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">s</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">x</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -144,7 +144,7 @@ Demographic Observatory</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

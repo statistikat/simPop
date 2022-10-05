@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">simPop</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.1.0</span>
       </span>
     </div>
 
@@ -50,31 +50,31 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">loadSILC</span><span class="op">(</span>
-  file <span class="op">=</span> <span class="cn">NULL</span>,
-  filed <span class="op">=</span> <span class="cn">NULL</span>,
-  filer <span class="op">=</span> <span class="cn">NULL</span>,
-  filep <span class="op">=</span> <span class="cn">NULL</span>,
-  fileh <span class="op">=</span> <span class="cn">NULL</span>,
-  year <span class="op">=</span> <span class="fl">2013</span>,
-  country <span class="op">=</span> <span class="st">"Austria"</span>
-<span class="op">)</span>
-
-<span class="fu">mergeSILC</span><span class="op">(</span><span class="va">filed</span>, <span class="va">filer</span>, <span class="va">fileh</span>, <span class="va">filep</span><span class="op">)</span>
-
-<span class="fu">checkCol</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span>
-
-<span class="fu">chooseSILCvars</span><span class="op">(</span>
-  <span class="va">x</span>,
-  vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"db030"</span>, <span class="st">"db040"</span>, <span class="st">"rb030"</span>, <span class="st">"rb080"</span>, <span class="st">"rb090"</span>, <span class="st">"pl031"</span>, <span class="st">"pb220a"</span>, <span class="st">"py010g"</span>,
-    <span class="st">"py021g"</span>, <span class="st">"py050g"</span>, <span class="st">"py080g"</span>, <span class="st">"py090g"</span>, <span class="st">"py100g"</span>, <span class="st">"py110g"</span>, <span class="st">"py120g"</span>, <span class="st">"py130g"</span>,
-    <span class="st">"py140g"</span>, <span class="st">"hy040g"</span>, <span class="st">"hy050g"</span>, <span class="st">"hy060g"</span>, <span class="st">"hy070g"</span>, <span class="st">"hy080g"</span>, <span class="st">"hy090g"</span>, <span class="st">"hy100g"</span>,
-    <span class="st">"hy110g"</span>, <span class="st">"hy120g"</span>, <span class="st">"hy130g"</span>, <span class="st">"hy140g"</span>, <span class="st">"db090"</span>, <span class="st">"rb050"</span>, <span class="st">"pb190"</span>, <span class="st">"pe040"</span>, <span class="st">"pl051"</span>,
-    <span class="st">"pl111"</span>, <span class="st">"rb010"</span><span class="op">)</span>,
-  country <span class="op">=</span> <span class="cn">NULL</span>
-<span class="op">)</span>
-
-<span class="fu">modifySILC</span><span class="op">(</span><span class="va">x</span>, country <span class="op">=</span> <span class="st">"Austria"</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">loadSILC</span><span class="op">(</span></span>
+<span>  file <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  filed <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  filer <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  filep <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  fileh <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  year <span class="op">=</span> <span class="fl">2013</span>,</span>
+<span>  country <span class="op">=</span> <span class="st">"Austria"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">mergeSILC</span><span class="op">(</span><span class="va">filed</span>, <span class="va">filer</span>, <span class="va">fileh</span>, <span class="va">filep</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">checkCol</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">chooseSILCvars</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"db030"</span>, <span class="st">"db040"</span>, <span class="st">"rb030"</span>, <span class="st">"rb080"</span>, <span class="st">"rb090"</span>, <span class="st">"pl031"</span>, <span class="st">"pb220a"</span>, <span class="st">"py010g"</span>,</span>
+<span>    <span class="st">"py021g"</span>, <span class="st">"py050g"</span>, <span class="st">"py080g"</span>, <span class="st">"py090g"</span>, <span class="st">"py100g"</span>, <span class="st">"py110g"</span>, <span class="st">"py120g"</span>, <span class="st">"py130g"</span>,</span>
+<span>    <span class="st">"py140g"</span>, <span class="st">"hy040g"</span>, <span class="st">"hy050g"</span>, <span class="st">"hy060g"</span>, <span class="st">"hy070g"</span>, <span class="st">"hy080g"</span>, <span class="st">"hy090g"</span>, <span class="st">"hy100g"</span>,</span>
+<span>    <span class="st">"hy110g"</span>, <span class="st">"hy120g"</span>, <span class="st">"hy130g"</span>, <span class="st">"hy140g"</span>, <span class="st">"db090"</span>, <span class="st">"rb050"</span>, <span class="st">"pb190"</span>, <span class="st">"pe040"</span>, <span class="st">"pl051"</span>,</span>
+<span>    <span class="st">"pl111"</span>, <span class="st">"rb010"</span><span class="op">)</span>,</span>
+<span>  country <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">modifySILC</span><span class="op">(</span><span class="va">x</span>, country <span class="op">=</span> <span class="st">"Austria"</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -131,54 +131,54 @@ Either file (merged data) or single files have to be provided for loadSILC().</p
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu">loadSILC</span><span class="op">(</span><span class="st">"new_workfile.RData"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">filed</span> <span class="op">&lt;-</span> <span class="st">"zielvar_d_eurostat2013.sav"</span></span>
-<span class="r-in"><span class="va">filer</span> <span class="op">&lt;-</span> <span class="st">"zielvar_r_eurostat2013.sav"</span></span>
-<span class="r-in"><span class="va">filep</span> <span class="op">&lt;-</span> <span class="st">"zielvar_p_eurostat2013.sav"</span></span>
-<span class="r-in"><span class="va">fileh</span> <span class="op">&lt;-</span> <span class="st">"zielvar_h_eurostat2013.sav"</span></span>
-<span class="r-in"><span class="va">suf4</span> <span class="op">&lt;-</span> <span class="fu">loadSILC</span><span class="op">(</span>filed <span class="op">=</span> <span class="va">filed</span>,</span>
-<span class="r-in">                 filer <span class="op">=</span> <span class="va">filer</span>,</span>
-<span class="r-in">                 filep <span class="op">=</span> <span class="va">filep</span>,</span>
-<span class="r-in">                 fileh <span class="op">=</span> <span class="va">fileh</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="va">filed</span> <span class="op">&lt;-</span> <span class="st">"zielvar_d_eurostat2013.sav"</span></span>
-<span class="r-in"><span class="va">filer</span> <span class="op">&lt;-</span> <span class="st">"zielvar_r_eurostat2013.sav"</span></span>
-<span class="r-in"><span class="va">filep</span> <span class="op">&lt;-</span> <span class="st">"zielvar_p_eurostat2013.sav"</span></span>
-<span class="r-in"><span class="va">fileh</span> <span class="op">&lt;-</span> <span class="st">"zielvar_h_eurostat2013.sav"</span></span>
-<span class="r-in"><span class="va">suf4</span> <span class="op">&lt;-</span> <span class="fu">loadSILC</span><span class="op">(</span>filed <span class="op">=</span> <span class="va">filed</span>,</span>
-<span class="r-in">                 filer <span class="op">=</span> <span class="va">filer</span>,</span>
-<span class="r-in">                 filep <span class="op">=</span> <span class="va">filep</span>,</span>
-<span class="r-in">                 fileh <span class="op">=</span> <span class="va">fileh</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">suf</span> <span class="op">&lt;-</span> <span class="fu">mergeSILC</span><span class="op">(</span>d <span class="op">=</span> <span class="va">suf4</span><span class="op">[[</span><span class="st">"d"</span><span class="op">]</span><span class="op">]</span>,</span>
-<span class="r-in">                 r <span class="op">=</span> <span class="va">suf4</span><span class="op">[[</span><span class="st">"r"</span><span class="op">]</span><span class="op">]</span>,</span>
-<span class="r-in">                 h <span class="op">=</span> <span class="va">suf4</span><span class="op">[[</span><span class="st">"h"</span><span class="op">]</span><span class="op">]</span>,</span>
-<span class="r-in">                 p <span class="op">=</span> <span class="va">suf4</span><span class="op">[[</span><span class="st">"p"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilc13puf</span><span class="op">)</span></span>
-<span class="r-in"><span class="co">## instead of scientific-use file or</span></span>
-<span class="r-in"><span class="co">## original data we took the 2006 synthetic data</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">)</span></span>
-<span class="r-in"><span class="co">## check which columns of y are in x</span></span>
-<span class="r-in"><span class="fu">checkCol</span><span class="op">(</span><span class="va">eusilc13puf</span>, <span class="va">eusilcS</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu">loadSILC</span><span class="op">(</span><span class="st">"new_workfile.RData"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">filed</span> <span class="op">&lt;-</span> <span class="st">"zielvar_d_eurostat2013.sav"</span></span></span>
+<span class="r-in"><span><span class="va">filer</span> <span class="op">&lt;-</span> <span class="st">"zielvar_r_eurostat2013.sav"</span></span></span>
+<span class="r-in"><span><span class="va">filep</span> <span class="op">&lt;-</span> <span class="st">"zielvar_p_eurostat2013.sav"</span></span></span>
+<span class="r-in"><span><span class="va">fileh</span> <span class="op">&lt;-</span> <span class="st">"zielvar_h_eurostat2013.sav"</span></span></span>
+<span class="r-in"><span><span class="va">suf4</span> <span class="op">&lt;-</span> <span class="fu">loadSILC</span><span class="op">(</span>filed <span class="op">=</span> <span class="va">filed</span>,</span></span>
+<span class="r-in"><span>                 filer <span class="op">=</span> <span class="va">filer</span>,</span></span>
+<span class="r-in"><span>                 filep <span class="op">=</span> <span class="va">filep</span>,</span></span>
+<span class="r-in"><span>                 fileh <span class="op">=</span> <span class="va">fileh</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="va">filed</span> <span class="op">&lt;-</span> <span class="st">"zielvar_d_eurostat2013.sav"</span></span></span>
+<span class="r-in"><span><span class="va">filer</span> <span class="op">&lt;-</span> <span class="st">"zielvar_r_eurostat2013.sav"</span></span></span>
+<span class="r-in"><span><span class="va">filep</span> <span class="op">&lt;-</span> <span class="st">"zielvar_p_eurostat2013.sav"</span></span></span>
+<span class="r-in"><span><span class="va">fileh</span> <span class="op">&lt;-</span> <span class="st">"zielvar_h_eurostat2013.sav"</span></span></span>
+<span class="r-in"><span><span class="va">suf4</span> <span class="op">&lt;-</span> <span class="fu">loadSILC</span><span class="op">(</span>filed <span class="op">=</span> <span class="va">filed</span>,</span></span>
+<span class="r-in"><span>                 filer <span class="op">=</span> <span class="va">filer</span>,</span></span>
+<span class="r-in"><span>                 filep <span class="op">=</span> <span class="va">filep</span>,</span></span>
+<span class="r-in"><span>                 fileh <span class="op">=</span> <span class="va">fileh</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">suf</span> <span class="op">&lt;-</span> <span class="fu">mergeSILC</span><span class="op">(</span>d <span class="op">=</span> <span class="va">suf4</span><span class="op">[[</span><span class="st">"d"</span><span class="op">]</span><span class="op">]</span>,</span></span>
+<span class="r-in"><span>                 r <span class="op">=</span> <span class="va">suf4</span><span class="op">[[</span><span class="st">"r"</span><span class="op">]</span><span class="op">]</span>,</span></span>
+<span class="r-in"><span>                 h <span class="op">=</span> <span class="va">suf4</span><span class="op">[[</span><span class="st">"h"</span><span class="op">]</span><span class="op">]</span>,</span></span>
+<span class="r-in"><span>                 p <span class="op">=</span> <span class="va">suf4</span><span class="op">[[</span><span class="st">"p"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilc13puf</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co">## instead of scientific-use file or</span></span></span>
+<span class="r-in"><span><span class="co">## original data we took the 2006 synthetic data</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co">## check which columns of y are in x</span></span></span>
+<span class="r-in"><span><span class="fu">checkCol</span><span class="op">(</span><span class="va">eusilc13puf</span>, <span class="va">eusilcS</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  these variables are in y but not in x:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  pl030 netIncome py010n py050n py090n py100n py110n py120n py130n py140n db090 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "pl030"     "netIncome" "py010n"    "py050n"    "py090n"    "py100n"   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [7] "py110n"    "py120n"    "py130n"    "py140n"    "db090"    </span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="co">## on original silc data to extract needed variables for SGA project on SILC</span></span>
-<span class="r-in"><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu">loadSILC</span><span class="op">(</span><span class="st">"new_workfile.RData"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">chooseSILCvars</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="co">## wrapper to prepare SILC data</span></span>
-<span class="r-in"><span class="co">## on original silc data</span></span>
-<span class="r-in"><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu">loadSILC</span><span class="op">(</span><span class="st">"new_workfile.RData"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu">chooseSILCvars</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">modifySILC</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="co">## on original silc data to extract needed variables for SGA project on SILC</span></span></span>
+<span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu">loadSILC</span><span class="op">(</span><span class="st">"new_workfile.RData"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">chooseSILCvars</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="co">## wrapper to prepare SILC data</span></span></span>
+<span class="r-in"><span><span class="co">## on original silc data</span></span></span>
+<span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu">loadSILC</span><span class="op">(</span><span class="st">"new_workfile.RData"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu">chooseSILCvars</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">modifySILC</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -193,7 +193,7 @@ Either file (merged data) or single files have to be provided for loadSILC().</p
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

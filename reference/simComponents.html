@@ -19,7 +19,7 @@ categorical conditioning variables need to be simulated beforehand."><!-- mathja
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">simPop</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.1.0</span>
       </span>
     </div>
 
@@ -54,15 +54,15 @@ categorical conditioning variables need to be simulated beforehand.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">simComponents</span><span class="op">(</span>
-  <span class="va">simPopObj</span>,
-  total <span class="op">=</span> <span class="st">"netIncome"</span>,
-  components <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"py010n"</span>, <span class="st">"py050n"</span>, <span class="st">"py090n"</span>, <span class="st">"py100n"</span>, <span class="st">"py110n"</span>, <span class="st">"py120n"</span>, <span class="st">"py130n"</span>,
-    <span class="st">"py140n"</span><span class="op">)</span>,
-  conditional <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu">getCatName</span><span class="op">(</span><span class="va">total</span><span class="op">)</span>, <span class="st">"pl030"</span><span class="op">)</span>,
-  replaceEmpty <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sequential"</span>, <span class="st">"min"</span><span class="op">)</span>,
-  <span class="va">seed</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">simComponents</span><span class="op">(</span></span>
+<span>  <span class="va">simPopObj</span>,</span>
+<span>  total <span class="op">=</span> <span class="st">"netIncome"</span>,</span>
+<span>  components <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"py010n"</span>, <span class="st">"py050n"</span>, <span class="st">"py090n"</span>, <span class="st">"py100n"</span>, <span class="st">"py110n"</span>, <span class="st">"py120n"</span>, <span class="st">"py130n"</span>,</span>
+<span>    <span class="st">"py140n"</span><span class="op">)</span>,</span>
+<span>  conditional <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu">getCatName</span><span class="op">(</span><span class="va">total</span><span class="op">)</span>, <span class="st">"pl030"</span><span class="op">)</span>,</span>
+<span>  replaceEmpty <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sequential"</span>, <span class="st">"min"</span><span class="op">)</span>,</span>
+<span>  <span class="va">seed</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -141,38 +141,38 @@ Information. <em>Journal of Statistical Survey</em>, <strong>79</strong> (10), 1
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">)</span></span>
-<span class="r-in"><span class="co"># \donttest{</span></span>
-<span class="r-in"><span class="co">## approx. 20 seconds computation time</span></span>
-<span class="r-in"><span class="va">inp</span> <span class="op">&lt;-</span> <span class="fu"><a href="specifyInput.html">specifyInput</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">eusilcS</span>, hhid<span class="op">=</span><span class="st">"db030"</span>, hhsize<span class="op">=</span><span class="st">"hsize"</span>,</span>
-<span class="r-in">  strata<span class="op">=</span><span class="st">"db040"</span>, weight<span class="op">=</span><span class="st">"db090"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">simPopObj</span> <span class="op">&lt;-</span> <span class="fu"><a href="simStructure.html">simStructure</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">inp</span>, method<span class="op">=</span><span class="st">"direct"</span>,</span>
-<span class="r-in">  basicHHvars<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"rb090"</span>, <span class="st">"hsize"</span>, <span class="st">"pl030"</span>, <span class="st">"pb220a"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">simPopObj</span> <span class="op">&lt;-</span> <span class="fu"><a href="simContinuous.html">simContinuous</a></span><span class="op">(</span><span class="va">simPopObj</span>, additional <span class="op">=</span> <span class="st">"netIncome"</span>,</span>
-<span class="r-in">  regModel <span class="op">=</span> <span class="op">~</span><span class="va">rb090</span><span class="op">+</span><span class="va">hsize</span><span class="op">+</span><span class="va">pl030</span><span class="op">+</span><span class="va">pb220a</span><span class="op">+</span><span class="va">hsize</span>,</span>
-<span class="r-in">  method<span class="op">=</span><span class="st">"multinom"</span>, upper<span class="op">=</span><span class="fl">200000</span>, equidist<span class="op">=</span><span class="cn">FALSE</span>, nr_cpus<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># categorize net income for use as conditioning variable</span></span>
-<span class="r-in"><span class="va">sIncome</span> <span class="op">&lt;-</span> <span class="fu"><a href="manageSimPopObj.html">manageSimPopObj</a></span><span class="op">(</span><span class="va">simPopObj</span>, var<span class="op">=</span><span class="st">"netIncome"</span>, sample<span class="op">=</span><span class="cn">TRUE</span>, set<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">sWeight</span> <span class="op">&lt;-</span> <span class="fu"><a href="manageSimPopObj.html">manageSimPopObj</a></span><span class="op">(</span><span class="va">simPopObj</span>, var<span class="op">=</span><span class="st">"rb050"</span>, sample<span class="op">=</span><span class="cn">TRUE</span>, set<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">pIncome</span> <span class="op">&lt;-</span> <span class="fu"><a href="manageSimPopObj.html">manageSimPopObj</a></span><span class="op">(</span><span class="va">simPopObj</span>, var<span class="op">=</span><span class="st">"netIncome"</span>, sample<span class="op">=</span><span class="cn">FALSE</span>, set<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">breaks</span> <span class="op">&lt;-</span> <span class="fu"><a href="getBreaks.html">getBreaks</a></span><span class="op">(</span>x<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">sIncome</span><span class="op">)</span>, w<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">sWeight</span><span class="op">)</span>, upper<span class="op">=</span><span class="cn">Inf</span>, equidist<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">simPopObj</span> <span class="op">&lt;-</span> <span class="fu"><a href="manageSimPopObj.html">manageSimPopObj</a></span><span class="op">(</span><span class="va">simPopObj</span>, var<span class="op">=</span><span class="st">"netIncomeCat"</span>, sample<span class="op">=</span><span class="cn">TRUE</span>,</span>
-<span class="r-in">  set<span class="op">=</span><span class="cn">TRUE</span>, values<span class="op">=</span><span class="fu"><a href="getCat.html">getCat</a></span><span class="op">(</span>x<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">sIncome</span><span class="op">)</span>, <span class="va">breaks</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">simPopObj</span> <span class="op">&lt;-</span> <span class="fu"><a href="manageSimPopObj.html">manageSimPopObj</a></span><span class="op">(</span><span class="va">simPopObj</span>, var<span class="op">=</span><span class="st">"netIncomeCat"</span>, sample<span class="op">=</span><span class="cn">FALSE</span>,</span>
-<span class="r-in">  set<span class="op">=</span><span class="cn">TRUE</span>, values<span class="op">=</span><span class="fu"><a href="getCat.html">getCat</a></span><span class="op">(</span>x<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">pIncome</span><span class="op">)</span>, <span class="va">breaks</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># simulate net income components</span></span>
-<span class="r-in"><span class="va">simPopObj</span> <span class="op">&lt;-</span> <span class="fu">simComponents</span><span class="op">(</span>simPopObj<span class="op">=</span><span class="va">simPopObj</span>, total<span class="op">=</span><span class="st">"netIncome"</span>,</span>
-<span class="r-in">  components<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"py010n"</span>,<span class="st">"py050n"</span>,<span class="st">"py090n"</span>,<span class="st">"py100n"</span>,<span class="st">"py110n"</span>,<span class="st">"py120n"</span>,<span class="st">"py130n"</span>,<span class="st">"py140n"</span><span class="op">)</span>,</span>
-<span class="r-in">  conditional <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"netIncomeCat"</span>, <span class="st">"pl030"</span><span class="op">)</span>, replaceEmpty <span class="op">=</span> <span class="st">"sequential"</span>, seed<span class="op">=</span><span class="fl">1</span> <span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">simPopObj</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co">## approx. 20 seconds computation time</span></span></span>
+<span class="r-in"><span><span class="va">inp</span> <span class="op">&lt;-</span> <span class="fu"><a href="specifyInput.html">specifyInput</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">eusilcS</span>, hhid<span class="op">=</span><span class="st">"db030"</span>, hhsize<span class="op">=</span><span class="st">"hsize"</span>,</span></span>
+<span class="r-in"><span>  strata<span class="op">=</span><span class="st">"db040"</span>, weight<span class="op">=</span><span class="st">"db090"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">simPopObj</span> <span class="op">&lt;-</span> <span class="fu"><a href="simStructure.html">simStructure</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">inp</span>, method<span class="op">=</span><span class="st">"direct"</span>,</span></span>
+<span class="r-in"><span>  basicHHvars<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"rb090"</span>, <span class="st">"hsize"</span>, <span class="st">"pl030"</span>, <span class="st">"pb220a"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">simPopObj</span> <span class="op">&lt;-</span> <span class="fu"><a href="simContinuous.html">simContinuous</a></span><span class="op">(</span><span class="va">simPopObj</span>, additional <span class="op">=</span> <span class="st">"netIncome"</span>,</span></span>
+<span class="r-in"><span>  regModel <span class="op">=</span> <span class="op">~</span><span class="va">rb090</span><span class="op">+</span><span class="va">hsize</span><span class="op">+</span><span class="va">pl030</span><span class="op">+</span><span class="va">pb220a</span><span class="op">+</span><span class="va">hsize</span>,</span></span>
+<span class="r-in"><span>  method<span class="op">=</span><span class="st">"multinom"</span>, upper<span class="op">=</span><span class="fl">200000</span>, equidist<span class="op">=</span><span class="cn">FALSE</span>, nr_cpus<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># categorize net income for use as conditioning variable</span></span></span>
+<span class="r-in"><span><span class="va">sIncome</span> <span class="op">&lt;-</span> <span class="fu"><a href="manageSimPopObj.html">manageSimPopObj</a></span><span class="op">(</span><span class="va">simPopObj</span>, var<span class="op">=</span><span class="st">"netIncome"</span>, sample<span class="op">=</span><span class="cn">TRUE</span>, set<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">sWeight</span> <span class="op">&lt;-</span> <span class="fu"><a href="manageSimPopObj.html">manageSimPopObj</a></span><span class="op">(</span><span class="va">simPopObj</span>, var<span class="op">=</span><span class="st">"rb050"</span>, sample<span class="op">=</span><span class="cn">TRUE</span>, set<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">pIncome</span> <span class="op">&lt;-</span> <span class="fu"><a href="manageSimPopObj.html">manageSimPopObj</a></span><span class="op">(</span><span class="va">simPopObj</span>, var<span class="op">=</span><span class="st">"netIncome"</span>, sample<span class="op">=</span><span class="cn">FALSE</span>, set<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">breaks</span> <span class="op">&lt;-</span> <span class="fu"><a href="getBreaks.html">getBreaks</a></span><span class="op">(</span>x<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">sIncome</span><span class="op">)</span>, w<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">sWeight</span><span class="op">)</span>, upper<span class="op">=</span><span class="cn">Inf</span>, equidist<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">simPopObj</span> <span class="op">&lt;-</span> <span class="fu"><a href="manageSimPopObj.html">manageSimPopObj</a></span><span class="op">(</span><span class="va">simPopObj</span>, var<span class="op">=</span><span class="st">"netIncomeCat"</span>, sample<span class="op">=</span><span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>  set<span class="op">=</span><span class="cn">TRUE</span>, values<span class="op">=</span><span class="fu"><a href="getCat.html">getCat</a></span><span class="op">(</span>x<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">sIncome</span><span class="op">)</span>, <span class="va">breaks</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">simPopObj</span> <span class="op">&lt;-</span> <span class="fu"><a href="manageSimPopObj.html">manageSimPopObj</a></span><span class="op">(</span><span class="va">simPopObj</span>, var<span class="op">=</span><span class="st">"netIncomeCat"</span>, sample<span class="op">=</span><span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>  set<span class="op">=</span><span class="cn">TRUE</span>, values<span class="op">=</span><span class="fu"><a href="getCat.html">getCat</a></span><span class="op">(</span>x<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">pIncome</span><span class="op">)</span>, <span class="va">breaks</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># simulate net income components</span></span></span>
+<span class="r-in"><span><span class="va">simPopObj</span> <span class="op">&lt;-</span> <span class="fu">simComponents</span><span class="op">(</span>simPopObj<span class="op">=</span><span class="va">simPopObj</span>, total<span class="op">=</span><span class="st">"netIncome"</span>,</span></span>
+<span class="r-in"><span>  components<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"py010n"</span>,<span class="st">"py050n"</span>,<span class="st">"py090n"</span>,<span class="st">"py100n"</span>,<span class="st">"py110n"</span>,<span class="st">"py120n"</span>,<span class="st">"py130n"</span>,<span class="st">"py140n"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  conditional <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"netIncomeCat"</span>, <span class="st">"pl030"</span><span class="op">)</span>, replaceEmpty <span class="op">=</span> <span class="st">"sequential"</span>, seed<span class="op">=</span><span class="fl">1</span> <span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">simPopObj</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "simPopObj"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"package")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "simPop"</span>
-<span class="r-in"><span class="co"># }</span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -187,7 +187,7 @@ Information. <em>Journal of Statistical Survey</em>, <strong>79</strong> (10), 1
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

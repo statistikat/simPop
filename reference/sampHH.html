@@ -18,7 +18,7 @@ household information."><!-- mathjax --><script src="https://cdnjs.cloudflare.co
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">simPop</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.1.0</span>
       </span>
     </div>
 
@@ -52,7 +52,7 @@ household information.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">sampHH</span><span class="op">(</span><span class="va">pop</span>, sizefactor <span class="op">=</span> <span class="fl">1</span>, hid <span class="op">=</span> <span class="st">"hid"</span>, strata <span class="op">=</span> <span class="st">"region"</span>, hsize <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">sampHH</span><span class="op">(</span><span class="va">pop</span>, sizefactor <span class="op">=</span> <span class="fl">1</span>, hid <span class="op">=</span> <span class="st">"hid"</span>, strata <span class="op">=</span> <span class="st">"region"</span>, hsize <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -103,34 +103,34 @@ Information. <em>Journal of Statistical Survey</em>, <strong>79</strong> (10), 1
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcP</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">pop</span> <span class="op">&lt;-</span> <span class="va">eusilcP</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">pop</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="st">"hhsize"</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span><span class="va">x1</span> <span class="op">&lt;-</span> <span class="fu">sampHH</span><span class="op">(</span><span class="va">pop</span>, strata<span class="op">=</span><span class="st">"region"</span>, hsize<span class="op">=</span><span class="st">"hhsize"</span><span class="op">)</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcP</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">pop</span> <span class="op">&lt;-</span> <span class="va">eusilcP</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">pop</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="st">"hhsize"</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span><span class="va">x1</span> <span class="op">&lt;-</span> <span class="fu">sampHH</span><span class="op">(</span><span class="va">pop</span>, strata<span class="op">=</span><span class="st">"region"</span>, hsize<span class="op">=</span><span class="st">"hhsize"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    user  system elapsed </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.610   0.000   0.611 </span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">x1</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 58602    28</span>
-<span class="r-in"><span class="co"># \donttest{</span></span>
-<span class="r-in"><span class="co">## approx. 10 second computation time ...</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span><span class="va">x1</span> <span class="op">&lt;-</span> <span class="fu">sampHH</span><span class="op">(</span><span class="va">pop</span>, sizefactor<span class="op">=</span><span class="fl">4</span>, strata<span class="op">=</span><span class="st">"region"</span>, hsize<span class="op">=</span><span class="st">"hhsize"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   0.630   0.000   0.631 </span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">x1</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 58597    28</span>
+<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co">## approx. 10 second computation time ...</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span><span class="va">x1</span> <span class="op">&lt;-</span> <span class="fu">sampHH</span><span class="op">(</span><span class="va">pop</span>, sizefactor<span class="op">=</span><span class="fl">4</span>, strata<span class="op">=</span><span class="st">"region"</span>, hsize<span class="op">=</span><span class="st">"hhsize"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    user  system elapsed </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   1.669   0.000   1.669 </span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">x1</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 234604     28</span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span><span class="va">x2</span> <span class="op">&lt;-</span> <span class="fu">sampHH</span><span class="op">(</span><span class="va">pop</span>, strata<span class="op">=</span><span class="cn">NULL</span>, hsize<span class="op">=</span><span class="st">"hhsize"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   1.710   0.028   1.737 </span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">x1</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 234603     28</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span><span class="va">x2</span> <span class="op">&lt;-</span> <span class="fu">sampHH</span><span class="op">(</span><span class="va">pop</span>, strata<span class="op">=</span><span class="cn">NULL</span>, hsize<span class="op">=</span><span class="st">"hhsize"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    user  system elapsed </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.843   0.012   0.855 </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">pop</span> <span class="op">&lt;-</span> <span class="va">pop</span><span class="op">[</span>,<span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">pop</span><span class="op">)</span><span class="op">==</span><span class="st">"hhsize"</span><span class="op">)</span><span class="op">]</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span><span class="va">y1</span> <span class="op">&lt;-</span> <span class="fu">sampHH</span><span class="op">(</span><span class="va">pop</span>, strata<span class="op">=</span><span class="st">"region"</span>, hsize<span class="op">=</span><span class="cn">NULL</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   0.846   0.009   0.854 </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">pop</span> <span class="op">&lt;-</span> <span class="va">pop</span><span class="op">[</span>,<span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">pop</span><span class="op">)</span><span class="op">==</span><span class="st">"hhsize"</span><span class="op">)</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span><span class="va">y1</span> <span class="op">&lt;-</span> <span class="fu">sampHH</span><span class="op">(</span><span class="va">pop</span>, strata<span class="op">=</span><span class="st">"region"</span>, hsize<span class="op">=</span><span class="cn">NULL</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    user  system elapsed </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.678   0.001   0.680 </span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span><span class="va">y2</span> <span class="op">&lt;-</span> <span class="fu">sampHH</span><span class="op">(</span><span class="va">pop</span>, strata<span class="op">=</span><span class="cn">NULL</span>, hsize<span class="op">=</span><span class="cn">NULL</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   0.700   0.000   0.699 </span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span><span class="va">y2</span> <span class="op">&lt;-</span> <span class="fu">sampHH</span><span class="op">(</span><span class="va">pop</span>, strata<span class="op">=</span><span class="cn">NULL</span>, hsize<span class="op">=</span><span class="cn">NULL</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    user  system elapsed </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   1.026   0.018   1.044 </span>
-<span class="r-in"><span class="co"># }</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   0.997   0.019   1.016 </span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -145,7 +145,7 @@ Information. <em>Journal of Statistical Survey</em>, <strong>79</strong> (10), 1
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

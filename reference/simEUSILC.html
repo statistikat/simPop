@@ -18,7 +18,7 @@ Conditions (EU-SILC)."><!-- mathjax --><script src="https://cdnjs.cloudflare.com
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">simPop</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.1.0</span>
       </span>
     </div>
 
@@ -52,42 +52,42 @@ Conditions (EU-SILC).</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">simEUSILC</span><span class="op">(</span>
-  <span class="va">dataS</span>,
-  hid <span class="op">=</span> <span class="st">"db030"</span>,
-  wh <span class="op">=</span> <span class="st">"db090"</span>,
-  wp <span class="op">=</span> <span class="st">"rb050"</span>,
-  hsize <span class="op">=</span> <span class="cn">NULL</span>,
-  strata <span class="op">=</span> <span class="st">"db040"</span>,
-  pid <span class="op">=</span> <span class="cn">NULL</span>,
-  age <span class="op">=</span> <span class="st">"age"</span>,
-  gender <span class="op">=</span> <span class="st">"rb090"</span>,
-  categorizeAge <span class="op">=</span> <span class="cn">TRUE</span>,
-  breaksAge <span class="op">=</span> <span class="cn">NULL</span>,
-  categorical <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pl030"</span>, <span class="st">"pb220a"</span><span class="op">)</span>,
-  income <span class="op">=</span> <span class="st">"netIncome"</span>,
-  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"multinom"</span>, <span class="st">"twostep"</span><span class="op">)</span>,
-  breaks <span class="op">=</span> <span class="cn">NULL</span>,
-  lower <span class="op">=</span> <span class="cn">NULL</span>,
-  upper <span class="op">=</span> <span class="cn">NULL</span>,
-  equidist <span class="op">=</span> <span class="cn">TRUE</span>,
-  probs <span class="op">=</span> <span class="cn">NULL</span>,
-  gpd <span class="op">=</span> <span class="cn">TRUE</span>,
-  threshold <span class="op">=</span> <span class="cn">NULL</span>,
-  est <span class="op">=</span> <span class="st">"moments"</span>,
-  const <span class="op">=</span> <span class="cn">NULL</span>,
-  alpha <span class="op">=</span> <span class="fl">0.01</span>,
-  residuals <span class="op">=</span> <span class="cn">TRUE</span>,
-  components <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"py010n"</span>, <span class="st">"py050n"</span>, <span class="st">"py090n"</span>, <span class="st">"py100n"</span>, <span class="st">"py110n"</span>, <span class="st">"py120n"</span>, <span class="st">"py130n"</span>,
-    <span class="st">"py140n"</span><span class="op">)</span>,
-  conditional <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu">getCatName</span><span class="op">(</span><span class="va">income</span><span class="op">)</span>, <span class="st">"pl030"</span><span class="op">)</span>,
-  keep <span class="op">=</span> <span class="cn">TRUE</span>,
-  maxit <span class="op">=</span> <span class="fl">500</span>,
-  MaxNWts <span class="op">=</span> <span class="fl">1500</span>,
-  tol <span class="op">=</span> <span class="va">.Machine</span><span class="op">$</span><span class="va">double.eps</span><span class="op">^</span><span class="fl">0.5</span>,
-  nr_cpus <span class="op">=</span> <span class="cn">NULL</span>,
-  <span class="va">seed</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">simEUSILC</span><span class="op">(</span></span>
+<span>  <span class="va">dataS</span>,</span>
+<span>  hid <span class="op">=</span> <span class="st">"db030"</span>,</span>
+<span>  wh <span class="op">=</span> <span class="st">"db090"</span>,</span>
+<span>  wp <span class="op">=</span> <span class="st">"rb050"</span>,</span>
+<span>  hsize <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  strata <span class="op">=</span> <span class="st">"db040"</span>,</span>
+<span>  pid <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  age <span class="op">=</span> <span class="st">"age"</span>,</span>
+<span>  gender <span class="op">=</span> <span class="st">"rb090"</span>,</span>
+<span>  categorizeAge <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  breaksAge <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  categorical <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pl030"</span>, <span class="st">"pb220a"</span><span class="op">)</span>,</span>
+<span>  income <span class="op">=</span> <span class="st">"netIncome"</span>,</span>
+<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"multinom"</span>, <span class="st">"twostep"</span><span class="op">)</span>,</span>
+<span>  breaks <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  lower <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  upper <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  equidist <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  probs <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  gpd <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  threshold <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  est <span class="op">=</span> <span class="st">"moments"</span>,</span>
+<span>  const <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="fl">0.01</span>,</span>
+<span>  residuals <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  components <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"py010n"</span>, <span class="st">"py050n"</span>, <span class="st">"py090n"</span>, <span class="st">"py100n"</span>, <span class="st">"py110n"</span>, <span class="st">"py120n"</span>, <span class="st">"py130n"</span>,</span>
+<span>    <span class="st">"py140n"</span><span class="op">)</span>,</span>
+<span>  conditional <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu">getCatName</span><span class="op">(</span><span class="va">income</span><span class="op">)</span>, <span class="st">"pl030"</span><span class="op">)</span>,</span>
+<span>  keep <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  maxit <span class="op">=</span> <span class="fl">500</span>,</span>
+<span>  MaxNWts <span class="op">=</span> <span class="fl">1500</span>,</span>
+<span>  tol <span class="op">=</span> <span class="va">.Machine</span><span class="op">$</span><span class="va">double.eps</span><span class="op">^</span><span class="fl">0.5</span>,</span>
+<span>  nr_cpus <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">seed</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -303,25 +303,25 @@ simulated EU-SILC population data as well as the underlying sample.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">)</span> <span class="co"># load sample data</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># \donttest{</span></span>
-<span class="r-in"><span class="co">## long computation time</span></span>
-<span class="r-in"><span class="co"># multinomial model with random draws</span></span>
-<span class="r-in"><span class="va">eusilcM</span> <span class="op">&lt;-</span> <span class="fu">simEUSILC</span><span class="op">(</span><span class="va">eusilcS</span>, upper <span class="op">=</span> <span class="fl">200000</span>, equidist <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span class="r-in">, nr_cpus <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">eusilcM</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">)</span> <span class="co"># load sample data</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co">## long computation time</span></span></span>
+<span class="r-in"><span><span class="co"># multinomial model with random draws</span></span></span>
+<span class="r-in"><span><span class="va">eusilcM</span> <span class="op">&lt;-</span> <span class="fu">simEUSILC</span><span class="op">(</span><span class="va">eusilcS</span>, upper <span class="op">=</span> <span class="fl">200000</span>, equidist <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span>, nr_cpus <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">eusilcM</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Length     Class      Mode </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         1 simPopObj        S4 </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># two-step regression</span></span>
-<span class="r-in"><span class="va">eusilcT</span> <span class="op">&lt;-</span> <span class="fu">simEUSILC</span><span class="op">(</span><span class="va">eusilcS</span>, method <span class="op">=</span> <span class="st">"twostep"</span>, nr_cpus <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">eusilcT</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># two-step regression</span></span></span>
+<span class="r-in"><span><span class="va">eusilcT</span> <span class="op">&lt;-</span> <span class="fu">simEUSILC</span><span class="op">(</span><span class="va">eusilcS</span>, method <span class="op">=</span> <span class="st">"twostep"</span>, nr_cpus <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">eusilcT</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Length     Class      Mode </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         1 simPopObj        S4 </span>
-<span class="r-in"><span class="co"># }</span></span>
-<span class="r-in"></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -336,7 +336,7 @@ simulated EU-SILC population data as well as the underlying sample.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

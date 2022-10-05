@@ -19,7 +19,7 @@ useful for writing custom wrapper functions such as simEUSILC."><!-- mathjax -->
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">simPop</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.1.0</span>
       </span>
     </div>
 
@@ -54,16 +54,16 @@ useful for writing custom wrapper functions such as <code><a href="simEUSILC.htm
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">getBreaks</span><span class="op">(</span>
-  <span class="va">x</span>,
-  weights <span class="op">=</span> <span class="cn">NULL</span>,
-  zeros <span class="op">=</span> <span class="cn">TRUE</span>,
-  lower <span class="op">=</span> <span class="cn">NULL</span>,
-  upper <span class="op">=</span> <span class="cn">NULL</span>,
-  equidist <span class="op">=</span> <span class="cn">TRUE</span>,
-  probs <span class="op">=</span> <span class="cn">NULL</span>,
-  strata <span class="op">=</span> <span class="cn">NULL</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">getBreaks</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  weights <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  zeros <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  lower <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  upper <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  equidist <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  probs <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  strata <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -142,21 +142,21 @@ respectively, if these are specified.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># semi-continuous variable, positive break points equidistant</span></span>
-<span class="r-in"><span class="fu">getBreaks</span><span class="op">(</span><span class="va">eusilcS</span><span class="op">$</span><span class="va">netIncome</span>, weights<span class="op">=</span><span class="va">eusilcS</span><span class="op">$</span><span class="va">rb050</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># semi-continuous variable, positive break points equidistant</span></span></span>
+<span class="r-in"><span><span class="fu">getBreaks</span><span class="op">(</span><span class="va">eusilcS</span><span class="op">$</span><span class="va">netIncome</span>, weights<span class="op">=</span><span class="va">eusilcS</span><span class="op">$</span><span class="va">rb050</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1]  -5809.40  -4373.25  -3107.34      0.00   4986.02   8479.22  11068.43</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [8]  13764.64  15812.79  17941.15  20732.70  23602.92  29164.46 185456.04</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># semi-continuous variable, positive break points not equidistant</span></span>
-<span class="r-in"><span class="fu">getBreaks</span><span class="op">(</span><span class="va">eusilcS</span><span class="op">$</span><span class="va">netIncome</span>, weights<span class="op">=</span><span class="va">eusilcS</span><span class="op">$</span><span class="va">rb050</span>,</span>
-<span class="r-in">    equidist <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># semi-continuous variable, positive break points not equidistant</span></span></span>
+<span class="r-in"><span><span class="fu">getBreaks</span><span class="op">(</span><span class="va">eusilcS</span><span class="op">$</span><span class="va">netIncome</span>, weights<span class="op">=</span><span class="va">eusilcS</span><span class="op">$</span><span class="va">rb050</span>,</span></span>
+<span class="r-in"><span>    equidist <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1]  -5809.40  -4373.25  -3107.34      0.00    636.01   2642.35   4986.02</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [8]   8479.22  13764.64  17941.15  23602.92  29164.46  35680.73  56238.29</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [15] 185456.04</span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -171,7 +171,7 @@ respectively, if these are specified.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

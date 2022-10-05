@@ -22,7 +22,7 @@ distribution of the smaller region within the broader region is respected."><!--
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">simPop</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.1.0</span>
       </span>
     </div>
 
@@ -59,18 +59,18 @@ distribution of the smaller region within the broader region is respected.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">simInitSpatial</span><span class="op">(</span>
-  <span class="va">simPopObj</span>,
-  <span class="va">additional</span>,
-  <span class="va">region</span>,
-  tspatialP <span class="op">=</span> <span class="cn">NULL</span>,
-  tspatialHH <span class="op">=</span> <span class="cn">NULL</span>,
-  eps <span class="op">=</span> <span class="fl">0.05</span>,
-  maxIter <span class="op">=</span> <span class="fl">100</span>,
-  nr_cpus <span class="op">=</span> <span class="cn">NULL</span>,
-  seed <span class="op">=</span> <span class="fl">1</span>,
-  verbose <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">simInitSpatial</span><span class="op">(</span></span>
+<span>  <span class="va">simPopObj</span>,</span>
+<span>  <span class="va">additional</span>,</span>
+<span>  <span class="va">region</span>,</span>
+<span>  tspatialP <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  tspatialHH <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  eps <span class="op">=</span> <span class="fl">0.05</span>,</span>
+<span>  maxIter <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  nr_cpus <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -157,67 +157,67 @@ Information. <em>Journal of Statistical Survey</em>, <strong>79</strong> (10), 1
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-datatable.com" class="external-link">data.table</a></span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcP</span><span class="op">)</span></span>
-<span class="r-in"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-datatable.com" class="external-link">data.table</a></span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># no districts are available in the population, so we have to generate those</span></span>
-<span class="r-in"><span class="co"># we randomly assign districts within "region" in the eusilc population data</span></span>
-<span class="r-in"><span class="co"># each hh has the same district</span></span>
-<span class="r-in"><span class="va">simulate_districts</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">inp</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">  <span class="va">hhid</span> <span class="op">&lt;-</span> <span class="st">"hid"</span></span>
-<span class="r-in">  <span class="va">region</span> <span class="op">&lt;-</span> <span class="st">"region"</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="va">a</span> <span class="op">&lt;-</span> <span class="va">inp</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/duplicated.html" class="external-link">duplicated</a></span><span class="op">(</span><span class="va">inp</span><span class="op">[</span>,<span class="va">hhid</span><span class="op">]</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">hhid</span>, <span class="va">region</span><span class="op">)</span><span class="op">]</span></span>
-<span class="r-in">  <span class="va">spl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/split.html" class="external-link">split</a></span><span class="op">(</span><span class="va">a</span>, <span class="va">a</span><span class="op">[</span>,<span class="va">region</span><span class="op">]</span><span class="op">)</span></span>
-<span class="r-in">  <span class="va">regions</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/duplicated.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">inp</span><span class="op">[</span>,<span class="va">region</span><span class="op">]</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in">  <span class="va">tmpres</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">spl</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in">    <span class="va">codes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">3</span><span class="op">:</span><span class="fl">9</span>,<span class="fl">1</span><span class="op">)</span>, sep<span class="op">=</span><span class="st">""</span><span class="op">)</span></span>
-<span class="r-in">    <span class="va">spl</span><span class="op">[[</span><span class="va">x</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">district</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">codes</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">spl</span><span class="op">[[</span><span class="va">x</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>, replace<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in">    <span class="va">spl</span><span class="op">[[</span><span class="va">x</span><span class="op">]</span><span class="op">]</span></span>
-<span class="r-in">  <span class="op">}</span><span class="op">)</span></span>
-<span class="r-in">  <span class="va">tmpres</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="st">"rbind"</span>, <span class="va">tmpres</span><span class="op">)</span></span>
-<span class="r-in">  <span class="va">tmpres</span> <span class="op">&lt;-</span> <span class="va">tmpres</span><span class="op">[</span>,<span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span><span class="op">]</span></span>
-<span class="r-in">  <span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">inp</span>, <span class="va">tmpres</span>, by.x<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">hhid</span><span class="op">)</span>, by.y<span class="op">=</span><span class="va">hhid</span>, all.x<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in">  <span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="va">out</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">eusilcP</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table</a></span><span class="op">(</span><span class="fu">simulate_districts</span><span class="op">(</span><span class="va">eusilcP</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="co"># we generate the input table using the broad region (variable 'region')</span></span>
-<span class="r-in"><span class="co"># and the districts, we have generated before.</span></span>
-<span class="r-in"><span class="co">#Generate table with household counts by district</span></span>
-<span class="r-in"><span class="va">tabHH</span> <span class="op">&lt;-</span> <span class="va">eusilcP</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/duplicated.html" class="external-link">duplicated</a></span><span class="op">(</span><span class="va">hid</span><span class="op">)</span>,<span class="fu">.</span><span class="op">(</span>Freq<span class="op">=</span><span class="va">.N</span><span class="op">)</span>,by<span class="op">=</span><span class="fu">.</span><span class="op">(</span>db040<span class="op">=</span><span class="va">region</span>,<span class="va">district</span><span class="op">)</span><span class="op">]</span></span>
-<span class="r-in"><span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/setkey.html" class="external-link">setkey</a></span><span class="op">(</span><span class="va">tabHH</span>,<span class="va">db040</span>,<span class="va">district</span><span class="op">)</span></span>
-<span class="r-in"><span class="co">#Generate table with person counts by district</span></span>
-<span class="r-in"><span class="va">tabP</span> <span class="op">&lt;-</span> <span class="va">eusilcP</span><span class="op">[</span>,<span class="fu">.</span><span class="op">(</span>Freq<span class="op">=</span><span class="va">.N</span><span class="op">)</span>,by<span class="op">=</span><span class="fu">.</span><span class="op">(</span>db040<span class="op">=</span><span class="va">region</span>,<span class="va">district</span><span class="op">)</span><span class="op">]</span></span>
-<span class="r-in"><span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/setkey.html" class="external-link">setkey</a></span><span class="op">(</span><span class="va">tabP</span>,<span class="va">db040</span>,<span class="va">district</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># we generate a synthetic population</span></span>
-<span class="r-in"><span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/setattr.html" class="external-link">setnames</a></span><span class="op">(</span><span class="va">eusilcP</span>,<span class="st">"region"</span>,<span class="st">"db040"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/setattr.html" class="external-link">setnames</a></span><span class="op">(</span><span class="va">eusilcP</span>,<span class="st">"hid"</span>,<span class="st">"db030"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">inp</span> <span class="op">&lt;-</span> <span class="fu"><a href="specifyInput.html">specifyInput</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">eusilcP</span>, hhid<span class="op">=</span><span class="st">"db030"</span>, hhsize<span class="op">=</span><span class="st">"hsize"</span>, strata<span class="op">=</span><span class="st">"db040"</span>,population<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in"><span class="co"># \donttest{</span></span>
-<span class="r-in"><span class="co"># use only HH counts</span></span>
-<span class="r-in"><span class="va">simPopObj</span> <span class="op">&lt;-</span> <span class="fu"><a href="simStructure.html">simStructure</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">inp</span>, method<span class="op">=</span><span class="st">"direct"</span>, basicHHvars<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"gender"</span><span class="op">)</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-datatable.com" class="external-link">data.table</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcP</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-datatable.com" class="external-link">data.table</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># no districts are available in the population, so we have to generate those</span></span></span>
+<span class="r-in"><span><span class="co"># we randomly assign districts within "region" in the eusilc population data</span></span></span>
+<span class="r-in"><span><span class="co"># each hh has the same district</span></span></span>
+<span class="r-in"><span><span class="va">simulate_districts</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">inp</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">hhid</span> <span class="op">&lt;-</span> <span class="st">"hid"</span></span></span>
+<span class="r-in"><span>  <span class="va">region</span> <span class="op">&lt;-</span> <span class="st">"region"</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="va">a</span> <span class="op">&lt;-</span> <span class="va">inp</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/duplicated.html" class="external-link">duplicated</a></span><span class="op">(</span><span class="va">inp</span><span class="op">[</span>,<span class="va">hhid</span><span class="op">]</span><span class="op">)</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">hhid</span>, <span class="va">region</span><span class="op">)</span><span class="op">]</span></span></span>
+<span class="r-in"><span>  <span class="va">spl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="va">a</span>, <span class="va">a</span><span class="op">[</span>,<span class="va">region</span><span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">regions</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">inp</span><span class="op">[</span>,<span class="va">region</span><span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="va">tmpres</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">spl</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="va">codes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">3</span><span class="op">:</span><span class="fl">9</span>,<span class="fl">1</span><span class="op">)</span>, sep<span class="op">=</span><span class="st">""</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">spl</span><span class="op">[[</span><span class="va">x</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">district</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">codes</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">spl</span><span class="op">[[</span><span class="va">x</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>, replace<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="va">spl</span><span class="op">[[</span><span class="va">x</span><span class="op">]</span><span class="op">]</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">tmpres</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="st">"rbind"</span>, <span class="va">tmpres</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">tmpres</span> <span class="op">&lt;-</span> <span class="va">tmpres</span><span class="op">[</span>,<span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span><span class="op">]</span></span></span>
+<span class="r-in"><span>  <span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">inp</span>, <span class="va">tmpres</span>, by.x<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">hhid</span><span class="op">)</span>, by.y<span class="op">=</span><span class="va">hhid</span>, all.x<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="va">out</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">eusilcP</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table</a></span><span class="op">(</span><span class="fu">simulate_districts</span><span class="op">(</span><span class="va">eusilcP</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># we generate the input table using the broad region (variable 'region')</span></span></span>
+<span class="r-in"><span><span class="co"># and the districts, we have generated before.</span></span></span>
+<span class="r-in"><span><span class="co">#Generate table with household counts by district</span></span></span>
+<span class="r-in"><span><span class="va">tabHH</span> <span class="op">&lt;-</span> <span class="va">eusilcP</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/duplicated.html" class="external-link">duplicated</a></span><span class="op">(</span><span class="va">hid</span><span class="op">)</span>,<span class="fu">.</span><span class="op">(</span>Freq<span class="op">=</span><span class="va">.N</span><span class="op">)</span>,by<span class="op">=</span><span class="fu">.</span><span class="op">(</span>db040<span class="op">=</span><span class="va">region</span>,<span class="va">district</span><span class="op">)</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/setkey.html" class="external-link">setkey</a></span><span class="op">(</span><span class="va">tabHH</span>,<span class="va">db040</span>,<span class="va">district</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co">#Generate table with person counts by district</span></span></span>
+<span class="r-in"><span><span class="va">tabP</span> <span class="op">&lt;-</span> <span class="va">eusilcP</span><span class="op">[</span>,<span class="fu">.</span><span class="op">(</span>Freq<span class="op">=</span><span class="va">.N</span><span class="op">)</span>,by<span class="op">=</span><span class="fu">.</span><span class="op">(</span>db040<span class="op">=</span><span class="va">region</span>,<span class="va">district</span><span class="op">)</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/setkey.html" class="external-link">setkey</a></span><span class="op">(</span><span class="va">tabP</span>,<span class="va">db040</span>,<span class="va">district</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># we generate a synthetic population</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/setattr.html" class="external-link">setnames</a></span><span class="op">(</span><span class="va">eusilcP</span>,<span class="st">"region"</span>,<span class="st">"db040"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/setattr.html" class="external-link">setnames</a></span><span class="op">(</span><span class="va">eusilcP</span>,<span class="st">"hid"</span>,<span class="st">"db030"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">inp</span> <span class="op">&lt;-</span> <span class="fu"><a href="specifyInput.html">specifyInput</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">eusilcP</span>, hhid<span class="op">=</span><span class="st">"db030"</span>, hhsize<span class="op">=</span><span class="st">"hsize"</span>, strata<span class="op">=</span><span class="st">"db040"</span>,population<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co"># use only HH counts</span></span></span>
+<span class="r-in"><span><span class="va">simPopObj</span> <span class="op">&lt;-</span> <span class="fu"><a href="simStructure.html">simStructure</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">inp</span>, method<span class="op">=</span><span class="st">"direct"</span>, basicHHvars<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"gender"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> the structure is created from a population! </span>
-<span class="r-in"><span class="va">simPopObj1</span> <span class="op">&lt;-</span> <span class="fu">simInitSpatial</span><span class="op">(</span><span class="va">simPopObj</span>, additional<span class="op">=</span><span class="st">"district"</span>, region<span class="op">=</span><span class="st">"db040"</span>, tspatialHH<span class="op">=</span><span class="va">tabHH</span>,</span>
-<span class="r-in">tspatialP<span class="op">=</span><span class="cn">NULL</span>, nr_cpus<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># use only P counts</span></span>
-<span class="r-in"><span class="va">simPopObj</span> <span class="op">&lt;-</span> <span class="fu"><a href="simStructure.html">simStructure</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">inp</span>, method<span class="op">=</span><span class="st">"direct"</span>, basicHHvars<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"gender"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="va">simPopObj1</span> <span class="op">&lt;-</span> <span class="fu">simInitSpatial</span><span class="op">(</span><span class="va">simPopObj</span>, additional<span class="op">=</span><span class="st">"district"</span>, region<span class="op">=</span><span class="st">"db040"</span>, tspatialHH<span class="op">=</span><span class="va">tabHH</span>,</span></span>
+<span class="r-in"><span>tspatialP<span class="op">=</span><span class="cn">NULL</span>, nr_cpus<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># use only P counts</span></span></span>
+<span class="r-in"><span><span class="va">simPopObj</span> <span class="op">&lt;-</span> <span class="fu"><a href="simStructure.html">simStructure</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">inp</span>, method<span class="op">=</span><span class="st">"direct"</span>, basicHHvars<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"gender"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> the structure is created from a population! </span>
-<span class="r-in"><span class="va">simPopObj2</span> <span class="op">&lt;-</span> <span class="fu">simInitSpatial</span><span class="op">(</span><span class="va">simPopObj</span>, additional<span class="op">=</span><span class="st">"district"</span>, region<span class="op">=</span><span class="st">"db040"</span>, tspatialHH<span class="op">=</span><span class="cn">NULL</span>,</span>
-<span class="r-in">tspatialP<span class="op">=</span><span class="va">tabP</span>, nr_cpus <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># use P and HH counts</span></span>
-<span class="r-in"><span class="va">simPopObj</span> <span class="op">&lt;-</span> <span class="fu"><a href="simStructure.html">simStructure</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">inp</span>, method<span class="op">=</span><span class="st">"direct"</span>, basicHHvars<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"gender"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="va">simPopObj2</span> <span class="op">&lt;-</span> <span class="fu">simInitSpatial</span><span class="op">(</span><span class="va">simPopObj</span>, additional<span class="op">=</span><span class="st">"district"</span>, region<span class="op">=</span><span class="st">"db040"</span>, tspatialHH<span class="op">=</span><span class="cn">NULL</span>,</span></span>
+<span class="r-in"><span>tspatialP<span class="op">=</span><span class="va">tabP</span>, nr_cpus <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># use P and HH counts</span></span></span>
+<span class="r-in"><span><span class="va">simPopObj</span> <span class="op">&lt;-</span> <span class="fu"><a href="simStructure.html">simStructure</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">inp</span>, method<span class="op">=</span><span class="st">"direct"</span>, basicHHvars<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"gender"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> the structure is created from a population! </span>
-<span class="r-in"><span class="va">simPopObj3</span> <span class="op">&lt;-</span> <span class="fu">simInitSpatial</span><span class="op">(</span><span class="va">simPopObj</span>, additional<span class="op">=</span><span class="st">"district"</span>, region<span class="op">=</span><span class="st">"db040"</span>, tspatialHH<span class="op">=</span><span class="va">tabHH</span>,</span>
-<span class="r-in">tspatialP<span class="op">=</span><span class="va">tabP</span>, nr_cpus <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span class="r-in"><span class="co"># }</span></span>
-<span class="r-in"></span>
+<span class="r-in"><span><span class="va">simPopObj3</span> <span class="op">&lt;-</span> <span class="fu">simInitSpatial</span><span class="op">(</span><span class="va">simPopObj</span>, additional<span class="op">=</span><span class="st">"district"</span>, region<span class="op">=</span><span class="st">"db040"</span>, tspatialHH<span class="op">=</span><span class="va">tabHH</span>,</span></span>
+<span class="r-in"><span>tspatialP<span class="op">=</span><span class="va">tabP</span>, nr_cpus <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -232,7 +232,7 @@ Information. <em>Journal of Statistical Survey</em>, <strong>79</strong> (10), 1
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

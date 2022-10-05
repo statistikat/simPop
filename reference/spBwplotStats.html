@@ -18,7 +18,7 @@ continuous or semi-continuous variables, taking into account sample weights."><!
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">simPop</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.1.0</span>
       </span>
     </div>
 
@@ -52,7 +52,7 @@ continuous or semi-continuous variables, taking into account sample weights.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">spBwplotStats</span><span class="op">(</span><span class="va">x</span>, weights <span class="op">=</span> <span class="cn">NULL</span>, coef <span class="op">=</span> <span class="fl">1.5</span>, zeros <span class="op">=</span> <span class="cn">TRUE</span>, do.out <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">spBwplotStats</span><span class="op">(</span><span class="va">x</span>, weights <span class="op">=</span> <span class="cn">NULL</span>, coef <span class="op">=</span> <span class="fl">1.5</span>, zeros <span class="op">=</span> <span class="cn">TRUE</span>, do.out <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -131,12 +131,12 @@ plots (not considering semi-continuous variables).</p></div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## semi-continuous variable</span></span>
-<span class="r-in"><span class="fu">spBwplotStats</span><span class="op">(</span><span class="va">eusilcS</span><span class="op">$</span><span class="va">netIncome</span>, </span>
-<span class="r-in">    weights<span class="op">=</span><span class="va">eusilcS</span><span class="op">$</span><span class="va">rb050</span>, do.out <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## semi-continuous variable</span></span></span>
+<span class="r-in"><span><span class="fu">spBwplotStats</span><span class="op">(</span><span class="va">eusilcS</span><span class="op">$</span><span class="va">netIncome</span>, </span></span>
+<span class="r-in"><span>    weights<span class="op">=</span><span class="va">eusilcS</span><span class="op">$</span><span class="va">rb050</span>, do.out <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $stats</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] -5809.40  9754.64 15812.21 22161.47 40757.02</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -151,7 +151,7 @@ plots (not considering semi-continuous variables).</p></div>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "spBwplotStats"</span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -166,7 +166,7 @@ plots (not considering semi-continuous variables).</p></div>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

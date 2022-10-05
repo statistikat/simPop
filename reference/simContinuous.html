@@ -21,7 +21,7 @@ predictors need to be simulated beforehand."><!-- mathjax --><script src="https:
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">simPop</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.1.0</span>
       </span>
     </div>
 
@@ -58,39 +58,39 @@ predictors need to be simulated beforehand.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">simContinuous</span><span class="op">(</span>
-  <span class="va">simPopObj</span>,
-  additional <span class="op">=</span> <span class="st">"netIncome"</span>,
-  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"multinom"</span>, <span class="st">"lm"</span>, <span class="st">"poisson"</span>, <span class="st">"xgboost"</span><span class="op">)</span>,
-  zeros <span class="op">=</span> <span class="cn">TRUE</span>,
-  breaks <span class="op">=</span> <span class="cn">NULL</span>,
-  lower <span class="op">=</span> <span class="cn">NULL</span>,
-  upper <span class="op">=</span> <span class="cn">NULL</span>,
-  equidist <span class="op">=</span> <span class="cn">TRUE</span>,
-  probs <span class="op">=</span> <span class="cn">NULL</span>,
-  gpd <span class="op">=</span> <span class="cn">TRUE</span>,
-  threshold <span class="op">=</span> <span class="cn">NULL</span>,
-  est <span class="op">=</span> <span class="st">"moments"</span>,
-  limit <span class="op">=</span> <span class="cn">NULL</span>,
-  censor <span class="op">=</span> <span class="cn">NULL</span>,
-  log <span class="op">=</span> <span class="cn">TRUE</span>,
-  const <span class="op">=</span> <span class="cn">NULL</span>,
-  alpha <span class="op">=</span> <span class="fl">0.01</span>,
-  residuals <span class="op">=</span> <span class="cn">TRUE</span>,
-  keep <span class="op">=</span> <span class="cn">TRUE</span>,
-  maxit <span class="op">=</span> <span class="fl">500</span>,
-  MaxNWts <span class="op">=</span> <span class="fl">1500</span>,
-  tol <span class="op">=</span> <span class="va">.Machine</span><span class="op">$</span><span class="va">double.eps</span><span class="op">^</span><span class="fl">0.5</span>,
-  nr_cpus <span class="op">=</span> <span class="cn">NULL</span>,
-  eps <span class="op">=</span> <span class="cn">NULL</span>,
-  regModel <span class="op">=</span> <span class="st">"basic"</span>,
-  byHousehold <span class="op">=</span> <span class="cn">NULL</span>,
-  imputeMissings <span class="op">=</span> <span class="cn">FALSE</span>,
-  <span class="va">seed</span>,
-  verbose <span class="op">=</span> <span class="cn">FALSE</span>,
-  by <span class="op">=</span> <span class="st">"strata"</span>,
-  model_params <span class="op">=</span> <span class="cn">NULL</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">simContinuous</span><span class="op">(</span></span>
+<span>  <span class="va">simPopObj</span>,</span>
+<span>  additional <span class="op">=</span> <span class="st">"netIncome"</span>,</span>
+<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"multinom"</span>, <span class="st">"lm"</span>, <span class="st">"poisson"</span>, <span class="st">"xgboost"</span><span class="op">)</span>,</span>
+<span>  zeros <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  breaks <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  lower <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  upper <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  equidist <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  probs <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  gpd <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  threshold <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  est <span class="op">=</span> <span class="st">"moments"</span>,</span>
+<span>  limit <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  censor <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  log <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  const <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="fl">0.01</span>,</span>
+<span>  residuals <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  keep <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  maxit <span class="op">=</span> <span class="fl">500</span>,</span>
+<span>  MaxNWts <span class="op">=</span> <span class="fl">1500</span>,</span>
+<span>  tol <span class="op">=</span> <span class="va">.Machine</span><span class="op">$</span><span class="va">double.eps</span><span class="op">^</span><span class="fl">0.5</span>,</span>
+<span>  nr_cpus <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  eps <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  regModel <span class="op">=</span> <span class="st">"basic"</span>,</span>
+<span>  byHousehold <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  imputeMissings <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">seed</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  by <span class="op">=</span> <span class="st">"strata"</span>,</span>
+<span>  model_params <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -371,37 +371,37 @@ Information. <em>Journal of Statistical Survey</em>, <strong>79</strong> (10), 1
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">)</span></span>
-<span class="r-in"><span class="co"># \donttest{</span></span>
-<span class="r-in"><span class="co">## approx. 20 seconds computation time</span></span>
-<span class="r-in"><span class="va">inp</span> <span class="op">&lt;-</span> <span class="fu"><a href="specifyInput.html">specifyInput</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">eusilcS</span>, hhid<span class="op">=</span><span class="st">"db030"</span>, hhsize<span class="op">=</span><span class="st">"hsize"</span>, strata<span class="op">=</span><span class="st">"db040"</span>, weight<span class="op">=</span><span class="st">"db090"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">simPop</span> <span class="op">&lt;-</span> <span class="fu"><a href="simStructure.html">simStructure</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">inp</span>, method<span class="op">=</span><span class="st">"direct"</span>,</span>
-<span class="r-in">  basicHHvars<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"rb090"</span>, <span class="st">"hsize"</span>, <span class="st">"pl030"</span>, <span class="st">"pb220a"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">regModel</span> <span class="op">=</span> <span class="op">~</span><span class="va">rb090</span><span class="op">+</span><span class="va">hsize</span><span class="op">+</span><span class="va">pl030</span><span class="op">+</span><span class="va">pb220a</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># multinomial model with random draws</span></span>
-<span class="r-in"><span class="va">eusilcM</span> <span class="op">&lt;-</span> <span class="fu">simContinuous</span><span class="op">(</span><span class="va">simPop</span>, additional<span class="op">=</span><span class="st">"netIncome"</span>,</span>
-<span class="r-in">              regModel <span class="op">=</span> <span class="va">regModel</span>,</span>
-<span class="r-in">              upper<span class="op">=</span><span class="fl">200000</span>, equidist<span class="op">=</span><span class="cn">FALSE</span>, nr_cpus<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">eusilcM</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co">## approx. 20 seconds computation time</span></span></span>
+<span class="r-in"><span><span class="va">inp</span> <span class="op">&lt;-</span> <span class="fu"><a href="specifyInput.html">specifyInput</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">eusilcS</span>, hhid<span class="op">=</span><span class="st">"db030"</span>, hhsize<span class="op">=</span><span class="st">"hsize"</span>, strata<span class="op">=</span><span class="st">"db040"</span>, weight<span class="op">=</span><span class="st">"db090"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">simPop</span> <span class="op">&lt;-</span> <span class="fu"><a href="simStructure.html">simStructure</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">inp</span>, method<span class="op">=</span><span class="st">"direct"</span>,</span></span>
+<span class="r-in"><span>  basicHHvars<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"rb090"</span>, <span class="st">"hsize"</span>, <span class="st">"pl030"</span>, <span class="st">"pb220a"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">regModel</span> <span class="op">=</span> <span class="op">~</span><span class="va">rb090</span><span class="op">+</span><span class="va">hsize</span><span class="op">+</span><span class="va">pl030</span><span class="op">+</span><span class="va">pb220a</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># multinomial model with random draws</span></span></span>
+<span class="r-in"><span><span class="va">eusilcM</span> <span class="op">&lt;-</span> <span class="fu">simContinuous</span><span class="op">(</span><span class="va">simPop</span>, additional<span class="op">=</span><span class="st">"netIncome"</span>,</span></span>
+<span class="r-in"><span>              regModel <span class="op">=</span> <span class="va">regModel</span>,</span></span>
+<span class="r-in"><span>              upper<span class="op">=</span><span class="fl">200000</span>, equidist<span class="op">=</span><span class="cn">FALSE</span>, nr_cpus<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">eusilcM</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "simPopObj"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"package")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "simPop"</span>
-<span class="r-in"><span class="co"># }</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># \donttest{</span></span>
-<span class="r-in"><span class="co"># two-step regression</span></span>
-<span class="r-in"><span class="va">eusilcT</span> <span class="op">&lt;-</span> <span class="fu">simContinuous</span><span class="op">(</span><span class="va">simPop</span>, additional<span class="op">=</span><span class="st">"netIncome"</span>,</span>
-<span class="r-in">              regModel <span class="op">=</span> <span class="st">"basic"</span>,</span>
-<span class="r-in">              method <span class="op">=</span> <span class="st">"lm"</span>, nr_cpus<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">eusilcT</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co"># two-step regression</span></span></span>
+<span class="r-in"><span><span class="va">eusilcT</span> <span class="op">&lt;-</span> <span class="fu">simContinuous</span><span class="op">(</span><span class="va">simPop</span>, additional<span class="op">=</span><span class="st">"netIncome"</span>,</span></span>
+<span class="r-in"><span>              regModel <span class="op">=</span> <span class="st">"basic"</span>,</span></span>
+<span class="r-in"><span>              method <span class="op">=</span> <span class="st">"lm"</span>, nr_cpus<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">eusilcT</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "simPopObj"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"package")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "simPop"</span>
-<span class="r-in"><span class="co"># }</span></span>
-<span class="r-in"></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -416,7 +416,7 @@ Information. <em>Journal of Statistical Survey</em>, <strong>79</strong> (10), 1
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

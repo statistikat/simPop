@@ -19,7 +19,7 @@ optionally some margins in form of a table (slot table)."><!-- mathjax --><scrip
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">simPop</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.1.0</span>
       </span>
     </div>
 
@@ -70,8 +70,8 @@ function <code><a href="simStructure.html">simStructure</a></code>.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="fu">showClass</span><span class="op">(</span><span class="st">"simPopObj"</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">showClass</span><span class="op">(</span><span class="st">"simPopObj"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Class "simPopObj" [package "simPop"]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Slots:</span>
@@ -80,17 +80,17 @@ function <code><a href="simStructure.html">simStructure</a></code>.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Class:   dataObjOrNULL dataframeOrNULL   dataObjOrNULL characterOrNULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Extends: "df_or_dataObj_or_simPopObj"</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## show method: generate an object of class simPop first</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">inp</span> <span class="op">&lt;-</span> <span class="fu"><a href="specifyInput.html">specifyInput</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">eusilcS</span>, hhid<span class="op">=</span><span class="st">"db030"</span>, hhsize<span class="op">=</span><span class="st">"hsize"</span>, strata<span class="op">=</span><span class="st">"db040"</span>, weight<span class="op">=</span><span class="st">"db090"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">eusilcP</span> <span class="op">&lt;-</span> <span class="fu"><a href="simStructure.html">simStructure</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">inp</span>, method<span class="op">=</span><span class="st">"direct"</span>, basicHHvars<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"rb090"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">eusilcP</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## show method: generate an object of class simPop first</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">inp</span> <span class="op">&lt;-</span> <span class="fu"><a href="specifyInput.html">specifyInput</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">eusilcS</span>, hhid<span class="op">=</span><span class="st">"db030"</span>, hhsize<span class="op">=</span><span class="st">"hsize"</span>, strata<span class="op">=</span><span class="st">"db040"</span>, weight<span class="op">=</span><span class="st">"db090"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">eusilcP</span> <span class="op">&lt;-</span> <span class="fu"><a href="simStructure.html">simStructure</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">inp</span>, method<span class="op">=</span><span class="st">"direct"</span>, basicHHvars<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"rb090"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">eusilcP</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "simPopObj"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"package")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "simPop"</span>
-<span class="r-in"><span class="co">## shows some basic information:</span></span>
-<span class="r-in"><span class="va">eusilcP</span></span>
+<span class="r-in"><span><span class="co">## shows some basic information:</span></span></span>
+<span class="r-in"><span><span class="va">eusilcP</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> -------------- </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> synthetic population  of size </span>
@@ -102,7 +102,7 @@ function <code><a href="simStructure.html">simStructure</a></code>.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> variables in the population:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> db030,hsize,db040,age,rb090,pid,weight</span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -117,7 +117,7 @@ function <code><a href="simStructure.html">simStructure</a></code>.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

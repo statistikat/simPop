@@ -19,7 +19,7 @@ simEUSILC."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">simPop</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.1.0</span>
       </span>
     </div>
 
@@ -54,7 +54,7 @@ function that is useful for writing custom wrapper functions such as
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">getCat</span><span class="op">(</span><span class="va">x</span>, <span class="va">breaks</span>, zeros <span class="op">=</span> <span class="cn">TRUE</span>, right <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">getCat</span><span class="op">(</span><span class="va">x</span>, <span class="va">breaks</span>, zeros <span class="op">=</span> <span class="cn">TRUE</span>, right <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -103,14 +103,14 @@ left-open and right-closed.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## semi-continuous variable</span></span>
-<span class="r-in"><span class="va">breaks</span> <span class="op">&lt;-</span> <span class="fu"><a href="getBreaks.html">getBreaks</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">$</span><span class="va">netIncome</span>, </span>
-<span class="r-in">    weights<span class="op">=</span><span class="va">eusilcS</span><span class="op">$</span><span class="va">rb050</span>, equidist <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">netIncomeCat</span> <span class="op">&lt;-</span> <span class="fu">getCat</span><span class="op">(</span><span class="va">eusilcS</span><span class="op">$</span><span class="va">netIncome</span>, <span class="va">breaks</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">netIncomeCat</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## semi-continuous variable</span></span></span>
+<span class="r-in"><span><span class="va">breaks</span> <span class="op">&lt;-</span> <span class="fu"><a href="getBreaks.html">getBreaks</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">$</span><span class="va">netIncome</span>, </span></span>
+<span class="r-in"><span>    weights<span class="op">=</span><span class="va">eusilcS</span><span class="op">$</span><span class="va">rb050</span>, equidist <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">netIncomeCat</span> <span class="op">&lt;-</span> <span class="fu">getCat</span><span class="op">(</span><span class="va">eusilcS</span><span class="op">$</span><span class="va">netIncome</span>, <span class="va">breaks</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">netIncomeCat</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [-5.81e+03,-4.37e+03) [-4.37e+03,-3.11e+03)         [-3.11e+03,0) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                     1                     1                     1 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                     0               (0,636]        (636,2.64e+03] </span>
@@ -123,7 +123,7 @@ left-open and right-closed.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                   411                   329                    79 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                  NA's </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                  2203 </span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -138,7 +138,7 @@ left-open and right-closed.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>

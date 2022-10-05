@@ -29,7 +29,7 @@ and the true population of interest."><!-- mathjax --><script src="https://cdnjs
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">simPop</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.1.0</span>
       </span>
     </div>
 
@@ -122,19 +122,19 @@ with Application in the Case of EU-SILC. In J Domingo-Ferrer, E Magkos (eds.),
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="co">## we use synthetic eusilcS survey sample data </span></span>
-<span class="r-in"><span class="co">## included in the package to simulate a population</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## create the structure</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">)</span></span>
-<span class="r-in"><span class="co"># \donttest{</span></span>
-<span class="r-in"><span class="co">## approx. 20 seconds computation time</span></span>
-<span class="r-in"><span class="va">inp</span> <span class="op">&lt;-</span> <span class="fu"><a href="specifyInput.html">specifyInput</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">eusilcS</span>, hhid<span class="op">=</span><span class="st">"db030"</span>, hhsize<span class="op">=</span><span class="st">"hsize"</span>, strata<span class="op">=</span><span class="st">"db040"</span>, weight<span class="op">=</span><span class="st">"db090"</span><span class="op">)</span></span>
-<span class="r-in"><span class="co">## in the following, nr_cpus are selected automatically</span></span>
-<span class="r-in"><span class="va">simPop</span> <span class="op">&lt;-</span> <span class="fu"><a href="simStructure.html">simStructure</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">inp</span>, method<span class="op">=</span><span class="st">"direct"</span>, basicHHvars<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"rb090"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">simPop</span> <span class="op">&lt;-</span> <span class="fu"><a href="simCategorical.html">simCategorical</a></span><span class="op">(</span><span class="va">simPop</span>, additional<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pl030"</span>, <span class="st">"pb220a"</span><span class="op">)</span>, method<span class="op">=</span><span class="st">"multinom"</span>, nr_cpus<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">simPop</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## we use synthetic eusilcS survey sample data </span></span></span>
+<span class="r-in"><span><span class="co">## included in the package to simulate a population</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## create the structure</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co">## approx. 20 seconds computation time</span></span></span>
+<span class="r-in"><span><span class="va">inp</span> <span class="op">&lt;-</span> <span class="fu"><a href="specifyInput.html">specifyInput</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">eusilcS</span>, hhid<span class="op">=</span><span class="st">"db030"</span>, hhsize<span class="op">=</span><span class="st">"hsize"</span>, strata<span class="op">=</span><span class="st">"db040"</span>, weight<span class="op">=</span><span class="st">"db090"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co">## in the following, nr_cpus are selected automatically</span></span></span>
+<span class="r-in"><span><span class="va">simPop</span> <span class="op">&lt;-</span> <span class="fu"><a href="simStructure.html">simStructure</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">inp</span>, method<span class="op">=</span><span class="st">"direct"</span>, basicHHvars<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"rb090"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">simPop</span> <span class="op">&lt;-</span> <span class="fu"><a href="simCategorical.html">simCategorical</a></span><span class="op">(</span><span class="va">simPop</span>, additional<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pl030"</span>, <span class="st">"pb220a"</span><span class="op">)</span>, method<span class="op">=</span><span class="st">"multinom"</span>, nr_cpus<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">simPop</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> -------------- </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> synthetic population  of size </span>
@@ -146,29 +146,29 @@ with Application in the Case of EU-SILC. In J Domingo-Ferrer, E Magkos (eds.),
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> variables in the population:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> db030,hsize,db040,age,rb090,pid,weight,pl030,pb220a</span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">simPop</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">simPop</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "simPopObj"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"package")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "simPop"</span>
-<span class="r-in"><span class="va">regModel</span> <span class="op">=</span> <span class="op">~</span><span class="va">rb090</span><span class="op">+</span><span class="va">hsize</span><span class="op">+</span><span class="va">pl030</span><span class="op">+</span><span class="va">pb220a</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## multinomial model with random draws</span></span>
-<span class="r-in"><span class="va">eusilcM</span> <span class="op">&lt;-</span> <span class="fu"><a href="simContinuous.html">simContinuous</a></span><span class="op">(</span><span class="va">simPop</span>, additional<span class="op">=</span><span class="st">"netIncome"</span>,</span>
-<span class="r-in">              regModel <span class="op">=</span> <span class="va">regModel</span>,</span>
-<span class="r-in">              upper<span class="op">=</span><span class="fl">200000</span>, equidist<span class="op">=</span><span class="cn">FALSE</span>, nr_cpus<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">eusilcM</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="va">regModel</span> <span class="op">=</span> <span class="op">~</span><span class="va">rb090</span><span class="op">+</span><span class="va">hsize</span><span class="op">+</span><span class="va">pl030</span><span class="op">+</span><span class="va">pb220a</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## multinomial model with random draws</span></span></span>
+<span class="r-in"><span><span class="va">eusilcM</span> <span class="op">&lt;-</span> <span class="fu"><a href="simContinuous.html">simContinuous</a></span><span class="op">(</span><span class="va">simPop</span>, additional<span class="op">=</span><span class="st">"netIncome"</span>,</span></span>
+<span class="r-in"><span>              regModel <span class="op">=</span> <span class="va">regModel</span>,</span></span>
+<span class="r-in"><span>              upper<span class="op">=</span><span class="fl">200000</span>, equidist<span class="op">=</span><span class="cn">FALSE</span>, nr_cpus<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">eusilcM</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "simPopObj"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"package")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "simPop"</span>
-<span class="r-in"><span class="co"># }</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co">## this is already a basic synthetic population, but</span></span>
-<span class="r-in"><span class="co">## many other functions in the package might now </span></span>
-<span class="r-in"><span class="co">## be used for fine-tuning, adding further variables, </span></span>
-<span class="r-in"><span class="co">## evaluating the quality, adding finer geographical details, </span></span>
-<span class="r-in"><span class="co">## using different methods, calibrating surveys or populations, etc. </span></span>
-<span class="r-in"><span class="co">## -- see Templ et al. (2017) for more details.</span></span>
-<span class="r-in"></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## this is already a basic synthetic population, but</span></span></span>
+<span class="r-in"><span><span class="co">## many other functions in the package might now </span></span></span>
+<span class="r-in"><span><span class="co">## be used for fine-tuning, adding further variables, </span></span></span>
+<span class="r-in"><span><span class="co">## evaluating the quality, adding finer geographical details, </span></span></span>
+<span class="r-in"><span><span class="co">## using different methods, calibrating surveys or populations, etc. </span></span></span>
+<span class="r-in"><span><span class="co">## -- see Templ et al. (2017) for more details.</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -183,7 +183,7 @@ with Application in the Case of EU-SILC. In J Domingo-Ferrer, E Magkos (eds.),
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>
