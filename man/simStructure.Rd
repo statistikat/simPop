@@ -8,7 +8,8 @@ simStructure(
   dataS,
   method = c("direct", "multinom", "distribution"),
   basicHHvars,
-  seed = 1
+  seed = 1,
+  MaxNWts = 1e+07
 )
 }
 \arguments{
@@ -31,6 +32,9 @@ variables such as age or sex may be used.}
 \item{seed}{optional; an integer value to be used as the seed of the random
 number generator, or an integer vector containing the state of the random
 number generator to be restored.}
+
+\item{MaxNWts}{optional; an integer value for the multinom method for controlling 
+the maximum number of weights.}
 }
 \value{
 An object of class \code{simPopObj} containing the simulated

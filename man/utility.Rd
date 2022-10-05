@@ -45,13 +45,13 @@ Various utility measues that basically compares two data sets
 }
 \section{Functions}{
 \itemize{
-\item \code{utility}: comparisons of two data sets
+\item \code{utility()}: comparisons of two data sets
 
-\item \code{utilityModal}: comparison of number of categories
+\item \code{utilityModal()}: comparison of number of categories
 
-\item \code{utilityIndicator}: difference between two values
+\item \code{utilityIndicator()}: difference between two values
+
 }}
-
 \examples{
 data(eusilcS)
 data(eusilcP)
