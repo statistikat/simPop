@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">simPop</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.1.1</span>
       </span>
     </div>
 
@@ -102,9 +102,9 @@ If NULL, the names of the selected variable should be the same in both x and y.<
     <div id="functions">
     <h2>Functions</h2>
     
-<ul><li><p><code>utility()</code>: comparisons of two data sets</p></li>
-<li><p><code>utilityModal()</code>: comparison of number of categories</p></li>
-<li><p><code>utilityIndicator()</code>: difference between two values</p></li>
+<ul><li><p><code>utility</code>: comparisons of two data sets</p></li>
+<li><p><code>utilityModal</code>: comparison of number of categories</p></li>
+<li><p><code>utilityIndicator</code>: difference between two values</p></li>
 </ul></div>
     <div id="author">
     <h2>Author</h2>
@@ -116,6 +116,7 @@ If NULL, the names of the selected variable should be the same in both x and y.<
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcP</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co">## for fast caluclations, took a subsample</span></span></span>
+<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="va">eusilcP</span> <span class="op">&lt;-</span> <span class="va">eusilcP</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">15000</span>, <span class="op">]</span></span></span>
 <span class="r-in"><span><span class="fu">utility</span><span class="op">(</span><span class="va">eusilcS</span>, <span class="va">eusilcP</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $compareColumns</span>
@@ -130,12 +131,15 @@ If NULL, the names of the selected variable should be the same in both x and y.<
 <span class="r-out co"><span class="r-pr">#&gt;</span> $compareNA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.8492675</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
+<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcP</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">utilityModal</span><span class="op">(</span><span class="va">eusilcS</span>, <span class="va">eusilcP</span>, <span class="st">"age"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.989899</span>
 <span class="r-in"><span><span class="fu">utilityModal</span><span class="op">(</span><span class="va">eusilcS</span>, <span class="va">eusilcP</span>, <span class="st">"pl030"</span>, <span class="st">"ecoStat"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcP</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">m1</span> <span class="op">&lt;-</span> <span class="fu"><a href="weighted_estimators.html">meanWt</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">$</span><span class="va">age</span>, <span class="va">eusilcS</span><span class="op">$</span><span class="va">rb050</span><span class="op">)</span> </span></span>
