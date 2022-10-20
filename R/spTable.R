@@ -24,12 +24,14 @@
 #' 
 #' set.seed(1234)  # for reproducibility
 #' data(eusilcS)   # load sample data
+#' \donttest{
 #' samp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize",
 #'   strata="db040", weight="db090")
 #' eusilcP <- simStructure(data=samp, method="direct", basicHHvars=c("age", "rb090"))
 #' res <- spTable(eusilcP, select = c("age", "rb090"))
 #' class(res)
 #' res
+#' }
 spTable <- function(inp, select) {
   if ( !inherits(inp, "simPopObj") ){
     stop("wrong input! Argument 'inp' must be of class 'simPopObj'!\n")

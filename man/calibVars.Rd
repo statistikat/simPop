@@ -28,11 +28,13 @@ are implemented:
 \examples{
 data(eusilcS)
 # default method
+\donttest{
 aux <- calibVars(eusilcS$rb090)
 head(aux)
 # data.frame method
 aux <- calibVars(eusilcS[, c("db040", "rb090")])
 head(aux)
+}
 }
 \references{
 M. Templ, B. Meindl, A. Kowarik, A. Alfons, O. Dupriez (2017) Simulation of Synthetic Populations for Survey Data Considering Auxiliary

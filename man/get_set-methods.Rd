@@ -52,6 +52,7 @@ slot \code{sample} of the \code{\link{simPopObj-class}}-object.
 \examples{
 
 data(eusilcS)
+\donttest{
 inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040",
 weight="db090")
 simPopObj <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090"))
@@ -75,6 +76,7 @@ pop(simPopObj, var="newvar") <- NULL
 head(pop(simPopObj, var="newvar"))
 ## extract multiple variables
 head(pop(simPopObj, var=c("db030","db040")))
+}
 
 }
 \seealso{

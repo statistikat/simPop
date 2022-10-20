@@ -31,6 +31,7 @@
 #' @export
 #' @examples
 #' set.seed(1234)  # for reproducibility
+#' \donttest{
 #' data(eusilcS)   # load sample data
 #' samp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize",
 #'   strata="db040", weight="db090")
@@ -46,6 +47,7 @@
 #' # differences with expected population sizes
 #' spMosaic(tab, method = "color",
 #'   labeling=labeling_border(abbreviate=c(db040=TRUE)))
+#' }
 #'
 spMosaic <- function(x, method = c("split", "color"), ...) {
   if ( !inherits(x, "spTable" ) ){

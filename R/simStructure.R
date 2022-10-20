@@ -40,10 +40,12 @@
 #' @examples
 #' 
 #' data(eusilcS)
+#' \donttest{
 #' inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
 #' eusilcP <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090"))
 #' class(eusilcP)
 #' eusilcP
+#' }
 #' 
 simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), basicHHvars, seed=1, MaxNWts = 10000000) {
   if ( !inherits(dataS, "dataObj" ) ){

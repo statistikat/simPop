@@ -2,8 +2,8 @@ Package: simPop
 Type: Package
 Title: Simulation of Complex Synthetic Data
     Information
-Version: 2.1.0
-Date: 2022-10-05
+Version: 2.1.1
+Date: 2022-10-19
 Authors@R: c(
   person("Matthias", "Templ", email = "matthias.templ@gmail.com", role = c("aut","cre")),
   person("Alexander", "Kowarik", email = "alexander.kowarik@statistik.gv.at", role = c("aut"), comment=c(ORCID="0000-0001-8598-4130")),

@@ -168,7 +168,7 @@ double calcCase2(Rcpp::NumericVector &x){
   
   Rcpp::NumericVector x_2 = as<NumericVector>(sign(x)) * pow(x,2.0);
   double probx = sum(x_2);
-  probx = sqrt(abs(probx)) * std::copysign(1.0,probx);
+  probx = sqrt(fabs(probx)) * std::copysign(1.0,probx);
   
   return(probx);
   
@@ -218,8 +218,8 @@ Rcpp::List calcProbabilities(Rcpp::IntegerMatrix &indexMat, Rcpp::NumericVector 
     // if number of draws succeeds highest positived difference to target margins
     probAdd = (probAdd*max(x)*m_value + probRemove*(n_add-max(x)*m_value))/n_add;
   }
-  if(abs(min(x)*m_value)<n_remove){
-    probRemove = (probRemove*abs(min(x)*m_value) + probAdd*(n_remove-abs(min(x)*m_value)))/n_remove;
+  if(fabs(min(x)*m_value)<n_remove){
+    probRemove = (probRemove*fabs(min(x)*m_value) + probAdd*(n_remove-fabs(min(x)*m_value)))/n_remove;
   }
   
   // for(int i=0;i<probAdd.size();i++){

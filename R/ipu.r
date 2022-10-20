@@ -46,6 +46,7 @@
 #' # generate input matrix
 #' # we want to adjust to variable "db040" (region) as household variables and
 #' # variable "rb090" (gender) as individual information
+#' \donttest{
 #' library(data.table)
 #' samp <- data.table(eusilcS)
 #' pop <-  data.table(eusilcP)
@@ -83,6 +84,7 @@
 #'   sum(res[,x]*res$weights)
 #' })
 #' data.frame(required=unlist(con), is=is)
+#' }
 ipu <- function(inp, con, hid=NULL, eps=1e-07, verbose=FALSE) {
   if ( class(inp)[1] %in% c("data.frame", "data.table") ) {
     cnames <- colnames(inp)

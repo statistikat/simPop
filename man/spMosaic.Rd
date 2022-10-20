@@ -31,6 +31,7 @@ plot of this table is then produced using \code{\link[vcd]{cotabplot}}.
 }
 \examples{
 set.seed(1234)  # for reproducibility
+\donttest{
 data(eusilcS)   # load sample data
 samp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize",
   strata="db040", weight="db090")
@@ -46,6 +47,7 @@ spMosaic(tab, method = "split",
 # differences with expected population sizes
 spMosaic(tab, method = "color",
   labeling=labeling_border(abbreviate=c(db040=TRUE)))
+}
 
 }
 \references{

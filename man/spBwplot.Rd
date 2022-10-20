@@ -96,7 +96,6 @@ simPop <- simStructure(data=inp, method="direct",
 eusilcM <- simContinuous(simPop, additional="netIncome",
   regModel  = ~rb090+hsize+pl030+pb220a+hsize,
   upper=200000, equidist=FALSE, nr_cpus=1)
-class(eusilcM)
 
 # plot results
 spBwplot(eusilcM, x="netIncome", cond=NULL)

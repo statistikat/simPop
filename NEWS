@@ -1,5 +1,8 @@
+Changes in simPop version 2.1.1
+  * warning in updateVec.cpp resolved
+  
 Changes in simPop version 2.1.0
-  * the deprecated functions ipu2 and kishFactor are removed
+  * ipu2 is now removed and available in package surveysd
   
 Changes in simPop version 1.2.0
   * simRelation now works with sp-called basic variables

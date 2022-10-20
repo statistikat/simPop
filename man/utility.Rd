@@ -45,23 +45,27 @@ Various utility measues that basically compares two data sets
 }
 \section{Functions}{
 \itemize{
-\item \code{utility()}: comparisons of two data sets
+\item \code{utility}: comparisons of two data sets
 
-\item \code{utilityModal()}: comparison of number of categories
+\item \code{utilityModal}: comparison of number of categories
 
-\item \code{utilityIndicator()}: difference between two values
-
+\item \code{utilityIndicator}: difference between two values
 }}
+
 \examples{
 data(eusilcS)
 data(eusilcP)
 ## for fast caluclations, took a subsample
+\donttest{
 eusilcP <- eusilcP[1:15000, ]
 utility(eusilcS, eusilcP)
+}
+\donttest{
 data(eusilcS)
 data(eusilcP)
 utilityModal(eusilcS, eusilcP, "age")
 utilityModal(eusilcS, eusilcP, "pl030", "ecoStat")
+}
 data(eusilcS)
 data(eusilcP)
 m1 <- meanWt(eusilcS$age, eusilcS$rb050) 

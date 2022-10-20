@@ -24,8 +24,10 @@ NULL
 #' data(eusilcS)
 #' data(eusilcP)
 #' ## for fast caluclations, took a subsample
+#' \donttest{
 #' eusilcP <- eusilcP[1:15000, ]
 #' utility(eusilcS, eusilcP)
+#' }
 #' @export
 # Basic similarity measures about structure of PUFs
 utility <- function(x, y, type=c("all", "compareColumns", "compareRows", "compareRowsHH", "compareNA"), hhid = NULL){
@@ -93,10 +95,12 @@ utility <- function(x, y, type=c("all", "compareColumns", "compareRows", "compar
 #' @param vary NULL or name or index of a variable in data.frame y corresponding to variable varx in data.frame x. 
 #' If NULL, the names of the selected variable should be the same in both x and y.
 #' @examples 
+#' \donttest{
 #' data(eusilcS)
 #' data(eusilcP)
 #' utilityModal(eusilcS, eusilcP, "age")
 #' utilityModal(eusilcS, eusilcP, "pl030", "ecoStat")
+#' }
 #' @export
 utilityModal <- function(x, y, varx, vary=NULL){
   if(is.null(vary)){ 

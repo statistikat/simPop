@@ -55,6 +55,7 @@ eusilcP$hsize  <- factor(eusilcP$hsize , levels = levels(eusilcS$hsize))
 # generate input matrix
 # we want to adjust to variable "db040" (region) as household variables and
 # variable "rb090" (gender) as individual information
+\donttest{
 library(data.table)
 samp <- data.table(eusilcS)
 pop <-  data.table(eusilcP)
@@ -92,6 +93,7 @@ is <- sapply(2:(ncol(res)-1), function(x) {
   sum(res[,x]*res$weights)
 })
 data.frame(required=unlist(con), is=is)
+}
 }
 \author{
 Bernhard Meindl

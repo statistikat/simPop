@@ -25,11 +25,13 @@
 #' @examples
 #' data(eusilcS)
 #' # default method
+#' \donttest{
 #' aux <- calibVars(eusilcS$rb090)
 #' head(aux)
 #' # data.frame method
 #' aux <- calibVars(eusilcS[, c("db040", "rb090")])
 #' head(aux)
+#' }
 calibVars <- function(x) UseMethod("calibVars")
 
 #' @export

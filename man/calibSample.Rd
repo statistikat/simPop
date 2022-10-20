@@ -40,6 +40,7 @@ variable names (and levels) of the specified input data set.  } }
 \examples{
 data(eusilcS)
 eusilcS$agecut <- cut(eusilcS$age, 7)
+\donttest{
 inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
 
 ## for simplicity, we are using population data directly from the sample, but you get the idea
@@ -63,6 +64,7 @@ weights2 <- calibSample(inp, totals2)
 totals2.df <- as.data.frame(totals2)
 weights2.df <- calibSample(inp, totals2.df)
 identical(weights2, weights2.df)
+}
 
 \dontrun{
 ## approx 10 seconds computation time ...
