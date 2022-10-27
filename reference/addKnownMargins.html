@@ -99,7 +99,7 @@ Information. <em>Journal of Statistical Survey</em>, <strong>79</strong> (10), 1
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcP</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span><span class="co">## approx. 20 seconds computation time</span></span></span>
 <span class="r-in"><span><span class="va">inp</span> <span class="op">&lt;-</span> <span class="fu"><a href="specifyInput.html">specifyInput</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">eusilcS</span>, hhid<span class="op">=</span><span class="st">"db030"</span>, hhsize<span class="op">=</span><span class="st">"hsize"</span>, strata<span class="op">=</span><span class="st">"db040"</span>, weight<span class="op">=</span><span class="st">"db090"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">inp</span> <span class="op">&lt;-</span> <span class="fu"><a href="simStructure.html">simStructure</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">inp</span>, method<span class="op">=</span><span class="st">"direct"</span>, basicHHvars<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"rb090"</span><span class="op">)</span><span class="op">)</span></span></span>
@@ -110,63 +110,7 @@ Information. <em>Journal of Statistical Survey</em>, <strong>79</strong> (10), 1
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">margins</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"db040"</span>, <span class="st">"rb090"</span>, <span class="st">"pb220a"</span>, <span class="st">"freq"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">inp</span> <span class="op">&lt;-</span> <span class="fu">addKnownMargins</span><span class="op">(</span><span class="va">inp</span>, <span class="va">margins</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">inp</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Formal class 'simPopObj' [package "simPop"] with 4 slots</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..@ sample     :Formal class 'dataObj' [package "simPop"] with 7 slots</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..@ data        :Classes ‘data.table’ and 'data.frame':	11725 obs. of  19 variables:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ db030    : int [1:11725] 1 1 2 3 4 4 4 5 5 5 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ hsize    : int [1:11725] 2 2 1 1 3 3 3 5 5 5 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ db040    : Factor w/ 9 levels "Burgenland","Carinthia",..: 4 4 7 5 7 7 7 4 4 4 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ age      : int [1:11725] 72 66 56 67 70 46 37 41 35 9 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ rb090    : Factor w/ 2 levels "male","female": 1 2 2 2 2 1 1 1 2 2 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ pl030    : Factor w/ 7 levels "1","2","3","4",..: 5 5 2 5 5 3 1 1 3 NA ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ pb220a   : Factor w/ 3 levels "AT","EU","Other": 1 1 1 1 1 1 3 1 1 NA ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ netIncome: num [1:11725] 22675 16999 19274 13319 14366 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ py010n   : num [1:11725] 0 0 19274 0 0 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ py050n   : num [1:11725] 0 0 0 0 0 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ py090n   : num [1:11725] 0 0 0 0 0 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ py100n   : num [1:11725] 22675 0 0 13319 14366 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ py110n   : num [1:11725] 0 0 0 0 0 0 0 0 0 NA ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ py120n   : num [1:11725] 0 0 0 0 0 0 0 0 0 NA ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ py130n   : num [1:11725] 0 16999 0 0 0 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ py140n   : num [1:11725] 0 0 0 0 0 0 0 0 0 NA ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ db090    : num [1:11725] 7.82 7.82 8.79 8.11 7.51 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ rb050    : num [1:11725] 7.82 7.82 8.79 8.11 7.51 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ pid      : chr [1:11725] "1.1" "1.2" "2.1" "3.1" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, "sorted")= chr [1:2] "db030" "pid"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..@ hhid        : chr "db030"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..@ pid         : chr "pid"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..@ hhsize      : chr "hsize"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..@ weight      : chr "db090"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..@ strata      : chr "db040"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..@ ispopulation: logi FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..@ table      :Classes ‘data.table’ and 'data.frame':	54 obs. of  4 variables:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ db040 : chr [1:54] "Burgenland" "Burgenland" "Burgenland" "Burgenland" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ rb090 : chr [1:54] "male" "male" "male" "female" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ pb220a: chr [1:54] "AT" "EU" "Other" "AT" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ N     : num [1:54] 797 26 10 821 29 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..@ pop        :Formal class 'dataObj' [package "simPop"] with 7 slots</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..@ data        :Classes ‘data.table’ and 'data.frame':	81838 obs. of  9 variables:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ db030 : int [1:81838] 1 2 3 4 5 6 7 8 9 10 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ hsize : int [1:81838] 1 1 1 1 1 1 1 1 1 1 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ db040 : Factor w/ 9 levels "Burgenland","Carinthia",..: 1 1 1 1 1 1 1 1 1 1 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ age   : int [1:81838] 74 50 43 50 52 82 78 81 66 21 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ rb090 : Factor w/ 2 levels "male","female": 2 2 1 2 2 2 2 2 1 2 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ pid   : chr [1:81838] "1.1" "2.1" "3.1" "4.1" ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ weight: num [1:81838] 1 1 1 1 1 1 1 1 1 1 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ pl030 : Factor w/ 7 levels "1","2","3","4",..: 5 7 1 7 7 5 5 5 5 4 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ pb220a: Factor w/ 3 levels "AT","EU","Other": 1 1 1 1 1 1 1 1 1 1 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, ".internal.selfref")=&lt;externalptr&gt; </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..- attr(*, "sorted")= chr "db030"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..@ hhid        : chr "db030"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..@ pid         : chr "pid"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..@ hhsize      : chr "hsize"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..@ weight      : chr "weight"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..@ strata      : chr "db040"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..@ ispopulation: logi TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ..@ basicHHvars: chr [1:2] "age" "rb090"</span>
-<span class="r-in"><span><span class="co"># }</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>

@@ -219,25 +219,14 @@ Information. <em>Journal of Statistical Survey</em>, <strong>79</strong> (10), 1
     <div id="ref-examples">
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">)</span> <span class="co"># load sample data</span></span></span>
-<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span><span class="co">## approx. 20 seconds computation time</span></span></span>
 <span class="r-in"><span><span class="va">inp</span> <span class="op">&lt;-</span> <span class="fu"><a href="specifyInput.html">specifyInput</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">eusilcS</span>, hhid<span class="op">=</span><span class="st">"db030"</span>, hhsize<span class="op">=</span><span class="st">"hsize"</span>, strata<span class="op">=</span><span class="st">"db040"</span>, weight<span class="op">=</span><span class="st">"db090"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co">## in the following, nr_cpus are selected automatically</span></span></span>
 <span class="r-in"><span><span class="va">simPop</span> <span class="op">&lt;-</span> <span class="fu"><a href="simStructure.html">simStructure</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">inp</span>, method<span class="op">=</span><span class="st">"direct"</span>, basicHHvars<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"rb090"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">simPop</span> <span class="op">&lt;-</span> <span class="fu">simCategorical</span><span class="op">(</span><span class="va">simPop</span>, additional<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pl030"</span>, <span class="st">"pb220a"</span><span class="op">)</span>, method<span class="op">=</span><span class="st">"multinom"</span>, nr_cpus<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">simPop</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -------------- </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> synthetic population  of size </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  81838 x 9 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> build from a sample of size </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11725 x 19</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -------------- </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> variables in the population:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> db030,hsize,db040,age,rb090,pid,weight,pl030,pb220a</span>
-<span class="r-in"><span><span class="co"># }</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>
