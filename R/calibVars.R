@@ -25,7 +25,7 @@
 #' @examples
 #' data(eusilcS)
 #' # default method
-#' \donttest{
+#' \dontrun{
 #' aux <- calibVars(eusilcS$rb090)
 #' head(aux)
 #' # data.frame method

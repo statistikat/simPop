@@ -34,7 +34,7 @@ Sampling weights are automatically used from the input object 'inp'!
 
 set.seed(1234)  # for reproducibility
 data(eusilcS)   # load sample data
-\donttest{
+\dontrun{
 samp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize",
   strata="db040", weight="db090")
 eusilcP <- simStructure(data=samp, method="direct", basicHHvars=c("age", "rb090"))

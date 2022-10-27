@@ -311,7 +311,7 @@ multiply_data <- function(data0,params,redist.var,split){
 #' @examples
 #' data(eusilcS) # load sample data
 #' data(eusilcP) # population data
-#' \donttest{
+#' \dontrun{
 #' inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
 #' simPop <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090"))
 #' simPop <- simCategorical(simPop, additional=c("pl030", "pb220a"), method="multinom", nr_cpus=1)
@@ -326,11 +326,11 @@ multiply_data <- function(data0,params,redist.var,split){
 #'  epsMinN=10, nr_cpus = 1)
 #' }
 #' # apply simulated annealing
-#' \donttest{
+#' \dontrun{
 #' simPop_adj <- calibPop(simPop, split="db040", temp=1,
 #' epsP.factor=0.1,nr_cpus = 1)
 #' }
-#' \donttest{
+#' \dontrun{
 #' ### use multiple different margins
 #' # person margins
 #' persTables <- as.data.frame(

@@ -1,3 +1,5 @@
+run_tests <- length(strsplit(as.character(packageVersion("simPop")), "[.]")[[1]]) > 3
+if(run_tests){
 #Test for cforest implementation
 library(simPop)
 
@@ -31,3 +33,4 @@ library(simPop)
   expect_true(nrow(simPop@pop@data)>0,
             "Expected generated synthetic population to have some rows")
 #
+}

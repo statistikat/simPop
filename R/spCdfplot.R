@@ -40,7 +40,7 @@
 #'
 #' set.seed(1234)  # for reproducibility
 #' data(eusilcS)   # load sample data
-#' \donttest{
+#' \dontrun{
 #' ## approx. 20 seconds computation time
 #' inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize",
 #'   strata="db040", weight="db090")

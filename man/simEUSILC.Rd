@@ -183,7 +183,7 @@ This is a wrapper calling \code{\link{simStructure}},
 
 data(eusilcS) # load sample data
 
-\donttest{
+\dontrun{
 ## long computation time
 # multinomial model with random draws
 eusilcM <- simEUSILC(eusilcS, upper = 200000, equidist = FALSE

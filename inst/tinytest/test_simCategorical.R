@@ -1,3 +1,5 @@
+run_tests <- length(strsplit(as.character(packageVersion("simPop")), "[.]")[[1]]) > 3
+if(run_tests){
 #Issue 18
 library(simPop)
 data(eusilcS)
@@ -38,3 +40,4 @@ expect_true(all(c("pl030", "pb220a")%in%colnames(simPop@sample@data)))
 simPop <- simCategorical(simPop0, additional=c("pl030", "pb220a"),
                          method="distribution", nr_cpus=1)
 expect_true(all(c("pl030", "pb220a")%in%colnames(simPop@sample@data)))
+}

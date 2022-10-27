@@ -11,7 +11,7 @@
 #' @examples
 #' data(eusilcS)
 #' data(totalsRG)
-#' \donttest{
+#' \dontrun{
 #' inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
 #' ## approx. 20 seconds ...
 #' addWeights(inp) <- calibSample(inp, totalsRG)

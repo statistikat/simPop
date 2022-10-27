@@ -1,3 +1,5 @@
+run_tests <- length(strsplit(as.character(packageVersion("simPop")), "[.]")[[1]]) > 3
+if(run_tests){
 message("heap")
 library(simPop)
 # correctHeaps",{
@@ -58,3 +60,4 @@ library(simPop)
   csf <- correctSingleHeap(age23, heap=23, before=5, after=5, method="lnorm", fixed=i)
   expect_identical(csf[i],age23[i])
 #
+}

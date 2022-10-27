@@ -389,7 +389,7 @@ simulateValues <- function(dataSample, dataPop, params) {
 #' )
 #' class(ghanaP)
 #'
-#' \donttest{
+#' \dontrun{
 #' ## long computation time ...
 #' ghanaP <- simRelation(
 #'   simPopObj = ghanaP,

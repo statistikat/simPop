@@ -80,7 +80,7 @@ the function \code{\link{simStructure}}.
 }
 \examples{
 data(eusilcS) # load sample data
-\donttest{
+\dontrun{
 ## approx. 20 seconds computation time
 inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
 ## in the following, nr_cpus are selected automatically

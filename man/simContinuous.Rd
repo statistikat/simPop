@@ -245,7 +245,7 @@ need to be simulated beforehand with the functions
 \examples{
 
 data(eusilcS)
-\donttest{
+\dontrun{
 ## approx. 20 seconds computation time
 inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
 simPop <- simStructure(data=inp, method="direct",

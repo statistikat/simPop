@@ -31,7 +31,7 @@
 #' @export
 #' @examples
 #' set.seed(1234)  # for reproducibility
-#' \donttest{
+#' \dontrun{
 #' data(eusilcS)   # load sample data
 #' samp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize",
 #'   strata="db040", weight="db090")

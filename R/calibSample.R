@@ -40,7 +40,7 @@
 #' @examples
 #' data(eusilcS)
 #' eusilcS$agecut <- cut(eusilcS$age, 7)
-#' \donttest{
+#' \dontrun{
 #' inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
 #'
 #' ## for simplicity, we are using population data directly from the sample, but you get the idea

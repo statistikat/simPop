@@ -40,7 +40,7 @@
 #' @examples
 #' 
 #' data(eusilcS)
-#' \donttest{
+#' \dontrun{
 #' inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
 #' eusilcP <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090"))
 #' class(eusilcP)
