@@ -258,9 +258,7 @@ eusilcM <- simContinuous(simPop, additional="netIncome",
               regModel = regModel,
               upper=200000, equidist=FALSE, nr_cpus=1)
 class(eusilcM)
-}
 
-\donttest{
 # two-step regression
 eusilcT <- simContinuous(simPop, additional="netIncome",
               regModel = "basic",
