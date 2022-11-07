@@ -21,7 +21,7 @@ predictors need to be simulated beforehand."><!-- mathjax --><script src="https:
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">simPop</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.1.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.1.2</span>
       </span>
     </div>
 
@@ -386,17 +386,13 @@ Information. <em>Journal of Statistical Survey</em>, <strong>79</strong> (10), 1
 <span class="r-in"><span>              regModel <span class="op">=</span> <span class="va">regModel</span>,</span></span>
 <span class="r-in"><span>              upper<span class="op">=</span><span class="fl">200000</span>, equidist<span class="op">=</span><span class="cn">FALSE</span>, nr_cpus<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">eusilcM</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="co"># two-step regression</span></span></span>
 <span class="r-in"><span><span class="va">eusilcT</span> <span class="op">&lt;-</span> <span class="fu">simContinuous</span><span class="op">(</span><span class="va">simPop</span>, additional<span class="op">=</span><span class="st">"netIncome"</span>,</span></span>
 <span class="r-in"><span>              regModel <span class="op">=</span> <span class="st">"basic"</span>,</span></span>
 <span class="r-in"><span>              method <span class="op">=</span> <span class="st">"lm"</span>, nr_cpus<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in simContinuous(simPop, additional = "netIncome", regModel = "basic",     method = "lm", nr_cpus = 1):</span> object 'simPop' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">eusilcT</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(expr, envir, enclos):</span> object 'eusilcT' not found</span>
-<span class="r-in"><span><span class="co"># }</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
