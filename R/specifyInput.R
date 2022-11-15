@@ -61,7 +61,7 @@ specifyInput <- function(data, hhid, hhsize=NULL, pid=NULL, weight=NULL,
 
   if ( !is.null(hhsize) ) {
     if ( !inherits(hhsize, "character") | length(hhsize) != 1 | is.na(match(hhsize, colnames(data)))) {
-      stop("strata must be a character defining the variable holding information on stratas and must be of length 1!\n")
+      stop("hhsize must be a character defining the variable holding information on stratas and must be of length 1!\n")
     }
   } else {
     hhsize <- "hhsize"
@@ -71,7 +71,7 @@ specifyInput <- function(data, hhid, hhsize=NULL, pid=NULL, weight=NULL,
   }
   if ( !is.null(pid) ) {
     if ( !inherits(pid, "character") | length(pid) != 1 | is.na(match(pid, colnames(data)))) {
-      stop("strata must be a character defining the variable holding information on stratas and must be of length 1!\n")
+      stop("pid must be a character defining the variable holding information on stratas and must be of length 1!\n")
     }
   } else {
     pid <- "pid"
