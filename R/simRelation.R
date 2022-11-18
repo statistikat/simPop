@@ -71,7 +71,7 @@ simulateValues <- function(dataSample, dataPop, params) {
   if(length(unique(dataSampleWork[[cur.var]]))>1){
     mod <- eval(parse(text=formula.cmd))  # fitted model
     # predict probabilities
-    
+
     ind <- match(colnames(newdata), colnames(dataSample))
     for (i in 1:length(ind)) {
       if (is.factor(unlist(newdata[, i, with = FALSE]))) {
@@ -89,11 +89,11 @@ simulateValues <- function(dataSample, dataPop, params) {
   }else{
     probs <- rep(1L,length(newdata))
   }
-  
 
-  
 
-  
+
+
+
   # set too small probabilities to exactly 0
   if (!is.null(eps)) {
     probs[probs < eps] <- 0
@@ -189,16 +189,16 @@ simulateValues <- function(dataSample, dataPop, params) {
     # command needs to be constructed as string
     # this is actually a pretty ugly way of fitting the model
     if(length(unique(dataSampleWork[[cur.var]]))>1){
-      mod <- eval(parse(text=formula.cmd))  # fitted model 
+      mod <- eval(parse(text=formula.cmd))  # fitted model
       # predict probabilities
-      
+
       ind <- match(colnames(newdata), colnames(dataSample))
       for (i in 1:length(ind)) {
         if (is.factor(unlist(newdata[[i]]))) {
           newdata[,colnames(newdata)[i] := factor(as.character(unlist(newdata[,colnames(newdata)[i],with=FALSE])),levels(dataSample[[ind[i]]]))]
         }
       }
-      
+
       if (meth %in% "multinom" ) {
         probs <- predict(mod, newdata = newdata, type = "probs")
       } else if ( meth %in% c("ctree","cforest") ) {
@@ -214,9 +214,9 @@ simulateValues <- function(dataSample, dataPop, params) {
     }else{
       probs <- rep(1L,length(newdata))
     }
-    
 
-    
+
+
     # set too small probabilities to exactly 0
     if (!is.null(eps)) {
       probs[probs < eps] <- 0
@@ -409,7 +409,7 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
 
   V1 <- x <- newAdditionalVarible <- NULL
   method <- match.arg(method)
-  
+
   # set seed of random number generator
   if (!missing(seed)) {
     set.seed(seed, "L'Ecuyer")  # set seed of random number generator
@@ -599,8 +599,8 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
       # simulation via recursive partitioning and regression trees
       formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
       formula.cmd_nd <- paste(i, "~", paste(c(predNames,getHeadName(i)), collapse = " + "))
-      formula.cmd <- paste("suppressWarnings(ctree(", formula.cmd)
-      formula.cmd_nd <- paste("suppressWarnings(ctree(", formula.cmd_nd)
+      formula.cmd <- paste("suppressWarnings(partykit::ctree(", formula.cmd)
+      formula.cmd_nd <- paste("suppressWarnings(partykit::ctree(", formula.cmd_nd)
       if (!dataS@ispopulation) {
         formula.cmd <- paste0(formula.cmd,", weights=as.integer(dataSampleWork$", dataS@weight,")")
         formula.cmd_nd <- paste0(formula.cmd_nd,", weights=as.integer(dataSampleWork$", dataS@weight,")")
@@ -615,8 +615,8 @@ simRelation <- function(simPopObj, relation = "relate", head = "head",
       # simulation via random forest
       formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
       formula.cmd_nd <- paste(i, "~", paste(c(predNames,getHeadName(i)), collapse = " + "))
-      formula.cmd <- paste("suppressWarnings(cforest(", formula.cmd)
-      formula.cmd_nd <- paste("suppressWarnings(cforest(", formula.cmd_nd)
+      formula.cmd <- paste("suppressWarnings(partykit::cforest(", formula.cmd)
+      formula.cmd_nd <- paste("suppressWarnings(partykit::cforest(", formula.cmd_nd)
       if (!dataS@ispopulation) {
         formula.cmd <- paste0(formula.cmd,", weights=as.integer(dataSampleWork$", dataS@weight,")")
         formula.cmd_nd <- paste0(formula.cmd_nd,", weights=as.integer(dataSampleWork$", dataS@weight,")")
