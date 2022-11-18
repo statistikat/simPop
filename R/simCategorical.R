@@ -113,7 +113,7 @@ generateValues <- function(dataSample, dataPop, params) {
     if(meth == c("xgboost")) {
       ind <- 1:length(levelsResponse)
     }
-    
+
     if ( length(exclude) == 0 ) {
       ncomb <- as.integer(sapply(indGrid, length))
       sim <- lapply(1:length(ncomb), resample, ncomb, probs)
@@ -144,7 +144,7 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
 
   pSplit <- lapply(splitS, function(i) {
     if(!is.null(w)){
-      wvec <- dataSample[[w]][i] 
+      wvec <- dataSample[[w]][i]
     }else{
       wvec <- NULL
     }
@@ -252,18 +252,18 @@ generateValues_distribution <- function(dataSample, dataPop, params) {
 #' number generator to be restored.
 #' @param verbose set to TRUE if additional print output should be shown.
 #' @param by defining which variable to use as split up variable of the estimation. Defaults to the strata variable.
-#' @param model_params NULL or a named list which can contain model specific parameters which will be passed onto the function call for the respective model. 
+#' @param model_params NULL or a named list which can contain model specific parameters which will be passed onto the function call for the respective model.
 #' @return An object of class \code{\linkS4class{simPopObj}} containing survey
 #' data as well as the simulated population data including the categorical
 #' variables specified by argument \code{additional}.
 #' @note The basic household structure needs to be simulated beforehand with
 #' the function \code{\link{simStructure}}.
 #' @author Bernhard Meindl, Andreas Alfons, Stefan Kraft, Alexander Kowarik, Matthias Templ, Siro Fritzmann
-#' @references 
+#' @references
 #' B. Meindl, M. Templ, A. Kowarik, O. Dupriez (2017) Simulation of Synthetic Populations for Survey Data Considering Auxiliary
 #' Information. \emph{Journal of Statistical Survey}, \strong{79} (10), 1--38. \doi{10.18637/jss.v079.i10}
-#' 
-#' A. Alfons, M. Templ (2011) Simulation of close-to-reality population data for household surveys with application to EU-SILC. 
+#'
+#' A. Alfons, M. Templ (2011) Simulation of close-to-reality population data for household surveys with application to EU-SILC.
 #' \emph{Statistical Methods & Applications}, \strong{20} (3), 383--407. \doi{10.1080/02664763.2013.859237}
 #' @seealso \code{\link{simStructure}}, \code{\link{simRelation}},
 #' \code{\link{simContinuous}}, \code{\link{simComponents}}
@@ -340,22 +340,22 @@ simCategorical <- function(simPopObj, additional,
       if(!(is.list(model_params) & !is.null(names(model_params)))){
         stop("Parameter model_params must be a named list where each entry refers to a parameter of the model chosen by `method`")
       }
-     
+
       all_model_params <- as.list(args(get(method)))
-      
+
       names_params <- names(model_params)
       names_all <- names(all_model_params)
       if(any(!names_params %in% names_all) & !"..."%in%names_all){
         stop("The following are not parameters of method ",method,"\n ",paste(names_params[!names_params %in% names_all],collapse=", "))
       }
-      
+
       # build parameter call for model
       param.cmd <- paste(names_params,paste0("params$model_extra$",names_params),sep="=",collapse=", ")
     }
-    
-    
-    
-    
+
+
+
+
   }
   # parameters for parallel computing
   if(by=="strata"){
@@ -495,16 +495,16 @@ simCategorical <- function(simPopObj, additional,
       if(!is.null(param.cmd)){
         formula.cmd <- paste0(formula.cmd,", ",param.cmd)
       }
-      
+
       formula.cmd <- paste0(formula.cmd,", data=dataSample, trace=FALSE",
                             ", maxit=",maxit, ", MaxNWts=", MaxNWts,"))")
-      
+
       if(verbose) cat("we are running the following multinom-model:\n")
       if(verbose) cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
     }else if ( method == "ctree" ) {
       # simulation via recursive partitioning and regression trees
       formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
-      formula.cmd <- paste("suppressWarnings(ctree(", formula.cmd)
+      formula.cmd <- paste("suppressWarnings(partykit::ctree(", formula.cmd)
       if(!dataS@ispopulation){
         formula.cmd <- paste0(formula.cmd,", weights=as.integer(dataSample$", dataS@weight,")")
       }
@@ -518,7 +518,7 @@ simCategorical <- function(simPopObj, additional,
     }else if ( method == "cforest" ) {
       # simulation via random forest
       formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))
-      formula.cmd <- paste("suppressWarnings(cforest(", formula.cmd)
+      formula.cmd <- paste("suppressWarnings(partykit::cforest(", formula.cmd)
       if(!dataS@ispopulation){
         formula.cmd <- paste0(formula.cmd,", weights=as.numeric(dataSample$", dataS@weight,")")
       }
@@ -542,17 +542,17 @@ simCategorical <- function(simPopObj, additional,
 	  	if(verbose) cat("we are running random forest (ranger):\n")
 		  if(verbose) cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
     }else if ( method == "xgboost" ) {
-      
+
       # simulation via xgboost
       if(verbose) cat("we are running xgboost:\n")
-      
+
       # set xgb verbose level
       if(verbose){
         xgb_verbose <- 1
       }else{
         xgb_verbose <- 0
       }
-      
+
       if(!dataS@ispopulation){
         weight_str <- paste0("as.numeric(dataSample$", dataS@weight, ")")
         # xgb_weight <- paste0(", info = list(\"weight\" = (",weight_str," - min(", weight_str, "))
@@ -562,12 +562,12 @@ simCategorical <- function(simPopObj, additional,
       }else{
         xgb_weight <- ""
       }
-      
+
       pred_names <- paste(predNames, collapse = "\",\"")
       train <- paste0("xgb.DMatrix(data = model.matrix(~.+0,data = setDT(dataSample)[,c(\"", pred_names,"\"), with=F]),
                                    label = as.numeric(dataSample$",i,") - 1
                                         ", xgb_weight,")")
-      
+
       # Default values
       nrounds <- 100
       early_stopping_rounds <- 10
@@ -579,9 +579,9 @@ simCategorical <- function(simPopObj, additional,
                                 subsample = 1,
                                 objective = \"multi:softprob\",
                                 eval_metric = \"mlogloss\")"
-      
+
       if(!is.null(model_params)){
-        
+
         xgb_hyper_params <- eval(parse(text=xgb_hyper_params))
         for(hyper in names(xgb_hyper_params)){
           if(is.null(model_params[[hyper]])){
@@ -589,30 +589,30 @@ simCategorical <- function(simPopObj, additional,
           }
         }
         xgb_hyper_params <- "params$model_extra"
-        
+
         if(!is.null(model_params$nrounds)){
           nrounds <- model_params$nrounds
           model_params$nrounds <- NULL
         }
-        
+
         if(!is.null(model_params$early_stopping_rounds)){
           early_stopping_rounds <- model_params$early_stopping_rounds
           model_params$early_stopping_rounds <- NULL
         }
       }
-      
+
       xgb_params <- paste0("nrounds = ", nrounds,",
                             watchlist = list(train = ", train, ",
-                                             test = ", train, "), 
+                                             test = ", train, "),
                             early_stopping_rounds = ", early_stopping_rounds,",
                             print_every_n = 10,")
-      
+
       command <- paste0("xgb.train(",train, ", ",
                                     xgb_params,
                                     "num_class = ", length(levelsResponse), ", ",
                                     "verbose = ", xgb_verbose, ", ",
                                     "params = ", xgb_hyper_params, ")")
-      
+
       formula.cmd <- command
       if(verbose) cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
     }

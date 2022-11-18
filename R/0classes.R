@@ -15,7 +15,7 @@ setClassUnion('listOrNULL', c('list', 'NULL'))
 #' @import vcd
 #' @import methods
 #' @import Rcpp
-#' @import party
+#' @importFrom partykit cforest ctree
 #' @import fitdistrplus
 #' @import xgboost
 #' @importFrom lattice bwplot panel.bwplot packet.number panel.points panel.refline panel.xyplot

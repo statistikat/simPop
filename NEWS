@@ -1,29 +1,36 @@
+Changes in simPop version 2.1.2
+  * use `partykit::ctree()` and `partykit::cforest()` addressing issue #22
+
 Changes in simPop version 2.1.1
   * warning in updateVec.cpp resolved
-  
+
 Changes in simPop version 2.1.0
   * ipu2 is now removed and available in package surveysd
-  
+
 Changes in simPop version 1.2.0
   * simRelation now works with sp-called basic variables
 
 Changes in simPop version 1.2.0
   * the function ipu2 is only a wrapper to surveysd::ipf and set as deprecated
-  
+
 Changes in simPop version 0.6.2
   * Updated function simInitSpatial (it now works with household and/or person counts per subregion)
   * Moved repo to https://github.com/statistikat/simPop from previous private git repo
+
 Changes in simPop version 0.5.0
   * The modified whipple index is now computed correctly
   * Weighting is now available directly in the whipple function
   * ranger is available in simCategorical
+
 Changes in simPop version 0.3.0
   * new function ipu2 (more flexible variant for ipu, still in development)
   * new function kishFactor (computation of the Kish factor for sample weights)
   * new functions correctHeaps and correctSimpleHeap for dealing with age heaping
+
 Changes in simPop version 0.3.0
   * new methods for simContinous and simCateogrical
   * simStructure can now deal with populations as input
+
 Changes in simPop version 0.2.15
   * Improvements in samp() and pop(). If argument 'var' is NULL (default), the complete dataset is returned.
 
@@ -98,93 +105,59 @@ Changes in simPop version 0.1.9
 
 Changes in simPop version 0.1.8
   * remove S3-class spBwplot() -> only default method was implemented. Removed option to supply a list of populations; rewritten to use 'simPopObj'-objects
-
   * fixed man files for spBwplot() and spBwplotStats()
-
   * updated calibPop() so that the function uses and returns objects of class 'simPopObj'
-
   * auxData()-methods to query/set 'sample' slot in 'simPopObj'-objects
 
 Changes in simPop version 0.1.7
   * parallel-computing on windows-platforms using doParallel-package
-
   * removed spTable.formula method (did not work correctly, anyway)
-
   * parallel processing on windows using doParallel-package and foreach with %dopar%
-
   * fixed a problem in calibPop.cpp where export of params-object in a list was not done correctly
-
   * refactorization of calibPop.R to allow parallel computing
 
 Changes in simPop version 0.1.6
   * removed method 'ctree' from simCategorical() -> perhaps add it later
-
   * removed argument 'basic' from simCategorical(). The function now uses variables listed in slot @basicHHvars of the input object of class 'simPopObj'.
-
   * made check that slot basicHHvars after simStructure() contains at least one variable.
-
   * new utility-function manageSynthPopObj() to get/set variables in objects of class 'simPopObj'
   * updated a lot of Rd-Files with (now) working examples
-
   * updated simEUSILC()
 
 Changes in simPop version 0.1.5
   * combined classes 'sampleObj' and 'popObj' into 'dataObj'
-
   * renamed specify_sample() to specifyInput()
-
   * adjusted NAMESPACE files, documentation and functions to reflect these changes
-
   * Parallelization of simContinous() on non-windows platforms
-
   * porting simContinous() to use new class 'simPopObj' as input
-
 
 Changes in simPop version 0.1.4
   * starting to use new classes 'sampleObj', 'popObj' and 'simPopObj' for the entire package
-
   * various fixes and improvements such as a new c++ implementation of calibVars()
-
   * cleanup dependencies in DESCRIPTION and NAMESPACE
-
   * remove method 'liblinear' from simCategorical() - has never really worked
 
 Changes in simPop version 0.1.3
   * parallelize simRelevation() on non-windows platforms
-
   * c++ algorithm for simulated annealing in calibPop()
-
   * multiple commits to fix documentation and cran-notes/warnings when checking
 
 Changes in simPop version 0.1.2
   * temporarily add explicit parallel-option to calibPop() for testing-purposes
-
   * more efficient implementation of auxiliary-function resample() used in calibPop()
-
   * changed default setting for auxiliary-variable 'factor' in calibPop() which now allows the algorithm to terminate in an accceptable time
-
   * added R/zzz.R to get current package version on loading the package
 
 Changes in simPop version 0.1.1
   * more efficient c++ implementation of iterative proportional updating
-
   * multiple imports from package simPopulation
-
   * reorganizations (simAnnealing -> simPop,...)
 
 Changes in simPop version 0.1.0
-
-  + code largely based on version 0.4.1 of simPopulation
-
-  + use package parallel if possible for some functions (non-windows platforms)
-
-  + first version of simulated annealing
-
-  + first (very rough) version of IPU (iterative proportional updating)
-
-  + remove vignette from simPopulation
-
-  + update Citation
-
-  + new methods for simCategorical (naivebayes, ctree and liblinear)
-
+  * code largely based on version 0.4.1 of simPopulation
+  * use package parallel if possible for some functions (non-windows platforms)
+  * first version of simulated annealing
+  * first (very rough) version of IPU (iterative proportional updating)
+  * remove vignette from simPopulation
+  * update Citation
+  * new methods for simCategorical (naivebayes, ctree and liblinear)
