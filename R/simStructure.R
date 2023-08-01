@@ -94,6 +94,11 @@ simStructure <- function(dataS, method=c("direct", "multinom", "distribution"), 
     strata <- factor(rep(1, nrow(dataS@data)))
   }
 
+  # Check levels for multinom method
+  if ( method == "multinom" & length(levels(strata)) < 2 ) {
+    stop("Your strata region must have 2 or more levels!\n")
+  }
+
   ##### set up household structure
 
   # generate variables on household level (indicated by H)
