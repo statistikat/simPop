@@ -104,7 +104,7 @@
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">birth</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1950</span><span class="op">:</span><span class="fl">2000</span>, <span class="fl">20</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">getAge</span><span class="op">(</span><span class="va">birth</span>, <span class="fl">2013</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 43 56 47 50 13 52 61 16 48 57 49 60 22 26 55 29 15 35 37 59</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 15 58 62 31 24 57 36 51 53 25 33 60 22 42 56 37 46 52 23 27</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu">getGender</span><span class="op">(</span><span class="st">"rb090"</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ma"</span>,<span class="st">"fe"</span><span class="op">)</span>, data<span class="op">=</span><span class="va">eusilcS</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] ma fe fe fe fe ma</span>
@@ -150,18 +150,18 @@
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">$</span><span class="va">fakepb220a</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  AT  BE  BG CAN  CH CSA  CY  CZ  DE  DK  EE  EL  ES  FI  FR  GR  HR  HU  IE  IS </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 254 226 242 270 258 223 239 271 281 253 258 246 231 270 264 267 256 280 232 260 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 228 247 269 238 235 226 241 248 276 266 252 234 250 246 255 270 244 249 227 238 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  IT  LT  LU  LV  ME  MK  MT NAF  NL NME  NO OAF OAS OCE OEU  OT OTH  PL  PT  RO </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 244 258 223 276 282 241 249 251 237 240 252 231 236 234 254 216 263 259 227 255 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 268 252 254 243 241 266 236 233 253 222 276 265 257 230 260 250 265 251 238 237 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  SE  SI  SK  TR  UK USA WAF </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 241 274 235 222 267 239 238 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 249 266 267 255 248 261 243 </span>
 <span class="r-in"><span><span class="va">eusilcS</span><span class="op">$</span><span class="va">fakepb220a</span> <span class="op">&lt;-</span> <span class="fu">getCitizenship</span><span class="op">(</span>citizenship <span class="op">=</span> <span class="st">"fakepb220a"</span>,</span></span>
 <span class="r-in"><span>                                  data<span class="op">=</span><span class="va">eusilcS</span>, owncountry<span class="op">=</span><span class="va">owncountry</span>,</span></span>
 <span class="r-in"><span>                                  EU<span class="op">=</span><span class="va">EU</span>, other<span class="op">=</span><span class="va">other</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">$</span><span class="va">fakepb220a</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    AT    EU Other </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   254  6805  4666 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   228  6792  4705 </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eusilcS</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">hsize</span> <span class="op">&lt;-</span> <span class="fu">getHsize</span><span class="op">(</span>data<span class="op">=</span><span class="va">eusilcS</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">hsize</span><span class="op">)</span></span></span>
