@@ -64,6 +64,7 @@ generateValues <- function(dataSample, dataPop, params) {
       probs <- predict(mod, newdata=newdata, type="probs")
     }else if ( meth %in% c("ctree","cforest") ) {
       probs <- predict(mod, newdata=data.table(newdata), type="prob")
+      probs <- split(probs, seq(nrow(probs)))  
       probs <- do.call("rbind",probs)
 	    if(ncol(probs)==2){
         probs <- probs[,2]
