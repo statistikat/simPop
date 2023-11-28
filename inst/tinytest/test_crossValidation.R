@@ -1,9 +1,9 @@
 run_tests <- length(strsplit(as.character(packageVersion("simPop")), "[.]")[[1]]) > 3
 if(run_tests){
-#Test for xgboost implementation
-library(simPop)
-
-# xgboost integration tests",{
+  #Test for xgboost implementation
+  library(simPop)
+  
+  # xgboost integration tests",{
   
   data(eusilcS) # load sample data
   
@@ -23,6 +23,6 @@ library(simPop)
                             verbose = TRUE, hyper_param_grid = grid)
   
   expect_true(nrow(simPop@pop@data)> 0,
-            "Expected generated synthetic population to have some rows")
-#
+              "Expected generated synthetic population to have some rows")
+  #
 }
