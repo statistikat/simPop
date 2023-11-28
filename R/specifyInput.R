@@ -35,6 +35,10 @@
 #' inp
 specifyInput <- function(data, hhid, hhsize=NULL, pid=NULL, weight=NULL,
                          strata=NULL, population=FALSE) {
+  
+  if(!(inherits(data,"data.frame") | inherits(data,"data.table"))){
+    stop("data must be either a data.frame or data.table")
+  }
   if ( !inherits(hhid, "character") | length(hhid) != 1 | is.na(match(hhid, colnames(data)))) {
     stop("hhid must be a character defining the variable holding household ids and must be of length 1!\n")
   }
@@ -54,6 +58,10 @@ specifyInput <- function(data, hhid, hhsize=NULL, pid=NULL, weight=NULL,
     if(!inherits(data[[strata]], "factor")){
       stop(strata," is not a factor variable as needed for a strata variable.")
     }
+  }else{
+    # initialize dummy strata used by other methods in package
+    strata <- paste(c("DUMMY_STRATA_",sample(c(letters,LETTERS),8,replace=TRUE)), collapse="")
+    df[[strata]] <- factor(1)
   }
 
   data <- as.data.table(data)

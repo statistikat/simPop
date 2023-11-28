@@ -2,7 +2,7 @@ Package: simPop
 Type: Package
 Title: Simulation of Complex Synthetic Data
     Information
-Version: 2.1.2
+Version: 2.1.3
 Date: 2022-11-06
 Authors@R: c(
   person("Matthias", "Templ", email = "matthias.templ@gmail.com", role = c("aut","cre")),
@@ -102,5 +102,5 @@ Collate:
     'whipple.R'
     'dataSets.R'
     'zzz.R'
-RoxygenNote: 7.2.2
+RoxygenNote: 7.2.3
 Encoding: UTF-8
