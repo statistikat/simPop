@@ -195,7 +195,7 @@ IntegerVector calibPop_work(IntegerMatrix inp, NumericVector totals, IntegerVect
     cooldown = cooldown + 1;
     if ( (obj_new <= eps) | (cooldown == 500) ) {
       if ( verb ) {
-        Rprintf("Required precision reached!\nValue of objective function: %g (required precision=%g)\nNumber of iterations=%f", obj_new, eps,counter_all);
+        Rprintf("Required precision reached!\nValue of objective function: %g (required precision=%g)\nNumber of iterations=%i", obj_new, eps,counter_all);
       }
       break;
     }
