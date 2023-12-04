@@ -1265,6 +1265,12 @@ simContinuous <- function(simPopObj, additional = "netIncome",
         xgb_verbose <- 0
       }
       
+      # set nr_cpus=1 for xgboost
+      if(verbose){
+        cat("\n Setting nr_cpus=1 when using xgboost\n")
+      }
+      nr_cpus <- 1
+      
       if(TRUE){
         xgb_weight <- paste0(", info = list(\"weight\" = as.numeric(dataSample$", weight, "))")
       }else{

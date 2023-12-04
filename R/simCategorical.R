@@ -555,7 +555,14 @@ simCategorical <- function(simPopObj, additional,
       }else{
         xgb_verbose <- 0
       }
-
+      
+      # set nr_cpus=1 for xgboost
+      if(verbose){
+        cat("\n Setting nr_cpus=1 when using xgboost\n")
+      }
+      nr_cpus <- 1
+      
+      
       if(!dataS@ispopulation){
         weight_str <- paste0("as.numeric(dataSample$", dataS@weight, ")")
         # xgb_weight <- paste0(", info = list(\"weight\" = (",weight_str," - min(", weight_str, "))
