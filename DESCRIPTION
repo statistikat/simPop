@@ -3,7 +3,7 @@ Type: Package
 Title: Simulation of Complex Synthetic Data
     Information
 Version: 2.1.3
-Date: 2022-11-06
+Date: 2023-12-04
 Authors@R: c(
   person("Matthias", "Templ", email = "matthias.templ@gmail.com", role = c("aut","cre")),
   person("Alexander", "Kowarik", email = "alexander.kowarik@statistik.gv.at", role = c("aut"), comment=c(ORCID="0000-0001-8598-4130")),
