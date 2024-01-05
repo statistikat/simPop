@@ -23,7 +23,7 @@ utilityIndicator(x, y)
 \item{y}{a data.frame, typically the corresponding synthetic data set. For \code{utilityIndicator} this should be a vector of length 1.}
 
 \item{type}{which measure
-\itemize{
+\describe{
  \item{compareColumns}{compares the intersection of variables}
  \item{compareRows}{compares the number of rows}
  \item{compareRowsHH}{compares the number of housholds}
