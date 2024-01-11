@@ -60,8 +60,8 @@ specifyInput <- function(data, hhid, hhsize=NULL, pid=NULL, weight=NULL,
     }
   }else{
     # initialize dummy strata used by other methods in package
-    strata <- paste(c("DUMMY_STRATA_",sample(c(letters,LETTERS),8,replace=TRUE)), collapse="")
-    df[[strata]] <- factor(1)
+    strata_col <- paste(c("DUMMY_STRATA_",sample(c(letters,LETTERS),8,replace=TRUE)), collapse="")
+    data[[strata_col]] <- factor(1)
   }
 
   data <- as.data.table(data)
