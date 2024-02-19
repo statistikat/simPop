@@ -86,11 +86,15 @@ dropLevels <- function(x, select = names(x)) {
 
 
 ## get which observations contain NAs (and need to be excluded)
+#' @export
 getExclude <- function(x, ...) UseMethod("getExclude")
+#' @export
 getExclude.default <- function(x, ...) which(is.na(x))
+#' @export
 getExclude.data.frame <- function(x, ...) {
   unique(which(is.na(x), arr.ind=TRUE)[, 1])
 }
+#' @export
 getExclude.data.table <- function(x, ...) {
   unique(which(is.na(x), arr.ind=TRUE)[, 1])
 }

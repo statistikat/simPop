@@ -101,9 +101,11 @@ simmulated annealing terminates. This repeats for each new set of \code{observe.
 provided, however only if \code{split} is NULL. Otherwise the computation is
 performed in parallel and no useful output can be provided.}
 
-\item{hhTables}{information on population margins for households}
+\item{hhTables}{Information on population margins for households. Can bei either a single \code{data.table} or \code{data.frame} or a list with multiple \code{data.tables}s or \code{data.frame}s.
+Each table must have one column named \code{Freq} and all other columns holding variable(s) of the synthetic population. Each row in this table corresponds to a the frequency count a one of the variable combination in that table, see examples.}
 
-\item{persTables}{information on population margins for persons}
+\item{persTables}{Information on population margins for persons. Can bei either a single \code{data.table} or \code{data.frame} or a list with multiple \code{data.tables}s or \code{data.frame}s.
+Each table must have one column named \code{Freq} and all other columns holding variable(s) of the synthetic population. Each row in this table corresponds to a the frequency count a one of the variable combination in that table, see examples.}
 
 \item{redist.var}{single column in the population which can be redistributed in each `split`. Still experimental!}
 

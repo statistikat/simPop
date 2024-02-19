@@ -296,8 +296,10 @@ multiply_data <- function(data0,params,redist.var,split){
 #' @param observe.break When objective value has been saved \code{observe.times}-times the coefficient of variation is calculated over saved values; if the coefficient of variation falls below \code{observe.break}
 #' simmulated annealing terminates. This repeats for each new set of \code{observe.times} new values of the objecive function. Can help save run time if objective value does not improve much. Disable this termination by either setting \code{observe.times=0} or \code{observe.break=0}.
 #' @param n.forceCooldown integer, if the solution does not move for \code{n.forceCooldown} iterations then a cooldown is automatically done.
-#' @param hhTables information on population margins for households
-#' @param persTables information on population margins for persons
+#' @param hhTables Information on population margins for households. Can bei either a single \code{data.table} or \code{data.frame} or a list with multiple \code{data.tables}s or \code{data.frame}s.
+#' Each table must have one column named \code{Freq} and all other columns holding variable(s) of the synthetic population. Each row in this table corresponds to a the frequency count a one of the variable combination in that table, see examples.
+#' @param persTables Information on population margins for persons. Can bei either a single \code{data.table} or \code{data.frame} or a list with multiple \code{data.tables}s or \code{data.frame}s.
+#' Each table must have one column named \code{Freq} and all other columns holding variable(s) of the synthetic population. Each row in this table corresponds to a the frequency count a one of the variable combination in that table, see examples.
 #' @param redist.var single column in the population which can be redistributed in each `split`. Still experimental!
 #' @param redist.var.factor numeric in the interval (0,1]. Used in combinationo with `redist.var`, still experimental!
 #' @return Returns an object of class \code{\linkS4class{simPopObj}} with an

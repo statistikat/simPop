@@ -50,7 +50,6 @@
 #'
 #' @name simPop-package
 #' @aliases simPop-package simPop
-#' @docType package
 #' @author Bernhard Meindl, Matthias Templ, Andreas Alfons, Alexander Kowarik,
 #' 
 #' Maintainer: Matthias Templ <matthias.templ@@gmail.com>
@@ -68,6 +67,7 @@
 #' \emph{Privacy in Statistical Databases}, \strong{6344} of Lecture Notes in Computer Science, 174--186. Springer Verlag, Heidelberg. \doi{10.1007/978-3-642-15838-4_16}
 #' 
 #' @keywords package
+#' 
 #' @examples
 #'
 #' ## we use synthetic eusilcS survey sample data 
@@ -99,4 +99,5 @@
 #' ## using different methods, calibrating surveys or populations, etc. 
 #' ## -- see Templ et al. (2017) for more details.
 #' 
+"_PACKAGE"
 NULL

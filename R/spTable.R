@@ -69,6 +69,7 @@ spTable <- function(inp, select) {
 }
 
 # methods for class "spTable"
+#' @export
 as.array.spTable <- function(x, ...) {
   values <- c(as.integer(x$expected), as.integer(x$realized))
   d <- c(dim(x$expected), 2)
@@ -77,14 +78,17 @@ as.array.spTable <- function(x, ...) {
   array(values, dim=d, dimnames=dn)
 }
 
+#' @export
 as.table.spTable <- function(x, ...) {
   tab <- as.array(x)
   class(tab) <- "table"
   tab
 }
 
+#' @export
 plot.spTable <- function(x, ...) spMosaic(x, ...)
 
+#' @export
 print.spTable <- function(x, ...) {
   # expected (from sample)
   cat("Expected:\n")
