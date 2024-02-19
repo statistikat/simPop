@@ -199,11 +199,13 @@ performed in parallel and no useful output can be provided.</p></dd>
 
 
 <dt>hhTables</dt>
-<dd><p>information on population margins for households</p></dd>
+<dd><p>Information on population margins for households. Can bei either a single <code>data.table</code> or <code>data.frame</code> or a list with multiple <code>data.tables</code>s or <code>data.frame</code>s.
+Each table must have one column named <code>Freq</code> and all other columns holding variable(s) of the synthetic population. Each row in this table corresponds to a the frequency count a one of the variable combination in that table, see examples.</p></dd>
 
 
 <dt>persTables</dt>
-<dd><p>information on population margins for persons</p></dd>
+<dd><p>Information on population margins for persons. Can bei either a single <code>data.table</code> or <code>data.frame</code> or a list with multiple <code>data.tables</code>s or <code>data.frame</code>s.
+Each table must have one column named <code>Freq</code> and all other columns holding variable(s) of the synthetic population. Each row in this table corresponds to a the frequency count a one of the variable combination in that table, see examples.</p></dd>
 
 
 <dt>redist.var</dt>
