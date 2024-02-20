@@ -121,6 +121,10 @@ setMethod("calibSample", c(inp="df_or_dataObj_or_simPopObj", totals="dataFrame_o
   args <- list(...)
   if ( is.null(args$method) ) {
     method <- "raking"
+  } else if (args$method %in% c("raking", "linear", "logit")) {
+    method <- args$method
+  } else {
+    stop("calibSample 'method' option should be one of c('raking', 'linear', 'logit') \n")
   }
   if ( is.null(args$bounds) ) {
     bounds <- c(0,10)
