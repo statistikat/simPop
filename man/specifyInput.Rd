@@ -6,7 +6,7 @@
 \usage{
 specifyInput(
   data,
-  hhid,
+  hhid = NULL,
   hhsize = NULL,
   pid = NULL,
   weight = NULL,
@@ -18,7 +18,9 @@ specifyInput(
 \item{data}{a \code{data.frame} or \code{data.table} featuring sample data.}
 
 \item{hhid}{character vector of length 1 specifying variable containing
-household ids within slot \code{data}.}
+household ids within slot \code{data}. If \code{hhid=NULL} a dummy hhid 
+(\code{hhid.simPop}) will be created to ensure compatability with
+other methods/functions in this package.}
 
 \item{hhsize}{character vector of length 1 specifying variable containing
 household sizes within slot \code{data}. If NULL, household sizes are
@@ -29,7 +31,8 @@ person ids within slot \code{data}. If NULL, person ids are automatically
 calculated.}
 
 \item{weight}{character vector of length 1 specifying variable holding
-sampling weights within slot \code{data}.}
+sampling weights within slot \code{data}. If NULL dummy weights \code{weights.simPop=1}
+will be created to ensure compatability with other methods/functions in this package.}
 
 \item{strata}{character vector of length 1 specifing variable name within
 slot \code{data} of variable holding information on strata, e.g. regions or

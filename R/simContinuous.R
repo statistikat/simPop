@@ -810,7 +810,7 @@ simContinuous <- function(simPopObj, additional = "netIncome",
   if ( !missing(seed) ) {
     set.seed(seed,"L'Ecuyer")  # set seed of random number generator
   }
-
+  
   if ( length(additional) != 1 ) {
     stop("currently only one additional variable can be generated at a time")
   }
@@ -1139,11 +1139,11 @@ simContinuous <- function(simPopObj, additional = "netIncome",
       if ( length(tol) != 1 || tol <= 0 ) {
         stop("'tol' must be a single small positive value!\n")
       }
-      #nas <- sum(!complete.cases(dataS))
-      #if ( length(nas) > 0 ) {
-      #  warning("\nwe Hotdeck-imputation of missing values sample data required!\n")
-      #  dataS <- hotdeck(dataS, variable=predNames, domain_var=samp@strata, imp_var=FALSE)
-      #}
+      nas <- sum(!complete.cases(dataS))
+      if ( length(nas) > 0 ) {
+       warning("\nHotdeck-imputation of missing values sample data required!\n")
+       dataS <- hotdeck(dataS, variable=c(name,predNames), domain_var=samp@strata, imp_var=FALSE)
+      }
       X <- model.matrix(estimationModel, data=dataS)
       y <- dataS[[name]]
       weights <- dataS[[weight]]

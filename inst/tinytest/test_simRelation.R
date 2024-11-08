@@ -1,5 +1,4 @@
-run_tests <- length(strsplit(as.character(packageVersion("simPop")), "[.]")[[1]]) > 3
-if(run_tests){
+# Tests for simRelation
 message("simRelation")
 library(simPop)
 data(ghanaS) # load sample data
@@ -28,4 +27,3 @@ ghanaP <- simRelation(
 )
 expect_true("nation"%in%colnames(ghanaP@pop@data))
 #
-}

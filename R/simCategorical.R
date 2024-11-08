@@ -62,15 +62,18 @@ generateValues <- function(dataSample, dataPop, params) {
 
     if ( meth %in% "multinom" ) {
       probs <- predict(mod, newdata=newdata, type="probs")
+      if(!inherits(probs,"matrix")){
+        probs <- cbind(1-probs, probs) 
+      }
     }else if ( meth %in% c("ctree","cforest") ) {
       probs <- predict(mod, newdata=data.table(newdata), type="prob")
-      probs <- split(probs, seq(nrow(probs)))  
-      if(!inherits(probs,"matrix")){
-        probs <- do.call("rbind",probs)
-      }
-	    if(ncol(probs)==2){
-        probs <- probs[,2]
-	    }
+#       probs <- split(probs, seq(nrow(probs)))  
+#       if(!inherits(probs,"matrix")){
+#         probs <- do.call("rbind",probs)
+#       }
+# 	    if(ncol(probs)==2){
+#         probs <- probs[,2]
+# 	    }
     }else if ( meth %in% c("ranger") ) {
       probs <- predict(mod,data=newdata,type="response")$predictions
       colnames(probs) <- mod$forest$levels
