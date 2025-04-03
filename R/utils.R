@@ -266,6 +266,7 @@ logitreg <- function(x, y, weights = rep(1, length(y)), start = rep(0, p), ...) 
   p <- ncol(x)
   if(is.factor(y)) y <- (unclass(y) != 1)
   # optimize and return result
+  browser()
   fit <- optim(start, fmin, gmin, X = x, y = y, w = weights, method = "BFGS", ...)
   names(fit$par) <- dn
   return(fit)

@@ -98,6 +98,16 @@ correctHeaps <- function(x, heaps="10year", method="lnorm",start=0, fixed=NULL) 
   }
   
   tab <- table(x)
+  # Create a complete sequence of ages from the minimum to maximum age
+  complete_ages <- seq(0, max(x, na.rm = TRUE))
+  
+  # Create a named vector with all ages, initialized to zero
+  complete_tab <- setNames(rep(0, length(complete_ages)), complete_ages)
+  
+  # Fill in the counts from the original data
+  complete_tab[names(tab)] <- tab
+  tab <- complete_tab
+  
   keep <- sapply(s+1, function(x) mean(c(tab[x-1], tab[x+1])))
   ratio <- tab[s+1] / keep
   
