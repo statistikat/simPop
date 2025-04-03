@@ -1,5 +1,5 @@
-run_tests <- length(strsplit(as.character(packageVersion("simPop")), "[.]")[[1]]) > 3
-if(run_tests){
+# tests for xgboost
+
 if(Sys.info()[["machine"]]!="arm64"){
 #Test for xgboost implementation
 library(simPop)
@@ -64,6 +64,4 @@ library(simPop)
                           alpha = NULL,
                           nr_cpus = 1)
     expect_true(all(c("hgrossminus")%in%colnames(simPop@sample@data)))
-}
-#
 }

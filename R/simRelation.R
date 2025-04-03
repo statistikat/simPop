@@ -400,12 +400,12 @@ simulateValues <- function(dataSample, dataPop, params) {
 #' str(ghanaP)
 #'}
 simRelation <- function(simPopObj, relation = "relate", head = "head",
-  direct = NULL, additional,
-  limit = NULL, censor = NULL, maxit = 500, MaxNWts = 2000,
-  eps = NULL, nr_cpus=NULL, seed = 1, regModel = NULL, verbose = FALSE,
-  method=c("multinom", "ctree","cforest","ranger"),
-  by = "strata") {
-
+                        direct = NULL, additional,
+                        limit = NULL, censor = NULL, maxit = 500, MaxNWts = 2000,
+                        eps = NULL, nr_cpus=NULL, seed = 1, regModel = NULL, verbose = FALSE,
+                        method=c("multinom", "ctree","cforest","ranger"),
+                        by = "strata") {
+  
 
   V1 <- x <- newAdditionalVarible <- NULL
   method <- match.arg(method)

@@ -100,6 +100,13 @@ M. Templ, A. Alfons (2012) Disclosure Risk of Synthetic Population Data
 with Application in the Case of EU-SILC. In J Domingo-Ferrer, E Magkos (eds.), 
 \emph{Privacy in Statistical Databases}, \strong{6344} of Lecture Notes in Computer Science, 174--186. Springer Verlag, Heidelberg. \doi{10.1007/978-3-642-15838-4_16}
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/statistikat/simPop}
+}
+
+}
 \author{
 Bernhard Meindl, Matthias Templ, Andreas Alfons, Alexander Kowarik,
 

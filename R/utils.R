@@ -84,8 +84,15 @@ dropLevels <- function(x, select = names(x)) {
 #   }
 # }
 
-
-## get which observations contain NAs (and need to be excluded)
+#' Position of missing values in data
+#' 
+#' Get the positions of missing values in the data. This function is used internally
+#' by other other functions of this package
+#' 
+#' @name getExclude
+#' @param x a vector, matrix, data.frame or data.table
+#' @param ... other arguments, not currently used
+#' @return Interger vector with positions indicating missing values
 #' @export
 getExclude <- function(x, ...) UseMethod("getExclude")
 #' @export
@@ -98,7 +105,18 @@ getExclude.data.frame <- function(x, ...) {
 getExclude.data.table <- function(x, ...) {
   unique(which(is.na(x), arr.ind=TRUE)[, 1])
 }
-
+#' @examples
+#' x <- c(1,2,NA,4,NA)
+#' y <- x[5:1]
+#' 
+#' getExclude(x)
+#' 
+#' DT <- data.table(x, y)
+#' getExclude(DT)
+#' 
+#' DF <- data.frame(x, y)
+#' getExclude(DF)
+#' 
 
 ### exclude observations
 #excludeData <- function(x, exclude = NULL, ...) UseMethod("excludeData")

@@ -1,5 +1,4 @@
-run_tests <- length(strsplit(as.character(packageVersion("simPop")), "[.]")[[1]]) > 3
-if(run_tests){
+# tests for sprague
 message("sprague")
 ## test sprague index:
 library(simPop)
@@ -19,5 +18,4 @@ x <- data.frame(age=as.factor(c(
 s  <- sprague(x[,2])
 
 expect_true(all.equal(sum(s), sum(x[,2])),info="not identical")
-#
-}
+
