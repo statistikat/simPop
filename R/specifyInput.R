@@ -39,6 +39,10 @@
 specifyInput <- function(data, hhid=NULL, hhsize=NULL, pid=NULL, weight=NULL,
                          strata=NULL, population=FALSE) {
   
+  if (missing(hhid)) hhid <- NULL
+  if (missing(hhsize)) hhsize <- NULL
+  if (missing(pid)) pid <- NULL
+  
   hhid.simPop <- weight.simPop <- NULL
   
   if(!(inherits(data,"data.frame") | inherits(data,"data.table"))){
