@@ -406,6 +406,10 @@ generateValues_xgboost <- function(dataSample, dataPop, params) {
          " has only one level, XGBoost can't work with categorical variables with one level")
   }
   
+  # quick fix: label in xgb.train does not like NA's:
+  dataSample <- dataSample[!is.na(dataSample$reviews_per_month), ]
+  # ToDo: check the consequences of this quick fix
+  
   mod <- eval(parse(text=command))
 
   # set sample factor levels to population
