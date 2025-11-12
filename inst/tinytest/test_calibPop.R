@@ -25,29 +25,53 @@ simPop <- addKnownMargins(simPop, margins)
 
 
 # Test CalibPop - check temp.factor",{
-simPop_adj <- calibPop(simPop, split="db040", temp=1, epsP.factor=0.1,choose.temp.factor = .5)
-expect_true(abs(simPop_adj@table[,sum(Freq)]-sum(margins$Freq))<1)
-# 
+epsP.factor <- c(0.1, 0.05, 0.025, 0.01)
+for(epsP in epsP.factor){
+  simPop_adj <- calibPop(simPop, split="db040", temp=1, epsP.factor=epsP,choose.temp.factor = .5)
+  check_table <- merge(simPop_adj@pop@data[,.N,by=.(db040, rb090, pb220a)], margins, by=c("db040", "rb090", "pb220a"))
+  expect_true(check_table[,sum(abs(N-Freq))/sum(N)<epsP])
+}
 
-# Test CalibPop - check sizefactor",{
-simPop_adj <- calibPop(simPop, split="db040", temp=1, epsP.factor=0.1,sizefactor = 5)  
-expect_true(abs(simPop_adj@table[,sum(Freq)]-sum(margins$Freq))<1)
-# 
+simPop_adj <- calibPop(simPop, split="db040", temp=1, epsP.factor=0.025,sizefactor = 5)  
+check_table <- merge(simPop_adj@pop@data[,.N,by=.(db040, rb090, pb220a)], margins, by=c("db040", "rb090", "pb220a"))
+expect_true(check_table[,sum(abs(N-Freq))/sum(N)<0.025])
 
 # Test CalibPop - check scale.redraw",{
-simPop_adj <- calibPop(simPop, split="db040", temp=1, epsP.factor=0.1,sizefactor = 5,scale.redraw = .2)
-expect_true(abs(simPop_adj@table[,sum(Freq)]-sum(margins$Freq))<1)
+simPop_adj <- calibPop(simPop, split="db040", temp=1, epsP.factor=0.025,sizefactor = 5,scale.redraw = .2)
+check_table <- merge(simPop_adj@pop@data[,.N,by=.(db040, rb090, pb220a)], margins, by=c("db040", "rb090", "pb220a"))
+expect_true(check_table[,sum(abs(N-Freq))/sum(N)<0.025])
 # 
 
 # Test CalibPop - check observe.break",{
-simPop_adj <- calibPop(simPop, split="db040", temp=1, epsP.factor=0.1,sizefactor = 5,observe.break = 0)
-expect_true(abs(simPop_adj@table[,sum(Freq)]-sum(margins$Freq))<1)
+simPop_adj <- calibPop(simPop, split="db040", temp=1, epsP.factor=0.025,sizefactor = 5,observe.break = 0)
+check_table <- merge(simPop_adj@pop@data[,.N,by=.(db040, rb090, pb220a)], margins, by=c("db040", "rb090", "pb220a"))
+expect_true(check_table[,sum(abs(N-Freq))/sum(N)<0.025])
 # 
 
 # Test CalibPop - check observe.times",{
-simPop_adj <- calibPop(simPop, split="db040", temp=1, epsP.factor=0.1,sizefactor = 5,observe.times=10)
-expect_true(abs(simPop_adj@table[,sum(Freq)]-sum(margins$Freq))<1)
-simPop_adj <- calibPop(simPop, split="db040", temp=1, epsP.factor=0.1,sizefactor = 5,observe.times=10,observe.break = .5)
-expect_true(abs(simPop_adj@table[,sum(Freq)]-sum(margins$Freq))<1)
+simPop_adj <- calibPop(simPop, split="db040", temp=1, epsP.factor=0.025,sizefactor = 5,observe.times=10)
+check_table <- merge(simPop_adj@pop@data[,.N,by=.(db040, rb090, pb220a)], margins, by=c("db040", "rb090", "pb220a"))
+expect_true(check_table[,sum(abs(N-Freq))/sum(N)<0.025])
+simPop_adj <- calibPop(simPop, split="db040", temp=1, epsP.factor=0.025,sizefactor = 5,observe.times=10,observe.break = .5)
+check_table <- merge(simPop_adj@pop@data[,.N,by=.(db040, rb090, pb220a)], margins, by=c("db040", "rb090", "pb220a"))
+expect_true(check_table[,sum(abs(N-Freq))/sum(N)<0.025])
 # 
 
+# Test calibPop - input data.table
+pop_data <- pop(simPop)
+pop_adj <- calibPop(pop_data, hid = "db030", pid = "pid.simPop", split="db040", 
+                       persTables = margins,
+                       temp=1, epsP.factor=0.01, choose.temp.factor = .5)
+check_table <- merge(pop_adj[,.N,by=.(db040, rb090, pb220a)], margins, by=c("db040", "rb090", "pb220a"))
+expect_true(check_table[,sum(abs(N-Freq))/sum(N)<epsP])
+
+# Test calibPop - input data.frame
+pop_data <- as.data.frame(pop(simPop))
+pop_adj <- calibPop(pop_data, hid = "db030", pid = "pid.simPop", split="db040", 
+                    persTables = margins,
+                    temp=1, epsP.factor=0.01, choose.temp.factor = .5)
+margin_adj <- xtabs(rep(1, nrow(pop_adj)) ~ pop_adj$db040 + pop_adj$rb090 + pop_adj$pb220a)
+margin_adj <- as.data.frame(margin_adj)
+colnames(margin_adj) <- c("db040", "rb090", "pb220a", "N")
+check_table <- merge(margin_adj, margins, by=c("db040", "rb090", "pb220a"))
+expect_true(sum(abs(check_table$N-check_table$Freq))/sum(check_table$N)<epsP)

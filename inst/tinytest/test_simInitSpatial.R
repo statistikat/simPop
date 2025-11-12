@@ -4,6 +4,7 @@
 ###############################################################################
 # context("simInitSpatial")
 library(simPop)
+library(data.table)
 # simInit Spatial Test",{
 data(eusilcS)
 data(eusilcP)

@@ -39,7 +39,7 @@ library(simPop)
                            log = FALSE,
                            alpha = NULL,
                            nr_cpus = 1)
-
+  
   expect_true(nrow(simPop@pop@data)>0,
             "Expected generated synthetic population to have some rows")
   

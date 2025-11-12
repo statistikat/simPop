@@ -3,10 +3,21 @@
 \docType{data}
 \name{calibPop}
 \alias{calibPop}
+\alias{calibPop.simPopObj}
+\alias{calibPop.data.frame}
+\alias{calibPop.data.table}
 \title{Calibration of 0/1 weights by Simulated Annealing}
 \usage{
-calibPop(
-  inp,
+calibPop(data, ...)
+
+\method{calibPop}{simPopObj}(data, ...)
+
+\method{calibPop}{data.frame}(data, ...)
+
+\method{calibPop}{data.table}(
+  data,
+  hid = attr(data, "hid"),
+  pid = attr(data, "pid"),
   split = NULL,
   splitUpper = NULL,
   temp = 1,
@@ -17,7 +28,6 @@ calibPop(
   temp.cooldown = 0.9,
   factor.cooldown = 0.85,
   min.temp = 10^-3,
-  nr_cpus = NULL,
   sizefactor = 2,
   choose.temp = TRUE,
   choose.temp.factor = 0.2,
@@ -29,12 +39,18 @@ calibPop(
   hhTables = NULL,
   persTables = NULL,
   redist.var = NULL,
-  redist.var.factor = 1
+  redist.var.factor = 1,
+  ...
 )
 }
 \arguments{
-\item{inp}{an object of class \code{\linkS4class{simPopObj}} with slot
-'table' being non-null! (see \code{\link{addKnownMargins}}).}
+\item{data}{a \code{data.table} or \code{data.frame} holding the synthetic data or an object of class \code{\linkS4class{simPopObj}} where slot 'table' can optionally hold population constraints (see \code{\link{addKnownMargins}}).}
+
+\item{...}{arguments passed to \code{calibPop.data.table()}.}
+
+\item{hid}{column in \code{data} holding the household ID. If \code{NULL} a generic household ID will be created using \code{1:nrow(data)}}
+
+\item{pid}{column in \code{data} holding the personal ID. If \code{NULL} a generic personal ID will be created with each houeshold using \code{1:hsize}.}
 
 \item{split}{given strata in which the problem will be split. Has to
 correspond to a column population data (slot 'pop' of input argument 'inp')
@@ -73,9 +89,6 @@ which the number of permutations of housholds, in each iteration, will be
 reduced in each step.}
 
 \item{min.temp}{minimal temperature at which the algorithm will stop.}
-
-\item{nr_cpus}{if specified, an integer number defining the number of cpus
-that should be used for parallel processing.}
 
 \item{sizefactor}{the factor for inflating the population before applying 0/1 weights}
 
@@ -147,7 +160,7 @@ this decision.
 \examples{
 data(eusilcS) # load sample data
 data(eusilcP) # population data
-\dontrun{
+\donttest{
 inp <- specifyInput(data=eusilcS, hhid="db030", hhsize="hsize", strata="db040", weight="db090")
 simPop <- simStructure(data=inp, method="direct", basicHHvars=c("age", "rb090"))
 simPop <- simCategorical(simPop, additional=c("pl030", "pb220a"), method="multinom", nr_cpus=1)
@@ -155,22 +168,61 @@ simPop <- simCategorical(simPop, additional=c("pl030", "pb220a"), method="multin
 # add margins
 margins <- as.data.frame(
   xtabs(rep(1, nrow(eusilcP)) ~ eusilcP$region + eusilcP$gender + eusilcP$citizenship))
-colnames(margins) <- c("db040", "rb090", "pb220a", "freq")
+colnames(margins) <- c("db040", "rb090", "pb220a", "Freq")
 simPop <- addKnownMargins(simPop, margins)
-simPop_adj2 <- calibPop(simPop, split="db040", 
-  temp=1, epsP.factor=0.1,
- epsMinN=10, nr_cpus = 1)
 }
-# apply simulated annealing
-\dontrun{
-simPop_adj <- calibPop(simPop, split="db040", temp=1,
-epsP.factor=0.1,nr_cpus = 1)
+
+epsP <- 0.1
+# --------------------------------------------------
+# apply simulated annealing using a simPop-Object
+\donttest{
+simPop_adj <- calibPop(simPop, split = "db040", temp = 1,
+                       epsP.factor = epsP)
+
+check_table <- merge(simPop_adj@pop@data[,.N,by=.(db040, rb090, pb220a)], 
+                     margins, by=c("db040", "rb090", "pb220a"))
+check_table[,sum(abs(N-Freq))/sum(N)<epsP]#' 
 }
-\dontrun{
-### use multiple different margins
+
+# --------------------------------------------------
+# apply simulated annealing using a data.table
+\donttest{
+pop_data <- pop(simPop)
+class(pop_data)
+
+pop_adj <- calibPop(pop_data, hid = "db030", 
+                   pid = "pid.simPop", split="db040", 
+                    persTables = margins,  #  <- supply margins directly
+                   temp=1, epsP.factor=epsP, choose.temp.factor = .5)
+check_table <- merge(pop_adj[,.N,by=.(db040, rb090, pb220a)], 
+                     margins, by=c("db040", "rb090", "pb220a"))
+check_table[,sum(abs(N-Freq))/sum(N)<epsP]
+
+}
+
+# --------------------------------------------------
+# apply simulated annealing using a data.frame
+\donttest{
+pop_data <- as.data.frame(pop(simPop))
+class(pop_data)
+
+pop_adj <- calibPop(pop_data, hid = "db030", pid = "pid.simPop", split="db040", 
+                    persTables = margins,  #  <- supply margins directly
+                    temp=1, epsP.factor=0.01, choose.temp.factor = .5)
+margin_adj <- xtabs(rep(1, nrow(pop_adj)) ~ pop_adj$db040 + pop_adj$rb090 + pop_adj$pb220a)
+margin_adj <- as.data.frame(margin_adj)
+colnames(margin_adj) <- c("db040", "rb090", "pb220a", "N")
+check_table <- merge(margin_adj, margins, by=c("db040", "rb090", "pb220a"))
+sum(abs(check_table$N-check_table$Freq))/sum(check_table$N)<epsP
+}
+
+# --------------------------------------------------
+# use multiple different margins
+\donttest{
+pop_data <- pop(simPop)
 # person margins
 persTables <- as.data.frame(
-xtabs(rep(1, nrow(eusilcP)) ~ eusilcP$region + eusilcP$gender + eusilcP$citizenship))
+  xtabs(rep(1, nrow(eusilcP)) ~ eusilcP$region + eusilcP$gender + eusilcP$citizenship))
 colnames(persTables) <- c("db040", "rb090", "pb220a", "Freq")
 
 # household margins
@@ -179,15 +231,27 @@ eusilcP$hsize4 <- pmin(4,as.numeric(eusilcP$hsize))
 hhTables <- as.data.frame(
   xtabs(rep(1, sum(filter_hid)) ~ eusilcP[filter_hid,]$region+eusilcP[filter_hid,]$hsize4))
 colnames(hhTables) <- c("db040", "hsize4", "Freq")
-simPop@pop@data$hsize4 <- pmin(4,as.numeric(simPop@pop@data$hsize))
+pop_data[,hsize4 := pmin(4,as.numeric(hsize))]
 
-simPop_adj_2 <- calibPop(simPop, split="db040", 
-                         temp=1, epsP.factor=0.1,
-                         epsH.factor = 0.1,
-                         persTables = persTables,
-                         hhTables = hhTables,
-                         nr_cpus = 1)
+epsP.factor <- 0.1
+epsH.factor <- 0.1
+
+pop_adj <- calibPop(pop_data, hid = "db030",
+                    pid = "pid.simPop", split="db040",
+                    temp=1, epsP.factor=0.1,
+                    epsH.factor = 0.1,
+                    persTables = persTables,
+                    hhTables = hhTables)
+
+check_pers <- merge(pop_adj[, .N, by = .(db040, rb090, pb220a)],
+                    persTables, by = c("db040", "rb090", "pb220a"))
+check_pers[, sum(abs(N-Freq))/sum(N) < epsP.factor]
+
+check_house <- merge(pop_adj[!duplicated(db030), .N, by = .(db040, hsize4)],
+                   hhTables, by = c("db040", "hsize4"))
+check_house[, sum(abs(N-Freq))/sum(N) < epsH.factor]
 }
+
 }
 \references{
 M. Templ, B. Meindl, A. Kowarik, A. Alfons, O. Dupriez (2017) Simulation of Synthetic Populations for Survey Data Considering Auxiliary

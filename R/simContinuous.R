@@ -407,7 +407,8 @@ generateValues_xgboost <- function(dataSample, dataPop, params) {
   }
   
   # quick fix: label in xgb.train does not like NA's:
-  dataSample <- dataSample[!is.na(dataSample$reviews_per_month), ]
+  label <- as.character(params$formula[[2]])
+  dataSample <- dataSample[!is.na(label), , env = list(label = label)]
   # ToDo: check the consequences of this quick fix
   
   mod <- eval(parse(text=command))
@@ -517,8 +518,8 @@ runModel <- function(dataS, dataP, params, typ) {
            cat("Current by group for the binary model:",x,"\n")
          }
         genVals(
-          dataSample=dataS[dataS[[strata]] == x,c(predNames, additional), with=FALSE],
-          dataPop=dataP[indStrata[[x]], predNames, with=FALSE],
+          dataSample = dataS[dataS[[strata]] == x,c(predNames, additional), with=FALSE],
+          dataPop = dataP[indStrata[[x]], predNames, with=FALSE],
   		params,response=dataS[dataS[[strata]] == x,eval(parse(text=params$name))],
           typ=typ)
       })
