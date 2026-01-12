@@ -48,9 +48,9 @@ calibPop(data, ...)
 
 \item{...}{arguments passed to \code{calibPop.data.table()}.}
 
-\item{hid}{column in \code{data} holding the household ID. If \code{NULL} a generic household ID will be created using \code{1:nrow(data)}}
+\item{hid}{column in \code{data} holding the household ID. If \code{NULL} a generic household ID will be created using \code{1:nrow(data)}. If \code{data} is an object of class \code{\linkS4class{simPopObj}} \code{hid} is extracted from the object.}
 
-\item{pid}{column in \code{data} holding the personal ID. If \code{NULL} a generic personal ID will be created with each houeshold using \code{1:hsize}.}
+\item{pid}{column in \code{data} holding the personal ID. If \code{NULL} a generic personal ID will be created with each houeshold using \code{1:hsize}. If \code{data} is an object of class \code{\linkS4class{simPopObj}} \code{pid} is extracted from the object.}
 
 \item{split}{given strata in which the problem will be split. Has to
 correspond to a column population data (slot 'pop' of input argument 'inp')
