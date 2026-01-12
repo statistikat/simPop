@@ -80,7 +80,7 @@ generateValues <- function(dataSample, dataPop, params) {
     }else if ( meth %in% c("xgboost") ) {
       probs <- predict(mod, newdata=xgb.DMatrix(data = model.matrix(~.+0,data = setDT(newdata))))
       # create matrix from prediction array
-      probs <- matrix(probs, nrow = nrow(newdata), ncol = mod[["params"]][["num_class"]], byrow = T)
+      probs <- matrix(probs, nrow = nrow(newdata), ncol = length(params$levelsResponse), byrow = T)
     }
     #if ( meth %in% "naivebayes" ) {
     #  probs <- predict(mod, newdata=newdata, type="raw")
@@ -568,30 +568,27 @@ simCategorical <- function(simPopObj, additional,
       
       if(!dataS@ispopulation){
         weight_str <- paste0("as.numeric(dataSample$", dataS@weight, ")")
-        # xgb_weight <- paste0(", info = list(\"weight\" = (",weight_str," - min(", weight_str, "))
-        #                      / (max(", weight_str, ") - min(", weight_str, ")))")
-        # xgb_weight <- paste0(", info = list(\"weight\" = (",weight_str," / max(", weight_str, ")))")
-        xgb_weight <- paste0(", info = list(\"weight\" = (",weight_str,"))")
+        xgb_weight <- weight_str
       }else{
-        xgb_weight <- ""
+        xgb_weight <- "NULL"
       }
-
-      pred_names <- paste(predNames, collapse = "\",\"")
-      train <- paste0("xgb.DMatrix(data = model.matrix(~.+0,data = setDT(dataSample)[,c(\"", pred_names,"\"), with=F]),
-                                   label = as.numeric(dataSample$",i,") - 1
-                                        ", xgb_weight,")")
+      pred_names <- paste(predNames, collapse = "','")
+      train <- paste0("xgb.DMatrix(data = model.matrix(~.+0,data = subset(dataSample, select = c('",pred_names,"'))),
+                                   label = as.numeric(dataSample$",i,") - 1,
+                                   weight = ", xgb_weight,")")
 
       # Default values
       nrounds <- 100
       early_stopping_rounds <- 10
-      xgb_hyper_params <- "list(nthread = 6,
-                                eta = 0.3,
+      xgb_hyper_params <- paste0("list(nthread = 6,
+                                learning_rate = 0.3,
                                 max_depth = 32,
                                 min_child_weight = 1,
-                                gamma = 0,
+                                min_split_loss = 0,
                                 subsample = 1,
                                 objective = \"multi:softprob\",
-                                eval_metric = \"mlogloss\")"
+                                eval_metric = \"mlogloss\",
+                                num_class = ", length(levelsResponse),")")
 
       if(!is.null(model_params)){
 
@@ -615,19 +612,17 @@ simCategorical <- function(simPopObj, additional,
       }
 
       xgb_params <- paste0("nrounds = ", nrounds,",
-                            watchlist = list(train = ", train, ",
+                            evals = list(train = ", train, ",
                                              test = ", train, "),
                             early_stopping_rounds = ", early_stopping_rounds,",
                             print_every_n = 10,")
 
-      command <- paste0("xgb.train(",train, ", ",
+      command <- paste0("xgb.train(data = ",train, ", ",
                                     xgb_params,
-                                    "num_class = ", length(levelsResponse), ", ",
-                                    "verbose = ", xgb_verbose, ", ",
                                     "params = ", xgb_hyper_params, ")")
 
       formula.cmd <- command
-      if(verbose) cat(strwrap(cat(gsub("))",")",gsub("suppressWarnings[(]","",formula.cmd)),"\n"), 76), sep = "\n")
+      if(verbose) cat(strwrap(cat(gsub("suppressWarnings[(]","",formula.cmd),"\n"), 76), sep = "\n")
     }
     #if ( method == "naivebayes" ) {
     #  formula.cmd <- paste(i, "~", paste(predNames, collapse = " + "))

@@ -50,7 +50,7 @@ library(simPop)
                          seed=10)
   simPop <- simCategorical(simPop0, additional=c("pl031", "pb220a"),
                            method="xgboost",
-                           verbose = TRUE,
+                           verbose = FALSE,
                            nr_cpus = 1)
   expect_true(all(c("pl031", "pb220a")%in%colnames(simPop@sample@data)))
   

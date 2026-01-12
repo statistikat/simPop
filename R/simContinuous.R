@@ -430,7 +430,7 @@ generateValues_xgboost <- function(dataSample, dataPop, params) {
     predSample <- predict(mod,
                           newdata=xgb.DMatrix(data = model.matrix(~.+0, data = model.frame(dataSample[, predNames, with = FALSE],  na.action=na.pass)),
                                               missing = NA,
-                                              info = list(weight = as.numeric(dataSample[, weight, with = FALSE]))))
+                                              weight = as.numeric(dataSample[, weight, with = FALSE])))
     resSample <- cbind(dataSample, predSample)
     
     resSample[, res := predSample - .SD, .SDcols = name]
@@ -1276,10 +1276,11 @@ simContinuous <- function(simPopObj, additional = "netIncome",
       }
       nr_cpus <- 1
       
-      if(TRUE){
-        xgb_weight <- paste0(", info = list(\"weight\" = as.numeric(dataSample$", weight, "))")
+      if(!samp@ispopulation){
+        weight_str <- paste0("as.numeric(dataSample$", samp@weight, ")")
+        xgb_weight <- weight_str
       }else{
-        xgb_weight <- ""
+        xgb_weight <- "NULL"
       }
       
       if( log ){
@@ -1290,17 +1291,17 @@ simContinuous <- function(simPopObj, additional = "netIncome",
 
       pred_names <- paste(predNames[predNames != strata], collapse = "\",\"")
       train <- paste0("xgb.DMatrix(data = model.matrix(~.+0,data = model.frame(setDT(dataSample)[,c(\"",pred_names,"\"), with=F],  na.action=na.pass)),
-                                         missing = NA, label = ", log_transform, "(dataSample$",additional,")
-                                        ", xgb_weight,")")
+                                         missing = NA, label = ", log_transform, "(dataSample$",additional,"),
+                                        weight = ", xgb_weight,")")
       
       # Default values
       nrounds <- 100
       early_stopping_rounds <- 10
       xgb_hyper_params <- "list(nthread = 6,
-                                eta = 0.1,
+                                learning_rate = 0.1,
                                 max_depth = 32,
                                 min_child_weight = 0,
-                                gamma = 0,
+                                min_split_loss = 0,
                                 subsample = 1,
                                 lambda = 0,
                                 objective = \"reg:squarederror\",
@@ -1320,12 +1321,12 @@ simContinuous <- function(simPopObj, additional = "netIncome",
       }
       
       xgb_params <- paste0("nrounds = ", nrounds,",
-                            watchlist = list(train = ", train, ",
+                            evals = list(train = ", train, ",
                                              test = ", train, "), 
                             early_stopping_rounds = ", early_stopping_rounds,",
                             print_every_n = 10,")
       
-      command <- paste0("xgb.train(",train, ", ",
+      command <- paste0("xgb.train(data = ",train, ", ",
                                     xgb_params,
                                     "verbose = ", xgb_verbose, ", ",
                                     "params = ", xgb_hyper_params, ")")
