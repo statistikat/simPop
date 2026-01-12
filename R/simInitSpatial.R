@@ -219,7 +219,7 @@ simInitSpatial <- function(simPopObj, additional, region, tspatialP=NULL,tspatia
   diffp <- firstP <- freqH <- freqP <- freqPopHH <- NULL
   hhidtmp <- hsize <- nP <- t <- subregionNeu <- NULL
   Ns <- Nt <- fak <- NULL
-  data_pop <- simPopObj@pop@data
+  data_pop <- copy(simPopObj@pop@data)
   data_sample <- simPopObj@sample@data
   basic <- simPopObj@basicHHvars
 
