@@ -79,8 +79,6 @@ generateValues <- function(dataSample, dataPop, params) {
       colnames(probs) <- mod$forest$levels
     }else if ( meth %in% c("xgboost") ) {
       probs <- predict(mod, newdata=xgb.DMatrix(data = model.matrix(~.+0,data = setDT(newdata))))
-      # create matrix from prediction array
-      probs <- matrix(probs, nrow = nrow(newdata), ncol = length(params$levelsResponse), byrow = T)
     }
     #if ( meth %in% "naivebayes" ) {
     #  probs <- predict(mod, newdata=newdata, type="raw")
